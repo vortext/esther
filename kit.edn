@@ -1,0 +1,8 @@
+{:full-name "vortext/esther"
+ :ns-name   "vortext.esther"
+ :sanitized "vortext/esther"
+ :name      "esther"
+ :modules   {:root         "modules"
+             :repositories [{:url  "https://github.com/kit-clj/modules.git"
+                             :tag  "master"
+                             :name "kit-modules"}]}}
