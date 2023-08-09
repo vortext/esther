@@ -1,14 +1,15 @@
 (ns vortext.esther.web.routes.api
   (:require
-    [vortext.esther.web.controllers.health :as health]
-    [vortext.esther.web.middleware.exception :as exception]
-    [vortext.esther.web.middleware.formats :as formats]
-    [integrant.core :as ig]
-    [reitit.coercion.malli :as malli]
-    [reitit.ring.coercion :as coercion]
-    [reitit.ring.middleware.muuntaja :as muuntaja]
-    [reitit.ring.middleware.parameters :as parameters]
-    [reitit.swagger :as swagger]))
+   [vortext.esther.web.controllers.health :as health]
+   [vortext.esther.web.controllers.converse :as converse]
+   [vortext.esther.web.middleware.exception :as exception]
+   [vortext.esther.web.middleware.formats :as formats]
+   [integrant.core :as ig]
+   [reitit.coercion.malli :as malli]
+   [reitit.ring.coercion :as coercion]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.ring.middleware.parameters :as parameters]
+   [reitit.swagger :as swagger]))
 
 (def route-data
   {:coercion   malli/coercion
@@ -38,7 +39,10 @@
            :swagger {:info {:title "vortext.esther API"}}
            :handler (swagger/create-swagger-handler)}}]
    ["/health"
-    {:get health/healthcheck!}]])
+    {:get health/healthcheck!}]
+   ["/converse"
+    {:post converse/converse!}]
+   ])
 
 (derive :reitit.routes/api :reitit/routes)
 
