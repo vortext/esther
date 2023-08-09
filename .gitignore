@@ -17,4 +17,4 @@ pom.xml.asc
 /log/
 *.log
 .Rhistory
-
+/log/*

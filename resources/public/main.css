@@ -1,27 +1,36 @@
 html {
-  font-family: "Noto Emoji", 'IBM Plex Serif', "Times", serif;
+  font-family: 'IBM Plex Serif', "Noto Emoji", serif;
+  font-family: 'IBM Plex Mono', "Noto Emoji", monospace;
+  font-family: 'IBM Plex Sans', "Noto Emoji", sans-serif;
+  font-family: 'IBM Plex Serif', "Noto Emoji", serif;
+  color: rgb(10,10,10);
   max-width: 50em;
   margin: 2em auto;
-  font-size: 14pt;
   background-color: #fafafa;
   padding-bottom: 5em;
 }
+#title {
+  font-weight: 200;
+  text-align: center;
+  text-shadow: rgba(0,0,0,0.125) 3px 0 5px;
+}
+#subtitle {
+  font-size: 12pt;
+  font-weight: 200;
+  color: rgb(100,100,100);
+}
 .memory .request {
-  border-bottom: 1px solid rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(0,0,0,0.125);
   padding: 1em 0;
 }
 .memory .response {
-  border-bottom: 1px solid rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(0,0,0,0.125);
   padding: 1em 0;
 }
 
 #user-value {
-  border-bottom: 1px solid rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(0,0,0,0.125);
   padding: 1em 0;
-}
-
-hr {
-  opacity: 0.1;
 }
 
 @keyframes loading {
@@ -61,31 +70,32 @@ hr {
 
 .loadingio-spinner-typing-loading .loading .first {
   left:0px;
-  background:#6a6a6a;
+  background:rgba(0,0,0, 0.75);
   animation-delay:-0.560s;
 }
 
 .loadingio-spinner-typing-loading .loading .second {
   left:22px;
-  background:#979797;
+  background:rgba(0,0,0, 0.50);
   animation-delay:-0.373s;
 }
 .loadingio-spinner-typing-loading .loading .third {
   left: 44px;
-  background:#bdbdbd;
+  background:rgba(0,0,0,0.25);
   animation-delay:-0.186s;
 }
 
 #loading-response {
   display: none;
 }
+
 #loading-response.htmx-request {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   left: -22px;
-  top: 2em;
+  top: 1em;
 }
 
 
@@ -93,6 +103,21 @@ hr {
   display: none;
 }
 
+#conversation {
+  transition: all 0.25 ease-out;
+}
+
+#conversation .memory .response {
+  transition: opacity 0.25s ease-out;
+}
+
+#conversation .memory.htmx-added .response {
+  opacity: 0;
+}
+
+#conversation .memory .response {
+  opacity: 1;
+}
 
 #conversation.loading-state.htmx-request #user-echo {
   display: block;

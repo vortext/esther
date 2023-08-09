@@ -12,7 +12,7 @@
    [reitit.ring.middleware.parameters :as parameters]))
 
 (def loading
-  [:div {:style "height: 5rem"
+  [:div {:style "height: 4rem"
          :class "loadingio-spinner-typing-loading"}
    [:div.loading
     [:div.first]
@@ -35,7 +35,7 @@
    [:form
     {:id "message-form"
      :hx-post "/msg"
-     :hx-swap "beforeend"
+     :hx-swap "beforeend settle:0.25s"
      :hx-boost "true"
      :hx-indicator ".loading-state"
      :hx-target "#history"
@@ -43,16 +43,19 @@
      "hx-on::before-request" "let msg = document.querySelector('#user-input').value;
                               document.querySelector('#user-value').textContent = msg;
                               document.querySelector('#user-input').disabled = true;
+                              document.querySelector('#user-input').placeholder = '';
                               document.querySelector('#user-input').value = '';"
      "hx-on::after-request" "document.querySelector('#user-input').disabled = false;
                              document.getElementById('user-input').focus();
                              document.getElementById('user-input').scrollIntoView({behavior: 'smooth'});"}
 
-    [:input#user-input {:type "text"
-                        :autocomplete "off"
-                        :autofocus "true"
-                        :placeholder "Dear Esther,"
-                        :name "msg"}]]])
+    [:input#user-input
+     {:type "text"
+      :autocomplete "off"
+      :maxlength 240
+      :autofocus "true"
+      :placeholder "Dear Esther,"
+      :name "msg"}]]])
 
 (defn conversation [request]
   [:div.container
@@ -67,6 +70,13 @@
      (msg-input request)
      ]]])
 
+(def font-param "IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,200;0,400;0,500;1,400;1,500&display=swap")
+
+(def today
+  (.format
+   (java.text.SimpleDateFormat. "EEEE dd MMMM yyyy") ;; G
+   (java.util.Date. (System/currentTimeMillis))))
+
 (defn home [request]
   (page
    [:head
@@ -74,7 +84,7 @@
     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
     [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
     [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
-    [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,300;1,500&display=swap"}]
+    [:link {:rel "stylesheet" :href (str "https://fonts.googleapis.com/css2?family=" font-param)}]
     [:link {:rel "stylesheet" :href "resources/public/fonts.css"}]
     [:link {:rel "stylesheet" :href "resources/public/main.css"}]
     [:title "Esther"]
@@ -83,6 +93,8 @@
               :crossorigin "anonymous"}]
     [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]]
    [:body
+    [:h1#title "Esther"]
+    [:h2#subtitle "Today is " today "."]
     (conversation request)]))
 
 
