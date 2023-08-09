@@ -1,0 +1,3 @@
+[submodule "path_to_submodule"] 
+  path = modules/kit-modules
+  url = https://github.com/kit-clj/

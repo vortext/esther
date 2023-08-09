@@ -1,0 +1,89 @@
+@font-face {
+    font-family: 'NotoEmoji-VariableFont_wght';
+         url('resources/public/font/NotoEmoji-VariableFont_wght.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+}
+
+html {
+  font-family: "NotoEmoji-VariableFont_wght", sans-serif;
+  max-width: 50em;
+  margin: 2em auto;
+}
+
+@keyframes loading {
+  0% {
+    animation-timing-function: cubic-bezier(0,0.5,0.5,1);
+    top: 32px;
+  }
+  30% {
+    animation-timing-function: cubic-bezier(0.5,0,1,0.5);
+    top: 26px;
+  }
+  60% {
+    animation-timing-function: cubic-bezier(0.5,0.5,0.5,0.5);
+    top: 32px;
+  }
+  100% {
+    top: 32px;
+  }
+}
+.loading div {
+  position: absolute;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  animation: loading 0.9345794392523364s infinite;
+}
+.loadingio-spinner-typing-loading {
+  height: 1rem;
+  display: inline-block;
+  background: none;
+}
+.loading {
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
+  transform-origin: 0 0; /* see note above */
+}
+.loading div { box-sizing: content-box; }
+
+.loadingio-spinner-typing-loading .loading .first {
+  left:0px;
+  background:#6a6a6a;
+  animation-delay:-0.560s;
+}
+
+.loadingio-spinner-typing-loading .loading .second {
+  left:22px;
+  background:#979797;
+  animation-delay:-0.373s;
+}
+.loadingio-spinner-typing-loading .loading .third {
+  left: 44px;
+  background:#bdbdbd;
+  animation-delay:-0.186s;
+}
+
+#loading-response {
+  display: none;
+}
+#loading-response.htmx-request {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  left: -22px;
+}
+
+
+#user-echo {
+  display: none;
+}
+
+
+#conversation.loading-state.htmx-request #user-echo {
+  display: block;
+}
+
+#user-input {
+  width: 100%;
+  margin-top: 2em;
+}
