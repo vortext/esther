@@ -27,9 +27,7 @@
         response-msg (get-in response [:response :response])]
     (ui
      [:div.memory
-      [:hr]
       [:div.request (:msg request)]
-      [:hr]
       [:div.response response-msg]])))
 
 (defn msg-input [_request]
@@ -47,9 +45,13 @@
                               document.querySelector('#user-input').disabled = true;
                               document.querySelector('#user-input').value = '';"
      "hx-on::after-request" "document.querySelector('#user-input').disabled = false;
-                             document.getElementById('user-input').focus();"}
+                             document.getElementById('user-input').focus();
+                             document.getElementById('user-input').scrollIntoView({behavior: 'smooth'});"}
 
     [:input#user-input {:type "text"
+                        :autocomplete "off"
+                        :autofocus "true"
+                        :placeholder "Dear Esther,"
                         :name "msg"}]]])
 
 (defn conversation [request]
@@ -59,9 +61,7 @@
     [:div#conversation.loading-state
      [:div#history]
      [:div#user-echo
-      [:hr]
-      [:div#user-value {:class "user-message"}]
-      [:hr]] ;; Here's the #message element
+      [:div#user-value {:class "user-message"}]]
      [:div#loading-response.loading-state
       loading]
      (msg-input request)
@@ -72,18 +72,18 @@
    [:head
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-    [:link {:rel "stylesheet" :href "https://gitcdn.link/repo/Chalarangelo/mini.css/master/dist/mini-default.min.css"}]
+    [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
+    [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
+    [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,300;1,500&display=swap"}]
+    [:link {:rel "stylesheet" :href "resources/public/fonts.css"}]
     [:link {:rel "stylesheet" :href "resources/public/main.css"}]
     [:title "Esther"]
     [:script {:src "https://unpkg.com/htmx.org@1.9.4"
               :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
               :crossorigin "anonymous"}]
-    [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]
-
-    ]
+    [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]]
    [:body
-    (conversation request)
-    ]))
+    (conversation request)]))
 
 
 ;; Routes

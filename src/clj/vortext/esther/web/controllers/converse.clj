@@ -11,7 +11,7 @@ Omnis in ipsam sapiente delectus. Sapiente delectus fugiat quia odio ipsam et qu
 
 (defn process
   [req]
-  (Thread/sleep (+ 100000 (int (rand 500))))
+  (Thread/sleep (+ 1000 (int (rand 500))))
   {:request req
    :response example-response}
   )

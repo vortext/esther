@@ -1,12 +1,27 @@
-@font-face {
-    font-family: 'NotoEmoji-VariableFont_wght';
-         url('resources/public/font/NotoEmoji-VariableFont_wght.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
-}
-
 html {
-  font-family: "NotoEmoji-VariableFont_wght", sans-serif;
+  font-family: "Noto Emoji", 'IBM Plex Serif', "Times", serif;
   max-width: 50em;
   margin: 2em auto;
+  font-size: 14pt;
+  background-color: #fafafa;
+  padding-bottom: 5em;
+}
+.memory .request {
+  border-bottom: 1px solid rgba(0,0,0,0.25);
+  padding: 1em 0;
+}
+.memory .response {
+  border-bottom: 1px solid rgba(0,0,0,0.25);
+  padding: 1em 0;
+}
+
+#user-value {
+  border-bottom: 1px solid rgba(0,0,0,0.25);
+  padding: 1em 0;
+}
+
+hr {
+  opacity: 0.1;
 }
 
 @keyframes loading {
@@ -34,7 +49,6 @@ html {
   animation: loading 0.9345794392523364s infinite;
 }
 .loadingio-spinner-typing-loading {
-  height: 1rem;
   display: inline-block;
   background: none;
 }
@@ -71,6 +85,7 @@ html {
   justify-content: center;
   position: relative;
   left: -22px;
+  top: 2em;
 }
 
 
@@ -86,4 +101,9 @@ html {
 #user-input {
   width: 100%;
   margin-top: 2em;
+  font-family: "Noto Emoji", 'IBM Plex Serif', "Times", serif;
+  border: none;
+  font-size: 14pt;
+  background: transparent;
+  outline: none;
 }
