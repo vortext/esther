@@ -9,6 +9,5 @@
   (let [cookie-store (cookie/cookie-store {:key (.getBytes ^String cookie-secret)})]
     (fn [handler]
       (cond-> ((:middleware env/defaults) handler opts)
-              true (defaults/wrap-defaults
-                     (assoc-in site-defaults-config [:session :store] cookie-store))
-              ))))
+        true (defaults/wrap-defaults
+              (assoc-in site-defaults-config [:session :store] cookie-store))))))

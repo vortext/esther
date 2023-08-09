@@ -1,0 +1,17 @@
+2023-08-09 14:14:46,183 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  kit.config - Reading config system.edn 
+2023-08-09 14:14:46,289 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] DEBUG org.jboss.logging - Logging Provider: org.jboss.logging.Slf4jLoggerProvider 
+2023-08-09 14:14:46,297 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  org.xnio - XNIO version 3.8.8.Final 
+2023-08-09 14:14:46,364 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] DEBUG org.xnio - Creating worker:null, pool size:384, max pool size:384, keep alive:60000, io threads:48, stack size:0 
+2023-08-09 14:14:46,374 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  org.jboss.threads - JBoss Threads version 3.5.0.Final 
+2023-08-09 14:14:46,415 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  kit.edge.server.undertow - server started on port 3000 
+2023-08-09 14:14:46,418 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  kit.edge.utils.nrepl - nREPL server started on port: 7001 
+2023-08-09 14:15:30,639 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  kit.edge.utils.nrepl - nREPL server stopped 
+2023-08-09 14:15:30,729 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  kit.config - Reading config system.edn 
+2023-08-09 14:15:30,742 [nREPL-session-a578716d-bfe1-456e-bed1-92931752ce7b] INFO  kit.edge.utils.nrepl - nREPL server started on port: 7001 
+2023-08-09 14:16:07,471 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] INFO  kit.config - Reading config system.edn 
+2023-08-09 14:16:07,564 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] DEBUG org.jboss.logging - Logging Provider: org.jboss.logging.Slf4jLoggerProvider 
+2023-08-09 14:16:07,570 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] INFO  org.xnio - XNIO version 3.8.8.Final 
+2023-08-09 14:16:07,630 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] DEBUG org.xnio - Creating worker:null, pool size:384, max pool size:384, keep alive:60000, io threads:48, stack size:0 
+2023-08-09 14:16:07,636 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] INFO  org.jboss.threads - JBoss Threads version 3.5.0.Final 
+2023-08-09 14:16:07,693 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] INFO  kit.edge.server.undertow - server started on port 3000 
+2023-08-09 14:16:07,694 [nREPL-session-d1c05d12-e796-4b2f-91a6-ea7b926f98ba] INFO  kit.edge.utils.nrepl - nREPL server started on port: 7001 
