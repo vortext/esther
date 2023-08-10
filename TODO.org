@@ -1,24 +1,23 @@
-* TODO better input UI? (textfield, resize, like Signal?)
 * TODO hook up OpenAI
 * TODO store results
 * TODO use results
-* TODO KaTeX and such
+* TODO markdown, KaTeX and such
 * TODO Test infrastructure
 * TODO Placeholder with thoughts, questions, desires
 * TODO Random thought or question pops up
 * TODO hook up Midjourney
 * TODO /imagine commands
-* TODO integrate describe into context
+* TODO integrate image describe into memory context
 * TODO memories page
-* TODO better design language??
 * TODO /interrupt /analysis /status commands
+* TODO better input UI? (textfield, resize, like Signal?)
 * TODO security / login / hosting
-* TODO embeddings / memory store
 * TODO error handling
+* TODO embeddings / memory store
 * TODO multi user?
 - security
+- crypto
 * TODO better intro flow
 * TODO app? legal, ethics, billing, subscriptions, etc.
-* TODO maybe bouncing ball energy for loading?
-- ask chat gpt for energy of css version
-- sentiment analysis (tensorflow.js), onnx server side?
+* DONE maybe bouncing ball energy for loading?
+* TODO sentiment analysis (tensorflow.js), onnx server side?

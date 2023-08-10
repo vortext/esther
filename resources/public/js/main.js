@@ -1,10 +1,9 @@
 function setSentiment(sentimentValue) {
-  console.log(sentimentValue);
   sentimentValue = Math.max(0, Math.min(1, sentimentValue));
 
   // Use the sentiment to create smooth and natural durations
-  const duration = 0.8 + (1 - sentimentValue) * 0.5; // seconds
-  const ease = `cubic-bezier(${0.2 + sentimentValue * 0.5},0.5,0.5,1)`;
+  const duration = 1.2 - sentimentValue * 0.4; // seconds
+  const ease = `cubic-bezier(${0.2 + sentimentValue * 0.3}, 0.5, 0.5, 1)`;
 
   const balls = document.querySelectorAll('.loading div');
 
@@ -13,6 +12,7 @@ function setSentiment(sentimentValue) {
     ball.style.animationTimingFunction = ease;
   });
 }
+
 
 function beforeConverseRequest() {
   setSentiment(Math.random());

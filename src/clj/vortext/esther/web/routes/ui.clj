@@ -2,12 +2,10 @@
   (:require
    [vortext.esther.web.middleware.exception :as exception]
    [vortext.esther.web.middleware.formats :as formats]
-   [vortext.esther.web.routes.utils :as utils]
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.htmx :refer [ui page] :as htmx]
    [vortext.esther.util.time :as time]
    [integrant.core :as ig]
-   [clojure.pprint :refer [pprint]]
    [clojure.tools.logging :as log]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]))
