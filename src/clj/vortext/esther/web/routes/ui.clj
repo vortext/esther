@@ -14,7 +14,7 @@
 
 (def loading
   [:div {:style "height: 4rem"
-         :class "loadingio-spinner-typing-loading"}
+         :class "esther-typing-loading"}
    [:div.loading
     [:div.first]
     [:div.second]
@@ -41,14 +41,8 @@
      :hx-indicator ".loading-state"
      :hx-target "#history"
      :hx-trigger "submit"
-     "hx-on::before-request" "let msg = document.querySelector('#user-input').value;
-                              document.querySelector('#user-value').textContent = msg;
-                              document.querySelector('#user-input').disabled = true;
-                              document.querySelector('#user-input').placeholder = '';
-                              document.querySelector('#user-input').value = '';"
-     "hx-on::after-request" "document.querySelector('#user-input').disabled = false;
-                             document.getElementById('user-input').focus();
-                             document.getElementById('user-input').scrollIntoView({behavior: 'smooth'});"}
+     "hx-on::before-request" "beforeConverseRequest()"
+     "hx-on::after-request" "afterConverseRequest()"}
 
     [:input#user-input
      {:type "text"
@@ -86,7 +80,9 @@
     [:script {:src "https://unpkg.com/htmx.org@1.9.4"
               :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
               :crossorigin "anonymous"}]
-    [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]]
+    [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]
+    [:script {:src "resources/public/js/main.js"}]]
+
    [:body
     [:h1#title "Esther"]
     [:h2#subtitle (time/human-today) "."]
