@@ -7,6 +7,8 @@
    [vortext.esther.web.htmx :refer [ui page] :as htmx]
    [integrant.core :as ig]
    [clojure.pprint :refer [pprint]]
+   [java-time.api :as j]
+   [clj-commons.humanize :as h]
    [clojure.tools.logging :as log]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]))
@@ -73,9 +75,15 @@
 (def font-param "IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,200;0,400;0,500;1,400;1,500&display=swap")
 
 (def today
-  (.format
-   (java.text.SimpleDateFormat. "EEEE dd MMMM yyyy") ;; G
-   (java.util.Date. (System/currentTimeMillis))))
+  (let [now (java.util.Date. (System/currentTimeMillis))]
+    (str
+     (.format (java.text.SimpleDateFormat. "EEEE") now)
+     " the "
+     (h/ordinal (.getDayOfMonth (j/month-day)))
+     " of "
+     (.format
+      (java.text.SimpleDateFormat. "MMMM")
+      now) ", " (j/year))))
 
 (defn home [request]
   (page
@@ -94,7 +102,7 @@
     [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]]
    [:body
     [:h1#title "Esther"]
-    [:h2#subtitle "Today is " today "."]
+    [:h2#subtitle today "."]
     (conversation request)]))
 
 
