@@ -3,17 +3,22 @@
 * TODO store results
 * TODO use results
 * TODO KaTeX and such
-* TODO History view
+* TODO Test infrastructure
 * TODO Placeholder with thoughts, questions, desires
+* TODO Random thought or question pops up
 * TODO hook up Midjourney
 * TODO /imagine commands
 * TODO integrate describe into context
 * TODO memories page
 * TODO better design language??
-* TODO /interrupt /analysis commands
+* TODO /interrupt /analysis /status commands
 * TODO security / login / hosting
 * TODO embeddings / memory store
 * TODO error handling
 * TODO multi user?
+- security
+* TODO better intro flow
 * TODO app? legal, ethics, billing, subscriptions, etc.
 * TODO maybe bouncing ball energy for loading?
+- ask chat gpt for energy of css version
+- sentiment analysis (tensorflow.js), onnx server side?

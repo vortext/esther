@@ -5,10 +5,9 @@
    [vortext.esther.web.routes.utils :as utils]
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.htmx :refer [ui page] :as htmx]
+   [vortext.esther.util.time :as time]
    [integrant.core :as ig]
    [clojure.pprint :refer [pprint]]
-   [java-time.api :as j]
-   [clj-commons.humanize :as h]
    [clojure.tools.logging :as log]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]))
@@ -69,21 +68,9 @@
       [:div#user-value {:class "user-message"}]]
      [:div#loading-response.loading-state
       loading]
-     (msg-input request)
-     ]]])
+     (msg-input request)]]])
 
 (def font-param "IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,200;0,400;0,500;1,400;1,500&display=swap")
-
-(def today
-  (let [now (java.util.Date. (System/currentTimeMillis))]
-    (str
-     (.format (java.text.SimpleDateFormat. "EEEE") now)
-     " the "
-     (h/ordinal (.getDayOfMonth (j/month-day)))
-     " of "
-     (.format
-      (java.text.SimpleDateFormat. "MMMM")
-      now) ", " (j/year))))
 
 (defn home [request]
   (page
@@ -102,7 +89,7 @@
     [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]]
    [:body
     [:h1#title "Esther"]
-    [:h2#subtitle today "."]
+    [:h2#subtitle (time/human-today) "."]
     (conversation request)]))
 
 

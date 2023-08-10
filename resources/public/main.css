@@ -1,3 +1,7 @@
+:root {
+  --accent: rgba(0,0,0,0.125);
+}
+
 html {
   font-family: 'IBM Plex Serif', "Noto Emoji", serif;
   font-family: 'IBM Plex Mono', "Noto Emoji", monospace;
@@ -12,7 +16,7 @@ html {
 #title {
   font-weight: 200;
   text-align: center;
-  text-shadow: rgba(0,0,0,0.125) 3px 0 5px;
+  text-shadow: var(--accent) 3px 0 5px;
 }
 #subtitle {
   font-size: 12pt;
@@ -20,16 +24,16 @@ html {
   color: rgb(100,100,100);
 }
 .memory .request {
-  border-bottom: 1px solid rgba(0,0,0,0.125);
+  border-bottom: 1px solid var(--accent);
   padding: 1em 0;
 }
 .memory .response {
-  border-bottom: 1px solid rgba(0,0,0,0.125);
+  border-bottom: 1px solid var(--accent);
   padding: 1em 0;
 }
 
 #user-value {
-  border-bottom: 1px solid rgba(0,0,0,0.125);
+  border-bottom: 1px solid var(--accent);
   padding: 1em 0;
 }
 
@@ -64,7 +68,7 @@ html {
 .loading {
   transform: translateZ(0) scale(1);
   backface-visibility: hidden;
-  transform-origin: 0 0; /* see note above */
+  transform-origin: 0 0;
 }
 .loading div { box-sizing: content-box; }
 
@@ -126,9 +130,16 @@ html {
 #user-input {
   width: 100%;
   margin-top: 2em;
-  font-family: "Noto Emoji", 'IBM Plex Serif', "Times", serif;
+  font-family: serif;
   border: none;
-  font-size: 14pt;
+  font-size: 12pt;
   background: transparent;
   outline: none;
+  padding-bottom: 1em;
+  transition: border-bottom 0.125s ease-in-out;
+  border-bottom: 1px solid transparent;
+}
+
+#user-input:hover {
+  border-bottom: 1px solid var(--accent);
 }
