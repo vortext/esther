@@ -26,13 +26,10 @@
 
 (defn message [request]
   (let [history (get-in request [:session :history] [])
-        _ (log/info "HISTORY" (str history))
         response (converse/answer history request)
         new-history (push-memory 5 response history)
-        _ (log/info "NEW HISTORY" (str new-history))
         energy (get-in response [:response :energy])
         response-msg (get-in response [:response :response])
-        _ (log/info "ENERGY" energy)
         md (markdown/md-to-html-string response-msg)
         reply (ui
                [:div.memory

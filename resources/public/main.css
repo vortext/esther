@@ -56,9 +56,20 @@ body {
   border-bottom: 1px solid var(--accent);
   padding: 1em 0;
 }
+.memory .request p {
+  margin: 0;
+}
+.memory p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .memory .response {
   border-bottom: 1px solid var(--accent);
   padding: 1em 0;
+}
+.memory .request, .memory .response {
+  padding-top: 1em;
+  padding-bottom: 1em;
 }
 
 #user-value {

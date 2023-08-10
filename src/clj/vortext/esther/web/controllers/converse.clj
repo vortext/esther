@@ -19,12 +19,12 @@
                 :request with-ctx
                 :ts (unix-ts)}]
     (reset! state [request response history])
-    (log/info "REQUEST")
-    (log/info (pprint/pprint params))
-    (log/info "RESPONSE")
-    (log/info (pprint/pprint response))
-    (log/info "RESULT")
-    (log/info (pprint/pprint result))
+    (log/trace "REQUEST")
+    (log/trace (pprint/pprint params))
+    (log/trace "RESPONSE")
+    (log/trace (pprint/pprint response))
+    (log/trace "RESULT")
+    (log/trace (pprint/pprint result))
     result
     ))
 

@@ -47,10 +47,10 @@
          [{:role "system" :content prompt}]
          conv
          [{:role "user" :content (json/generate-string msg)}])]
-    (log/info "CONVERSATION")
-    (log/info (pprint/pprint conv))
-    (log/info "SUBMISSION")
-    (log/info (pprint/pprint submission))
+    (log/trace "CONVERSATION")
+    (log/trace (pprint/pprint conv))
+    (log/trace "SUBMISSION")
+    (log/trace (pprint/pprint submission))
     (api/create-chat-completion
      {:model model
       :messages submission}
