@@ -20,3 +20,4 @@ pom.xml.asc
 /log/*
 .envrc
 .secrets.edn
+.syncthing*
