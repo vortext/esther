@@ -116,7 +116,7 @@ body {
   margin-top: 2em;
 }
 .esther-typing-loading .loading .first {
-  background-color: rgba(0,0,0,0.375);
+  background-color: rgba(0,0,0,0.125);
 }
 
 .esther-typing-loading .loading .second {
@@ -124,7 +124,7 @@ body {
 }
 
 .esther-typing-loading .loading .third {
-  background-color: rgba(0,0,0,0.125);
+  background-color: rgba(0,0,0,0.375);
 }
 
 .esther-typing-loading .loading {

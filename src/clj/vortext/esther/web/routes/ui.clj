@@ -19,16 +19,24 @@
     [:div.second]
     [:div.third]]])
 
-
+(defn push-memory
+  [history-size new-memory memories]
+  (conj (vec (take-last history-size memories)) new-memory))
 
 (defn message [request]
-  (let [request (:params request)
-        response (converse/process request)
-        response-msg (get-in response [:response :response])]
-    (ui
-     [:div.memory
-      [:div.request (:msg request)]
-      [:div.response response-msg]])))
+  (let [session-history (get-in request [:session :history] [])
+        response (converse/answer request)
+        request-params (:params request)
+        response-msg (get-in response [:response :response])
+        memory [request-params response]
+        new-history (push-memory 5 memory session-history)
+        reply (ui
+               [:div.memory
+                [:div.request (:msg request-params)]
+                [:div.response response-msg]])]
+    (assoc reply :session {:history new-history})))
+
+
 
 (defn msg-input [_request]
   [:div.input-form
@@ -42,10 +50,6 @@
      :hx-trigger "submit"
      "hx-on::before-request" "beforeConverseRequest()"
      "hx-on::after-request" "afterConverseRequest()"}
-    [:input
-     {:type :hidden
-      :name "entropy"
-      :value (random-base64)}]
     [:input#user-input
      {:type "text"
       :autocomplete "off"

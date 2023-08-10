@@ -1,6 +1,8 @@
 (ns vortext.esther.web.controllers.converse
   (:require
+   [vortext.esther.util.time :refer [unix-ts]]
    [clojure.string :as str]
+   [clojure.tools.logging :as log]
    [ring.util.http-response :as http-response]))
 
 (defn example-response
@@ -9,13 +11,15 @@
 
 Omnis in ipsam sapiente delectus. Sapiente delectus fugiat quia odio ipsam et quo aut. Laboriosam voluptatibus reiciendis eos quia autem voluptatem vel numquam. Quis minima et iure qui. Doloremque mollitia rem ut numquam veritatis aut ipsum. Praesentium laborum beatae suscipit. 🌌😊")))})
 
-(defn process
-  [req]
-  (Thread/sleep (+ 1250 (int (rand 500))))
-  {:request req
-   :response (example-response)}
-  )
+(defn answer
+  [request]
+  (let [{:keys [session params]} request]
+    (log/info session)
+    (Thread/sleep (+ 1250 (int (rand 500))))
+    {:ts (unix-ts)
+     :request params
+     :response (example-response)}))
 
 (defn converse!
   [req]
-  (http-response/ok (process req)))
+  (http-response/ok (answer req)))

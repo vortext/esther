@@ -27,3 +27,5 @@
           (h/ordinal day-month)
           " of " (month-name month locale) ", "
           year))))
+
+(defn unix-ts [] (inst-ms (java.time.Instant/now)))
