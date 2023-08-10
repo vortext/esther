@@ -5,14 +5,15 @@
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.htmx :refer [ui page] :as htmx]
    [vortext.esther.util.time :as time]
+   [vortext.esther.util.security :refer [random-base64]]
+
    [integrant.core :as ig]
    [clojure.tools.logging :as log]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]))
 
 (def loading
-  [:div {:style "height: 4rem"
-         :class "esther-typing-loading"}
+  [:div.esther-typing-loading
    [:div.loading
     [:div.first]
     [:div.second]
@@ -41,7 +42,10 @@
      :hx-trigger "submit"
      "hx-on::before-request" "beforeConverseRequest()"
      "hx-on::after-request" "afterConverseRequest()"}
-
+    [:input
+     {:type :hidden
+      :name "entropy"
+      :value (random-base64)}]
     [:input#user-input
      {:type "text"
       :autocomplete "off"
@@ -64,24 +68,30 @@
 
 (def font-param "IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,200;0,400;0,500;1,400;1,500&display=swap")
 
+(defn font-link [font-param]
+  [:link {:rel "stylesheet" :href (str "https://fonts.googleapis.com/css2?family=" font-param)}])
+
+(defn head-section []
+  [:head
+   [:meta {:charset "UTF-8"}]
+   [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+   [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
+   [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
+   (font-link font-param)
+   [:link {:rel "stylesheet" :href "resources/public/fonts.css"}]
+   [:link {:rel "stylesheet" :href "resources/public/main.css"}]
+   [:title "Esther"]
+   [:script {:src "https://unpkg.com/htmx.org@1.9.4"
+             :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+             :crossorigin "anonymous"}]
+   [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]
+   [:script {:src "resources/public/js/main.js"}]])
+
 (defn home [request]
   (page
-   [:head
-    [:meta {:charset "UTF-8"}]
-    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-    [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
-    [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
-    [:link {:rel "stylesheet" :href (str "https://fonts.googleapis.com/css2?family=" font-param)}]
-    [:link {:rel "stylesheet" :href "resources/public/fonts.css"}]
-    [:link {:rel "stylesheet" :href "resources/public/main.css"}]
-    [:title "Esther"]
-    [:script {:src "https://unpkg.com/htmx.org@1.9.4"
-              :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
-              :crossorigin "anonymous"}]
-    [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]
-    [:script {:src "resources/public/js/main.js"}]]
-
+   (head-section)
    [:body
+    {"data-session-id" (random-base64)}
     [:h1#title "Esther"]
     [:h2#subtitle (time/human-today) "."]
     (conversation request)]))

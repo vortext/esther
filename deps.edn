@@ -7,6 +7,8 @@
            clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
+           ;; Security
+           buddy/buddy-core {:mvn/version "1.11.423"}
 
            ;; Ring
            metosin/ring-http-response {:mvn/version "0.9.3"}

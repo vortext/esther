@@ -2,14 +2,32 @@
   --accent: rgba(0,0,0,0.125);
   --font-color:  rgb(10,10,10);
   --background-color: #fafafa;
+  --font-family: "IBM Plex Serif", "Noto Emoji", serif;
+
+}
+
+@media (max-width: 768px) {
+  html {
+    margin: 1em;
+    padding-bottom: 3em;
+  }
+
+  #title {
+    font-size: 1.8em;
+  }
+
+  #subtitle {
+    font-size: 10pt;
+  }
+
+  #user-input {
+    margin-top: 1em;
+  }
 }
 
 html {
-  font-family: 'IBM Plex Serif', "Noto Emoji", serif;
-  font-family: 'IBM Plex Mono', "Noto Emoji", monospace;
-  font-family: 'IBM Plex Sans', "Noto Emoji", sans-serif;
-  font-family: 'IBM Plex Serif', "Noto Emoji", serif;
-  color: var(--font-color);
+  font-family: var(--font-family);
+  font-family: color: var(--font-color);
   max-width: 50em;
   margin: 2em auto;
   background-color: var(--background-color);
@@ -56,24 +74,17 @@ html {
   display: none;
 }
 
-#conversation {
-  transition: all 0.25 ease-out;
+#conversation.loading-state.htmx-request #user-echo {
+  display: block;
 }
 
-#conversation .memory .response {
-  transition: opacity 0.25s ease-out;
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 #conversation .memory.htmx-added .response {
-  opacity: 0;
-}
-
-#conversation .memory .response {
-  opacity: 1;
-}
-
-#conversation.loading-state.htmx-request #user-echo {
-  display: block;
+  animation: fade-in 0.5s ease; /* Apply fade-in effect */
 }
 
 #user-input {
@@ -94,6 +105,9 @@ html {
 }
 
 /* Loading animation */
+.esther-typing-loading {
+  margin-top: 2em;
+}
 .esther-typing-loading .loading .first {
   background-color: rgba(0,0,0,0.375);
 }
@@ -136,12 +150,9 @@ html {
 }
 
 @keyframes loading {
-  0%, 100% {
-    top: 32px;
-    transform: scale(0.9); /* Gentle scaling at the start and end */
-  }
-  50% {
-    top: 20px; /* Reduced bounce height */
-    transform: scale(1.1); /* Exciting scaling at the peak */
-  }
+  0% { transform: translateY(0) scale(0.9); }
+  25% { transform: translateY(-5px) scale(1); }
+  50% { transform: translateY(0) scale(0.9); }
+  75% { transform: translateY(-5px) scale(1); }
+  100% { transform: translateY(0) scale(0.9); }
 }
