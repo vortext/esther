@@ -66,7 +66,9 @@
       loading]
      (msg-input request)]]])
 
-(def font-param "IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,200;0,400;0,500;1,400;1,500&display=swap")
+(def ibm-plex "IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,200;0,400;0,500;1,400;1,500&display=swap")
+
+(def noto-emoji "Noto+Emoji&display=swap")
 
 (defn font-link [font-param]
   [:link {:rel "stylesheet" :href (str "https://fonts.googleapis.com/css2?family=" font-param)}])
@@ -77,7 +79,8 @@
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
    [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
-   (font-link font-param)
+   (font-link ibm-plex)
+   (font-link noto-emoji)
    [:link {:rel "stylesheet" :href "resources/public/fonts.css"}]
    [:link {:rel "stylesheet" :href "resources/public/main.css"}]
    [:title "Esther"]

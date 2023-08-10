@@ -29,12 +29,15 @@
 }
 
 html {
-  font-family: var(--font-family);
-  font-family: color: var(--font-color);
+  color: var(--font-color);
   max-width: 50em;
   margin: 3em auto;
   padding-bottom: 6em;
   background-color: var(--background-color);
+}
+
+body {
+  font-family: var(--font-family);
 }
 
 #title {
