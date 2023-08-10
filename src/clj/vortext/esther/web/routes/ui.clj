@@ -5,6 +5,7 @@
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.htmx :refer [ui page] :as htmx]
    [vortext.esther.util.time :as time]
+   [markdown.core :as markdown]
    [vortext.esther.util.security :refer [random-base64]]
 
    [integrant.core :as ig]
@@ -24,16 +25,19 @@
   (conj (vec (take-last history-size memories)) new-memory))
 
 (defn message [request]
-  (let [session-history (get-in request [:session :history] [])
-        response (converse/answer request)
+  (let [history (get-in request [:session :history] [])
+        _ (log/info "HISTORY" (str history))
+        response (converse/answer history request)
+        new-history (push-memory 5 response history)
+
         request-params (:params request)
-        response-msg (get-in response [:response :response])
-        memory [request-params response]
-        new-history (push-memory 5 memory session-history)
+        response-msg (:response response)
+        _ (log/info "NEW HISTORY" (str new-history))
+        md (markdown/md-to-html-string (:response response-msg))
         reply (ui
                [:div.memory
                 [:div.request (:msg request-params)]
-                [:div.response response-msg]])]
+                [:div.response md]])]
     (assoc reply :session {:history new-history})))
 
 
@@ -83,6 +87,10 @@
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
    [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
+   ;; Math
+   [:link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css"}]
+   [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"}]
+   ;; Fonts
    (font-link ibm-plex)
    (font-link noto-emoji)
    [:link {:rel "stylesheet" :href "resources/public/fonts.css"}]

@@ -19,3 +19,4 @@ pom.xml.asc
 .Rhistory
 /log/*
 .envrc
+.secrets.edn

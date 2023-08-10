@@ -1,3 +1,6 @@
-(ns vortext.esther.ai.stablediffusion)
+(ns vortext.esther.ai.stablediffusion
+  (:require [vortext.esther.config :refer [secrets]]))
 
-(defonce api-key (System/getenv "STABLEDIFFUSION_API_KEY"))
+(defonce api-key
+  (:stablediffusion-api-key
+   (secrets)))
