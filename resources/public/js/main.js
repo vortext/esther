@@ -13,9 +13,12 @@ function setSentiment(sentimentValue) {
   });
 }
 
+function getSentimentEnergy() {
+  return parseFloat(document.querySelectorAll("#history .memory:last-child")[0].dataset.energy);
+}
 
 function beforeConverseRequest() {
-  setSentiment(Math.random());
+  setSentiment(getSentimentEnergy());
   let msg = document.querySelector('#user-input').value;
   document.querySelector('#user-value').textContent = msg;
   document.querySelector('#user-input').disabled = true;

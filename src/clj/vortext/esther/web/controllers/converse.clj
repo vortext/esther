@@ -12,9 +12,11 @@
 (defn answer
   [history request]
   (let [{:keys [params]} request
-        response (openai/complete history params)
+        ctx {}
+        with-ctx (assoc params :context ctx)
+        response (openai/complete history with-ctx)
         result {:response response
-                :request params
+                :request with-ctx
                 :ts (unix-ts)}]
     (reset! state [request response history])
     (log/info "REQUEST")

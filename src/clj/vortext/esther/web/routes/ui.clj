@@ -29,14 +29,17 @@
         _ (log/info "HISTORY" (str history))
         response (converse/answer history request)
         new-history (push-memory 5 response history)
-
-        request-params (:params request)
-        response-msg (:response response)
         _ (log/info "NEW HISTORY" (str new-history))
-        md (markdown/md-to-html-string (:response response-msg))
+        energy (get-in response [:response :energy])
+        response-msg (get-in response [:response :response])
+        _ (log/info "ENERGY" energy)
+        md (markdown/md-to-html-string response-msg)
         reply (ui
                [:div.memory
-                [:div.request (:msg request-params)]
+                {"data-energy" energy}
+                [:div.request
+                 (markdown/md-to-html-string
+                  (get-in request [:params :msg]))]
                 [:div.response md]])]
     (assoc reply :session {:history new-history})))
 
