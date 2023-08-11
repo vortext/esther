@@ -22,12 +22,12 @@
    :initiate (slurp (io/resource "prompts/scenarios/initiate.org"))})
 
 (defn prompt
-  [history msg]
+  [history memories _msg]
   (let [scenario (cond
                    (seq history) :continue
-                   (empty? history) :initial
+                   (and (empty? history)
+                        (empty? memories)) :initial
                    :else :initiate)]
-    (log/info "scenario" scenario)
     (str/join
      "\n"
      [prompt
@@ -70,27 +70,30 @@
     coversation-seq))
 
 (defn chat-completion
-  [history msg]
+  [history memories msg]
   (let [conv (format-for-completion history)
         submission
         (concat
          [{:role "system"
-           :content (prompt history msg)}]
+           :content (prompt history memories msg)}]
+         [{:role "system"
+           :content (str "You have the following predictions:\n"
+                         (str/join " \n" (map :prediction memories)))}]
          conv
          [{:role "user"
            :content (json/write-value-as-string msg)}])]
     (log/trace "CONVERSATION")
     (log/trace (pprint/pprint conv))
     (log/trace "SUBMISSION")
-    (log/trace (pprint/pprint submission))
+    (log/info  (pprint/pprint submission))
     (api/create-chat-completion
      {:model model
       :messages submission}
      {:api-key api-key})))
 
 (defn complete
-  [history msg]
-  (let [completion (chat-completion history msg)]
+  [history memories msg]
+  (let [completion (chat-completion history memories msg)]
     (parse-result completion)))
 
 ;; Scratch

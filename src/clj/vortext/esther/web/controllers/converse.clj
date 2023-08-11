@@ -46,8 +46,11 @@
   (let [{:keys [params]} request
         context  (get-context request)
         request-with-context (assoc params :context context)
+        memories ((:query-fn opts) :random-memories {})
         _ (log/debug "request:" (pprint/pprint request-with-context))
-        response (openai/complete history request-with-context)
+        response (openai/complete history
+                                  memories
+                                  request-with-context)
         _ (log/debug "response" (pprint/pprint response))]
     (remember!
      opts
