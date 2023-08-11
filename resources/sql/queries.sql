@@ -27,3 +27,7 @@ order by id limit 5
 -- :name random-memories :? :*
 -- :doc Get a few random memories
 select * from memory order by random() limit 5;
+
+-- :name last-entries :? :*
+-- :doc Get the last entries (from new to old)
+select content from entries order by id desc limit 5;

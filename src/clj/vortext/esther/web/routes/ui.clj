@@ -20,26 +20,18 @@
     [:div.second]
     [:div.third]]])
 
-(defn push-memory
-  [history-size new-memory memories]
-  (conj (vec (take-last history-size memories)) new-memory))
-
 (defn message [opts request]
-  (let [history (get-in request [:session :history] [])
-        response (converse/answer! opts history request)
-        memory-capacity 5
-        new-history (push-memory memory-capacity response history)
+  (let [response (converse/answer! opts request)
         energy (get-in response [:response :energy])
         response-msg (get-in response [:response :response])
-        md (markdown/md-to-html-string response-msg)
-        reply (ui
-               [:div.memory
-                {"data-energy" energy}
-                [:div.request
-                 (markdown/md-to-html-string
-                  (get-in request [:params :msg]))]
-                [:div.response md]])]
-    (assoc reply :session {:history new-history})))
+        md (markdown/md-to-html-string response-msg)]
+    (ui
+     [:div.memory
+      {"data-energy" energy}
+      [:div.request
+       (markdown/md-to-html-string
+        (get-in request [:params :msg]))]
+      [:div.response md]])))
 
 
 

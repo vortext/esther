@@ -11,12 +11,18 @@
    [vortext.esther.web.routes.utils :as utils]
    [ring.util.http-response :as http-response]))
 
+(defn push-memory
+  [history-size new-memory memories]
+  (conj (vec (take-last history-size memories)) new-memory))
+
+(defn read-json-value
+  [str]
+  (json/read-value str json/keyword-keys-object-mapper))
+
 (defn get-context
   [request]
-  (let [from-request (json/read-value
-                      (get-in request [:params :context] "")
-                      json/keyword-keys-object-mapper)]
-    from-request))
+  (read-json-value
+   (get-in request [:params :context] "")))
 
 
 (defn remember!
@@ -41,17 +47,20 @@
       (query-fn tx :push-entry entry))
     answer))
 
+(defn parse-entries
+  [entries]
+  (map (comp read-json-value :content) entries))
+
 (defn answer!
-  [opts history request]
+  [opts request]
   (let [{:keys [params]} request
         context  (get-context request)
         request-with-context (assoc params :context context)
-        memories ((:query-fn opts) :random-memories {})
-        _ (log/debug "request:" (pprint/pprint request-with-context))
-        response (openai/complete history
-                                  memories
-                                  request-with-context)
-        _ (log/debug "response" (pprint/pprint response))]
+        memories (parse-entries (reverse ((:query-fn opts) :last-entries {})))
+        _ (log/debug "memories" memories)
+        response (openai/complete
+                  memories
+                  request-with-context)]
     (remember!
      opts
      {:response response
@@ -61,19 +70,6 @@
 (defn converse!
   [_opts request]
   (http-response/ok
-   (answer!
-    (get-in request [:session :history] [])
-    request)))
+   {:todo "FIXME"}))
 
 ;;; Scratch
-(comment
-  ;; (def query-fn (:db.sql/query-fn state/system))
-
-  (query-fn :push-memory {:gid (rand 1000000)
-                          :emoji ""
-                          :prediction "?"
-                          :question "!"
-                          :summary "$"
-                          :image_prompt "%"})
-
-  (query-fn :random-memories {}))
