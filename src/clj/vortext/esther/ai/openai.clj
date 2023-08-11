@@ -78,10 +78,6 @@
          conv
          [{:role "user"
            :content (json/write-value-as-string msg)}])]
-    (log/trace "CONVERSATION")
-    (log/trace (pprint/pprint conv))
-    (log/trace "SUBMISSION")
-    (log/trace  (pprint/pprint submission))
     (api/create-chat-completion
      {:model model
       :messages submission}

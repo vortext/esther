@@ -57,7 +57,6 @@
         context  (get-context request)
         request-with-context (assoc params :context context)
         memories (parse-entries (reverse ((:query-fn opts) :last-entries {})))
-        _ (log/debug "memories" memories)
         response (openai/complete
                   memories
                   request-with-context)]
