@@ -14,7 +14,12 @@ function setSentiment(sentimentValue) {
 }
 
 function getSentimentEnergy() {
-  return parseFloat(document.querySelectorAll("#history .memory:last-child")[0].dataset.energy);
+  const lastMemory = document.querySelectorAll("#history .memory:last-child");
+  if (lastMemory.length) {
+    return parseFloat(lastMemory[0].dataset.energy || 0.5);
+  } else {
+    return 0.5;
+  }
 }
 
 function beforeConverseRequest() {

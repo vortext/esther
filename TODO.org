@@ -1,11 +1,12 @@
-* TODO hook up OpenAI
+* DONE hook up OpenAI
 * TODO store results
-* TODO use results
-* TODO markdown, KaTeX and such
+- sqllite storing memories
+* TODO use results, better context (locale, time, memories)
+* DONE markdown, KaTeX and such
 * TODO Test infrastructure
 * TODO Placeholder with thoughts, questions, desires
 * TODO Random thought or question pops up
-* TODO hook up Midjourney
+* TODO hook up StableDiffusion
 * TODO /imagine commands
 * TODO integrate image describe into memory context
 * TODO memories page
@@ -20,4 +21,8 @@
 * TODO better intro flow
 * TODO app? legal, ethics, billing, subscriptions, etc.
 * DONE maybe bouncing ball energy for loading?
-* TODO sentiment analysis (tensorflow.js), onnx server side?
+* TODO introduce as book fiction literary work imaginary scene
+- let chatgpt-4 check the prompt
+- she can use emoji and markdown.
+* TODO
+- Check the bouncyballs again (revert old animation), test

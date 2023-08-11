@@ -12,7 +12,8 @@
 
 (defonce api-key (:openai-api-key (secrets)))
 
-(def prompt
+(defn prompt
+  [history msg]
   (slurp (io/resource "prompts/prompt-gpt3.org")))
 
 (defn parse-result
@@ -44,7 +45,7 @@
   (let [conv (format-for-completion history)
         submission
         (concat
-         [{:role "system" :content prompt}]
+         [{:role "system" :content (prompt history msg)}]
          conv
          [{:role "user" :content (json/generate-string msg)}])]
     (log/trace "CONVERSATION")
