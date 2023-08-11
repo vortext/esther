@@ -21,6 +21,17 @@
    :continue (slurp (io/resource "prompts/scenarios/continue.org"))
    :initiate (slurp (io/resource "prompts/scenarios/initiate.org"))})
 
+(defn example
+  [memory]
+  (str/join "\n"
+            ["*Example"
+             "** Input"
+             (json/write-value-as-string (:request memory))
+             "** Output"
+             (json/write-value-as-string (:response memory))
+             ] )
+  )
+
 (defn generate-prompt
   [memories _msg]
   (let [scenario (cond
@@ -30,7 +41,9 @@
     (str/join
      "\n"
      [prompt
-      (scenario scenarios)])))
+      (scenario scenarios)
+      (when (= :continue scenario)
+        (example (first memories)))])))
 
 (defn parse-maybe-json
   [maybe-json]
@@ -70,11 +83,12 @@
 
 (defn chat-completion
   [memories msg]
-  (let [conv (format-for-completion memories)
+  (let [prompt (generate-prompt memories msg)
+        conv (format-for-completion (rest memories))
         submission
         (concat
          [{:role "system"
-           :content (generate-prompt memories msg)}]
+           :content prompt}]
          conv
          [{:role "user"
            :content (json/write-value-as-string msg)}])]

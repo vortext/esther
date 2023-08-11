@@ -20,7 +20,7 @@
   (json/read-value str json/keyword-keys-object-mapper))
 
 (defn get-context
-  [request]
+  [memories request]
   (read-json-value
    (get-in request [:params :context] "")))
 
@@ -54,9 +54,11 @@
 (defn answer!
   [opts request]
   (let [{:keys [params]} request
-        context  (get-context request)
+        last-10-entries (reverse ((:query-fn opts) :last-10-entries {}))
+        memories (parse-entries last-10-entries)
+
+        context  (get-context memories request)
         request-with-context (assoc params :context context)
-        memories (parse-entries (reverse ((:query-fn opts) :last-entries {})))
         response (openai/complete
                   memories
                   request-with-context)]

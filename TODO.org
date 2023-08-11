@@ -1,7 +1,7 @@
 * DONE hook up OpenAI
-* TODO store results
+* DONE store results
 - sqllite storing memories
-* TODO use results, better context (locale, time, memories)
+* DONE use results, better context (locale, time, memories)
 * DONE markdown, KaTeX and such
 * TODO Test infrastructure
 * TODO Placeholder with thoughts, questions, desires
@@ -21,8 +21,6 @@
 * TODO better intro flow
 * TODO app? legal, ethics, billing, subscriptions, etc.
 * DONE maybe bouncing ball energy for loading?
-* TODO introduce as book fiction literary work imaginary scene
+* DONE introduce as book fiction literary work imaginary scene
 - let chatgpt-4 check the prompt
 - she can use emoji and markdown.
-* TODO
-- Check the bouncyballs again (revert old animation), test
