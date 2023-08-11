@@ -24,10 +24,11 @@
   [history-size new-memory memories]
   (conj (vec (take-last history-size memories)) new-memory))
 
-(defn message [request]
+(defn message [opts request]
   (let [history (get-in request [:session :history] [])
-        response (converse/answer history request)
-        new-history (push-memory 5 response history)
+        response (converse/answer! opts history request)
+        memory-capacity 5
+        new-history (push-memory memory-capacity response history)
         energy (get-in response [:response :energy])
         response-msg (get-in response [:response :response])
         md (markdown/md-to-html-string response-msg)
@@ -112,9 +113,9 @@
 
 
 ;; Routes
-(defn ui-routes [_opts]
+(defn ui-routes [opts]
   [["/" {:get home}]
-   ["/msg" {:post message}]])
+   ["/msg" {:post (partial message opts)}]])
 
 (def route-data
   {:muuntaja   formats/instance

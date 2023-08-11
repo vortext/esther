@@ -1,1 +1,29 @@
--- Place your queries here. Docs available https://www.hugsql.org/
+-- :name push-memory :! :n
+-- :doc Insert a single memory
+insert into memory (gid, emoji, prediction, question, summary, image_prompt)
+values (:gid, :emoji, :prediction, :question, :summary, :image_prompt)
+
+-- :name push-entry :! :n
+-- :doc Insert a single entry
+insert into entries (gid, uid, content, memory)
+values (:gid, :uid, :content, :memory)
+
+-- A ":result" value of ":*" specifies a vector of records
+-- (as hashmaps) will be returned
+-- :name last-memories :? :*
+-- :doc Get the last memories
+select * from memory
+order by id desc limit 5
+
+-- A ":result" value of ":*" specifies a vector of records
+-- (as hashmaps) will be returned
+-- :name first-memories :? :*
+-- :doc Get the last memories
+select * from memory
+order by id limit 5
+
+-- A ":result" value of ":*" specifies a vector of records
+-- (as hashmaps) will be returned
+-- :name random-memories :? :*
+-- :doc Get a few random memories
+select * from memory order by random() limit 5;

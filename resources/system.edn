@@ -37,6 +37,7 @@
  :reitit.routes/api
  {:base-path "/api"
   :env #ig/ref :system/env
+  :connection #ig/ref  :db.sql/connection
   :query-fn #ig/ref :db.sql/query-fn}
 
  :router/routes
@@ -45,6 +46,8 @@
  :router/core
  {:routes #ig/ref :router/routes}
  :reitit.routes/ui {:base-path "",
+                    :query-fn #ig/ref :db.sql/query-fn
+                    :connection #ig/ref  :db.sql/connection
                     :env #ig/ref :system/env}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}

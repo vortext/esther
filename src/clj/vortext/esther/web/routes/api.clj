@@ -4,6 +4,7 @@
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.middleware.exception :as exception]
    [vortext.esther.web.middleware.formats :as formats]
+   [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [reitit.coercion.malli :as malli]
    [reitit.ring.coercion :as coercion]
@@ -33,16 +34,15 @@
                 exception/wrap-exception]})
 
 ;; Routes
-(defn api-routes [_opts]
+(defn api-routes [opts]
   [["/swagger.json"
     {:get {:no-doc  true
            :swagger {:info {:title "vortext.esther API"}}
            :handler (swagger/create-swagger-handler)}}]
    ["/health"
-    {:get health/healthcheck!}]
+    {:get (partial health/healthcheck! opts)}]
    ["/converse"
-    {:post converse/converse!}]
-   ])
+    {:post (partial converse/converse! opts)}]])
 
 (derive :reitit.routes/api :reitit/routes)
 
