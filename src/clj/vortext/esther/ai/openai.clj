@@ -2,11 +2,12 @@
   (:require
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
+   [vortext.esther.util :refer [read-json-value]]
    [jsonista.core :as json]
-   [cheshire.core :as cheshire]
    [clojure.pprint :as pprint]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
+   [clojure.data.csv :as csv]
    [wkok.openai-clojure.api :as api]
    [vortext.esther.config :refer [secrets]]))
 
@@ -21,29 +22,34 @@
    :continue (slurp (io/resource "prompts/scenarios/continue.org"))
    :initiate (slurp (io/resource "prompts/scenarios/initiate.org"))})
 
-(defn example
+(defn get-keywords
+  [memories]
+  (let [csv (str/join "," (map :keywords memories))
+        parts (str/split csv #",")
+        kw (vec (into #{} parts))]
+    kw))
+
+(defn example-org-prompt
   [memory]
-  (str/join "\n"
-            ["*Example"
-             "** Input"
-             (json/write-value-as-string (:request memory))
-             "** Output"
-             (json/write-value-as-string (:response memory))
-             ] )
-  )
+  (let [mapper (json/object-mapper {:pretty true})]
+    (str/join
+     "\n"
+     ["* Example from the conversation"
+      "** Input"
+      (json/write-value-as-string (:request memory) mapper)
+      "** Output"
+      (json/write-value-as-string (:response memory) mapper)])))
+
 
 (defn generate-prompt
   [memories _msg]
-  (let [scenario (cond
-                   (seq memories) :continue
-                   (empty? memories) :initial
-                   :else :initiate)]
+  (let [scenario :initial
+        keywords (get-keywords memories)]
+    (log/info "openai::generate-prompt:keywords" keywords)
     (str/join
      "\n"
      [prompt
-      (scenario scenarios)
-      (when (= :continue scenario)
-        (example (first memories)))])))
+      (scenario scenarios)])))
 
 (defn parse-maybe-json
   [maybe-json]
@@ -52,10 +58,7 @@
      maybe-json
      json/keyword-keys-object-mapper)
     (catch Exception _
-      (try ;; Try cheshire?
-        (cheshire/decode maybe-json true)
-        (catch Exception _
-          {:response (str maybe-json)})))))
+      {:response (str maybe-json)})))
 
 (defn parse-result
   [resp]
@@ -81,10 +84,18 @@
                          (map assistant (map :response memories)))]
     coversation-seq))
 
+
+
+(defn get-contents-memories
+  [memories]
+  (map (comp read-json-value :content) memories))
+
 (defn chat-completion
   [memories msg]
-  (let [prompt (generate-prompt memories msg)
-        conv (format-for-completion (rest memories))
+  (let [
+        prompt (generate-prompt memories msg)
+        conv (format-for-completion
+              (get-contents-memories memories))
         submission
         (concat
          [{:role "system"

@@ -3,40 +3,41 @@
 
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
            ;; Util
- org.clj-commons/humanize {:mvn/version "1.0"}
- clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
- babashka/fs {:mvn/version "0.4.19"}
- markdown-clj/markdown-clj {:mvn/version "1.11.4"}
- metosin/jsonista {:mvn/version "0.3.7"}
- cheshire/cheshire {:mvn/version "5.11.0"} ;; Reasons ...
+           org.clj-commons/humanize {:mvn/version "1.0"}
+           clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
+           babashka/fs {:mvn/version "0.4.19"}
+           markdown-clj/markdown-clj {:mvn/version "1.11.4"}
+           metosin/jsonista {:mvn/version "0.3.7"}
+           org.clojure/data.csv {:mvn/version "1.0.1"}
+           camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
            ;; Routing
- metosin/reitit {:mvn/version "0.6.0"}
+           metosin/reitit {:mvn/version "0.6.0"}
            ;; Security
- buddy/buddy-core {:mvn/version "1.11.423"}
+           buddy/buddy-core {:mvn/version "1.11.423"}
            ;; AI
- net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
+           net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
            ;; Ring
- metosin/ring-http-response {:mvn/version "0.9.3"}
- ring/ring-core {:mvn/version "1.10.0"}
- ring/ring-defaults {:mvn/version "0.3.3"}
+           metosin/ring-http-response {:mvn/version "0.9.3"}
+           ring/ring-core {:mvn/version "1.10.0"}
+           ring/ring-defaults {:mvn/version "0.3.3"}
 
            ;; Logging
- ch.qos.logback/logback-classic {:mvn/version "1.4.4"}
+           ch.qos.logback/logback-classic {:mvn/version "1.4.4"}
 
            ;; Data coercion
- luminus-transit/luminus-transit {:mvn/version "0.1.5"
-                                  :exclusions [com.cognitect/transit-clj]}
- metosin/muuntaja {:mvn/version "0.6.8"}
+           luminus-transit/luminus-transit {:mvn/version "0.1.5"
+                                            :exclusions [com.cognitect/transit-clj]}
+           metosin/muuntaja {:mvn/version "0.6.8"}
 
            ;; kit Libs
- io.github.kit-clj/kit-core {:mvn/version "1.0.3"}
- io.github.kit-clj/kit-undertow {:mvn/version "1.0.5"}
- hiccup/hiccup {:mvn/version "1.0.5"}
- io.github.kit-clj/kit-nrepl {:mvn/version "1.0.1"}
- io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.5"}
- io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}
- org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
- buddy/buddy-auth {:mvn/version "3.0.323"}}
+           io.github.kit-clj/kit-core {:mvn/version "1.0.3"}
+           io.github.kit-clj/kit-undertow {:mvn/version "1.0.5"}
+           hiccup/hiccup {:mvn/version "1.0.5"}
+           io.github.kit-clj/kit-nrepl {:mvn/version "1.0.1"}
+           io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.5"}
+           io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}
+           org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
+           buddy/buddy-auth {:mvn/version "3.0.323"}}
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/sha "e3e3532"
                                                          :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
                    :ns-default build}
