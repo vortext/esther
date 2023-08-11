@@ -1,1 +1,1 @@
-#:kit{:htmx :success, :nrepl :success}
+#:kit{:htmx :success, :nrepl :success, :sql :success, :auth :success}

@@ -4,51 +4,32 @@
    [vortext.esther.ai.openai :as openai]
    [clojure.string :as str]
    [clojure.pprint :as pprint]
+   [jsonista.core :as json]
    [clojure.tools.logging :as log]
    [ring.util.http-response :as http-response]))
 
-(def state (atom nil))
+(defn get-context
+  [request]
+  (let [from-request (json/read-value
+                      (get-in request [:params :context] "")
+                      json/keyword-keys-object-mapper)]
+    from-request))
 
 (defn answer
   [history request]
   (let [{:keys [params]} request
-        ctx {}
-        with-ctx (assoc params :context ctx)
-        response (openai/complete history with-ctx)
-        result {:response response
-                :request with-ctx
-                :ts (unix-ts)}]
-    (reset! state [request response history])
-    (log/trace "REQUEST")
-    (log/trace (pprint/pprint params))
-    (log/trace "RESPONSE")
-    (log/trace (pprint/pprint response))
-    (log/trace "RESULT")
-    (log/trace (pprint/pprint result))
-    result
-    ))
+        context  (get-context request)
+        request-with-context (assoc params :context context)
+        _ (log/debug "request:" (pprint/pprint request-with-context))
+        response (openai/complete history request-with-context)
+        _ (log/debug "response" (pprint/pprint response))]
+    {:response response
+     :request request-with-context
+     :ts (unix-ts)}))
 
 (defn converse!
-  [req]
-  (http-response/ok (answer req)))
-
-;; Scratch
-(comment
-  (defn example-response
-    [params]
-    {:response (str "😄 " (str params) (str/join "" (take (rand 250) "Earum blanditiis molestias explicabo in id. Repellat est veniam nihil quia et. Commodi culpa in voluptatem eveniet doloribus velit doloribus nulla. Consequatur natus dolor necessitatibus cum blanditiis asperiores nihil. Neque ducimus modi occaecati sint.
-
-Omnis in ipsam sapiente delectus. Sapiente delectus fugiat quia odio ipsam et quo aut. Laboriosam voluptatibus reiciendis eos quia autem voluptatem vel numquam. Quis minima et iure qui. Doloremque mollitia rem ut numquam veritatis aut ipsum. Praesentium laborum beatae suscipit. 🌌😊")))})
-
-  (def *history (atom nil))
-
-  (defn answer
-    [request]
-    (let [{:keys [session params]} request
-          _history (:history session)]
-      (reset! *history _history)
-      (Thread/sleep (+ 1250 (int (rand 500))))
-      (merge
-       {:response (example-response params)}
-       {:request params
-        :ts (unix-ts)}))))
+  [request]
+  (http-response/ok
+   (answer
+    (get-in request [:session :history] [])
+    request)))

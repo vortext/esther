@@ -13,7 +13,9 @@
     [vortext.esther.web.routes.api]
     
     [vortext.esther.web.routes.ui] 
-    [kit.edge.utils.nrepl])
+    [kit.edge.utils.nrepl] 
+    [kit.edge.db.sql.conman] 
+    [kit.edge.db.sql.migratus])
   (:gen-class))
 
 ;; log uncaught exceptions in threads

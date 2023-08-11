@@ -22,13 +22,22 @@ function getSentimentEnergy() {
   }
 }
 
+function getLocalContext() {
+  return {
+    "local-time": Date(),
+    "browser-lang": navigator.language,
+  };
+}
+
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
   let msg = document.querySelector('#user-input').value;
-  document.querySelector('#user-value').textContent = msg;
-  document.querySelector('#user-input').disabled = true;
-  document.querySelector('#user-input').placeholder = '';
-  document.querySelector('#user-input').value = '';
+  let localContext = JSON.stringify(getLocalContext());
+  document.getElementById("user-context").value = localContext;
+  document.getElementById('user-value').textContent = msg;
+  document.getElementById('user-input').disabled = true;
+  document.getElementById('user-input').placeholder = '';
+  document.getElementById('user-input').value = '';
 }
 
 function afterConverseRequest() {

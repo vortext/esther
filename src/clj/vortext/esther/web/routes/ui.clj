@@ -54,6 +54,10 @@
      :hx-trigger "submit"
      "hx-on::before-request" "beforeConverseRequest()"
      "hx-on::after-request" "afterConverseRequest()"}
+    [:input#user-context
+     {:type "hidden"
+      :name "context"
+      :value "{}"}]
     [:input#user-input
      {:type "text"
       :autocomplete "off"
@@ -64,15 +68,13 @@
 
 (defn conversation [request]
   [:div.container
-   [:div.row
-    [:div.col-md-12]
-    [:div#conversation.loading-state
-     [:div#history]
-     [:div#user-echo
-      [:div#user-value {:class "user-message"}]]
-     [:div#loading-response.loading-state
-      loading]
-     (msg-input request)]]])
+   [:div#conversation.loading-state
+    [:div#history]
+    [:div#user-echo
+     [:div#user-value {:class "user-message"}]]
+    [:div#loading-response.loading-state
+     loading]
+    (msg-input request)]])
 
 
 (def ibm-plex "IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;1,400;1,500&display=swap")

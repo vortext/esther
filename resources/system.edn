@@ -36,7 +36,8 @@
 
  :reitit.routes/api
  {:base-path "/api"
-  :env #ig/ref :system/env}
+  :env #ig/ref :system/env
+  :query-fn #ig/ref :db.sql/query-fn}
 
  :router/routes
  {:routes #ig/refset :reitit/routes}
@@ -46,4 +47,13 @@
  :reitit.routes/ui {:base-path "",
                     :env #ig/ref :system/env}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
-                :bind #or [#env NREPL_HOST "127.0.0.1"]}}
+                :bind #or [#env NREPL_HOST "127.0.0.1"]}
+ :db.sql/query-fn {:conn #ig/ref :db.sql/connection,
+                   :options {},
+                   :filename "sql/queries.sql"}
+ :db.sql/migrations {:store :database,
+                     :db {:datasource #ig/ref :db.sql/connection},
+                     :migrate-on-init? true}
+ :db.sql/connection #profile {:dev {:jdbc-url "jdbc:sqlite:esther_dev.db"},
+                              :test {:jdbc-url "jdbc:sqlite:esther_test.db"},
+                              :prod {:jdbc-url #env JDBC_URL}}}

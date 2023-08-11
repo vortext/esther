@@ -2,8 +2,10 @@
   (:require
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
-   [cheshire.core :as json]
+   [jsonista.core :as json]
+   [cheshire.core :as cheshire]
    [clojure.pprint :as pprint]
+   [clojure.string :as str]
    [clojure.tools.logging :as log]
    [wkok.openai-clojure.api :as api]
    [vortext.esther.config :refer [secrets]]))
@@ -12,16 +14,43 @@
 
 (defonce api-key (:openai-api-key (secrets)))
 
+(def prompt (slurp (io/resource "prompts/prompt-gpt3.org")))
+
+(def scenarios
+  {:initial (slurp (io/resource "prompts/scenarios/initial.org"))
+   :continue (slurp (io/resource "prompts/scenarios/continue.org"))
+   :initiate (slurp (io/resource "prompts/scenarios/initiate.org"))})
+
 (defn prompt
   [history msg]
-  (slurp (io/resource "prompts/prompt-gpt3.org")))
+  (let [scenario (cond
+                   (seq history) :continue
+                   (empty? history) :initial
+                   :else :initiate)]
+    (log/info "scenario" scenario)
+    (str/join
+     "\n"
+     [prompt
+      (scenario scenarios)])))
+
+(defn parse-maybe-json
+  [maybe-json]
+  (try
+    (json/read-value
+     maybe-json
+     json/keyword-keys-object-mapper)
+    (catch Exception _
+      (try ;; Try cheshire?
+        (cheshire/decode maybe-json true)
+        (catch Exception _
+          (str maybe-json))))))
 
 (defn parse-result
   [resp]
   (let [r ((comp :content :message first)
            (get-in resp [:choices]))]
     (try
-      (json/parse-string r true)
+      (parse-maybe-json r)
       (catch Exception e
         (log/warn [e resp])
         {:response (str r)}))))
@@ -29,7 +58,7 @@
 (defn as-role
   [role e]
   {:role role
-   :content (json/generate-string e)})
+   :content (json/write-value-as-string e)})
 
 (defn format-for-completion
   [history]
@@ -45,9 +74,11 @@
   (let [conv (format-for-completion history)
         submission
         (concat
-         [{:role "system" :content (prompt history msg)}]
+         [{:role "system"
+           :content (prompt history msg)}]
          conv
-         [{:role "user" :content (json/generate-string msg)}])]
+         [{:role "user"
+           :content (json/write-value-as-string msg)}])]
     (log/trace "CONVERSATION")
     (log/trace (pprint/pprint conv))
     (log/trace "SUBMISSION")
@@ -63,6 +94,3 @@
     (parse-result completion)))
 
 ;; Scratch
-(comment
-
-  (def history @vortext.esther.web.controllers.converse/*history))
