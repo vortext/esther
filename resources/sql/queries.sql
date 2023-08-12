@@ -11,7 +11,7 @@ order by created desc limit 10 ;
 
 -- :name inspect-memory
 -- :doc Inspects the memory at this point
-select emoji, energy, keywords from memory
+select emoji, energy, keywords, image_prompt from memory
 where uid = :uid
 order by created desc limit 5;
 

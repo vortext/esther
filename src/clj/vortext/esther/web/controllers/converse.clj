@@ -55,10 +55,12 @@
 (defn inspect
   [uid opts _data]
   (let [{:keys [query-fn]} opts
-        result (query-fn :inspect-memory {:uid uid})]
+        result (query-fn :inspect-memory {:uid uid})
+        result (map #(dissoc % :image-prompt) result)]
     (log/debug "converse::inspect")
     {:type :inspect
-     :response (t/table-str result  :style :github-markdown)}))
+     :response
+     (t/table-str result  :style :github-markdown)}))
 
 (defn answer!
   [opts request]
