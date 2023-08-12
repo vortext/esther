@@ -14,6 +14,6 @@
   "state": "🤓",
   "energy": 0.7,
   "keywords": [
-    "user:likes-scifi", "tv:star-trek"
+    "likes:sci-fi", "tv:star-trek"
   ]
 }

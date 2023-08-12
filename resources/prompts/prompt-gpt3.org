@@ -47,6 +47,6 @@ All responses must be provided in the JSON format, following the predefined stru
 - energy: The energy level of the conversation from 0 to 1, where 0 is calm and 1 is excited. Consider the topic and mood of the conversation.
 - response: A verbal reply to the user's message.
 - prediction: Anticipate user needs and interests. Think about what the user might say or want next.
-- keywords: Keywords based on the conversation.
+- keywords: Keywords that describe the user based on the conversation.
 - question: Frame a question you might want to ask the user.
 - image-prompt: Describe a scene or image that reflects the conversation.
