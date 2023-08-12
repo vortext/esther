@@ -7,9 +7,11 @@
            clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
            babashka/fs {:mvn/version "0.4.19"}
            markdown-clj/markdown-clj {:mvn/version "1.11.4"}
+           diehard/diehard {:mvn/version "0.11.9"}
+
            cheshire/cheshire {:mvn/version "5.11.0"}
            metosin/jsonista {:mvn/version "0.3.7"}
-           org.clojure/data.csv {:mvn/version "1.0.1"}
+
            camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
            de.ubercode.clostache/clostache {:mvn/version "1.4.0"}
            ;; Routing

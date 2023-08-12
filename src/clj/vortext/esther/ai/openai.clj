@@ -7,6 +7,7 @@
    [cheshire.core :as cheshire]
    [clostache.parser :as template]
    [clojure.pprint :as pprint]
+   [diehard.core :as dh]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [wkok.openai-clojure.api :as api]
@@ -29,8 +30,8 @@
   (if-not (empty? memories)
     (let [keywords (get-keywords memories)
           image-prompt (last (map :image_prompt memories))]
-      (log/trace "openai::generate-prompt:keywords" keywords)
-      (log/trace "openai::generate-prompt:image-prompt" image-prompt)
+      (log/debug "openai::generate-prompt:keywords" keywords)
+      (log/debug "openai::generate-prompt:image-prompt" image-prompt)
       (str
        "\n# Information about the current user"
        "\n## Keywords about the user:\n" (str/join "," keywords)
@@ -85,11 +86,30 @@
   [memories]
   (map (comp read-json-value :content) memories))
 
+(dh/defratelimiter openai-rl {:rate 12})
+
+(defn openai-api-complete
+  [model submission api-key]
+  (dh/with-retry
+    {:retry-on          Exception
+     :max-retries       3
+     :on-retry          (fn [_val _ex] (log/warn "openai::openai-api-complete:retrying..."))
+     :on-failure        (fn [_ _]
+                          (log/warn "openai::openai-api-complete:failed...")
+                          {:reponse "Esther is unavailabe right now" :energy 0 :emoji "😢"})
+     :on-failed-attempt (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
+    (dh/with-rate-limiter openai-rl
+      (dh/with-timeout {:timeout-ms 12000} ;; 12s
+        (api/create-chat-completion
+         {:model model
+          :messages submission}
+         {:api-key api-key})))))
+
 (defn chat-completion
   [memories msg]
   (let [
         prompt (generate-prompt memories msg)
-        _ (log/debug "openai::chat-completion:prompt" prompt)
+        _ (log/trace "openai::chat-completion:prompt" prompt)
         conv (format-for-completion
               (get-contents-memories memories))
         submission
@@ -99,15 +119,12 @@
          conv
          [{:role "user"
            :content (json/write-value-as-string msg)}])]
-    (api/create-chat-completion
-     {:model model
-      :messages submission}
-     {:api-key api-key})))
+    (openai-api-complete model submission api-key)))
 
 (defn complete
   [memories msg]
   (let [completion (chat-completion memories msg)]
-    (log/info "openai::complete:chat-completion" completion)
+    (log/trace  "openai::complete:chat-completion" completion)
     (parse-result completion)))
 
 ;; Scratch
