@@ -10,3 +10,9 @@ select gid, content, keywords, image_prompt from memory order by created desc li
 -- :name inspect-memory
 -- :doc Inspects the memory at this point
 select created, emoji, energy, keywords from memory order by created desc limit 5;
+
+-- :name see-keyword :! :1
+-- :doc increments the seen counter of the keyword for uid
+insert into memory_keyword (uid, keyword)
+values(:uid, :keyword)
+on conflict(uid, keyword) do update set seen=seen+1, last_seen=current_timestamp;

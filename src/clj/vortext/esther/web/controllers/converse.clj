@@ -6,6 +6,7 @@
    [vortext.esther.util.security :refer [random-base64]]
    [vortext.esther.util :refer [read-json-value]]
    [clojure.string :as str]
+   [next.jdbc :as jdbc]
    [jsonista.core :as json]
    [clojure.tools.logging :as log]
    [table.core :as t]
@@ -21,26 +22,30 @@
 (defn remember!
   [opts answer]
   (let [ ;; {:keys [query-fn]} (utils/route-data request)
-        {:keys [query-fn]} opts
+        {:keys [connection query-fn]} opts
+        uid "<user>"
         response (:response answer)
         memory-gid (random-base64)
         keywords (map (comp csk/->kebab-case str/trim) (get response :keywords []))
         memory {:gid memory-gid
-                :uid "<user>"
                 :sid (:sid answer)
+                :uid uid
                 :emoji (:emoji response)
                 :energy (get response :energy 0)
                 :content (json/write-value-as-string answer)
                 :keywords (when (seq keywords) (str/join "," keywords))
                 :image_prompt (:image-prompt response)}]
-    (query-fn :push-memory memory)
+    (jdbc/with-transaction [tx connection]
+      (query-fn tx :push-memory memory)
+      (doall
+       (map (fn [kw] (query-fn tx :see-keyword {:uid uid :keyword kw})) keywords)) )
     answer))
 
 (defn complete!
   [opts data]
   (let [{:keys [query-fn]} opts
         last-10-memories (reverse (query-fn :last-10-memories {}))
-        result (openai/complete last-10-memories (:request data))]
+        result (openai/complete opts last-10-memories (:request data))]
     (log/debug "converse::complete!")
     (remember!
      opts

@@ -84,9 +84,6 @@
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
    [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
-   ;; Math
-   ;; [:link {:rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css"}]
-   ;; [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"}]
    ;; Fonts
    (font-link ibm-plex)
    [:link {:rel "stylesheet" :href "resources/public/main.css"}]
@@ -94,7 +91,7 @@
    [:script {:src "https://unpkg.com/htmx.org@1.9.4"
              :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
              :crossorigin "anonymous"}]
-   [:script {:src "https://unpkg.com/hyperscript.org@0.9.5" :defer true}]
+   [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js "}]
    [:script {:src "resources/public/js/main.js"}]])
 
 (defn home [request]

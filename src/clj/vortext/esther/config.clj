@@ -7,6 +7,3 @@
 (defn system-config
   [options]
   (config/read-config system-filename options))
-
-(defn secrets []
-  (get-in (system-config {}) [:handler/ring :secrets]))

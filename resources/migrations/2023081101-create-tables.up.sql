@@ -1,17 +1,33 @@
-CREATE TABLE memory (
-    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-    gid                     TEXT NOT NULL UNIQUE,
-    uid                     TEXT NOT NULL,
-    sid                     TEXT NOT NULL,
-    content                 TEXT,
-    emoji                   VARCHAR,
-    energy                  FLOAT,
-    keywords                TEXT,
-    image_prompt            TEXT,
-    image_uri               VARCHAR,
-    created                 TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+create table memory (
+    id                      integer primary key autoincrement,
+    gid                     text not null unique,
+    uid                     text not null,
+    sid                     text not null,
+    content                 text,
+    emoji                   varchar,
+    energy                  float,
+    keywords                text,
+    image_prompt            text,
+    image_uri               varchar,
+    image_description       text,
+    created                 timestamp with time zone default current_timestamp
 );
 --;;
-CREATE INDEX memory_created on memory(created);
+create index memory_created on memory(created);
 --;;
-CREATE INDEX memory_access on memory(uid, sid);
+create index memory_access on memory(uid, sid);
+--;;
+create table memory_keyword (
+    id                      integer primary key autoincrement,
+    uid                     text not null,
+    keyword                 varchar,
+    seen                    integer default 1,
+    last_seen               timestamp with time zone default current_timestamp,
+    unique(uid,keyword)
+)
+--;;
+create index memory_keyword_access on memory_keyword(uid);
+--;;
+create index memory_keyword_last_seen on memory_keyword(last_seen);
+--;;
+create index memory_keyword_uid_seen on memory_keyword(uid, seen);

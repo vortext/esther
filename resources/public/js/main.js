@@ -22,9 +22,33 @@ function getSentimentEnergy() {
   }
 }
 
+function getTimeOfDay() {
+  const date = new Date();
+
+  // FIXME Assuming a generic latitude and longitude
+  const latitude = 51.509865; // Example: London's latitude
+  const longitude = -0.118092; // Example: London's longitude
+
+  const times = SunCalc.getTimes(date, latitude, longitude);
+
+  if (date < times.nauticalDawn) return 'night';
+  if (date < times.dawn) return 'nautical twilight';
+  if (date < times.sunrise) return 'civil twilight';
+  if (date < times.sunriseEnd) return 'sunrise';
+  if (date < times.goldenHourEnd) return 'morning';
+  if (date < times.solarNoon) return 'daytime';
+  if (date < times.goldenHour) return 'afternoon';
+  if (date < times.sunsetStart) return 'evening';
+  if (date < times.sunset) return 'sunset';
+  if (date < times.dusk) return 'civil twilight';
+  if (date < times.nauticalDusk) return 'nautical twilight';
+
+  return 'night';
+}
+
 function getLocalContext() {
   return {
-    "local-time": Date()
+    "time-of-day": getTimeOfDay()
   };
 }
 

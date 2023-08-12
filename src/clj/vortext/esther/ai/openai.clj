@@ -11,12 +11,9 @@
    [diehard.core :as dh]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
-   [wkok.openai-clojure.api :as api]
-   [vortext.esther.config :refer [secrets]]))
+   [wkok.openai-clojure.api :as api]))
 
 (def model "gpt-3.5-turbo")
-
-(defonce api-key (:openai-api-key (secrets)))
 
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
@@ -110,8 +107,8 @@
            :messages submission}
           {:api-key api-key}))))))
 
-(defn chat-completion
-  [memories request]
+(defn complete
+  [opts memories request]
   (let [prompt (generate-prompt memories request)
         _ (log/trace "openai::chat-completion:prompt" prompt)
         _ (log/trace "openai::chat-completion:request" request)
@@ -124,13 +121,11 @@
          [{:role "user"
            :content (json/write-value-as-string request)}])]
     _ (log/trace "openai::chat-completion:submission" submission)
+    (openai-api-complete
+     model
+     submission
+     (get-in opts [:secrets :openai-api-key]))))
 
-    (openai-api-complete model submission api-key)))
 
-(defn complete
-  [memories request]
-  (let [completion (chat-completion memories request)]
-    (log/trace  "openai::complete:chat-completion" completion)
-    completion))
 
 ;; Scratch

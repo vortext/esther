@@ -11,7 +11,6 @@
  {:router #ig/ref :router/core
   :api-path "/api"
   :cookie-secret #or [#env COOKIE_SECRET "ZMIEHXXJLZIUFHAW"]
-  :secrets #include #join [#env HOME "/.secrets.edn"]
   ;; from ring.middleware.defaults. anti-forgery `false` by default because services may not require it
   :site-defaults-config {:params {:urlencoded true
                                   :multipart true
@@ -48,6 +47,7 @@
  :reitit.routes/ui {:base-path "",
                     :query-fn #ig/ref :db.sql/query-fn
                     :connection #ig/ref  :db.sql/connection
+                    :secrets #include #join [#env HOME "/.secrets.edn"]
                     :env #ig/ref :system/env}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}
