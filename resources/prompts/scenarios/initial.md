@@ -1,11 +1,14 @@
-* Example
-** Input
+# Example
+## Input
+```json
 {
  "context": {"local-time":"Sat Aug 12 2023 00:40:32 GMT+0200 (Central European Summer Time)",
              "browser-lang":"en-US"},
  "msg": "I really like sci-fi too! Star Trek is my favorite :D"
 }
-** Output
+```
+## Output
+```json
 {
   "response": "Ah, a fellow fan of science fiction! The genre offers limitless possibilities and sparks our imagination. Are there any specific science fiction books, movies, or TV shows that you've enjoyed? I'd love to hear your recommendations and discuss them with you!",
   "image-prompt": "A futuristic cityscape with towering skyscrapers and flying vehicles, depicting the awe-inspiring world of science fiction.",
@@ -17,3 +20,4 @@
     "likes:sci-fi", "tv:star-trek"
   ]
 }
+```

@@ -2,7 +2,7 @@
   (:require
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
-   [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.util :refer [read-json-value parse-maybe-json]]
    [jsonista.core :as json]
    [clojure.pprint :as pprint]
    [clojure.string :as str]
@@ -24,22 +24,21 @@
 
 (defn get-keywords
   [memories]
-  (let [csv (str/join "," (map :keywords memories))
-        parts (str/split csv #",")
-        kw (vec (into #{} parts))]
-    kw))
+  (let [keywords (mapcat (comp #(str/split % #",") :keywords) memories)]
+    (vec (into #{} keywords))))
 
-(defn example-org-prompt
-  [memory]
-  (let [mapper (json/object-mapper {:pretty true})]
-    (str/join
-     "\n"
-     ["* Example from the conversation"
-      "** Input"
-      (json/write-value-as-string (:request memory) mapper)
-      "** Output"
-      (json/write-value-as-string (:response memory) mapper)])))
-
+(defn generate-prompt
+  [memories _msg]
+  (let [scenario :initial
+        keywords (get-keywords memories)
+        questions (map :question memories)]
+    (str/join "\n" [prompt
+                    (when (seq memories)
+                      (str
+                       "# About the user"
+                       "\nKeywords about the user: " (str/join ", " keywords)
+                       "\nQuestion about the user: " (str/join "," questions)
+                       (scenario scenarios)))])))
 
 (defn generate-prompt
   [memories _msg]
@@ -51,24 +50,11 @@
      [prompt
       (scenario scenarios)])))
 
-(defn parse-maybe-json
-  [maybe-json]
-  (try
-    (json/read-value
-     maybe-json
-     json/keyword-keys-object-mapper)
-    (catch Exception _
-      {:response (str maybe-json)})))
-
 (defn parse-result
   [resp]
   (let [r ((comp :content :message first)
            (get-in resp [:choices]))]
-    (try
-      (parse-maybe-json r)
-      (catch Exception e
-        (log/warn [e resp])
-        {:response (str r)}))))
+    (assoc {:response r} :response (parse-maybe-json r))))
 
 (defn as-role
   [role e]

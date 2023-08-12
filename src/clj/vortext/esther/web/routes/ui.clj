@@ -20,19 +20,20 @@
     [:div.second]
     [:div.third]]])
 
+(defn markdown->html [md-text]
+  (markdown/md-to-html-string md-text))
+
 (defn message [opts request]
   (let [response (converse/answer! opts request)
         energy (get-in response [:response :energy])
         response-msg (get-in response [:response :response])
-        md (markdown/md-to-html-string response-msg)]
+        md-response (markdown->html response-msg)
+        md-request (markdown->html (get-in request [:params :msg]))]
     (ui
      [:div.memory
       {"data-energy" energy}
-      [:div.request
-       (markdown/md-to-html-string
-        (get-in request [:params :msg]))]
-      [:div.response md]])))
-
+      [:div.request md-request]
+      [:div.response md-response]])))
 
 
 (defn msg-input [_request]
