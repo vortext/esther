@@ -36,7 +36,6 @@
       [:div.request md-request]
       [:div.response {:class (name response-type)} md-response]])))
 
-
 (defn msg-input [_request]
   [:div.input-form
    [:form
@@ -47,20 +46,24 @@
      :hx-indicator ".loading-state"
      :hx-target "#history"
      :hx-trigger "submit"
-     "hx-on::before-request" "beforeConverseRequest()"
-     "hx-on::after-request" "afterConverseRequest()"}
+     "hx-on::before-request" "beforeConverseRequest();"
+     "hx-on::after-request" "afterConverseRequest();"}
     [:input#user-context
      {:type "hidden"
       :name "context"
       :value "{}"}]
-    [:input#user-input
-     {:type "text"
-      :autocomplete "off"
+    [:textarea#user-input
+     {:autocomplete "off"
       :minlength 1
-      :maxlength 240
+      :maxlength 1024
       :autofocus "true"
       :placeholder "Dear Esther,"
-      :name "msg"}]]])
+      :name "msg"
+      :rows 1
+      :onkeydown "handleTextareaInput(event);"}]]])
+
+
+
 
 (defn conversation [request]
   [:div.container

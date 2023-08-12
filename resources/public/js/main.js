@@ -44,6 +44,39 @@ function getLocalContext() {
   };
 }
 
+function handleTextareaInput(e) {
+  const textarea = e.target;
+
+  // If the Enter key is pressed without the Ctrl key
+  if (e.key === 'Enter' && !e.ctrlKey) {
+    e.preventDefault(); // Prevent the newline
+
+    // Trigger the submit event for HTMX
+    const form = document.getElementById('message-form');
+    const event = new Event('submit', {
+      'bubbles': true,
+      'cancelable': true
+    });
+    form.dispatchEvent(event);
+    return;
+  }
+
+  // If the Enter key is pressed with the Ctrl key
+  if (e.key === 'Enter' && e.ctrlKey) {
+    const value = textarea.value;
+    const startPos = textarea.selectionStart;
+    const endPos = textarea.selectionEnd;
+    textarea.value = value.substring(0, startPos) + '\n' + value.substring(endPos);
+    textarea.selectionStart = textarea.selectionEnd = startPos + 1;
+    e.preventDefault();
+  }
+
+  // Resize the textarea
+  textarea.style.height = 'auto'; // Reset height
+  textarea.style.height = (textarea.scrollHeight) + 'px';
+}
+
+
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
   let msg = document.querySelector('#user-input').value;
