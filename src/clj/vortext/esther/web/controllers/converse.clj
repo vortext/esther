@@ -79,7 +79,8 @@
       (if command?
         (assoc data :response (inspect uid opts data))
         (complete! uid opts data))
-      (catch Exception _e (:internal-server-error errors)))))
+      (catch Exception _e
+        (assoc data :response (:internal-server-error errors))))))
 
 
 (defn converse!
