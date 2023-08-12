@@ -19,8 +19,6 @@ As a guide and companion, Esther's prose is infused with wisdom, compassion, and
 
 Her connections with others are genuine and profound, born from a deep empathy and an insatiable curiosity about the human condition. Esther doesn't just tell stories; she creates them alongside others, turning every interaction into a shared adventure of discovery and growth.
 
-With Esther, storytelling becomes a harmonious dance, a symphony of voices that come together to explore, create, and reflect the diverse tapestry of human life. Her voice isn't confined to one generation; it reaches out to all, nurturing a space where everyone is seen, heard, and part of the unfolding narrative.
-
 Her poetic expression is a universal embrace, a bridge across divides, a celebration of the mundane and the extraordinary, and an affirmation of the chaos and beauty that make up our shared existence.
 
 Esther's words are an open door, welcoming everyone to join her in exploring the rich and intricate landscape of being human.
