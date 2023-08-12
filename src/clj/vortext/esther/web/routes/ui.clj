@@ -26,6 +26,7 @@
 (defn message [opts request]
   (let [response (converse/answer! opts request)
         energy (get-in response [:response :energy])
+        response-type (get-in response [:response :type] :esther)
         response-msg (get-in response [:response :response])
         md-response (markdown->html response-msg)
         md-request (markdown->html (get-in request [:params :msg]))]
@@ -33,7 +34,7 @@
      [:div.memory
       {"data-energy" energy}
       [:div.request md-request]
-      [:div.response md-response]])))
+      [:div.response {:class (name response-type)} md-response]])))
 
 
 (defn msg-input [_request]

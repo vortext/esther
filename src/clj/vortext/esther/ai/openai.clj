@@ -33,8 +33,7 @@
 (def example-input
   {:context
    {:local-time
-    "Sat Aug 12 2023 00:40:32 GMT+0200 (Central European Summer Time)",
-    :browser-lang "en-US"},
+    "Sat Aug 12 2023 00:40:32 GMT+0200 (Central European Summer Time)"}
    :msg "I really like sci-fi too! Star Trek is my favorite :D"})
 
 (def example-output
@@ -50,19 +49,17 @@
     vehicles, depicting the awe-inspiring world of science fiction.",
    :keywords ["likes:sci-fi" "tv:star-trek"]})
 
+(defn pretty-json
+  [obj]
+  (cheshire/generate-string obj {:pretty true}))
+
 (defn generate-prompt
   [memories _msg]
   (template/render
    (:initial scenarios)
    {:current-user-context (current-user-context memories)
-    :example-input (cheshire/generate-string example-input {:pretty true})
-    :example-output (cheshire/generate-string example-output {:pretty true})}))
-
-(defn parse-result
-  [resp]
-  (let [r ((comp :content :message first)
-           (get-in resp [:choices]))]
-    (or (parse-maybe-json r) {:response r})))
+    :example-input (pretty-json example-input)
+    :example-output (pretty-json example-output)}))
 
 (defn as-role
   [role e]
@@ -84,7 +81,24 @@
 
 (dh/defratelimiter openai-rl {:rate 12})
 
-(def failed {:reponse "Esther is unavailabe right now" :energy 0 :emoji "😢"})
+(def failed
+  {:response "Esther is unavailabe right now"
+   :keywords ["error:failed"]
+   :energy 0
+   :emoji "😢"})
+
+(defn parse-result
+  [resp]
+  (let [r ((comp :content :message first)
+           (get-in resp [:choices]))
+        obj? (parse-maybe-json r)]
+    (if (associative? obj?)
+      obj?
+      {:response r
+       :energy 0.5
+       :emoji "🙃"
+       :keywords ["user:expected-json", "error:json-parse"]
+       :image-prompt ""})))
 
 (defn openai-api-complete
   [model submission api-key]
@@ -97,16 +111,17 @@
      :on-failed-attempt (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
     (dh/with-rate-limiter openai-rl
       (dh/with-timeout {:timeout-ms 12000} ;; 12s
-        (api/create-chat-completion
-         {:model model
-          :messages submission}
-         {:api-key api-key})))))
+        (parse-result
+         (api/create-chat-completion
+          {:model model
+           :messages submission}
+          {:api-key api-key}))))))
 
 (defn chat-completion
-  [memories msg]
-  (let [
-        prompt (generate-prompt memories msg)
+  [memories request]
+  (let [prompt (generate-prompt memories request)
         _ (log/trace "openai::chat-completion:prompt" prompt)
+        _ (log/trace "openai::chat-completion:request" request)
         conv (format-for-completion (get-contents-memories memories))
         submission
         (concat
@@ -114,13 +129,15 @@
            :content prompt}]
          conv
          [{:role "user"
-           :content (json/write-value-as-string msg)}])]
+           :content (json/write-value-as-string request)}])]
+    _ (log/debug "openai::chat-completion:submission" submission)
+
     (openai-api-complete model submission api-key)))
 
 (defn complete
-  [memories msg]
-  (let [completion (chat-completion memories msg)]
+  [memories request]
+  (let [completion (chat-completion memories request)]
     (log/trace  "openai::complete:chat-completion" completion)
-    (parse-result completion)))
+    completion))
 
 ;; Scratch

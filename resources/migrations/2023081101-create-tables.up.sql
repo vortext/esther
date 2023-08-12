@@ -5,6 +5,7 @@ CREATE TABLE memory (
     sid                     TEXT NOT NULL,
     content                 TEXT,
     emoji                   VARCHAR,
+    energy                  FLOAT,
     keywords                TEXT,
     image_prompt            TEXT,
     image_uri               VARCHAR,

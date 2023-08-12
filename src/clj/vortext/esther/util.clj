@@ -18,4 +18,4 @@
                  ": " e maybe-json])
       (try
         (cheshire/parse-string maybe-json true)
-        (catch Exception _ nil)))))
+        (catch Exception _ maybe-json)))))
