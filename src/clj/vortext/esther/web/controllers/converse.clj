@@ -26,11 +26,10 @@
         memory-gid (random-base64)
         keywords (map csk/->kebab-case (get response :keywords []))
         memory {:gid memory-gid
-                :emoji (:state response)
-                :prediction (:prediction response)
-                :question (:question response)
+                :uid "<user>"
+                :emoji (:emoji response)
                 :content (json/write-value-as-string answer)
-                :keywords  (str/join "," keywords)
+                :keywords (when (seq keywords) (str/join "," keywords))
                 :image_prompt (:image-prompt response)}]
     (query-fn :push-memory memory)
     answer))

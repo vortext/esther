@@ -4,10 +4,11 @@
    [clojure.java.io :as io]
    [vortext.esther.util :refer [read-json-value parse-maybe-json]]
    [jsonista.core :as json]
+   [cheshire.core :as cheshire]
+   [clostache.parser :as template]
    [clojure.pprint :as pprint]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
-   [clojure.data.csv :as csv]
    [wkok.openai-clojure.api :as api]
    [vortext.esther.config :refer [secrets]]))
 
@@ -17,31 +18,48 @@
 
 (def base-prompt (slurp (io/resource "prompts/prompt-gpt3.md")))
 
-(def scenarios
-  {:initial (slurp (io/resource "prompts/scenarios/initial.md"))
-   :continue (slurp (io/resource "prompts/scenarios/continue.md"))
-   :initiate (slurp (io/resource "prompts/scenarios/initiate.md"))})
-
 (defn get-keywords
   [memories]
-  (let [keywords (mapcat (comp #(str/split % #",") :keywords) memories)]
+  (let [break (fn [s] (if (string? s) (str/split s #",") ""))
+        keywords (mapcat (comp break :keywords) memories)]
     (vec (into #{} keywords))))
+
+(defn current-user-context
+  [memories]
+  (if-not (empty? memories)
+    (let [keywords (get-keywords memories)
+          image-prompt (last (map :image_prompt memories))]
+      (log/trace "openai::generate-prompt:keywords" keywords)
+      (log/trace "openai::generate-prompt:image-prompt" image-prompt)
+      (str
+       "\n# Information about the current user"
+       "\n## Keywords about the user:\n" (str/join "," keywords)
+       "\n## Current scenery for the user (as image descriptions):\n" image-prompt))
+    ""))
+
+(def example-input
+  {:context
+   {:local-time
+    "Sat Aug 12 2023 00:40:32 GMT+0200 (Central European Summer Time)",
+    :browser-lang "en-US"},
+   :msg "I really like sci-fi too! Star Trek is my favorite :D"})
+
+(def example-output
+  {:response
+   "Ah, a fellow fan of science fiction! The genre offers limitless possibilities and sparks our imagination. Are there any specific science fiction books, movies, or TV shows that you've enjoyed? I'd love to hear your recommendations and discuss them with you!",
+   :emoji "🤓",
+   :energy 0.7,
+   :image-prompt
+   "A futuristic cityscape with towering skyscrapers and flying vehicles, depicting the awe-inspiring world of science fiction.",
+   :keywords ["likes:sci-fi" "tv:star-trek"]})
 
 (defn generate-prompt
   [memories _msg]
-  (let [scenario :initial
-        keywords (get-keywords memories)
-        image-prompt (last (map :image_prompt memories))
-        parts [base-prompt
-               (when (seq memories)
-                 (str
-                  "# About the user"
-                  "\nKeywords about the user: " (str/join ", " keywords)
-                  "\nCurrent scenery for the user (as image descriptions):" image-prompt))
-               (scenario scenarios)]
-        prompt (str/join "\n" parts)]
-    (log/info "openai::generate-prompt:keywords" keywords)
-    prompt))
+  (template/render
+   base-prompt
+   {:current-user-context (current-user-context memories)
+    :example-input (cheshire/generate-string example-input {:pretty true})
+    :example-output (cheshire/generate-string example-output {:pretty true})}))
 
 (defn parse-result
   [resp]
@@ -63,8 +81,6 @@
                          (map assistant (map :response memories)))]
     coversation-seq))
 
-
-
 (defn get-contents-memories
   [memories]
   (map (comp read-json-value :content) memories))
@@ -73,6 +89,7 @@
   [memories msg]
   (let [
         prompt (generate-prompt memories msg)
+        _ (log/debug "openai::chat-completion:prompt" prompt)
         conv (format-for-completion
               (get-contents-memories memories))
         submission
@@ -90,6 +107,7 @@
 (defn complete
   [memories msg]
   (let [completion (chat-completion memories msg)]
+    (log/info "openai::complete:chat-completion" completion)
     (parse-result completion)))
 
 ;; Scratch

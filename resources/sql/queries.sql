@@ -1,7 +1,7 @@
 -- :name push-memory :! :n
 -- :doc Insert a single memory
-insert into memory (gid, content, emoji, prediction, keywords, question, image_prompt)
-values (:gid, :content, :emoji, :prediction, :keywords, :question, :image_prompt)
+insert into memory (gid, uid, content, emoji, keywords, image_prompt)
+values (:gid, :uid, :content, :emoji, :keywords, :image_prompt)
 
 -- A ":result" value of ":*" specifies a vector of records
 -- (as hashmaps) will be returned
