@@ -9,7 +9,7 @@ select gid, content, keywords, image_prompt from memory order by created desc li
 
 -- :name inspect-memory
 -- :doc Inspects the memory at this point
-select created, emoji, energy, keywords from memory order by created desc limit 5;
+select emoji, energy, keywords from memory order by created desc limit 5;
 
 -- :name see-keyword :! :1
 -- :doc increments the seen counter of the keyword for uid
