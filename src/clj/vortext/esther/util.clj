@@ -15,4 +15,4 @@
       (log/warn ["JSON Parsing Error at line " (.getLineNr (.getLocation e))
                  ", column " (.getColumnNr (.getLocation e))
                  ": " e maybe-json])
-      maybe-json)))
+      nil)))

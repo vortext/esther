@@ -54,7 +54,7 @@
   [resp]
   (let [r ((comp :content :message first)
            (get-in resp [:choices]))]
-    (assoc {:response r} :response (parse-maybe-json r))))
+    (or (parse-maybe-json r) {:response r})))
 
 (defn as-role
   [role e]
