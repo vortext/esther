@@ -35,6 +35,10 @@
   (edn/read-string
    (slurp (io/resource "prompts/scenarios/examples.edn"))))
 
+(def errors
+  (edn/read-string
+   (slurp (io/resource "prompts/scenarios/errors.edn"))))
+
 (defn pretty-json
   [obj]
   (cheshire/generate-string obj {:pretty true}))
@@ -68,12 +72,7 @@
 
 (dh/defratelimiter openai-rl {:rate 12})
 
-(def failed
-  {:response "Esther is unavailabe right now"
-   :keywords ["error:failed"]
-   :energy 0
-   :image-promt "A sign that says be right back technical difficulties."
-   :emoji "😢"})
+(def failed (:internal-server-error errors))
 
 (defn parse-result
   [resp]

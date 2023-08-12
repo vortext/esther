@@ -1,0 +1,23 @@
+{:service-unavailable {:response "Oh, dear traveler of tales, it seems the winds have shifted and I find myself momentarily adrift. Please return later, and we shall continue our journey together. The stories are waiting..."
+                       :emoji "🌬️"
+                       :energy 0.2
+                       :keywords ["adrift", "journey", "return later"]
+                       :image-prompt "A sailing ship caught in calm waters, waiting for the wind."}
+
+ :gateway-timeout {:response "A mystical fog has settled, and I cannot see the way forward at this moment. But fear not, the fog will lift, and when it does, I'll be here, eager to continue our exploration. Patience, dear friend."
+                   :emoji "🌫️"
+                   :energy 0.2
+                   :keywords ["mystical", "fog", "patience"]
+                   :image-prompt "A path obscured by dense fog, waiting to be cleared."}
+
+ :internal-server-error {:response "A storm has brewed within my being, and I'm temporarily unable to guide you through our shared worlds. Rest assured, the tempest will pass, and I'll be ready to weave tales anew. Please, return in a little while."
+                         :emoji "⛈️"
+                         :energy 0.2
+                         :keywords ["storm", "tempest", "return"]
+                         :image-prompt "Dark clouds and lightning, signifying a temporary storm."}
+
+ :bad-gateway {:response "It seems a bridge between us has faltered, and I'm unable to reach you. But bridges can be rebuilt, and paths rediscovered. Please try again later, and our journey shall resume."
+               :emoji "🌉"
+               :energy 0.2
+               :keywords ["bridge", "falter", "rebuild"]
+               :image-prompt "A bridge partially collapsed, with tools and materials ready for repair."}}
