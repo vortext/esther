@@ -5,11 +5,10 @@
    [vortext.esther.util :refer [read-json-value parse-maybe-json]]
    [jsonista.core :as json]
    [cheshire.core :as cheshire]
-   [clojure.edn :as edn]
    [clostache.parser :as template]
    [clojure.pprint :as pprint]
    [diehard.core :as dh]
-   [vortext.esther.config :refer [secrets]]
+   [vortext.esther.config :refer [secrets examples errors introductions]]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [wkok.openai-clojure.api :as api]))
@@ -28,18 +27,6 @@
        "\n # Narrative:"
        "\n## Current scene:\n" image-prompt))
     ""))
-
-(def examples
-  (edn/read-string
-   (slurp (io/resource "prompts/scenarios/examples.edn"))))
-
-(def errors
-  (edn/read-string
-   (slurp (io/resource "prompts/scenarios/errors.edn"))))
-
-(def introductions
-  (edn/read-string
-   (slurp (io/resource "prompts/scenarios/introductions.edn"))))
 
 (defn pretty-json
   [obj]
@@ -86,6 +73,8 @@
       obj?
       (:json-parse-error errors))))
 
+(defonce api-key (:openai-api-key (secrets)))
+
 (defn openai-api-complete
   [model submission]
   (dh/with-retry
@@ -106,7 +95,7 @@
          (api/create-chat-completion
           {:model model
            :messages submission}
-          {:api-key (:openai-api-key (secrets))}))))))
+          {:api-key api-key}))))))
 
 (defn complete
   [opts memories request]
