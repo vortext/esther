@@ -129,9 +129,10 @@ body {
   background: transparent;
   font-size: var(--font-size-base) !important;
   outline: none;
-  padding-bottom: 1em;
   transition: border-bottom 0.125s ease-in-out;
   border-bottom: 1px solid transparent;
+  resize: none; /* Disables user resizing */
+  overflow: hidden; /* Prevents scrollbars */
 }
 
 
