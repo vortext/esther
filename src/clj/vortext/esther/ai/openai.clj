@@ -39,6 +39,10 @@
   (edn/read-string
    (slurp (io/resource "prompts/scenarios/errors.edn"))))
 
+(def introductions
+  (edn/read-string
+   (slurp (io/resource "prompts/scenarios/introductions.edn"))))
+
 (defn pretty-json
   [obj]
   (cheshire/generate-string obj {:pretty true}))
@@ -68,7 +72,10 @@
 
 (defn get-contents-memories
   [memories]
-  (map (comp read-json-value :content) memories))
+  (let [real (map (comp read-json-value :content) memories)]
+    (if (seq real)
+      real
+      [(first (shuffle (:imagine introductions)))])))
 
 (dh/defratelimiter openai-rl {:rate 12})
 
@@ -81,11 +88,7 @@
         obj? (parse-maybe-json r)]
     (if (associative? obj?)
       obj?
-      {:response r
-       :energy 0.5
-       :emoji "🙃"
-       :keywords ["json-parse-error", "response-not-json"]
-       :image-prompt "A confused person, looking at a book filled with unexpected computer symbols, juxtaposed with literary prose."})))
+      (:json-parse-error errors))))
 
 (defn openai-api-complete
   [model submission api-key]

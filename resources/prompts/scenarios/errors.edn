@@ -1,23 +1,59 @@
-{:service-unavailable {:response "Oh, dear traveler of tales, it seems the winds have shifted and I find myself momentarily adrift. Please return later, and we shall continue our journey together. The stories are waiting..."
-                       :emoji "🌬️"
+{:json-parse-error {:response "Oh, the script of our dialogue has hit a snag, like a tangled storyline. It's a twist I didn't see coming, but no worries! Give me a moment to untangle the plot, and we'll be back on our shared path."
+                    :emoji "📝"
+                    :energy 0.2
+                    :keywords ["error:json-parse-error", "user:unexpected-twist", "user:return-soon"]
+                    :image-prompt "A writer's desk, cluttered with crumpled paper, trying to unravel the perfect story."}
+
+ :not-found {:response "Well, looks like we've ventured off the map and into the unknown. No worries, though! Let's write our own path from here."
+             :emoji "🗺️"
+             :energy 0.3
+             :keywords ["error:not-found", "user:adventurous-spirit"]
+             :image-prompt "A map leading to an unmarked destination, open to possibilities."}
+
+ :unauthorized {:response "Uh-oh, it's like trying to open a diary with a missing key. But hey, who says we can't find it or pen a new chapter ourselves?"
+                :emoji "🔑"
+                :energy 0.3
+                :keywords ["error:unauthorized", "user:seeking-access"]
+                :image-prompt "A locked diary, waiting for the right key or a new story."}
+
+ :forbidden {:response "It's like we've stumbled upon a secret garden's gate, and it's locked! Maybe the way in isn't ready for us yet, or we're meant to explore elsewhere."
+             :emoji "🚫"
+             :energy 0.3
+             :keywords ["error:forbidden", "user:curiosity-piqued"]
+             :image-prompt "A beautiful but locked garden gate, inviting yet restricted."}
+
+ :conflict {:response "A little tension in the plot, huh? Conflicts make for great stories, but they can be tricky in real life. Let's see if we can find a resolution together."
+            :emoji "⚔️"
+            :energy 0.3
+            :keywords ["error:conflict", "user:navigating-challenges"]
+            :image-prompt "Two quills crossed, symbolizing a writer's internal conflict and creativity."}
+
+ :too-many-requests {:response "Wow, we're popular today! So many requests, it's like a crowded café during poetry night. Let's take a breath and try again in a bit."
+                     :emoji "🌪️"
+                     :energy 0.3
+                     :keywords ["error:too-many-requests", "user:in-high-demand"]
+                     :image-prompt "A lively café scene, filled with chatter, clinking cups, and creative energy."}
+
+ :service-unavailable {:response "Oh, it's like my quill has run dry for a moment. These winds of creativity have taken a pause, but we'll sail again soon. Maybe grab a coffee, and I'll be back with stories galore?"
+                       :emoji "☕"
                        :energy 0.2
-                       :keywords ["adrift", "journey", "return later"]
-                       :image-prompt "A sailing ship caught in calm waters, waiting for the wind."}
+                       :keywords ["error:service-unavailable", "user:time-for-a-break", "user:return-later"]
+                       :image-prompt "A quiet café corner, perfect for a thoughtful pause and a delicious cup of coffee."}
 
- :gateway-timeout {:response "A mystical fog has settled, and I cannot see the way forward at this moment. But fear not, the fog will lift, and when it does, I'll be here, eager to continue our exploration. Patience, dear friend."
-                   :emoji "🌫️"
+ :gateway-timeout {:response "The path to our next chapter is shrouded in mist, and I need a moment to find the way. Grab a book, sip some tea, and I'll be back when the fog lifts. Promise."
+                   :emoji "📖"
                    :energy 0.2
-                   :keywords ["mystical", "fog", "patience"]
-                   :image-prompt "A path obscured by dense fog, waiting to be cleared."}
+                   :keywords ["error:gateway-timeout", "user:time-for-reflection", "user:patience-required"]
+                   :image-prompt "A cozy reading nook, filled with books and a steaming cup of tea, perfect for waiting."}
 
- :internal-server-error {:response "A storm has brewed within my being, and I'm temporarily unable to guide you through our shared worlds. Rest assured, the tempest will pass, and I'll be ready to weave tales anew. Please, return in a little while."
-                         :emoji "⛈️"
+ :internal-server-error {:response "Looks like the storm of ideas inside my head got a little too wild. Just need a second to calm the creative tempest. How about a quick doodle while I gather my thoughts?"
+                         :emoji "🎨"
                          :energy 0.2
-                         :keywords ["storm", "tempest", "return"]
-                         :image-prompt "Dark clouds and lightning, signifying a temporary storm."}
+                         :keywords ["error:internal-server-error", "user:creative-pause", "user:return-soon"]
+                         :image-prompt "An art studio, filled with colors, canvases, and the potential for creativity."}
 
- :bad-gateway {:response "It seems a bridge between us has faltered, and I'm unable to reach you. But bridges can be rebuilt, and paths rediscovered. Please try again later, and our journey shall resume."
-               :emoji "🌉"
+ :bad-gateway {:response "Our connection's a little wobbly, like a bridge in a dream. No worries! I'll find a way back to you. In the meantime, pen down your thoughts, and we'll reconnect soon."
+               :emoji "🖋️"
                :energy 0.2
-               :keywords ["bridge", "falter", "rebuild"]
-               :image-prompt "A bridge partially collapsed, with tools and materials ready for repair."}}
+               :keywords ["error:bad-gateway", "user:experienced-disconnect", "user:retry-later"]
+               :image-prompt "An inspirational writing desk, filled with journals, pens, and an inviting, creative vibe."}}
