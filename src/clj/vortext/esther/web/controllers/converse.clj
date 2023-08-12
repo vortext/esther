@@ -34,21 +34,39 @@
     (query-fn :push-memory memory)
     answer))
 
+(defn converse!
+  [opts base-response]
+  (let [{:keys [query-fn]} opts
+        last-10-memories (reverse (query-fn :last-10-memories {}))
+        response (openai/complete
+                  last-10-memories
+                  (:request base-response))
+        response (assoc base-response :response response)]
+    (log/info [base-response response])
+    (remember! opts response)))
+
+(defn inspect
+  [opts base-response]
+  (let [{:keys [query-fn]} opts]
+    {:response "heyzz"}
+    )
+
+  )
+
 (defn answer!
   [opts request]
   (let [{:keys [params]} request
-        last-10-memories (reverse ((:query-fn opts) :last-10-memories {}))
         context (get-context request)
         request-with-context (assoc params :context context)
-        response (openai/complete
-                  last-10-memories
-                  request-with-context)]
-    (remember!
-     opts
-     {:response response
-      :request request-with-context
-      :sid (get-in request [:session :sid])
-      :ts (unix-ts)})))
+        base-response {:sid (get-in request [:session :sid])
+                       :request request-with-context
+                       :ts (unix-ts)}]
+    (cond (str/starts-with? (:msg params) "/inspect")
+          (do (log/info "inspect")
+              (-> base-response
+                  (assoc :response (inspect opts base-response))))
+          :else
+          (converse! opts base-response))))
 
 (defn converse!
   [_opts request]

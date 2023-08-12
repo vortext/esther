@@ -20,12 +20,6 @@
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
 
-(defn get-keywords
-  [memories]
-  (let [break (fn [s] (if (string? s) (str/split s #",") ""))
-        keywords (mapcat (comp break :keywords) memories)]
-    (vec (into #{} keywords))))
-
 (defn current-user-context
   [memories]
   (if-not (empty? memories)
@@ -90,6 +84,8 @@
 
 (dh/defratelimiter openai-rl {:rate 12})
 
+(def failed {:reponse "Esther is unavailabe right now" :energy 0 :emoji "😢"})
+
 (defn openai-api-complete
   [model submission api-key]
   (dh/with-retry
@@ -97,8 +93,7 @@
      :max-retries       3
      :on-retry          (fn [_val _ex] (log/warn "openai::openai-api-complete:retrying..."))
      :on-failure        (fn [_ _]
-                          (log/warn "openai::openai-api-complete:failed...")
-                          {:reponse "Esther is unavailabe right now" :energy 0 :emoji "😢"})
+                          (log/warn "openai::openai-api-complete:failed...") failed)
      :on-failed-attempt (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
     (dh/with-rate-limiter openai-rl
       (dh/with-timeout {:timeout-ms 12000} ;; 12s
@@ -112,8 +107,7 @@
   (let [
         prompt (generate-prompt memories msg)
         _ (log/trace "openai::chat-completion:prompt" prompt)
-        conv (format-for-completion
-              (get-contents-memories memories))
+        conv (format-for-completion (get-contents-memories memories))
         submission
         (concat
          [{:role "system"

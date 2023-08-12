@@ -24,8 +24,7 @@ function getSentimentEnergy() {
 
 function getLocalContext() {
   return {
-    "local-time": Date(),
-    "browser-lang": navigator.language,
+    "local-time": Date()
   };
 }
 

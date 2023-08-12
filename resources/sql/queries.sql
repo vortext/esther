@@ -6,3 +6,7 @@ values (:gid, :uid, :sid, :content, :emoji, :keywords, :image_prompt)
 -- :name last-10-memories :? :*
 -- :doc Get the last entries (from new to old)
 select gid, content, keywords, image_prompt from memory order by created desc limit 10;
+
+-- :name inspect-memory
+-- :doc Inspects the memory at this point
+select created, emoji, image_prompt from memory order by created desc limit 5;
