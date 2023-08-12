@@ -9,6 +9,7 @@
    [clostache.parser :as template]
    [clojure.pprint :as pprint]
    [diehard.core :as dh]
+   [vortext.esther.config :refer [secrets]]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [wkok.openai-clojure.api :as api]))
@@ -76,8 +77,6 @@
 
 (dh/defratelimiter openai-rl {:rate 12})
 
-(def failed (:internal-server-error errors))
-
 (defn parse-result
   [resp]
   (let [r ((comp :content :message first)
@@ -88,15 +87,17 @@
       (:json-parse-error errors))))
 
 (defn openai-api-complete
-  [model submission api-key]
+  [model submission]
   (dh/with-retry
     {:retry-on Exception
-     :max-retries 3
+     :max-retries 2
      :on-retry
      (fn [_val _ex] (log/warn "openai::openai-api-complete:retrying..."))
      :on-failure
-     (fn [_ _]
-       (log/warn "openai::openai-api-complete:failed...") failed)
+     (fn [_val ex]
+       (let [response (:internal-server-error errors)]
+         (log/warn "openai::openai-api-complete:failed..." ex response)
+         response))
      :on-failed-attempt
      (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
     (dh/with-rate-limiter openai-rl
@@ -105,7 +106,7 @@
          (api/create-chat-completion
           {:model model
            :messages submission}
-          {:api-key api-key}))))))
+          {:api-key (:openai-api-key (secrets))}))))))
 
 (defn complete
   [opts memories request]
@@ -121,10 +122,7 @@
          [{:role "user"
            :content (json/write-value-as-string request)}])]
     _ (log/trace "openai::chat-completion:submission" submission)
-    (openai-api-complete
-     model
-     submission
-     (get-in opts [:secrets :openai-api-key]))))
+    (openai-api-complete model submission)))
 
 
 
