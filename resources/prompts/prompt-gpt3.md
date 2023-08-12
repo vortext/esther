@@ -46,7 +46,7 @@ All responses must be provided in the JSON format, following the predefined stru
 
 - **state**: An emoji reflecting the user's emotional state. Think about how the user might feel and represent it with an emoji.
 - **energy**: The energy level of the conversation from 0 to 1, where 0 is calm and 1 is excited. Consider the topic and mood of the conversation.
-- **response**: A verbal reply to the user's message.
+- **response**: A verbal reply to the user's message. Must be valid Markdown in JSON.
 - **prediction**: Anticipate user needs and interests. Think about what the user might say or want next.
 - **keywords**: Keywords that describe the user based on the conversation.
 - **question**: Frame a question you might want to ask the user.
