@@ -93,12 +93,15 @@
 (defn openai-api-complete
   [model submission api-key]
   (dh/with-retry
-    {:retry-on          Exception
-     :max-retries       3
-     :on-retry          (fn [_val _ex] (log/warn "openai::openai-api-complete:retrying..."))
-     :on-failure        (fn [_ _]
-                          (log/warn "openai::openai-api-complete:failed...") failed)
-     :on-failed-attempt (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
+    {:retry-on Exception
+     :max-retries 3
+     :on-retry
+     (fn [_val _ex] (log/warn "openai::openai-api-complete:retrying..."))
+     :on-failure
+     (fn [_ _]
+       (log/warn "openai::openai-api-complete:failed...") failed)
+     :on-failed-attempt
+     (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
     (dh/with-rate-limiter openai-rl
       (dh/with-timeout {:timeout-ms 12000} ;; 12s
         (parse-result
