@@ -26,14 +26,13 @@
     (let [image-prompt (last (map :image_prompt memories))]
       (log/debug "openai::generate-prompt:image-prompt" image-prompt)
       (str
-       "\n # User context description:"
-       "\n## Current scene for the user:\n" image-prompt))
+       "\n # Context description:"
+       "\n## Current scene:\n" image-prompt))
     ""))
 
 (def example-input
   {:context
-   {:local-time
-    "Sat Aug 12 2023 00:40:32 GMT+0200 (Central European Summer Time)"}
+   {:local-time "..."}
    :msg "I really like sci-fi too! Star Trek is my favorite :D"})
 
 (def example-output
@@ -85,6 +84,7 @@
   {:response "Esther is unavailabe right now"
    :keywords ["error:failed"]
    :energy 0
+   :image-promt "A sign that says be right back technical difficulties."
    :emoji "😢"})
 
 (defn parse-result
@@ -98,7 +98,7 @@
        :energy 0.5
        :emoji "🙃"
        :keywords ["user:expected-json", "error:json-parse"]
-       :image-prompt ""})))
+       :image-prompt "A confused person. Their book shows weird unexpected computer things."})))
 
 (defn openai-api-complete
   [model submission api-key]
@@ -130,7 +130,7 @@
          conv
          [{:role "user"
            :content (json/write-value-as-string request)}])]
-    _ (log/debug "openai::chat-completion:submission" submission)
+    _ (log/trace "openai::chat-completion:submission" submission)
 
     (openai-api-complete model submission api-key)))
 
