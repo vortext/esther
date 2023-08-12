@@ -42,9 +42,10 @@
     answer))
 
 (defn complete!
-  [opts data]
+  [uid opts data]
   (let [{:keys [query-fn]} opts
-        last-10-memories (reverse (query-fn :last-10-memories {}))
+        last-10-memories (query-fn :last-10-memories {:uid uid})
+        last-10-memories (reverse last-10-memories)
         result (openai/complete opts last-10-memories (:request data))]
     (log/debug "converse::complete!")
     (remember!
@@ -52,9 +53,9 @@
      (assoc data :response result))))
 
 (defn inspect
-  [opts _data]
+  [uid opts _data]
   (let [{:keys [query-fn]} opts
-        result (query-fn :inspect-memory {})]
+        result (query-fn :inspect-memory {:uid uid})]
     (log/debug "converse::inspect")
     {:type :inspect
      :response (t/table-str result  :style :github-markdown)}))
@@ -62,6 +63,8 @@
 (defn answer!
   [opts request]
   (let [{:keys [params]} request
+        uid "<user>"
+
         context (get-context request)
         request-with-context (assoc params :context context)
         data {:sid (get-in request [:session :sid])
@@ -70,8 +73,8 @@
         command? (str/starts-with? (:msg params) "/")]
     (log/debug "converse::answer!")
     (if command?
-      (assoc data :response (inspect opts data))
-      (complete! opts data))))
+      (assoc data :response (inspect uid opts data))
+      (complete! uid opts data))))
 
 
 (defn converse!

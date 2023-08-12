@@ -13,10 +13,13 @@ create table memory (
     created                 timestamp with time zone default current_timestamp
 );
 --;;
-create index memory_created on memory(created);
+create index memory_created on memory(uid, created);
 --;;
 create index memory_access on memory(uid, sid);
 --;;
+create index memory_uid on memory(uid);
+--;;
+
 create table memory_keyword (
     id                      integer primary key autoincrement,
     uid                     text not null,
@@ -28,6 +31,6 @@ create table memory_keyword (
 --;;
 create index memory_keyword_access on memory_keyword(uid);
 --;;
-create index memory_keyword_last_seen on memory_keyword(last_seen);
+create index memory_keyword_last_seen on memory_keyword(uid, last_seen);
 --;;
 create index memory_keyword_uid_seen on memory_keyword(uid, seen);
