@@ -72,8 +72,8 @@
                       {:model model
                        :messages submission}
                       {:api-key api-key})
-          first-choice ((comp :content :message first)
-                        (get-in completion [:choices]))
+          first-choice ((comp :content :message)
+                        (get-in completion [:choices 0]))
           json-obj? (parse-maybe-json first-choice)]
       (if json-obj? json-obj? (:json-parse-error errors)))))
 
