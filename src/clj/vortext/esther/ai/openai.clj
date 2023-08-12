@@ -15,12 +15,12 @@
 
 (defonce api-key (:openai-api-key (secrets)))
 
-(def prompt (slurp (io/resource "prompts/prompt-gpt3.org")))
+(def prompt (slurp (io/resource "prompts/prompt-gpt3.md")))
 
 (def scenarios
-  {:initial (slurp (io/resource "prompts/scenarios/initial.org"))
-   :continue (slurp (io/resource "prompts/scenarios/continue.org"))
-   :initiate (slurp (io/resource "prompts/scenarios/initiate.org"))})
+  {:initial (slurp (io/resource "prompts/scenarios/initial.md"))
+   :continue (slurp (io/resource "prompts/scenarios/continue.md"))
+   :initiate (slurp (io/resource "prompts/scenarios/initiate.md"))})
 
 (defn get-keywords
   [memories]
