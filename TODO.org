@@ -3,8 +3,10 @@
 - sqllite storing memories
 * DONE use results, better context (locale, time, memories)
 * DONE markdown, KaTeX and such
-* TODO /interrupt /analysis /status commands
-* TODO /imagine commands
+* TODO /interrupt command?
+* TODO /inspect command
+* TODO /status command
+* TODO /imagine command
 * TODO hook up StableDiffusion
 * TODO integrate image describe into memory context
 * TODO better input UI? (textfield, resize, like Signal?)
@@ -12,6 +14,7 @@
 * TODO security / login / hosting
 * TODO error handling
 * TODO embeddings / memory store
+* TODO geoip for time of day?
 * TODO multi user?
 - security
 - crypto
