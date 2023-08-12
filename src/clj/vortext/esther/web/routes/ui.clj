@@ -96,14 +96,16 @@
    [:script {:src "resources/public/js/main.js"}]])
 
 (defn home [request]
-  (page
-   (head-section)
-   [:body
-    {"data-session-id" (random-base64)}
-    [:h1#title "Esther"]
-    [:h2#subtitle (time/human-today) "."]
-    (conversation request)]))
-
+  (let [sid (random-base64 32)]
+    (->
+     (page
+      (head-section)
+      [:body
+       {"data-sid" sid}
+       [:h1#title "Esther"]
+       [:h2#subtitle (time/human-today) "."]
+       (conversation request)])
+     (assoc-in [:session :sid] sid))))
 
 ;; Routes
 (defn ui-routes [opts]

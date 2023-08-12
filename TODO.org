@@ -3,15 +3,12 @@
 - sqllite storing memories
 * DONE use results, better context (locale, time, memories)
 * DONE markdown, KaTeX and such
-* TODO Test infrastructure
-* TODO Placeholder with thoughts, questions, desires
-* TODO Random thought or question pops up
-* TODO hook up StableDiffusion
-* TODO /imagine commands
-* TODO integrate image describe into memory context
-* TODO memories page
 * TODO /interrupt /analysis /status commands
+* TODO /imagine commands
+* TODO hook up StableDiffusion
+* TODO integrate image describe into memory context
 * TODO better input UI? (textfield, resize, like Signal?)
+* TODO Test infrastructure
 * TODO security / login / hosting
 * TODO error handling
 * TODO embeddings / memory store

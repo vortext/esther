@@ -17,7 +17,8 @@
 
 (defonce api-key (:openai-api-key (secrets)))
 
-(def base-prompt (slurp (io/resource "prompts/prompt-gpt3.md")))
+(def scenarios
+  {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
 
 (defn get-keywords
   [memories]
@@ -28,14 +29,11 @@
 (defn current-user-context
   [memories]
   (if-not (empty? memories)
-    (let [keywords (get-keywords memories)
-          image-prompt (last (map :image_prompt memories))]
-      (log/debug "openai::generate-prompt:keywords" keywords)
+    (let [image-prompt (last (map :image_prompt memories))]
       (log/debug "openai::generate-prompt:image-prompt" image-prompt)
       (str
-       "\n# Information about the current user"
-       "\n## Keywords about the user:\n" (str/join "," keywords)
-       "\n## Current scenery for the user (as image descriptions):\n" image-prompt))
+       "\n # User context description:"
+       "\n## Current scene for the user:\n" image-prompt))
     ""))
 
 (def example-input
@@ -47,17 +45,21 @@
 
 (def example-output
   {:response
-   "Ah, a fellow fan of science fiction! The genre offers limitless possibilities and sparks our imagination. Are there any specific science fiction books, movies, or TV shows that you've enjoyed? I'd love to hear your recommendations and discuss them with you!",
+   "Ah, a fellow fan of science fiction! The genre offers limitless
+    possibilities and sparks our imagination. Are there any specific
+    science fiction books, movies, or TV shows that you've enjoyed? I'd
+    love to hear your recommendations and discuss them with you!",
    :emoji "🤓",
    :energy 0.7,
    :image-prompt
-   "A futuristic cityscape with towering skyscrapers and flying vehicles, depicting the awe-inspiring world of science fiction.",
+   "A futuristic cityscape with towering skyscrapers and flying
+    vehicles, depicting the awe-inspiring world of science fiction.",
    :keywords ["likes:sci-fi" "tv:star-trek"]})
 
 (defn generate-prompt
   [memories _msg]
   (template/render
-   base-prompt
+   (:initial scenarios)
    {:current-user-context (current-user-context memories)
     :example-input (cheshire/generate-string example-input {:pretty true})
     :example-output (cheshire/generate-string example-output {:pretty true})}))

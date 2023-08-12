@@ -17,16 +17,16 @@
   (read-json-value
    (get-in request [:params :context] "")))
 
-
 (defn remember!
   [opts answer]
   (let [ ;; {:keys [query-fn]} (utils/route-data request)
         {:keys [query-fn]} opts
         response (:response answer)
         memory-gid (random-base64)
-        keywords (map csk/->kebab-case (get response :keywords []))
+        keywords (map (comp csk/->kebab-case str/trim) (get response :keywords []))
         memory {:gid memory-gid
                 :uid "<user>"
+                :sid (:sid answer)
                 :emoji (:emoji response)
                 :content (json/write-value-as-string answer)
                 :keywords (when (seq keywords) (str/join "," keywords))
@@ -47,6 +47,7 @@
      opts
      {:response response
       :request request-with-context
+      :sid (get-in request [:session :sid])
       :ts (unix-ts)})))
 
 (defn converse!
