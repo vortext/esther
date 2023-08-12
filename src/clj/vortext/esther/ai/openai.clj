@@ -52,17 +52,6 @@
       real
       [(first (shuffle (:imagine introductions)))])))
 
-(dh/defratelimiter openai-rl {:rate 12})
-
-(defn parse-result
-  [resp]
-  (let [r ((comp :content :message first)
-           (get-in resp [:choices]))
-        obj? (parse-maybe-json r)]
-    (if (associative? obj?)
-      obj?
-      (:json-parse-error errors))))
-
 (defonce api-key (:openai-api-key (secrets)))
 
 (defn openai-api-complete
@@ -79,13 +68,14 @@
          response))
      :on-failed-attempt
      (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
-    (dh/with-rate-limiter openai-rl
-      (dh/with-timeout {:timeout-ms 12000} ;; 12s
-        (parse-result
-         (api/create-chat-completion
-          {:model model
-           :messages submission}
-          {:api-key api-key}))))))
+    (let [completion (api/create-chat-completion
+                      {:model model
+                       :messages submission}
+                      {:api-key api-key})
+          first-choice ((comp :content :message first)
+                        (get-in completion [:choices]))
+          json-obj? (parse-maybe-json first-choice)]
+      (if json-obj? json-obj? (:json-parse-error errors)))))
 
 (defn complete
   [opts memories request]
