@@ -72,7 +72,7 @@ navigator.geolocation.getCurrentPosition(
     setPosition(position.coords.latitude, position.coords.longitude);
   },
   (error) => {
-    setPosition(51.509865, -0.118092) ;; London
+    setPosition(51.509865, -0.118092); // London
     console.warn('Geolocation error:', error);
   }
 );
