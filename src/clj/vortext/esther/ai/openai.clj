@@ -84,8 +84,8 @@
       {:response r
        :energy 0.5
        :emoji "🙃"
-       :keywords ["user:expected-json", "error:json-parse"]
-       :image-prompt "A confused person. Their book shows weird unexpected computer things."})))
+       :keywords ["json-parse-error", "response-not-json"]
+       :image-prompt "A confused person, looking at a book filled with unexpected computer symbols, juxtaposed with literary prose."})))
 
 (defn openai-api-complete
   [model submission api-key]
