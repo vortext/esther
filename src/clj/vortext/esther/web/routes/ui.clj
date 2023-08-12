@@ -25,6 +25,8 @@
 
 (defn message [opts request]
   (let [response (converse/answer! opts request)
+        _ (log/debug "ui::mesage:request" response)
+        _ (log/debug "ui::mesage:response" response)
         energy (get-in response [:response :energy])
         response-type (get-in response [:response :type] :esther)
         response-msg (get-in response [:response :response])
@@ -61,9 +63,6 @@
       :name "msg"
       :rows 1
       :onkeydown "handleTextareaInput(event);"}]]])
-
-
-
 
 (defn conversation [request]
   [:div.container

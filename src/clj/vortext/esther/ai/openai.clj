@@ -18,27 +18,17 @@
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
 
-(defn current-user-context
-  [memories]
-  (if-not (empty? memories)
-    (let [image-prompt (last (map :image_prompt memories))]
-      (log/debug "openai::generate-prompt:image-prompt" image-prompt)
-      (str
-       "\n # Narrative:"
-       "\n## Current scene:\n" image-prompt))
-    ""))
 
 (defn pretty-json
   [obj]
   (cheshire/generate-string obj {:pretty true}))
 
 (defn generate-prompt
-  [memories _msg]
+  [_memories _msg]
   (let [example (first (shuffle examples))]
     (template/render
      (:initial scenarios)
-     {:current-user-context (current-user-context memories)
-      :example-request (pretty-json (:request example))
+     {:example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
 
 (defn as-role
@@ -81,7 +71,7 @@
     {:retry-on Exception
      :max-retries 2
      :on-retry
-     (fn [_val _ex] (log/warn "openai::openai-api-complete:retrying..."))
+     (fn [_val ex] (log/warn "openai::openai-api-complete:retrying..." ex))
      :on-failure
      (fn [_val ex]
        (let [response (:internal-server-error errors)]

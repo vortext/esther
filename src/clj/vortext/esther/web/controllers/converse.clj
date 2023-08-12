@@ -27,7 +27,9 @@
         uid "<user>"
         response (:response answer)
         memory-gid (random-base64)
-        keywords (map (comp csk/->kebab-case str/trim) (get response :keywords []))
+        keywords (map (fn [kw] (csk/->kebab-case (str/trim kw)))
+                      (get response :keywords []))
+        _ (log/debug "converse::remember!" keywords)
         memory {:gid memory-gid
                 :sid (:sid answer)
                 :uid uid
