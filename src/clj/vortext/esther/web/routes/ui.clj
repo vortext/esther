@@ -56,6 +56,7 @@
     [:input#user-input
      {:type "text"
       :autocomplete "off"
+      :minlength 1
       :maxlength 240
       :autofocus "true"
       :placeholder "Dear Esther,"

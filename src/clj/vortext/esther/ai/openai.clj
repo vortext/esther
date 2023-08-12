@@ -5,6 +5,7 @@
    [vortext.esther.util :refer [read-json-value parse-maybe-json]]
    [jsonista.core :as json]
    [cheshire.core :as cheshire]
+   [clojure.edn :as edn]
    [clostache.parser :as template]
    [clojure.pprint :as pprint]
    [diehard.core :as dh]
@@ -26,27 +27,13 @@
     (let [image-prompt (last (map :image_prompt memories))]
       (log/debug "openai::generate-prompt:image-prompt" image-prompt)
       (str
-       "\n # Context description:"
+       "\n # Narrative:"
        "\n## Current scene:\n" image-prompt))
     ""))
 
-(def example-input
-  {:context
-   {:local-time "..."}
-   :msg "I really like sci-fi too! Star Trek is my favorite :D"})
-
-(def example-output
-  {:response
-   "Ah, a fellow fan of science fiction! The genre offers limitless
-    possibilities and sparks our imagination. Are there any specific
-    science fiction books, movies, or TV shows that you've enjoyed? I'd
-    love to hear your recommendations and discuss them with you!",
-   :emoji "🤓",
-   :energy 0.7,
-   :image-prompt
-   "A futuristic cityscape with towering skyscrapers and flying
-    vehicles, depicting the awe-inspiring world of science fiction.",
-   :keywords ["likes:sci-fi" "tv:star-trek"]})
+(def examples
+  (edn/read-string
+   (slurp (io/resource "prompts/scenarios/examples.edn"))))
 
 (defn pretty-json
   [obj]
@@ -54,11 +41,12 @@
 
 (defn generate-prompt
   [memories _msg]
-  (template/render
-   (:initial scenarios)
-   {:current-user-context (current-user-context memories)
-    :example-input (pretty-json example-input)
-    :example-output (pretty-json example-output)}))
+  (let [example (first (shuffle examples))]
+    (template/render
+     (:initial scenarios)
+     {:current-user-context (current-user-context memories)
+      :example-request (pretty-json (:request example))
+      :example-response (pretty-json (:response example))})))
 
 (defn as-role
   [role e]
