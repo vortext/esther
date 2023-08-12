@@ -1,6 +1,7 @@
 (ns vortext.esther.util
   (:require
    [clojure.tools.logging :as log]
+   [cheshire.core :as cheshire]
    [jsonista.core :as json]))
 
 (defn read-json-value
@@ -15,4 +16,6 @@
       (log/warn ["JSON Parsing Error at line " (.getLineNr (.getLocation e))
                  ", column " (.getColumnNr (.getLocation e))
                  ": " e maybe-json])
-      nil)))
+      (try
+        (cheshire/parse-string maybe-json true)
+        (catch Exception _ nil)))))

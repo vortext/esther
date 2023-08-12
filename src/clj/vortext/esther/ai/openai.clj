@@ -15,7 +15,7 @@
 
 (defonce api-key (:openai-api-key (secrets)))
 
-(def prompt (slurp (io/resource "prompts/prompt-gpt3.md")))
+(def base-prompt (slurp (io/resource "prompts/prompt-gpt3.md")))
 
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))
@@ -31,24 +31,17 @@
   [memories _msg]
   (let [scenario :initial
         keywords (get-keywords memories)
-        questions (map :question memories)]
-    (str/join "\n" [prompt
-                    (when (seq memories)
-                      (str
-                       "# About the user"
-                       "\nKeywords about the user: " (str/join ", " keywords)
-                       "\nQuestion about the user: " (str/join "," questions)
-                       (scenario scenarios)))])))
-
-(defn generate-prompt
-  [memories _msg]
-  (let [scenario :initial
-        keywords (get-keywords memories)]
+        image-prompt (last (map :image_prompt memories))
+        parts [base-prompt
+               (when (seq memories)
+                 (str
+                  "# About the user"
+                  "\nKeywords about the user: " (str/join ", " keywords)
+                  "\nCurrent scenery for the user (as image descriptions):" image-prompt))
+               (scenario scenarios)]
+        prompt (str/join "\n" parts)]
     (log/info "openai::generate-prompt:keywords" keywords)
-    (str/join
-     "\n"
-     [prompt
-      (scenario scenarios)])))
+    prompt))
 
 (defn parse-result
   [resp]

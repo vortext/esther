@@ -7,7 +7,7 @@
    [vortext.esther.util :refer [read-json-value]]
    [clojure.string :as str]
    [jsonista.core :as json]
-   ;; [clojure.tools.logging :as log]
+   [clojure.tools.logging :as log]
    ;; [clojure.pprint :as pprint]
    [ring.util.http-response :as http-response]))
 

@@ -25,4 +25,4 @@ select * from memory order by random() limit 5;
 
 -- :name last-10-memories :? :*
 -- :doc Get the last entries (from new to old)
-select content, keywords from memory order by id desc limit 10;
+select content, keywords, image_prompt from memory order by id desc limit 10;
