@@ -48,7 +48,7 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 #6D6866
 #84807E
 #+END_SRC
-** Dominant monochrome
+** Dominant
 #+BEGIN_SRC css
 #EEEEEC
 #DFDEDC
@@ -56,7 +56,7 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 #242323
 #6F6E6C
 #+END_SRC
-** Accents
+** Accent colors
 #+BEGIN_SRC css
 #B52D10
 #EC8050
