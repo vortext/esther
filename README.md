@@ -1,7 +1,9 @@
 # esther
 
 Start a [REPL](#repls) in your editor or terminal of choice.
-
+```
+clj -M:dev:cider
+```
 Start the server with:
 
 ```clojure

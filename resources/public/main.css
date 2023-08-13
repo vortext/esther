@@ -1,41 +1,30 @@
 :root {
-  /* --accent: rgba(0,0,0,0.125);
-  --font-color:  rgb(10,10,10);
-  --background-color: #fafafa; */
   --font-family: "IBM Plex Serif", serif;
-  --font-family-mono:  "IBM Plex Mono", monospace;
-  --accent: rgba(100, 100, 100, 0.2);
-  --font-color: rgb(50, 50, 50);
-  --background-color: #f5f5f5;
+  --font-family-mono: "IBM Plex Mono", monospace;
+  --accent: #6F6E6C; /* Replaced with one of the dominant colors */
+  --font-color: #242323; /* Darker color for text from the dominant palette */
+  --background-color: #EEEEEC; /* Lighter background from the dominant palette */
+  --secondary-color: #6B6A69; /* Secondary color for various elements */
   --font-size-base: 12pt;
+  --subdued-color: #B1B0AE; /* Subdued color from the dominant palette */
+  /* Additional colors based on your sections */
+  --desaturated-color1: #E4E4E2;
+  --desaturated-color2: #2D2D2C;
+  --desaturated-color3: #6D6866;
+  --desaturated-color4: #84807E;
+  --accent-primary: #B52D10; /* Primary accent color */
+  --accent-secondary: #EC8050; /* Secondary accent color */
 }
 
 
-@media (max-width: 768px) {
-  html {
-    margin: 1em;
-    padding-bottom: 3em;
-  }
 
-  #title {
-    font-size: 1.8em;
-  }
-
-  #subtitle {
-    font-size: 0.83em; /* Relative to base font size */
-  }
-
-  #user-input {
-    margin-top: 1em;
-  }
-}
-
+/* Add a subtle texture or gradient to the background to reflect the abstract vibes */
 html {
+  background: var(--background-color) url('texture.png'); /* Add a subtle texture image here */
   color: var(--font-color);
   max-width: 50em;
   margin: 3em auto;
   padding-bottom: 6em;
-  background-color: var(--background-color);
 }
 
 pre, code {
@@ -50,23 +39,42 @@ body {
 #title {
   font-weight: 300;
   text-align: center;
-  text-shadow: var(--accent) 3px 0 5px;
+  color: var(--secondary-color); /* Subtle secondary color for title */
 }
+
 #subtitle {
   font-size: 12pt;
-  color: rgb(100,100,100);
+  color: var(--subdued-color); /* More subdued color from the palette */
   font-weight: lighter;
 }
+
+table {
+  border: 1px solid var(--secondary-color); /* Adjusted table border color */
+}
+
+.memory .request,
+.memory .response {
+  border-bottom: 1px solid var(--accent); /* Using accent color for border */
+}
+
+#user-input {
+  border-bottom: 1px solid var(--accent);
+  color: var(--font-color);
+  background: var(--background-color);
+}
+
+/* Additional styles can be adjusted to include more abstract, mechanical, or industrial elements */
+
 
 table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  background: var(--background-color, #f9f9f9);
-  border: 1px solid var(--font-color, #ddd);
+  background: var(--background-color);
+  border: 1px solid var(--font-color);
 }
 table th {
-  border-bottom: 1px solid var(--font-color, #ddd);
+  border-bottom: 1px solid var(--font-color);
 }
 
 table th,
@@ -81,12 +89,12 @@ table th {
 
 table tr:not(:last-child) th,
 table tr:not(:last-child) td {
-  border-bottom: 1px solid var(--font-color, #ddd);
+  border-bottom: 1px solid var(--font-color);
 }
 
 table tr th:not(:last-child),
 table tr td:not(:last-child) {
-  border-right: 1px solid var(--font-color, #ddd);
+  border-right: 1px solid var(--font-color);
 }
 
 
@@ -215,4 +223,25 @@ table tr td:not(:last-child) {
   50% { transform: translateY(0) scale(0.9); }
   75% { transform: translateY(-5px) scale(1); }
   100% { transform: translateY(0) scale(0.9); }
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  html {
+    margin: 1em;
+    padding-bottom: 3em;
+  }
+
+  #title {
+    font-size: 1.8em;
+  }
+
+  #subtitle {
+    font-size: 0.83em; /* Relative to base font size */
+  }
+
+  #user-input {
+    margin-top: 1em;
+  }
 }
