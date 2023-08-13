@@ -1,16 +1,14 @@
 (ns vortext.esther.ai.openai
   (:require
+   [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
-   [vortext.esther.util :refer [read-json-value parse-maybe-json]]
+   [vortext.esther.util :refer [parse-maybe-json]]
    [jsonista.core :as json]
    [cheshire.core :as cheshire]
    [clostache.parser :as template]
-   [clojure.pprint :as pprint]
    [diehard.core :as dh]
-   [vortext.esther.config :refer [secrets examples errors introductions]]
-   [clojure.string :as str]
-   [clojure.tools.logging :as log]
+   [vortext.esther.config :refer [examples errors introductions]]
    [wkok.openai-clojure.api :as api]))
 
 (def model "gpt-3.5-turbo")
@@ -51,8 +49,6 @@
     memories
     [(first (shuffle (:imagine introductions)))]))
 
-(defonce api-key (:openai-api-key (secrets)))
-
 (defn openai-api-complete
   [model submission]
   (dh/with-retry
@@ -70,7 +66,7 @@
     (let [completion (api/create-chat-completion
                       {:model model
                        :messages submission}
-                      {:api-key api-key})
+                      {:api-key (:openai-api-key (secrets))})
           first-choice ((comp :content :message)
                         (get-in completion [:choices 0]))
           json-obj? (parse-maybe-json first-choice)]
