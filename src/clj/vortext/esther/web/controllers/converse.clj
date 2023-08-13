@@ -23,7 +23,7 @@
 (defn remember!
   [opts answer]
   (let [ ;; {:keys [query-fn]} (utils/route-data request)
-        {:keys [connection query-fn]} opts
+        {:keys [connection query-fn]} (:db opts)
         uid "<user>"
         response (:response answer)
         memory-gid (random-base64)
@@ -46,7 +46,7 @@
 
 (defn complete!
   [uid opts data]
-  (let [{:keys [query-fn]} opts
+  (let [{:keys [query-fn]} (:db opts)
         last-10-memories (contents-as-memories
                           (query-fn :last-n-memories {:uid uid :n 10}))
         last-10-memories (reverse last-10-memories)
@@ -59,13 +59,17 @@
 
 (defn inspect
   [uid opts _data]
-  (let [{:keys [query-fn]} opts
+  (let [{:keys [query-fn]} (:db opts)
         memories (contents-as-memories
                   (query-fn :last-n-memories {:uid uid :n 5}))
-        responses (map (fn [memory]
-                         (let [response (:response memory)]
-                           (assoc response :keywords (clojure.string/join ", " (:keywords response)))))
-                       memories)
+        responses (map
+                   (fn [memory]
+                     (let [response (:response memory)
+                           kw (:keywords response)]
+                       (assoc
+                        response :keywords
+                        (clojure.string/join ", " kw))))
+                   memories)
         ks [:emoji :energy :keywords :image-prompt]]
     (log/debug "converse::inspect")
     {:type :inspect
@@ -73,9 +77,6 @@
      (t/table-str
       (map #(select-keys % ks) responses)
       :style :github-markdown)}))
-
-
-
 
 (defn answer!
   [opts request]
@@ -95,11 +96,5 @@
         (complete! uid opts data))
       (catch Exception _e
         (assoc data :response (:internal-server-error errors))))))
-
-
-(defn converse!
-  [_opts request]
-  (http-response/ok
-   {:todo "FIXME"}))
 
 ;;; Scratch

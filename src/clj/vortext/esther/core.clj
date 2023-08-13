@@ -1,21 +1,21 @@
 (ns vortext.esther.core
   (:require
-    [clojure.tools.logging :as log]
-    [integrant.core :as ig]
-    [vortext.esther.config :as config]
-    [vortext.esther.env :refer [defaults]]
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [vortext.esther.config :as config]
+   [vortext.esther.env :refer [defaults]]
+   [vortext.esther.web.middleware.auth :refer [insert-user!]]
 
-    ;; Edges       
-    [kit.edge.server.undertow]
-    [vortext.esther.web.handler]
+   ;; Edges
+   [kit.edge.server.undertow]
+   [vortext.esther.web.handler]
 
-    ;; Routes
-    [vortext.esther.web.routes.api]
-    
-    [vortext.esther.web.routes.ui] 
-    [kit.edge.utils.nrepl] 
-    [kit.edge.db.sql.conman] 
-    [kit.edge.db.sql.migratus])
+   ;; Routes
+   [vortext.esther.web.routes.api]
+   [vortext.esther.web.routes.ui]
+   [kit.edge.utils.nrepl]
+   [kit.edge.db.sql.conman]
+   [kit.edge.db.sql.migratus])
   (:gen-class))
 
 ;; log uncaught exceptions in threads
@@ -27,6 +27,18 @@
                   :where (str "Uncaught exception on" (.getName thread))}))))
 
 (defonce system (atom nil))
+
+;; Database
+
+(defmethod ig/init-key :dev/init-test-user
+  [_ {:keys [db] :as opts}]
+  (let [username "test"
+        email "test@localhost"
+        password "test"]
+    (when (nil? ((:query-fn db) :find-user-by-username {:username username}))
+      (do
+        (log/warn ":db.sql/init creating user " username " with password " password)
+        (insert-user! opts username email password)))))
 
 (defn stop-app []
   ((or (:stop defaults) (fn [])))

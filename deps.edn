@@ -19,6 +19,7 @@
            metosin/reitit {:mvn/version "0.6.0"}
            ;; Security
            buddy/buddy-core {:mvn/version "1.11.423"}
+           buddy/buddy-hashers {:mvn/version "2.0.167"}
            ;; AI
            net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
            ;; Ring

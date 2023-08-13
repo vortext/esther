@@ -2,6 +2,8 @@
   (:require
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.htmx :refer [ui] :as htmx]
+   [vortext.esther.util.time :as time]
+   [vortext.esther.util.security :refer [random-base64]]
    [markdown.core :as markdown]
    [clojure.tools.logging :as log]))
 
@@ -36,7 +38,7 @@
   [:div.input-form
    [:form
     {:id "message-form"
-     :hx-post "/msg"
+     :hx-post "/ui/msg"
      :hx-swap "beforeend settle:0.25s"
      :hx-boost "true"
      :hx-indicator ".loading-state"
@@ -58,12 +60,20 @@
       :rows 1
       :onkeydown "handleTextareaInput(event);"}]]])
 
-(defn conversation [request]
+(defn conversation [_opts request]
   [:div.container
    [:div#conversation.loading-state
     [:div#history]
     [:div#user-echo
      [:div#user-value {:class "user-message"}]]
-    [:div#loading-response.loading-state
-     loading]
+    [:div#loading-response.loading-state loading]
     (msg-input request)]])
+
+(defn conversation-body
+  [opts request]
+  (let [sid (random-base64 32)]
+    [:body
+     {"data-sid" sid}
+     [:h1#title "Esther"]
+     [:h2#subtitle (time/human-today) "."]
+     (conversation opts request)]))

@@ -109,3 +109,10 @@ navigator.geolocation.getCurrentPosition(
     console.warn('Geolocation error:', error);
   }
 );
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+    // ...
+  });
+
+});

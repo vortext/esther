@@ -40,9 +40,7 @@
            :swagger {:info {:title "vortext.esther API"}}
            :handler (swagger/create-swagger-handler)}}]
    ["/health"
-    {:get (partial health/healthcheck! opts)}]
-   ["/converse"
-    {:post (partial converse/converse! opts)}]])
+    {:get (partial health/healthcheck! opts)}]])
 
 (derive :reitit.routes/api :reitit/routes)
 

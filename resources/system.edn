@@ -36,18 +36,26 @@
  :reitit.routes/api
  {:base-path "/api"
   :env #ig/ref :system/env
-  :connection #ig/ref  :db.sql/connection
-  :query-fn #ig/ref :db.sql/query-fn}
+  :db {:query-fn  #ig/ref :db.sql/query-fn
+       :connection #ig/ref  :db.sql/connection}}
 
- :router/routes
- {:routes #ig/refset :reitit/routes}
+ :dev/init-test-user
+ {:db {:query-fn  #ig/ref :db.sql/query-fn
+       :connection #ig/ref  :db.sql/connection}
+  :depends-on [:db.sql/migrations]}
+
+ :router/routes #profile
+ {:dev
+  {:routes #ig/refset :reitit/routes
+   :depends-on [:dev/init-test-user]}}
 
  :router/core
  {:routes #ig/ref :router/routes}
- :reitit.routes/ui {:base-path "",
-                    :query-fn #ig/ref :db.sql/query-fn
-                    :connection #ig/ref  :db.sql/connection
-                    :env #ig/ref :system/env}
+ :reitit.routes/ui
+ #profile {:dev {:base-path "",
+                 :db {:query-fn  #ig/ref :db.sql/query-fn
+                      :connection #ig/ref  :db.sql/connection}
+                 :env #ig/ref :system/env}}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}
  :db.sql/query-fn {:conn #ig/ref :db.sql/connection,
