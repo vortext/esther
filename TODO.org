@@ -12,6 +12,8 @@
 * DONE better input UI? (textfield, resize, like Signal?)
 * TODO Test infrastructure
 * TODO security / login / hosting
+* TODO input checking and santization
+* TODO refactor memory to only have contents
 * TODO error handling
 * TODO embeddings / memory store
 * TODO better integrate keywords

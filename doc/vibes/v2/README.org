@@ -1,0 +1,42 @@
+[[[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner.png?raw=true)]]]]
+
+* Midjourney 5.2
+abstract circle and circle drawing vector, in the style of industrial futurism, textured splashes, nathan wirth, kinetic installations, destroyed gadgets sculptures, victor pasmore, rectangular fields --ar 128:71
+/describe
+1. abstract black and white illustration created with various spheres
+   and dots, in the style of esteban vicente, nostalgic tone, future
+   tech, david mould, organic forms, muted tones, mechanical designs,
+   dark brown and orange --ar 128:71
+2. abstract abstract circles abstract illustration, in the style of
+   futuristic contraptions, light black and brown, 20 megapixels,
+   stains/washes, color splash, sparse, analytical art --ar 128:71
+3. abstract background of white, black, gray and brown shapes, in the
+   style of martin stranka, industrial and technological subjects,
+   luminous spheres, suehiro maruo, intricate minimalism, abstract and
+   conceptual sketches, mechanical designs --ar 128:71
+4. abstract abstract background with dots on it, in the style of
+   futuristic contraptions, subtle ink wash, 20 megapixels, light
+   black and brown, redshift, innovating techniques, analytical art
+   --ar 128:71
+
+* Colors
+[[[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)]]]]
+** dominant 5
+#+BEGIN_SRC css
+#F3EDE0
+#E6DDCC
+#BAAF9C
+#26231E
+#776C5D
+#+EMD_SRC
+** more colors
+#+BEGIN_SRC css
+#EDE7D8
+#302C26
+#A39783
+#885F4A
+#CABEA9
+#997B5C
+#AFA39C
+#9FA49F
+#+END_SRC

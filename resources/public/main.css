@@ -57,6 +57,39 @@ body {
   color: rgb(100,100,100);
   font-weight: lighter;
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--background-color, #f9f9f9);
+  border: 1px solid var(--font-color, #ddd);
+}
+table th {
+  border-bottom: 1px solid var(--font-color, #ddd);
+}
+
+table th,
+table td {
+  padding: 0.5em;
+  text-align: left;
+}
+
+table th {
+  font-weight: bold;
+}
+
+table tr:not(:last-child) th,
+table tr:not(:last-child) td {
+  border-bottom: 1px solid var(--font-color, #ddd);
+}
+
+table tr th:not(:last-child),
+table tr td:not(:last-child) {
+  border-right: 1px solid var(--font-color, #ddd);
+}
+
+
 .memory .request {
   border-bottom: 1px solid var(--accent);
   padding: 1em 0;
@@ -74,11 +107,6 @@ body {
 }
 .memory .response.inspect {
   font-family: var(--font-family-mono);
-}
-.memory .response.inspect table tr td {
-  border-left: 1px solid var(--font-color);
-  border-top: 1px solid var(--font-color);
-  padding: 0.5em;
 }
 
 .memory .request, .memory .response {
