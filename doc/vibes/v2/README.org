@@ -1,4 +1,4 @@
-[[[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner.png?raw=true)]]]]
+[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner.png?raw=true)]]
 
 * Midjourney 5.2
 abstract circle and circle drawing vector, in the style of industrial futurism, textured splashes, nathan wirth, kinetic installations, destroyed gadgets sculptures, victor pasmore, rectangular fields --ar 128:71
@@ -20,7 +20,8 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
    --ar 128:71
 
 * Colors
-[[[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)]]]]
+[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)]]
+
 ** dominant 5
 #+BEGIN_SRC css
 #F3EDE0
@@ -28,7 +29,7 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 #BAAF9C
 #26231E
 #776C5D
-#+EMD_SRC
+#+END_SRC
 ** more colors
 #+BEGIN_SRC css
 #EDE7D8
