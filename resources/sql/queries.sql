@@ -1,19 +1,13 @@
 -- :name push-memory :! :n
 -- :doc Insert a single memory
-insert into memory (gid, uid, sid, content, emoji, energy, keywords, image_prompt)
-values (:gid, :uid, :sid, :content, :emoji, :energy, :keywords, :image_prompt)
+insert into memory (gid, uid, sid, content)
+values (:gid, :uid, :sid, :content)
 
--- :name last-10-memories :? :*
+-- :name last-n-memories :? :*
 -- :doc Get the last entries (from new to old)
-select gid, content, keywords, image_prompt from memory
+select gid, content from memory
 where uid = :uid
-order by created desc limit 10 ;
-
--- :name inspect-memory
--- :doc Inspects the memory at this point
-select emoji, energy, keywords, image_prompt from memory
-where uid = :uid
-order by created desc limit 5;
+order by created desc limit :n;
 
 -- :name see-keyword :! :1
 -- :doc increments the seen counter of the keyword for uid

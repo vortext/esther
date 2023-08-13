@@ -47,10 +47,9 @@
 
 (defn get-contents-memories
   [memories]
-  (let [real (map (comp read-json-value :content) memories)]
-    (if (seq real)
-      real
-      [(first (shuffle (:imagine introductions)))])))
+  (if (seq memories)
+    memories
+    [(first (shuffle (:imagine introductions)))]))
 
 (defonce api-key (:openai-api-key (secrets)))
 

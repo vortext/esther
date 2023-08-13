@@ -4,12 +4,6 @@ create table memory (
     uid                     text not null,
     sid                     text not null,
     content                 text,
-    emoji                   varchar,
-    energy                  float,
-    keywords                text,
-    image_prompt            text,
-    image_uri               varchar,
-    image_description       text,
     created                 timestamp with time zone default current_timestamp
 );
 --;;

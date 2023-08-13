@@ -33,21 +33,22 @@
         memory {:gid memory-gid
                 :sid (:sid answer)
                 :uid uid
-                :emoji (:emoji response)
-                :energy (get response :energy 0)
-                :content (json/write-value-as-string answer)
-                :keywords (when (seq keywords) (str/join "," keywords))
-                :image_prompt (:image-prompt response)}]
+                :content (json/write-value-as-string answer)}]
     (jdbc/with-transaction [tx connection]
       (query-fn tx :push-memory memory)
       (doall
        (map (fn [kw] (query-fn tx :see-keyword {:uid uid :keyword kw})) keywords)) )
     answer))
 
+(defn contents-as-memories
+  [jsons]
+  (map (comp read-json-value :content) jsons))
+
 (defn complete!
   [uid opts data]
   (let [{:keys [query-fn]} opts
-        last-10-memories (query-fn :last-10-memories {:uid uid})
+        last-10-memories (contents-as-memories
+                          (query-fn :last-n-memories {:uid uid :n 10}))
         last-10-memories (reverse last-10-memories)
         result (openai/complete opts last-10-memories (:request data))]
     (log/debug "converse::complete!")
@@ -55,15 +56,26 @@
      opts
      (assoc data :response result))))
 
+
 (defn inspect
   [uid opts _data]
   (let [{:keys [query-fn]} opts
-        result (query-fn :inspect-memory {:uid uid})
-        result (map #(dissoc % :image-prompt) result)]
+        memories (contents-as-memories
+                  (query-fn :last-n-memories {:uid uid :n 5}))
+        responses (map (fn [memory]
+                         (let [response (:response memory)]
+                           (assoc response :keywords (clojure.string/join ", " (:keywords response)))))
+                       memories)
+        ks [:emoji :energy :keywords :image-prompt]]
     (log/debug "converse::inspect")
     {:type :inspect
      :response
-     (t/table-str result  :style :github-markdown)}))
+     (t/table-str
+      (map #(select-keys % ks) responses)
+      :style :github-markdown)}))
+
+
+
 
 (defn answer!
   [opts request]
