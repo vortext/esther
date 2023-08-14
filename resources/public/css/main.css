@@ -74,3 +74,18 @@ table th {
     margin-top: 1em;
   }
 }
+
+
+button {
+  background: var(--accent-primary);
+  color: var(--background-color);
+  border: none;
+  padding: 10px 20px;
+  font-family: var(--font-family-sans);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent-secondary);
+}

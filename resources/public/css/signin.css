@@ -53,19 +53,6 @@ h1 {
   box-shadow: 0 0 5px var(--accent-primary);
 }
 
-button {
-  background: var(--accent-primary);
-  color: var(--background-color);
-  border: none;
-  padding: 10px 20px;
-  font-family: var(--font-family-sans);
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: var(--accent-secondary);
-}
 .error {
   color: var(--accent-primary);
   font-family: var(--font-family-mono);
