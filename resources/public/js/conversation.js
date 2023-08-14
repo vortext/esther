@@ -44,11 +44,16 @@ function getLocalContext() {
 
 function handleTextareaInput(e) {
   const textarea = e.target;
-
+  var userInput = document.getElementById("user-input").value;
   // If the Enter key is pressed without the Ctrl key
   if (e.key === 'Enter' && !e.ctrlKey) {
     e.preventDefault(); // Prevent the newline
 
+    // Check if the input contains only whitespace
+    if (userInput.trim() === "") {
+      // If only whitespace, prevent the default behavior (submission)
+      return;
+    }
     // Trigger the submit event for HTMX
     const form = document.getElementById('message-form');
     const event = new Event('submit', {
@@ -56,6 +61,8 @@ function handleTextareaInput(e) {
       'cancelable': true
     });
     form.dispatchEvent(event);
+    textarea.style.height = 'auto'; // Reset height
+
     return;
   }
 
