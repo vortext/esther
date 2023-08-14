@@ -9,20 +9,25 @@
 * TODO /imagine command
 * DONE styling according to style vibes
 * TODO user flow (just use sqllite)
+* TODO vibes for login page
+* TODO logout functionality
+* TODO refactor memory and login/auth controllers
+* TODO multi user?
+- security (encrypt contents and keywords)
+- add vault to user
+- more information in session
 * TODO hook up StableDiffusion
 * TODO integrate image describe into memory context
 * DONE better input UI? (textfield, resize, like Signal?)
 * TODO Test infrastructure
 * DONE just slurp the secrets.edn file and get rid of the rest (secrets.clj)
-* TODO security / login / hosting
-* TODO input checking and santization
+* TODO security and hosting
+* TODO input checking and santization (also chatgpt)
 * DONE refactor memory to only have contents
 * DONE error handling
 * TODO embeddings / memory store
 * TODO better integrate keywords in narrative
 * DONE geoip for time of day?
-* TODO multi user?
-- security (encrypt contents and keywords)
 * TODO better intro flow
 * TODO app? legal, ethics, billing, subscriptions, etc.
 * DONE maybe bouncing ball energy for loading?
