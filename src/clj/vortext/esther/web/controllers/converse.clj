@@ -4,11 +4,11 @@
    [vortext.esther.web.middleware.auth :as auth]
    [vortext.esther.config :refer [errors]]
    [camel-snake-kebab.core :as csk]
+   [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.signin :as signin]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.util.security :refer [random-base64]]
    [vortext.esther.util :refer [read-json-value]]
-   [vortext.esther.config :refer [errors]]
    [clojure.string :as str]
    [next.jdbc :as jdbc]
    [jsonista.core :as json]
@@ -23,23 +23,11 @@
 
 (defn remember!
   [opts uid sid answer]
-  (let [ ;; {:keys [query-fn]} (utils/route-data request)
-        {:keys [connection query-fn]} (:db opts)
-        response (:response answer)
-        gid (random-base64)
+  (let [response (:response answer)
         keywords (map (fn [kw] (csk/->kebab-case (str/trim kw)))
                       (get response :keywords []))
-        _ (log/debug "converse::remember![gid,sid,keywords]"
-                     gid sid keywords)
-        memory {:gid gid
-                :sid sid
-                :uid uid
-                :content (json/write-value-as-string answer)}]
-    (jdbc/with-transaction [tx connection]
-      (query-fn tx :push-memory memory)
-      (doall
-       (map (fn [kw] (query-fn tx :see-keyword {:uid uid :keyword kw})) keywords)) )
-    answer))
+        _ (log/debug "converse::remember![gid,sid,keywords]" sid keywords)]
+    (memory/remember! opts uid sid answer keywords)))
 
 (defn contents-as-memories
   [jsons]
@@ -48,9 +36,7 @@
 (defn complete!
   [opts uid sid data]
   (try
-    (let [{:keys [query-fn]} (:db opts)
-          last-10-memories (contents-as-memories
-                            (query-fn :last-n-memories {:uid uid :n 10}))
+    (let [last-10-memories (memory/last-memories opts uid)
           last-10-memories (reverse last-10-memories)
           result (openai/complete opts last-10-memories (:request data))
           answer (-> data
@@ -64,9 +50,7 @@
 
 (defn inspect
   [opts uid _sid _data]
-  (let [{:keys [query-fn]} (:db opts)
-        memories (contents-as-memories
-                  (query-fn :last-n-memories {:uid uid :n 5}))
+  (let [memories (memory/last-memories opts uid 5)
         responses (map
                    (fn [memory]
                      (let [response (:response memory)
