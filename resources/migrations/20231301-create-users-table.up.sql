@@ -3,6 +3,7 @@ create table users (
     username text not null unique,
     password_hash text not null,
     vault text not null default "",
+    email text default "NA",
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp
 );
