@@ -1,9 +1,12 @@
 (ns vortext.esther.web.routes.ui
   (:require
    [clojure.tools.logging :as log]
+   [ring.util.response :as response]
+   [jsonista.core :as json]
    [vortext.esther.web.middleware.exception :as exception]
    [vortext.esther.web.middleware.formats :as formats]
    [vortext.esther.web.middleware.auth :as auth]
+   [vortext.esther.util.security :refer [random-base64]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.web.ui.conversation :as conversation]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
@@ -12,91 +15,97 @@
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]))
 
+(def default-location "/converse")
+
 (def ibm-plex "IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;1,400;1,500&display=swap")
 
 (defn font-link [font-param]
   [:link {:rel "stylesheet" :href (str "https://fonts.googleapis.com/css2?family=" font-param)}])
 
-(defn head-section [maybe-user]
+(defn json-config
+  []
+  [:script {:type "text/javascript"}
+   (str "window.estherConfig = "
+        (json/write-value-as-string
+         {"defaultLocation" default-location}) ";")])
+
+(defn head-section [scripts]
   [:head
-   (concat
-    [[:meta {:charset "UTF-8"}]
-     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-     [:title "Esther"]
+   [:meta {:charset "UTF-8"}]
+   [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+   [:title "Esther"]
+   (json-config)
+   [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
+   [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
+   ;; Fonts
+   (font-link ibm-plex)
+   [:link {:rel "stylesheet" :href "resources/public/main.css"}]
 
-     [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
-     [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
-     ;; Fonts
-     (font-link ibm-plex)
-     [:link {:rel "stylesheet" :href "resources/public/main.css"}]]
+   [:script {:src "https://unpkg.com/htmx.org@1.9.4"
+             :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+             :crossorigin "anonymous"}]
 
-    ;; Scripts
-    (if maybe-user
-      [[:script {:src "https://unpkg.com/htmx.org@1.9.4"
-                 :integrity "sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
-                 :crossorigin "anonymous"}]
-       [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"}]
-       [:script {:src "resources/public/js/main.js"}]]
-      []))])
+   ;; Scripts
+   (concat scripts)])
+
 
 (defn sign-in
   [error-message]
-  [:form {:hx-post "/login" :hx-swap "outerHTML"}
-   (when error-message
-     [:div.error error-message])
-   [:label "Username: "
-    [:input {:type "text" :name "username"}]]
-   [:label "Password: "
-    [:input {:type "password" :name "password"}]]
-   [:button "Sign In"]])
-
-(defn content [opts _user request]
-  (conversation/conversation-body opts request))
-
-#_(defn login-handler [opts request]
-    (if-let [token (auth/auth-handler opts request)]
-      (do (log/info "auth-handler" token (keys opts) (keys request))
-          (-> (ui (content opts request))
-              (assoc :headers {"Authorization" (str "Bearer " token)})))
-
-      (ui (sign-in "Invalid credentials"))))
-
-;; Semantic response helpers
-(defn ok [d] {:status 200 :body d})
-(defn bad-request [d] {:status 400 :body d})
+  (page
+   (head-section
+    [[:script {:src "resources/public/js/login.js"}]])
+   [:form {:action "/login"
+           :method "POST"}
+    (when error-message
+      [:div.error error-message])
+    [:label "Username: "
+     [:input {:type "text" :name "username"}]]
+    [:label "Password: "
+     [:input {:type "password" :name "password"}]]
+    [:button "Sign In"]]))
 
 
 (defn login-handler [opts request]
-  (if-let [user (auth/auth-handler opts request)]
-    (do (log/info "auth-handler" user (keys opts) (keys request))
-        (-> (ui (content opts user request))
-            (assoc-in [:session :identity] user))) ; Use :identity key
-    (ui (sign-in "Invalid credentials"))))
+  (if-let [uid (auth/authenticate opts request)]
+    (do (log/info "authenticate uid " uid "redirecting to " default-location)
+        {:status 303
+         :session {:identity uid}
+         :headers {"Location" default-location}})
+    (sign-in "Invalid credentials")))
 
 
-(defn home [opts request]
-  (let [maybe-user (get-in request [:session :identity])]
-    (log/debug "maybe" maybe-user)
-    (page
-     (head-section maybe-user)
-     (if maybe-user
-       (content opts maybe-user request)
-       (sign-in nil)))))
 
+(defn display-page [page-html-fn opts request]
+  (->
+   (page
+    (head-section
+     [[:script {:src "https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"}]
+      [:script {:src "resources/public/js/main.js"}]])
+    (page-html-fn opts request))
+   (assoc-in [:session :sid] (random-base64 32))))
 
 ;; Routes
 (defn ui-routes [opts]
-  [["/" {:get (partial home opts)}]
-   ["/login" {:post (partial login-handler opts)}]
-   ["/ui/msg" {:post (partial conversation/message opts)}]])
+  [["/" {:get (fn [req] (if (auth/authenticated? req)
+                         (response/redirect default-location)
+                         (response/redirect "/login")))}]
+   ["/login"
+    {:post (partial login-handler opts)
+     :get (fn [_] (sign-in nil))}]
+   ["/converse"
+    {:get
+     (fn [req]
+       (display-page conversation/conversation-body opts req))}]
+   ["/converse/msg"
+    {:post (partial conversation/message opts)}]])
 
 
 (defn on-error
-  [request value]
-  {:status 403
-   :headers {}
-   :body "Not authorized"})
-
+  [_ _]
+  (log/warn "Redirecting to login")
+  {:status 303
+   :headers {"Location" "/login"}
+   :body "Redirecting to login"})
 
 (defn any-access [_] true)
 
@@ -104,7 +113,9 @@
                     :handler any-access}
                    {:pattern #"^/login$"
                     :handler any-access}
-                   {:pattern #"^/ui/.*"
+                   {:pattern #"^/converse"
+                    :handler auth/authenticated-access}
+                   {:pattern #"^/converse/*"
                     :handler auth/authenticated-access}])
 
 
@@ -122,9 +133,7 @@
     [wrap-access-rules {:rules access-rules
                         :on-error on-error}]
     [wrap-authorization auth/auth-backend]
-    [wrap-authentication auth/auth-backend]
-
-    ]})
+    [wrap-authentication auth/auth-backend]]})
 
 (derive :reitit.routes/ui :reitit/routes)
 
