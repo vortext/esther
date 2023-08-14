@@ -1,12 +1,12 @@
 (ns vortext.esther.ai.openai
   (:require
+   [vortext.esther.util.mustache :as mustache]
    [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
    [vortext.esther.util :refer [parse-maybe-json]]
    [jsonista.core :as json]
    [cheshire.core :as cheshire]
-   [clostache.parser :as template]
    [diehard.core :as dh]
    [vortext.esther.config :refer [examples errors introductions]]
    [wkok.openai-clojure.api :as api]))
@@ -24,7 +24,7 @@
 (defn generate-prompt
   [_memories _msg]
   (let [example (first (shuffle examples))]
-    (template/render
+    (mustache/render
      (:initial scenarios)
      {:example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
@@ -73,7 +73,7 @@
       (if json-obj? json-obj? (:json-parse-error errors)))))
 
 (defn complete
-  [opts memories request]
+  [_ memories request]
   (let [prompt (generate-prompt memories request)
         _ (log/trace "openai::chat-completion:prompt" prompt)
         _ (log/trace "openai::chat-completion:request" request)

@@ -14,7 +14,6 @@
            metosin/jsonista {:mvn/version "0.3.7"}
 
            camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
-           de.ubercode.clostache/clostache {:mvn/version "1.4.0"}
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
            ;; Security
