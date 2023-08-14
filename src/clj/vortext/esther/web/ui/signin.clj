@@ -1,10 +1,16 @@
 (ns vortext.esther.web.ui.signin
   (:require
    [clojure.tools.logging :as log]
+   [markdown.core :as markdown]
    [vortext.esther.web.ui.common :as common]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.web.middleware.auth :refer [authenticate authenticated?]]))
 
+(defn logout-chat
+  [_]
+  [:form {:action "/logout" :method :post}
+   [:button {:name "logout" :value -1} "Click to logout"]]
+  )
 
 (defn render
   [{:keys [default-path]} request error-message]

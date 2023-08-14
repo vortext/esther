@@ -3,6 +3,7 @@
    [vortext.esther.util.time :refer [unix-ts]]
    [vortext.esther.web.middleware.auth :as auth]
    [camel-snake-kebab.core :as csk]
+   [vortext.esther.web.ui.signin :as signin]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.util.security :refer [random-base64]]
    [vortext.esther.util :refer [read-json-value]]
@@ -51,7 +52,9 @@
         last-10-memories (reverse last-10-memories)
         result (openai/complete opts last-10-memories (:request data))]
     (log/debug "converse::complete!" uid sid)
-    (remember! opts uid sid (assoc data :response result))))
+    (remember! opts uid sid (assoc data
+                                   :response result
+                                   :type :md-serif))))
 
 
 (defn inspect
@@ -69,11 +72,30 @@
                    memories)
         ks [:emoji :energy :keywords :image-prompt]]
     (log/debug "converse::inspect")
-    {:type :inspect
+    {:type :md-mono
      :response
      (t/table-str
       (map #(select-keys % ks) responses)
       :style :github-markdown)}))
+
+(defn logout
+  [_opts _uid _sid {:keys [request]}]
+  {:type :htmx
+   :response (signin/logout-chat request)})
+
+
+(defn split-first-word [s]
+  (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
+    [first-word (or rest "")]))
+
+(defn command
+  [opts uid sid data]
+  (let [[cmd _msg] (split-first-word
+                    (apply str (rest (:command? data))))
+
+        impl {:inspect inspect
+              :logout logout}]
+    (((keyword cmd) impl) opts uid sid data)))
 
 (defn answer!
   [opts request]
@@ -82,13 +104,17 @@
         sid (:sid params)
         context (get-context request)
         request-with-context (assoc params :context context)
+        msg-params (:msg params)
+        command? (str/starts-with? msg-params "/")
         data {:request request-with-context
-              :ts (unix-ts)}
-        command? (str/starts-with? (:msg params) "/")]
-    (log/debug "converse::answer!")
+              :ts (unix-ts)}]
+    (log/info "command?" command? msg-params)
     (try
       (if command?
-        (assoc data :response (inspect opts uid sid data))
+        (assoc
+         data :response
+         (command opts uid sid (assoc data :command? msg-params)))
+        ;; Converse
         (complete! opts uid sid data))
       (catch Exception e
         (do (log/warn e)

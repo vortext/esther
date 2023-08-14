@@ -32,7 +32,7 @@
 .memory .response {
   padding: 1em 0;
 }
-.memory .response.inspect {
+.memory .response.md-mono {
   font-family: var(--font-family-mono);
 }
 

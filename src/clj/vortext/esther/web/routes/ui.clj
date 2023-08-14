@@ -5,7 +5,6 @@
    [vortext.esther.web.middleware.exception :as exception]
    [vortext.esther.web.middleware.formats :as formats]
    [vortext.esther.web.middleware.auth :as auth]
-
    [vortext.esther.web.ui.conversation :as conversation]
    [vortext.esther.web.ui.signin :as signin]
 
@@ -26,6 +25,12 @@
    ["/signin"
     {:post (partial signin/handler opts)
      :get (fn [req] (signin/render opts req nil))}]
+   ["/logout"
+    {:post
+     (fn [_]
+       {:status 303
+        :session {:identity nil}
+        :headers {"Location" "/"}})}]
    ["/user/conversation"
     {:get (partial conversation/render opts)
      :post (partial conversation/message opts)}]])
@@ -44,6 +49,8 @@
                     :handler any-access}
                    {:pattern #"^/signin$"
                     :handler any-access}
+                   {:pattern #"^/logout$"
+                    :handler auth/authenticated-access}
                    {:pattern #"^/user/.*"
                     :handler auth/authenticated-access}])
 

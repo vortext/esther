@@ -16,25 +16,28 @@
     [:div.second]
     [:div.third]]])
 
-(defn markdown->html [md-text]
-  (markdown/md-to-html-string md-text))
-
 (defn message [opts request]
   (let [sid (get-in request [:params :sid])
-        _ (log/debug "ui::mesage:sid" sid)
+        _ (log/debug "ui::message:sid" sid)
         response (:response (converse/answer! opts request))
-        _ (log/debug "ui::mesage:response" response)
-        energy (:energy response)
-        response-type (get response :type :esther)
-        response-msg (:response response)
-        md-response (markdown->html response-msg)
-        md-request (markdown->html (get-in request [:params :msg]))]
-    (->
-     (ui
-      [:div.memory
-       {"data-energy" energy}
-       [:div.request md-request]
-       [:div.response {:class (name response-type)} md-response]]))))
+        _ (log/debug "ui::message:response" response)
+        {:keys [energy type response]} response
+        _ (log/debug "ui::message:type" type)
+        result
+        (case type
+          :md-mono ( markdown/md-to-html-string response)
+          :md-sans (markdown/md-to-html-string response)
+          :md-serif (markdown/md-to-html-string response)
+          :htmx response
+          :else [:pre (str response)])
+
+        md-request (markdown/md-to-html-string
+                    (get-in request [:params :msg]))]
+    (ui
+     [:div.memory
+      {"data-energy" energy}
+      [:div.request md-request]
+      [:div.response {:class (name type)} result]])))
 
 
 (defn msg-input [_request]
