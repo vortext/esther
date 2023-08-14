@@ -43,8 +43,9 @@
            io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}
            org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
            buddy/buddy-auth {:mvn/version "3.0.323"}}
- :aliases {:build {:deps {io.github.clojure/tools.build {:git/sha "e3e3532"
-                                                         :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
+ :aliases {:build {:deps {io.github.clojure/tools.build
+                          {:git/sha "e3e3532"
+                           :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
                    :ns-default build}
 
 
@@ -63,7 +64,7 @@
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}
            :cider {:extra-deps {nrepl/nrepl       {:mvn/version "0.9.0"}
-                                cider/cider-nrepl {:mvn/version "0.32.0-alpha3"}}
+                                cider/cider-nrepl {:mvn/version "0.35.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]" "-i"]}
 
            :test {:extra-deps  {criterium/criterium                  {:mvn/version "0.4.6"}
