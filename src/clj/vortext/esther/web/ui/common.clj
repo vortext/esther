@@ -31,10 +31,10 @@
    (font-link ibm-plex)
 
    ;; Styles
-   [:link {:rel "stylesheet" :href "resources/public/css/main.css"}]
+   [:link {:rel "stylesheet" :href "/resources/public/css/main.css"}]
    (concat styles)
 
-   [:script {:src "resources/public/js/vendor/htmx.min.js"}]
+   [:script {:src "/resources/public/js/vendor/htmx.min.js"}]
 
    ;; Scripts
    (concat scripts)])

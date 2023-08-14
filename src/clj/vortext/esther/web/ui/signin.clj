@@ -14,15 +14,15 @@
     (page
      (common/head
       {}
-      [[:link {:rel "stylesheet" :href "resources/public/css/signin.css"}]]
-      [[:script {:src "resources/public/js/signin.js"}]])
+      [[:link {:rel "stylesheet" :href "/resources/public/css/signin.css"}]]
+      [[:script {:src "/resources/public/js/signin.js"}]])
      [:body
       [:div.container
        [:div.login-box
         [:h1 "Esther"]
         (when error-message
           [:div.error error-message])
-        [:form {:action "/login" :method "POST"}
+        [:form {:action "/signin" :method "POST"}
          [:div.form-group
           [:label "Username: "
            [:input {:type "text" :name "username" :class "form-input"}]]]
@@ -32,7 +32,7 @@
          [:button "Sign In"]]]]])))
 
 
-(defn login-handler [{:keys [default-path] :as opts} request]
+(defn handler [{:keys [default-path] :as opts} request]
   (if-let [uid (authenticate opts request)]
     (do (log/info "authenticate uid " uid "redirecting to " default-path)
         {:status 303

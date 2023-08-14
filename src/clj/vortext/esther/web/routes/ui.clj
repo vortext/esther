@@ -18,33 +18,33 @@
 
 ;; Routes
 (defn ui-routes [opts]
-  [["/" {:get (fn [req] (if (auth/authenticated? req)
-                         (response/redirect (:default-path opts))
-                         (signin/render opts req nil)))}]
-   ["/login"
-    {:post (partial signin/login-handler opts)
+  [["/" {:get
+         (fn [req]
+           (if (auth/authenticated? req)
+             (response/redirect (:default-path opts))
+             (signin/render opts req nil)))}]
+   ["/signin"
+    {:post (partial signin/handler opts)
      :get (fn [req] (signin/render opts req nil))}]
-   ["/converse"
-    {:get (partial conversation/render opts)}]
-   ["/converse/msg"
-    {:post (partial conversation/message opts)}]])
-
+   ["/user/conversation"
+    {:get (partial conversation/render opts)
+     :post (partial conversation/message opts)}]])
 
 (defn on-error
   [req _]
   (log/warn
    "access-rules on-error" " session:" (:session req))
   {:status 303
-   :headers {"Location" "/login"}
-   :body "Redirecting to login"})
+   :headers {"Location" "/signin"}
+   :body "Redirecting to signin"})
 
 (defn any-access [_] true)
 
 (def access-rules [{:pattern #"/$"
                     :handler any-access}
-                   {:pattern #"^/login$"
+                   {:pattern #"^/signin$"
                     :handler any-access}
-                   {:pattern #"^/converse.*"
+                   {:pattern #"^/user/.*"
                     :handler auth/authenticated-access}])
 
 

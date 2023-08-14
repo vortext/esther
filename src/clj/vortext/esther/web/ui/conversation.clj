@@ -41,7 +41,7 @@
   [:div.input-form
    [:form
     {:id "message-form"
-     :hx-post "/converse/msg"
+     :hx-post "/user/conversation"
      :hx-swap "beforeend settle:0.25s"
      :hx-boost "true"
      :hx-indicator ".loading-state"
@@ -81,9 +81,9 @@
     (page
      (common/head
       {:sid sid}
-      [[:link {:rel "stylesheet" :href "resources/public/css/conversation.css"}]]
-      [[:script {:src "resources/public/js/vendor/suncalc.min.js"}]
-       [:script {:src "resources/public/js/conversation.js"}]])
+      [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
+      [[:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
+       [:script {:src "/resources/public/js/conversation.js"}]])
      [:body
       [:div#container
        [:h1#title "Esther"]
