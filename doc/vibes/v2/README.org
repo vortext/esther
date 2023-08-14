@@ -1,6 +1,6 @@
 [[https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner.png?raw=true)]]
 
-* Midjourney 5.2
+* Vibes
 abstract circle and circle drawing vector, in the style of industrial futurism, textured splashes, nathan wirth, kinetic installations, destroyed gadgets sculptures, victor pasmore, rectangular fields --ar 128:71
 /describe
 1. abstract black and white illustration created with various spheres

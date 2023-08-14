@@ -85,6 +85,7 @@
       [[:script {:src "resources/public/js/vendor/suncalc.min.js"}]
        [:script {:src "resources/public/js/conversation.js"}]])
      [:body
-      [:h1#title "Esther"]
-      [:h2#subtitle (time/human-today) "."]
-      (conversation opts request)])))
+      [:div#container
+       [:h1#title "Esther"]
+       [:h2#subtitle (time/human-today) "."]
+       (conversation opts request)]])))

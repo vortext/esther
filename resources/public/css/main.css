@@ -1,6 +1,7 @@
 :root {
   --font-family: "IBM Plex Serif", serif;
   --font-family-mono: "IBM Plex Mono", monospace;
+  --font-family-sans: "IBM Plex Sans", sans;
   --accent: #6F6E6C; /* Replaced with one of the dominant colors */
   --font-color: #242323; /* Darker color for text from the dominant palette */
   --background-color: #EEEEEC; /* Lighter background from the dominant palette */
@@ -16,13 +17,20 @@
   --accent-secondary: #EC8050; /* Secondary accent color */
 }
 
-/* Add a subtle texture or gradient to the background to reflect the abstract vibes */
+* {
+  box-sizing: border-box; /* Apply box-sizing to all elements */
+}
+
 html {
-  background: var(--background-color) url('texture.png'); /* Add a subtle texture image here */
+  background: var(--background-color);
   color: var(--font-color);
-  max-width: 50em;
-  margin: 3em auto;
-  padding-bottom: 6em;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  margin: 0;
+  padding: 0;
 }
 
 pre, code {
@@ -32,18 +40,6 @@ pre, code {
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
-}
-
-#title {
-  font-weight: 300;
-  text-align: center;
-  color: var(--secondary-color); /* Subtle secondary color for title */
-}
-
-#subtitle {
-  font-size: 12pt;
-  color: var(--subdued-color); /* More subdued color from the palette */
-  font-weight: lighter;
 }
 
 table {

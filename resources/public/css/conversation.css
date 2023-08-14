@@ -1,3 +1,20 @@
+#container {
+  max-width: 50em;
+  margin: 3em auto;
+  padding-bottom: 6em;
+}
+#title {
+  font-weight: 300;
+  text-align: center;
+  color: var(--secondary-color); /* Subtle secondary color for title */
+}
+
+#subtitle {
+  font-size: 12pt;
+  color: var(--subdued-color); /* More subdued color from the palette */
+  font-weight: lighter;
+}
+
 .memory .request,
 .memory .response {
   border-bottom: 1px solid var(--subdued-color);

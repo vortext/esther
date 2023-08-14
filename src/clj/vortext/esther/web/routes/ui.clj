@@ -20,7 +20,7 @@
 (defn ui-routes [opts]
   [["/" {:get (fn [req] (if (auth/authenticated? req)
                          (response/redirect (:default-path opts))
-                         (response/redirect "/login")))}]
+                         (signin/render opts req nil)))}]
    ["/login"
     {:post (partial signin/login-handler opts)
      :get (fn [req] (signin/render opts req nil))}]

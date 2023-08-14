@@ -1,0 +1,65 @@
+/* Login Box Styles */
+
+html { /* or html */
+  background-image: url("/resources/public/img/background.png");
+  background-size: cover; /* instead of contain */
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* optional: makes background fixed during scroll */
+  margin: 0; /* optional: remove default margin */
+}
+
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-box {
+  width: 300px;
+  background: var(--background-color);
+  border-radius: 5px;
+  box-shadow: 0 4px 6px var(--desaturated-color3);
+  padding: 2em;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1em;
+}
+h1 {
+  font-weight: 300;
+  text-align: center;
+  color: var(--secondary-color);
+}
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--desaturated-color2);
+  border-radius: 5px;
+  background: var(--desaturated-color1);
+  transition: all 0.3s ease;
+  margin-top: 0.5em;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 5px var(--accent-primary);
+}
+
+button {
+  background: var(--accent-primary);
+  color: var(--background-color);
+  border: none;
+  padding: 10px 20px;
+  font-family: var(--font-family-sans);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--accent-secondary);
+}
