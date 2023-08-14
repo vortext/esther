@@ -42,19 +42,18 @@ pre, code {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--background-color);
-  border: 1px solid var(--subdued-color);
+  border: 1px solid var(--font-color);
 }
 
 table th, table td {
   padding: 0.5em;
   text-align: left;
-  border-bottom: 1px solid var(--subdued-color);
+  border-bottom: 1px solid var(--font-color);
+  border-right: 1px solid var(--font-color);
 }
 
 table th {
   font-weight: bold;
-  border-bottom: 2px solid var(--subdued-color);
 }
 
 /* Responsive */
