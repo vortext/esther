@@ -37,3 +37,6 @@ Note that this alias runs nREPL during development. To run nREPL in production (
 Run `clj -M:dev:nrepl` or `make repl`.
 
 Note that, just like with [CIDER](#cider), this alias runs nREPL during development. To run nREPL in production (typically when the system starts), use the kit-nrepl library through the +nrepl profile as described in [the documentation](https://kit-clj.github.io/docs/profiles.html#profiles).
+
+### Useful
+browser-sync start --proxy http://localhost:3000 --files="**/*"

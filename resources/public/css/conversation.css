@@ -1,5 +1,8 @@
+.memory .request,
+.memory .response {
+  border-bottom: 1px solid var(--subdued-color);
+}
 .memory .request {
-  border-bottom: 1px solid var(--accent);
   padding: 1em 0;
 }
 .memory .request p {
@@ -10,7 +13,6 @@
   margin-bottom: 0;
 }
 .memory .response {
-  border-bottom: 1px solid var(--accent);
   padding: 1em 0;
 }
 .memory .response.inspect {
@@ -23,7 +25,7 @@
 }
 
 #user-value {
-  border-bottom: 1px solid var(--accent);
+  border-bottom: 1px solid var(--subdued-color);
   padding: 1em 0;
 }
 #loading-response {
