@@ -2,7 +2,7 @@ create table users (
     uid varchar primary key,
     username text not null unique,
     password_hash text not null,
-    email text not null unique,
+    vault text not null default "";
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp
 );
