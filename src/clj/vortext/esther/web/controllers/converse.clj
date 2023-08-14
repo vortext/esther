@@ -2,6 +2,7 @@
   (:require
    [vortext.esther.util.time :refer [unix-ts]]
    [vortext.esther.web.middleware.auth :as auth]
+   [vortext.esther.config :refer [errors]]
    [camel-snake-kebab.core :as csk]
    [vortext.esther.web.ui.signin :as signin]
    [vortext.esther.ai.openai :as openai]
@@ -46,15 +47,19 @@
 
 (defn complete!
   [opts uid sid data]
-  (let [{:keys [query-fn]} (:db opts)
-        last-10-memories (contents-as-memories
-                          (query-fn :last-n-memories {:uid uid :n 10}))
-        last-10-memories (reverse last-10-memories)
-        result (openai/complete opts last-10-memories (:request data))]
-    (log/debug "converse::complete!" uid sid)
-    (remember! opts uid sid (assoc data
-                                   :response result
-                                   :type :md-serif))))
+  (try
+    (let [{:keys [query-fn]} (:db opts)
+          last-10-memories (contents-as-memories
+                            (query-fn :last-n-memories {:uid uid :n 10}))
+          last-10-memories (reverse last-10-memories)
+          result (openai/complete opts last-10-memories (:request data))
+          answer (-> data
+                     (assoc :response
+                            (assoc result :type :md-serif)))]
+      (log/debug "converse::complete!" uid sid answer)
+      (remember! opts uid sid answer))
+    (catch Exception e (log/warn "converse:complete" e)
+           (:internal-server-error errors))))
 
 
 (defn inspect
