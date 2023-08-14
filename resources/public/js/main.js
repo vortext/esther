@@ -15,11 +15,8 @@ function getSentimentEnergy() {
   return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
 }
 
-function getTimeOfDay() {
+function getTimeOfDay(latitude, longitude) {
   const date = new Date();
-
-  const latitude = window.latitude;
-  const longitude = window.longitude ;
 
   const times = SunCalc.getTimes(date, latitude, longitude);
 
@@ -40,7 +37,8 @@ function getTimeOfDay() {
 
 function getLocalContext() {
   return {
-    "time-of-day": getTimeOfDay()
+    "time-of-day": getTimeOfDay(window.appConfig.latitude,
+                                window.appConfig.longitude)
   };
 }
 
@@ -95,8 +93,8 @@ function afterConverseRequest() {
 }
 
 function setPosition(lat, lon) {
-  window.latitude = lat;
-  window.longitude = lon;
+  window.appConfig.latitude = lat;
+  window.appConfig.longitude = lon;
 }
 
 // Geolocation Handling
@@ -111,8 +109,8 @@ navigator.geolocation.getCurrentPosition(
 );
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.body.addEventListener('htmx:afterOnLoad', function(evt) {
-    // ...
+  var sidElements = document.querySelectorAll('.session-sid');
+  sidElements.forEach(function(element) {
+    element.value = window.appConfig.sid;
   });
-
 });

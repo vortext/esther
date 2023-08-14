@@ -33,6 +33,7 @@
   ([opts username password]
    (let [query-fn (get-in opts [:db :query-fn])
          user (query-fn :find-user-by-username {:username username})]
+     (log/info "authenticate:user" user)
      (if (and username password (hashers/check password (:password_hash user)))
        (:uid user) nil))))
 
@@ -45,5 +46,6 @@
 (defn authenticated-access
   "Check if request coming in is authenticated with user/password "
   [request]
+  (log/info "authenticated-access:session" (:session request))
   (let [valid? (authenticated? request)]
-    (if valid? true (error "Unauthenticated"))))
+    (if valid? true (error "unauthenticated"))))

@@ -18,19 +18,21 @@
   (markdown/md-to-html-string md-text))
 
 (defn message [opts request]
-  (let [response (converse/answer! opts request)
+  (let [sid (get-in request [:params :sid])
+        _ (log/debug "ui::mesage:sid" sid)
+        response (:response (converse/answer! opts request))
         _ (log/debug "ui::mesage:response" response)
-        _ (log/debug "ui::mesage:response" response)
-        energy (get-in response [:response :energy])
-        response-type (get-in response [:response :type] :esther)
-        response-msg (get-in response [:response :response])
+        energy (:energy response)
+        response-type (get response :type :esther)
+        response-msg (:response response)
         md-response (markdown->html response-msg)
         md-request (markdown->html (get-in request [:params :msg]))]
-    (ui
-     [:div.memory
-      {"data-energy" energy}
-      [:div.request md-request]
-      [:div.response {:class (name response-type)} md-response]])))
+    (->
+     (ui
+      [:div.memory
+       {"data-energy" energy}
+       [:div.request md-request]
+       [:div.response {:class (name response-type)} md-response]]))))
 
 
 (defn msg-input [_request]
@@ -49,6 +51,10 @@
      {:type "hidden"
       :name "context"
       :value "{}"}]
+    [:input.session-sid
+     {:type "hidden"
+      :name "sid"
+      :value ""}]
     [:textarea#user-input
      {:autocomplete "off"
       :minlength 1

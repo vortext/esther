@@ -24,11 +24,12 @@
   (let [ ;; {:keys [query-fn]} (utils/route-data request)
         {:keys [connection query-fn]} (:db opts)
         response (:response answer)
-        memory-gid (random-base64)
+        gid (random-base64)
         keywords (map (fn [kw] (csk/->kebab-case (str/trim kw)))
                       (get response :keywords []))
-        _ (log/debug "converse::remember!" keywords)
-        memory {:gid memory-gid
+        _ (log/debug "converse::remember![gid,sid,keywords]"
+                     gid sid keywords)
+        memory {:gid gid
                 :sid sid
                 :uid uid
                 :content (json/write-value-as-string answer)}]
@@ -49,7 +50,7 @@
                           (query-fn :last-n-memories {:uid uid :n 10}))
         last-10-memories (reverse last-10-memories)
         result (openai/complete opts last-10-memories (:request data))]
-    (log/debug "converse::complete!")
+    (log/debug "converse::complete!" uid sid)
     (remember! opts uid sid (assoc data :response result))))
 
 
@@ -78,7 +79,7 @@
   [opts request]
   (let [{:keys [params]} request
         uid (auth/authenticated? request)
-        sid (get-in request [:session :sid])
+        sid (:sid params)
         context (get-context request)
         request-with-context (assoc params :context context)
         data {:request request-with-context

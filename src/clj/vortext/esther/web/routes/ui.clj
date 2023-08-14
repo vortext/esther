@@ -24,10 +24,12 @@
 
 (defn json-config
   []
-  [:script {:type "text/javascript"}
-   (str "window.estherConfig = "
-        (json/write-value-as-string
-         {"defaultLocation" default-location}) ";")])
+  (let [sid (random-base64 10)]
+    [:script {:type "text/javascript"}
+     (str "window.appConfig = "
+          (json/write-value-as-string
+           {"sid" sid
+            "defaultLocation" default-location}) ";")]))
 
 (defn head-section [scripts]
   [:head
@@ -50,7 +52,7 @@
 
 
 (defn sign-in
-  [error-message]
+  [_ _request error-message]
   (page
    (head-section
     [[:script {:src "resources/public/js/login.js"}]])
@@ -71,9 +73,7 @@
         {:status 303
          :session {:identity uid}
          :headers {"Location" default-location}})
-    (sign-in "Invalid credentials")))
-
-
+    (sign-in request opts "Invalid credentials")))
 
 (defn display-page [page-html-fn opts request]
   (->
@@ -81,8 +81,7 @@
     (head-section
      [[:script {:src "https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"}]
       [:script {:src "resources/public/js/main.js"}]])
-    (page-html-fn opts request))
-   (assoc-in [:session :sid] (random-base64 32))))
+    (page-html-fn opts request))))
 
 ;; Routes
 (defn ui-routes [opts]
@@ -91,7 +90,7 @@
                          (response/redirect "/login")))}]
    ["/login"
     {:post (partial login-handler opts)
-     :get (fn [_] (sign-in nil))}]
+     :get (fn [req] (sign-in opts req nil))}]
    ["/converse"
     {:get
      (fn [req]
@@ -101,8 +100,9 @@
 
 
 (defn on-error
-  [_ _]
-  (log/warn "Redirecting to login")
+  [req _]
+  (log/warn
+   "access-rules on-error" " session:" (:session req))
   {:status 303
    :headers {"Location" "/login"}
    :body "Redirecting to login"})
@@ -113,9 +113,7 @@
                     :handler any-access}
                    {:pattern #"^/login$"
                     :handler any-access}
-                   {:pattern #"^/converse"
-                    :handler auth/authenticated-access}
-                   {:pattern #"^/converse/*"
+                   {:pattern #"^/converse.*"
                     :handler auth/authenticated-access}])
 
 

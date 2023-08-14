@@ -1,7 +1,6 @@
 (ns vortext.esther.util.security
   (:require
-   [buddy.core.hash :as hash]
-   [buddy.core.codecs :refer [bytes->hex bytes->str bytes->b64-str]]
+   [buddy.core.codecs :refer [bytes->hex bytes->b64-str]]
    [buddy.core.nonce :as nonce]))
 
 (defn random-id
