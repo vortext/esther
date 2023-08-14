@@ -25,6 +25,9 @@ html { /* or html */
   text-align: center;
 }
 
+form {
+  margin-top: 0.5em;
+}
 .form-group {
   margin-bottom: 1em;
 }
@@ -32,14 +35,15 @@ h1 {
   font-weight: 300;
   text-align: center;
   color: var(--secondary-color);
+  margin: 0 0 0.5em 0;
 }
+
 .form-input {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--desaturated-color2);
   border-radius: 5px;
   background: var(--desaturated-color1);
-  transition: all 0.3s ease;
   margin-top: 0.5em;
 }
 
@@ -57,9 +61,12 @@ button {
   font-family: var(--font-family-sans);
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 button:hover {
   background: var(--accent-secondary);
+}
+.error {
+  color: var(--accent-primary);
+  font-family: var(--font-family-mono);
 }
