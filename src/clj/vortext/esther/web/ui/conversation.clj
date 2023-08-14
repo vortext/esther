@@ -1,7 +1,9 @@
 (ns vortext.esther.web.ui.conversation
   (:require
    [vortext.esther.web.controllers.converse :as converse]
-   [vortext.esther.web.htmx :refer [ui] :as htmx]
+   [vortext.esther.web.ui.common :as common]
+   [vortext.esther.util.security :refer [random-base64]]
+   [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
    [markdown.core :as markdown]
    [clojure.tools.logging :as log]))
@@ -74,9 +76,15 @@
     [:div#loading-response.loading-state loading]
     (msg-input request)]])
 
-(defn conversation-body
-  [opts request]
-  [:body
-   [:h1#title "Esther"]
-   [:h2#subtitle (time/human-today) "."]
-   (conversation opts request)])
+(defn render [opts request]
+  (let [sid (random-base64 10)]
+    (page
+     (common/head
+      {:sid sid}
+      [[:link {:rel "stylesheet" :href "resources/public/css/conversation.css"}]]
+      [[:script {:src "resources/public/js/vendor/suncalc.min.js"}]
+       [:script {:src "resources/public/js/conversation.js"}]])
+     [:body
+      [:h1#title "Esther"]
+      [:h2#subtitle (time/human-today) "."]
+      (conversation opts request)])))

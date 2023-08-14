@@ -53,6 +53,7 @@
  {:routes #ig/ref :router/routes}
  :reitit.routes/ui
  #profile {:dev {:base-path "",
+                 :default-path "/converse"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
                  :env #ig/ref :system/env}}
