@@ -1,7 +1,7 @@
 -- Users
 -- :name create-user :! :n
 -- :doc Creates a new user
-insert into users (uid, username, password_hash, email) values (:uid, :username, :password_hash, :email);
+insert into users (uid, username, password_hash) values (:uid, :username, :password_hash);
 
 -- :name find-user-by-username :? :1
 -- :doc retrieves a user by username

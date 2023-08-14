@@ -33,12 +33,11 @@
 (defmethod ig/init-key :dev/init-test-user
   [_ {:keys [db] :as opts}]
   (let [username "test"
-        email "test@localhost"
         password "test"]
     (when (nil? ((:query-fn db) :find-user-by-username {:username username}))
       (do
         (log/warn ":db.sql/init creating user " username " with password " password)
-        (insert-user! opts username email password)))))
+        (insert-user! opts username password)))))
 
 (defn stop-app []
   ((or (:stop defaults) (fn [])))

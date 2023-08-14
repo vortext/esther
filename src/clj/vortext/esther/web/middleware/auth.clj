@@ -12,7 +12,7 @@
 (def auth-backend (session))
 
 (defn insert-user!
-  [{:keys [db]} username email password]
+  [{:keys [db]} username password]
   (let [uid (-> (hash/sha256 username) (bytes->hex))]
     (when (nil? ((:query-fn db)
                  :find-user-by-username {:username username}))
@@ -20,7 +20,6 @@
        :create-user
        {:uid uid
         :username username
-        :email email
         :password_hash (hashers/encrypt password)}))))
 
 (defn authenticate
