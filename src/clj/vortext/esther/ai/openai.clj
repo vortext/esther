@@ -3,6 +3,7 @@
    [vortext.esther.util.mustache :as mustache]
    [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]
+   [clojure.string :as str]
    [clojure.java.io :as io]
    [vortext.esther.util :refer [parse-maybe-json pretty-json]]
    [jsonista.core :as json]
@@ -16,11 +17,15 @@
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
 
 (defn generate-prompt
-  [_memories _msg]
-  (let [example (first (shuffle examples))]
+  [keywords]
+  (let [example (first (shuffle examples))
+        keywords (if (seq keywords) keywords [{:value "user:new-user"}])
+        keyword-str (str/join "," (map :value keywords))]
+    (log/debug "openai::generate-prompt:keywords" keyword-str)
     (mustache/render
      (:initial scenarios)
-     {:example-request (pretty-json (:request example))
+     {:keywords keyword-str
+      :example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
 
 (defn as-role
@@ -67,10 +72,8 @@
       (if json-obj? json-obj? (:json-parse-error errors)))))
 
 (defn complete
-  [_ memories request]
-  (let [prompt (generate-prompt memories request)
-        _ (log/trace "openai::chat-completion:prompt" prompt)
-        _ (log/trace "openai::chat-completion:request" request)
+  [_ memories keywords request]
+  (let [prompt (generate-prompt keywords)
         conv (format-for-completion (get-contents-memories memories))
         submission
         (concat
@@ -79,7 +82,6 @@
          conv
          [{:role "user"
            :content (json/write-value-as-string request)}])]
-    _ (log/trace "openai::chat-completion:submission" submission)
     (openai-api-complete model submission)))
 
 

@@ -7,10 +7,8 @@
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.signin :as signin]
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util :refer [read-json-value random-base64]]
+   [vortext.esther.util :refer [read-json-value]]
    [clojure.string :as str]
-   [next.jdbc :as jdbc]
-   [jsonista.core :as json]
    [clojure.tools.logging :as log]
    [table.core :as t]))
 
@@ -23,20 +21,19 @@
         _ (log/debug "converse::remember![gid,sid,keywords]" sid keywords)]
     (memory/remember! opts user sid answer keywords)))
 
-(defn contents-as-memories
-  [jsons]
-  (map (comp read-json-value :content) jsons))
 
 (defn complete!
   [opts user sid data]
-  (try
-    (let [last-10-memories (memory/last-memories opts user)
-          last-10-memories (reverse last-10-memories)
-          result (openai/complete opts last-10-memories (:request data))
-          answer (-> data (assoc :response result))]
-      (remember! opts user sid answer))
-    (catch Exception e (log/warn "converse:complete" e)
-           (:internal-server-error errors))))
+  (let [last-10-memories (memory/last-memories opts user)
+        last-10-memories (reverse last-10-memories)
+        keyword-memories (memory/frecency-keywords opts user)
+        result (openai/complete
+                opts
+                last-10-memories
+                keyword-memories
+                (:request data))
+        answer (-> data (assoc :response result))]
+    (remember! opts user sid answer)))
 
 
 (defn inspect
