@@ -12,25 +12,28 @@
 
 (defn render
   [{:keys [default-path]} request error-message]
-  (page
-   (common/head
-    {}
-    [[:link {:rel "stylesheet" :href "/resources/public/css/signin.css"}]]
-    [[:script {:src "/resources/public/js/signin.js"}]])
-   [:body
-    [:div.container
-     [:div.login-box
-      [:h1 "Esther"]
-      (when error-message
-        [:div.error error-message])
-      [:form {:action "/signin" :method "POST"}
-       [:div.form-group
-        [:label "Username: "
-         [:input {:type "text" :name "username" :class "form-input"}]]]
-       [:div.form-group
-        [:label "Password: "
-         [:input {:type "password" :name "password" :class "form-input"}]]]
-       [:button "Sign In"]]]]]))
+  (if (authenticated? request)
+    {:status 303
+     :headers {"Location" default-path}}
+    (page
+     (common/head
+      {}
+      [[:link {:rel "stylesheet" :href "/resources/public/css/signin.css"}]]
+      [[:script {:src "/resources/public/js/signin.js"}]])
+     [:body
+      [:div.container
+       [:div.login-box
+        [:h1 "Esther"]
+        (when error-message
+          [:div.error error-message])
+        [:form {:action "/signin" :method "POST"}
+         [:div.form-group
+          [:label "Username: "
+           [:input {:type "text" :name "username" :class "form-input"}]]]
+         [:div.form-group
+          [:label "Password: "
+           [:input {:type "password" :name "password" :class "form-input"}]]]
+         [:button "Sign In"]]]]])))
 
 
 (defn handler [{:keys [default-path] :as opts} request]
