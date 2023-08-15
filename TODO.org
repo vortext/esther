@@ -1,36 +1,39 @@
-* DONE hook up OpenAI
-* DONE store results
+* Progress
+** DONE hook up OpenAI
+** DONE store results
 - sqllite storing memories
-* DONE use results, better context (locale, time, memories)
-* DONE markdown, KaTeX and such
-* TODO /interrupt command?
-* DONE /inspect command
-* TODO /status command
-* TODO /imagine command
-* DONE styling according to style vibes
-* TODO user flow (just use sqllite)
-* TODO vibes for login page
-* TODO logout functionality
-* TODO refactor memory and login/auth controllers
-* TODO multi user?
+** DONE use results, better context (locale, time, memories)
+** DONE markdown, KaTeX and such
+** DONE /inspect command
+** TODO /status command
+** TODO /help command
+** DONE styling according to style vibes
+** DONE user flow (just use sqllite)
+** DONE vibes for login page
+** DONE logout functionality (/logout)
+** DONE refactor memory and login/auth controllers
+** DONE geoip for time of day?
+** DONE maybe bouncing ball energy for loading?
+** DONE introduce as book fiction literary work imaginary scene
+** TODO multi user?
 - security (encrypt contents and keywords)
 - add vault to user
-- more information in session
-* TODO hook up StableDiffusion
-* TODO integrate image describe into memory context
-* DONE better input UI? (textfield, resize, like Signal?)
-* TODO Test infrastructure
-* DONE just slurp the secrets.edn file and get rid of the rest (secrets.clj)
-* TODO security and hosting
-* TODO input checking and santization (also chatgpt)
-* DONE refactor memory to only have contents
-* DONE error handling
-* TODO embeddings / memory store
-* TODO better integrate keywords in narrative
-* DONE geoip for time of day?
-* TODO better intro flow
-* TODO app? legal, ethics, billing, subscriptions, etc.
-* DONE maybe bouncing ball energy for loading?
-* DONE introduce as book fiction literary work imaginary scene
-- let chatgpt-4 check the prompt
-- she can use emoji and markdown.
+- uid in vault
+- more user information in session (vault)
+** TODO input checking and santization (also converse.clj)
+** TODO check logging levels (disable debug outside dev)
+** TODO /imagine command
+- hook up StableDiffusion
+- integrate image describe into memory
+- store description and image in memory contents
+** DONE better input UI? (textfield, resize, like Signal?)
+** DONE just slurp the secrets.edn file and get rid of the rest (secrets.clj)
+** DONE refactor memory to only have contents
+** DONE error handling
+** TODO better integrate keywords in narrative
+** TODO test infrastructure and test
+** TODO security and hosting
+** TODO better intro flow
+** TODO app? legal, ethics, billing, subscriptions, etc.
+** TODO use keywords and image describe as context for converse
+* Ideas for later
