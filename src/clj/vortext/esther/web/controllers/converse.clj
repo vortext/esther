@@ -16,41 +16,35 @@
    [table.core :as t]))
 
 
-(defn get-context
-  [request]
-  (read-json-value
-   (get-in request [:params :context] "")))
+
 
 (defn remember!
-  [opts uid sid answer]
+  [opts user sid answer]
   (let [response (:response answer)
         keywords (map (fn [kw] (csk/->kebab-case (str/trim kw)))
                       (get response :keywords []))
         _ (log/debug "converse::remember![gid,sid,keywords]" sid keywords)]
-    (memory/remember! opts uid sid answer keywords)))
+    (memory/remember! opts user sid answer keywords)))
 
 (defn contents-as-memories
   [jsons]
   (map (comp read-json-value :content) jsons))
 
 (defn complete!
-  [opts uid sid data]
+  [opts user sid data]
   (try
-    (let [last-10-memories (memory/last-memories opts uid)
+    (let [last-10-memories (memory/last-memories opts user)
           last-10-memories (reverse last-10-memories)
           result (openai/complete opts last-10-memories (:request data))
-          answer (-> data
-                     (assoc :response
-                            (assoc result :type :md-serif)))]
-      (log/debug "converse::complete!" uid sid answer)
-      (remember! opts uid sid answer))
+          answer (-> data (assoc :response result))]
+      (remember! opts user sid answer))
     (catch Exception e (log/warn "converse:complete" e)
            (:internal-server-error errors))))
 
 
 (defn inspect
-  [opts uid _sid _data]
-  (let [memories (memory/last-memories opts uid 5)
+  [opts user _sid _data]
+  (let [memories (memory/last-memories opts user 5)
         responses (map
                    (fn [memory]
                      (let [response (:response memory)
@@ -68,7 +62,7 @@
       :style :github-markdown)}))
 
 (defn logout
-  [_opts _uid _sid {:keys [request]}]
+  [_opts _user _sid {:keys [request]}]
   {:type :htmx
    :response (signin/logout-chat request)})
 
@@ -78,35 +72,39 @@
     [first-word (or rest "")]))
 
 (defn command
-  [opts uid sid data]
-  (let [[cmd _msg] (split-first-word
-                    (apply str (rest (:command? data))))
+  [opts user sid data]
+  (let [command (get-in data [:request :msg])
+        [cmd _msg] (split-first-word
+                    (apply str (rest command)))
 
         impl {:inspect inspect
               :logout logout}]
-    (((keyword cmd) impl) opts uid sid data)))
+    (((keyword cmd) impl) opts user sid data)))
+
+(defn get-context
+  [request]
+  (read-json-value
+   (get-in request [:params :context] "")))
 
 (defn answer!
   [opts request]
-  (let [{:keys [params]} request
-        uid (auth/authenticated? request)
-        sid (:sid params)
-        context (get-context request)
-        request-with-context (assoc params :context context)
-        msg-params (:msg params)
-        command? (str/starts-with? msg-params "/")
-        data {:request request-with-context
-              :ts (unix-ts)}]
-    (log/info "command?" command? msg-params)
-    (try
-      (if command?
-        (assoc
-         data :response
-         (command opts uid sid (assoc data :command? msg-params)))
-        ;; Converse
-        (complete! opts uid sid data))
-      (catch Exception e
-        (do (log/warn e)
-            (assoc data :response (:internal-server-error errors)))))))
+  (when-let [uid (auth/authenticated? request)]
+    (let [{:keys [params]} request
+          user (get-in request [:session :user])
+          sid (:sid params)
+          request (assoc params :context (get-context request))
+          data {:request request
+                :ts (unix-ts)}]
+      (try
+        (if (str/starts-with? (:msg params) "/")
+          (-> data
+              (assoc :response (command opts user sid data)))
+
+          ;; Converse
+          (-> (complete! opts user sid data)
+              (assoc-in [:response :type] :md-serif)))
+        (catch Exception e
+          (do (log/warn e)
+              (assoc data :response (:internal-server-error errors))))))))
 
 ;;; Scratch

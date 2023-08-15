@@ -6,10 +6,11 @@
    [vortext.esther.util.security :refer [random-base64]]))
 
 (defn remember!
-  ([opts uid sid content]
-   (remember! opts uid sid content []))
-  ([opts uid sid content keywords]
+  ([opts user sid content]
+   (remember! opts user sid content []))
+  ([opts user sid content keywords]
    (let [{:keys [connection query-fn]} (:db opts)
+         uid (get-in user [:vault :uid])
          gid (random-base64)
          memory {:gid gid
                  :uid uid
@@ -21,14 +22,16 @@
         (map (fn [kw] (query-fn tx :see-keyword {:uid uid :keyword kw})) keywords)))
      content)))
 
-(defn contents-as-memories
-  [jsons]
-  (map (comp read-json-value :content) jsons))
+(defn construct-memories
+  [user contents]
+  (map (comp read-json-value :content) contents))
 
 (defn last-memories
-  ([opts uid]
-   (last-memories opts uid 10))
-  ([opts uid n]
-   (let [{:keys [query-fn]} (:db opts)]
-     (contents-as-memories
+  ([opts user]
+   (last-memories opts user 10))
+  ([opts user n]
+   (let [{:keys [query-fn]} (:db opts)
+         uid (get-in user [:vault :uid])]
+     (construct-memories
+      user
       (query-fn :last-n-memories {:uid uid :n n})))))

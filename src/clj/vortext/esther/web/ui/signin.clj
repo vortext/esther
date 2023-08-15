@@ -8,7 +8,7 @@
 (defn logout-chat
   [_]
   [:form {:action "/logout" :method :post}
-   [:button {:name "logout" :value -1} "Logout!"]])
+   [:button {:name "logout" :value -1} "Logout"]])
 
 (defn render
   [{:keys [default-path]} request error-message]
