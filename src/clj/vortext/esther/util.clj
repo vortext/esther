@@ -46,4 +46,4 @@
 
 (defn random-base64
   ([] (random-base64 64))
-  ([l] (codecs/bytes->b64-str (random-id l))))
+  ([l] (codecs/bytes->b64-str (random-id l) true)))

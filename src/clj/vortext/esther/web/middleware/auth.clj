@@ -3,13 +3,11 @@
    [clojure.tools.logging :as log]
    [buddy.hashers :as hashers]
    [buddy.core.hash :as hash]
-   [vortext.esther.util :refer [read-json-value
-                                random-base64
-                                bytes->b64]]
+   [vortext.esther.util :refer [read-json-value bytes->b64]]
    [vortext.esther.secrets :as secrets]
    [jsonista.core :as json]
    [buddy.auth.backends :refer [session]]
-   [buddy.auth.accessrules :refer [success error]]))
+   [buddy.auth.accessrules :refer [error]]))
 
 ;; Create an instance of auth backend.
 (def auth-backend (session))
@@ -32,8 +30,7 @@
 (defn insert-user!
   [{:keys [db]} username password]
   (let [query-fn (:query-fn db)
-        nonce (random-base64 16)
-        uid (-> (hash/sha256 (str nonce username)) (bytes->b64))
+        uid (-> (hash/sha256 username) (bytes->b64))
         stretched-password (secrets/slow-key-stretch-with-pbkdf2 password 64)
         vault {:uid uid
                :secret stretched-password
@@ -55,7 +52,6 @@
   ([opts username password]
    (let [query-fn (get-in opts [:db :query-fn])
          user (query-fn :find-user-by-username {:username username})]
-     (log/debug "authenticate:user" user)
      (if (and username password (hashers/check password (:password_hash user)))
        (read-vault user (secrets/slow-key-stretch-with-pbkdf2 password 64)) nil))))
 
@@ -68,6 +64,5 @@
 (defn authenticated-access
   "Check if request coming in is authenticated with user/password "
   [request]
-  (log/debug "authenticated-access:session" (:session request))
   (let [valid? (authenticated? request)]
     (if valid? true (error "unauthenticated"))))

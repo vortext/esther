@@ -29,6 +29,6 @@ order by created desc limit :n;
 
 -- :name see-keyword :! :1
 -- :doc increments the seen counter of the keyword for uid
-insert into memory_keyword (uid, data, iv)
-values(:uid, :data, :iv)
-on conflict(uid, data, iv) do update set seen=seen+1, last_seen=current_timestamp;
+insert into memory_keyword (uid, fingerprint, data, iv)
+values(:uid, :fingerprint, :data, :iv)
+on conflict(uid, fingerprint) do update set seen=seen+1, last_seen=current_timestamp;

@@ -16,11 +16,12 @@ create index memory_uid on memory(uid);
 
 create table memory_keyword (
     uid                     text not null,
+    fingerprint             text not null,
     data                    text not null,
     iv                      iv not null,
     seen                    integer default 1,
     last_seen               timestamp with time zone default current_timestamp,
-    unique(uid,data,iv)
+    unique(uid,fingerprint)
 )
 --;;
 create index memory_keyword_access on memory_keyword(uid);

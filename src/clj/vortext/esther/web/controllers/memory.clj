@@ -2,13 +2,16 @@
   (:require
    [next.jdbc :as jdbc]
    [vortext.esther.secrets :as secrets]
-   [vortext.esther.util :refer [random-base64]]))
+   [buddy.core.hash :as hash]
+   [vortext.esther.util :refer [random-base64 bytes->b64]]))
 
 (defn see-keyword
   [query-fn tx user kw]
   (let [{:keys [uid secret]} (:vault user)
-        {:keys [data iv]} (secrets/encrypt-for-sql kw secret)]
-    (query-fn tx :see-keyword {:uid uid :data data :iv iv})))
+        {:keys [data iv]} (secrets/encrypt-for-sql kw secret)
+        fingerprint (-> (hash/sha256 (str uid kw)) (bytes->b64))
+        content {:uid uid :data data :iv iv :fingerprint fingerprint}]
+    (query-fn tx :see-keyword content)))
 
 (defn remember!
   ([opts user sid content]
