@@ -15,11 +15,15 @@
 ** DONE geoip for time of day?
 ** DONE maybe bouncing ball energy for loading?
 ** DONE introduce as book fiction literary work imaginary scene
+** TODO keyword frecency query
 ** TODO multi user?
-- security (encrypt contents and keywords)
-- add vault to user
-- uid in vault
-- more user information in session (vault)
+- security
+x encrypt contents
+x encrypt keywords
+x add vault to user
+x uid in vault
+x more user information in session (vault)
+** TODO use data, iv as columns instead of the json for memory and memory_keywords
 ** TODO input checking and santization (also converse.clj)
 ** TODO check logging levels (disable debug outside dev)
 ** TODO /imagine command
