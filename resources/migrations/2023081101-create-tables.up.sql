@@ -1,9 +1,9 @@
 create table memory (
-    id                      integer primary key autoincrement,
-    gid                     text not null unique,
+    gid                     text primary key,
     uid                     text not null,
     sid                     text not null,
-    content                 text,
+    data                    text not null,
+    iv                      iv not null,
     created                 timestamp with time zone default current_timestamp
 );
 --;;
@@ -15,12 +15,12 @@ create index memory_uid on memory(uid);
 --;;
 
 create table memory_keyword (
-    id                      integer primary key autoincrement,
     uid                     text not null,
-    keyword                 varchar,
+    data                    text not null,
+    iv                      iv not null,
     seen                    integer default 1,
     last_seen               timestamp with time zone default current_timestamp,
-    unique(uid,keyword)
+    unique(uid,data,iv)
 )
 --;;
 create index memory_keyword_access on memory_keyword(uid);

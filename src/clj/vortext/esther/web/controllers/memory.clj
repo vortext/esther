@@ -7,9 +7,8 @@
 (defn see-keyword
   [query-fn tx user kw]
   (let [{:keys [uid secret]} (:vault user)
-        secret-kw (secrets/encrypt-for-sql {:value kw} secret)
-        data {:uid uid :keyword secret-kw}]
-    (query-fn tx :see-keyword data)))
+        {:keys [data iv]} (secrets/encrypt-for-sql kw secret)]
+    (query-fn tx :see-keyword {:uid uid :data data :iv iv})))
 
 (defn remember!
   ([opts user sid content]
@@ -18,10 +17,12 @@
    (let [{:keys [connection query-fn]} (:db opts)
          {:keys [uid secret]} (:vault user)
          gid (random-base64)
+         {:keys [data iv]} (secrets/encrypt-for-sql content secret)
          memory {:gid gid
                  :uid uid
                  :sid sid
-                 :content (secrets/encrypt-for-sql content secret)}]
+                 :data data
+                 :iv iv}]
      (jdbc/with-transaction [tx connection]
        (query-fn tx :push-memory memory)
        (doall
@@ -32,7 +33,7 @@
   [user contents]
   (let [{:keys [_uid secret]} (:vault user)
         decrypt #(secrets/decrypt-from-sql % secret)]
-    (map (comp decrypt :content) contents)))
+    (map decrypt contents)))
 
 (defn last-memories
   ([opts user]

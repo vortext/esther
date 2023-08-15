@@ -22,13 +22,14 @@
         response (:response (converse/answer! opts request))
         _ (log/debug "ui::message:response" response)
         {:keys [energy type response]} response
+        type (or type :default)
         result
         (case type
-          :md-mono ( markdown/md-to-html-string response)
+          :md-mono (markdown/md-to-html-string response)
           :md-sans (markdown/md-to-html-string response)
           :md-serif (markdown/md-to-html-string response)
           :htmx response
-          [:pre.exception (str response)])
+          :default (markdown/md-to-html-string response))
 
         md-request (markdown/md-to-html-string
                     (get-in request [:params :msg]))]

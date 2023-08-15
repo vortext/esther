@@ -15,20 +15,20 @@ update users set password_hash = :password_hash, email = :email, updated_at = cu
 -- :doc deletes a user by uid
 delete from users where uid = :uid;
 
--- Core
+-- Memory
 -- :name push-memory :! :n
 -- :doc Insert a single memory
-insert into memory (gid, uid, sid, content)
-values (:gid, :uid, :sid, :content)
+insert into memory (gid, uid, sid, data, iv)
+values (:gid, :uid, :sid, :data, :iv)
 
 -- :name last-n-memories :? :*
 -- :doc Get the last entries (from new to old)
-select gid, content from memory
+select gid, data, iv from memory
 where uid = :uid
 order by created desc limit :n;
 
 -- :name see-keyword :! :1
 -- :doc increments the seen counter of the keyword for uid
-insert into memory_keyword (uid, keyword)
-values(:uid, :keyword)
-on conflict(uid, keyword) do update set seen=seen+1, last_seen=current_timestamp;
+insert into memory_keyword (uid, data, iv)
+values(:uid, :data, :iv)
+on conflict(uid, data, iv) do update set seen=seen+1, last_seen=current_timestamp;

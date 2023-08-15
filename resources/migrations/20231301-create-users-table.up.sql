@@ -1,5 +1,5 @@
 create table users (
-    username text primary_key,
+    username text primary key,
     email text default "NA",
     password_hash text not null,
     vault text not null default "",
