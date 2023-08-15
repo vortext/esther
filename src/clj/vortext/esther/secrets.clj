@@ -31,7 +31,7 @@
 (defn slow-key-stretch-with-pbkdf2 [weak-text-key n-bytes]
   (kdf/get-bytes
    (kdf/engine {:key weak-text-key
-                :salt (b64->bytes "j3gT0zoPJos=")
+                :salt (b64->bytes (:salt (secrets)))
                 :alg :pbkdf2
                 :digest :sha512
                 :iterations 1e5}) ;; target O(100ms) on commodity hardware
