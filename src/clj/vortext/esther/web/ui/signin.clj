@@ -38,7 +38,7 @@
 
 (defn handler [{:keys [default-path] :as opts} request]
   (if-let [user (authenticate opts request)]
-    (do (log/info "signin::handler:authenticate " user "redirecting to " default-path)
+    (do (log/debug "signin::handler:authenticate " user "redirecting to " default-path)
         {:status 303
          :session {:identity (get-in user [:vault :uid])
                    :user user}

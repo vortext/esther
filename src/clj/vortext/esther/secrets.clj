@@ -14,7 +14,9 @@
             [clojure.pprint :as pprint]
             [clojure.string :as string]
             [babashka.fs :as fs]
-            [clojure.edn :as edn])
+            [clojure.edn :as edn]
+            [jsonista.core :as json]
+            [vortext.esther.util :refer [read-json-value bytes->b64 b64->bytes]])
   (:import (java.util Base64)))
 
 (def secrets
@@ -25,9 +27,8 @@
        (str
         (fs/expand-home (fs/path "~/.secrets.edn"))))))))
 
-(defn bytes->b64 [^bytes b] (String. (.encode (Base64/getEncoder) b)))
-(defn b64->bytes [^String s] (.decode (Base64/getDecoder) (.getBytes s)))
 
+(def algorithm :aes256-cbc-hmac-sha512)
 
 ;; Take a weak text passphrase and make it brute force resistant
 (defn slow-key-stretch-with-pbkdf2 [weak-text-key n-bytes]
@@ -54,7 +55,7 @@
              (codecs/to-bytes clear-text)
              password
              initialization-vector
-             {:algorithm :aes256-cbc-hmac-sha512}))
+             {:algorithm algorithm}))
      :iv (bytes->b64 initialization-vector)}))
 
 
@@ -62,10 +63,20 @@
   "Decrypt and return the clear text for some output of `encrypt` given the
   same `password` used during encryption."
   [{:keys [data iv]} password]
-  (log/debug data iv)
   (codecs/bytes->str
    (crypto/decrypt
     (b64->bytes data)
     password
     (b64->bytes iv)
-    {:algorithm :aes256-cbc-hmac-sha512})))
+    {:algorithm algorithm})))
+
+
+(defn decrypt-from-sql
+  [content password]
+  (read-json-value
+   (decrypt (read-json-value content) (b64->bytes password))))
+
+(defn encrypt-for-sql
+  [content password]
+  (json/write-value-as-string
+   (encrypt (json/write-value-as-string content) (b64->bytes password))))

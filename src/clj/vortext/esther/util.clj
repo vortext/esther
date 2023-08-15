@@ -1,13 +1,20 @@
 (ns vortext.esther.util
   (:require
    [clojure.tools.logging :as log]
-   [cheshire.core :as cheshire]
-   [jsonista.core :as json]))
+   [jsonista.core :as json]
+
+   [buddy.core.codecs :as codecs]
+   [buddy.core.nonce :as nonce])
+  (:import (java.util Base64)))
+
+(def pretty-object-mapper
+  (json/object-mapper
+   {:pretty true}))
 
 ;; JSON utils
 (defn pretty-json
   [obj]
-  (cheshire/generate-string obj {:pretty true}))
+  (json/write-value-as-string obj pretty-object-mapper))
 
 (defn read-json-value
   [str]
@@ -22,5 +29,21 @@
                  ", column " (.getColumnNr (.getLocation e))
                  ": " e maybe-json])
       (try
-        (cheshire/parse-string maybe-json true)
         (catch Exception _ maybe-json)))))
+
+;; Base64
+(defn bytes->b64 [^bytes b] (String. (.encode (Base64/getEncoder) b)))
+(defn b64->bytes [^String s]
+  (codecs/b64->bytes s))
+
+
+;; Random
+(defn random-id
+  ([] (random-id 64))
+  ([l] (nonce/random-nonce l)))
+
+(defn random-hex [] (codecs/bytes->hex (random-id)))
+
+(defn random-base64
+  ([] (random-base64 64))
+  ([l] (codecs/bytes->b64-str (random-id l))))

@@ -7,15 +7,12 @@
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.signin :as signin]
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util.security :refer [random-base64]]
-   [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.util :refer [read-json-value random-base64]]
    [clojure.string :as str]
    [next.jdbc :as jdbc]
    [jsonista.core :as json]
    [clojure.tools.logging :as log]
    [table.core :as t]))
-
-
 
 
 (defn remember!

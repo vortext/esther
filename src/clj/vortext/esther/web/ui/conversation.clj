@@ -2,7 +2,7 @@
   (:require
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.ui.common :as common]
-   [vortext.esther.util.security :refer [random-base64]]
+   [vortext.esther.util :refer [random-base64]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
    [markdown.core :as markdown]
@@ -22,14 +22,13 @@
         response (:response (converse/answer! opts request))
         _ (log/debug "ui::message:response" response)
         {:keys [energy type response]} response
-        _ (log/debug "ui::message:type" type)
         result
         (case type
           :md-mono ( markdown/md-to-html-string response)
           :md-sans (markdown/md-to-html-string response)
           :md-serif (markdown/md-to-html-string response)
           :htmx response
-          :else [:pre (str response)])
+          [:pre.exception (str response)])
 
         md-request (markdown/md-to-html-string
                     (get-in request [:params :msg]))]

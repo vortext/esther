@@ -6,7 +6,6 @@
    [clojure.java.io :as io]
    [vortext.esther.util :refer [parse-maybe-json pretty-json]]
    [jsonista.core :as json]
-   [cheshire.core :as cheshire]
    [diehard.core :as dh]
    [vortext.esther.config :refer [examples errors introductions]]
    [wkok.openai-clojure.api :as api]))
