@@ -26,14 +26,14 @@ values(:uid, :fingerprint, :data, :iv)
 on conflict(uid, fingerprint) do update set seen=seen+1, last_seen=current_timestamp;
 
 -- :name frecency-keywords :? :* :1
--- :doc returns the frecency of keywords for a uid
-select uid,
+-- :doc returns the frecency of keywords for a uid with exponential decay
+SELECT uid,
        fingerprint,
        iv,
        data,
-       seen as frequency,
-       (julianday('now') - julianday(last_seen)) * 86400 as recency,
-       (seen / (1 + (julianday('now') - julianday(last_seen)) * 86400)) as frecency
-from memory_keyword
-where uid = :uid
-order by frecency desc limit :n;
+       seen AS frequency,
+       (julianday('now') - julianday(last_seen)) * 86400 AS recency,
+       seen * exp(:lambda * (julianday('now') - julianday(last_seen)) * 86400) AS frecency
+FROM memory_keyword
+WHERE uid = :uid
+ORDER BY frecency ASC LIMIT :n;

@@ -49,11 +49,20 @@
       (query-fn :last-n-memories {:uid uid :n n})))))
 
 (defn frecency-keywords
-  ([opts user] (frecency-keywords opts user 5))
-  ([opts user n]
+  "λ (lamda) is a decay constant that determines the rate of
+    forgetting. The value of lambda will determine how quickly the
+    frecency declines as recency increases. Larger values of λ will
+    cause more rapid decay, while smaller values will result in slower
+    decay."
+  ([opts user]
+   (let [lambda 0.001
+         n 10]
+     (frecency-keywords opts user lambda n)))
+  ([opts user lambda n]
    (let [{:keys [query-fn]} (:db opts)
          {:keys [uid secret]} (:vault user)
          cols [:fingerprint :frecency :recency :frequency]
          decrypt (fn [kw] (merge {:value (secrets/decrypt-from-sql kw secret)}
-                                (select-keys kw cols)))]
-     (map decrypt (query-fn :frecency-keywords {:uid uid :n n})))))
+                                (select-keys kw cols)))
+         query-params {:uid uid :n n :lambda lambda}]
+     (map decrypt (query-fn :frecency-keywords query-params)))))
