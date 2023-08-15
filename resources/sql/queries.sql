@@ -1,19 +1,11 @@
 -- Users
--- :name create-user :! :n
+-- :name create-user :! :1
 -- :doc Creates a new user
 insert into users (username, password_hash, vault) values (:username, :password_hash, :vault);
 
 -- :name find-user-by-username :? :1
 -- :doc retrieves a user by username
 select * from users where username = :username limit 1;
-
--- :name update-user! :! :n
--- :doc updates a user's details
-update users set password_hash = :password_hash, email = :email, updated_at = current_timestamp where username = :username;
-
--- :name delete-user! :! :n
--- :doc deletes a user by uid
-delete from users where uid = :uid;
 
 -- Memory
 -- :name push-memory :! :n
@@ -32,3 +24,16 @@ order by created desc limit :n;
 insert into memory_keyword (uid, fingerprint, data, iv)
 values(:uid, :fingerprint, :data, :iv)
 on conflict(uid, fingerprint) do update set seen=seen+1, last_seen=current_timestamp;
+
+-- :name frecency-keywords :? :* :1
+-- :doc returns the frecency of keywords for a uid
+select uid,
+       fingerprint,
+       iv,
+       data,
+       seen as frequency,
+       (julianday('now') - julianday(last_seen)) * 86400 as recency,
+       (seen / (1 + (julianday('now') - julianday(last_seen)) * 86400)) as frecency
+from memory_keyword
+where uid = :uid
+order by frecency desc limit :n;

@@ -33,8 +33,7 @@
         uid (-> (hash/sha256 username) (bytes->b64))
         stretched-password (secrets/slow-key-stretch-with-pbkdf2 password 64)
         vault {:uid uid
-               :secret stretched-password
-               :secret-b64 (bytes->b64 stretched-password)}
+               :secret stretched-password}
         user (write-vault
               {:username username
                :password_hash (hashers/encrypt password)

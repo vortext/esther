@@ -17,10 +17,7 @@
     [:div.third]]])
 
 (defn message [opts request]
-  (let [sid (get-in request [:params :sid])
-        _ (log/debug "ui::message:sid" sid)
-        response (:response (converse/answer! opts request))
-        _ (log/debug "ui::message:response" response)
+  (let [response (:response (converse/answer! opts request))
         {:keys [energy type response]} response
         type (or type :default)
         result

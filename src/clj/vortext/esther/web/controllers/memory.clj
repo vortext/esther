@@ -47,3 +47,13 @@
      (construct-memories
       user
       (query-fn :last-n-memories {:uid uid :n n})))))
+
+(defn frecency-keywords
+  ([opts user] (frecency-keywords opts user 5))
+  ([opts user n]
+   (let [{:keys [query-fn]} (:db opts)
+         {:keys [uid secret]} (:vault user)
+         cols [:fingerprint :frecency :recency :frequency]
+         decrypt (fn [kw] (merge {:value (secrets/decrypt-from-sql kw secret)}
+                                (select-keys kw cols)))]
+     (map decrypt (query-fn :frecency-keywords {:uid uid :n n})))))
