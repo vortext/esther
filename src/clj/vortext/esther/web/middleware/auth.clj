@@ -3,24 +3,46 @@
    [clojure.tools.logging :as log]
    [buddy.hashers :as hashers]
    [buddy.core.hash :as hash]
+   [vortext.esther.util.security :refer [random-base64]]
+   [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.secrets :as secrets]
    [buddy.core.codecs :refer [bytes->hex]]
+   [jsonista.core :as json]
    [buddy.auth.backends :refer [session]]
-   [ring.util.response :as response]
    [buddy.auth.accessrules :refer [success error]]))
 
 ;; Create an instance of auth backend.
 (def auth-backend (session))
 
+(defn read-vault
+  [user password]
+  (let [encrypted-vault
+        (read-json-value (:vault user))
+
+        decrypted-vault
+        (read-json-value (secrets/decrypt encrypted-vault password))]
+    (assoc user :vault decrypted-vault)))
+
+(defn write-vault
+  [{:keys [vault] :as user}]
+  (let [encrypt (fn [s] (secrets/encrypt s (:secret vault)))
+        encrypted (encrypt (json/write-value-as-string vault))]
+    (assoc user :vault (json/write-value-as-string encrypted))))
+
 (defn insert-user!
   [{:keys [db]} username password]
-  (let [uid (-> (hash/sha256 username) (bytes->hex))]
-    (when (nil? ((:query-fn db)
-                 :find-user-by-username {:username username}))
-      ((:query-fn db)
-       :create-user
-       {:uid uid
-        :username username
-        :password_hash (hashers/encrypt password)}))))
+  (let [query-fn (:query-fn db)
+        nonce (random-base64 16)
+        uid (-> (hash/sha256 (str username nonce)) (bytes->hex))
+        stretched-password (secrets/slow-key-stretch-with-pbkdf2 password 64)
+        vault {:uid uid
+               :secret stretched-password}
+        user (write-vault
+              {:username username
+               :password_hash (hashers/encrypt password)
+               :vault vault})]
+    (when (nil? (query-fn :find-user-by-username {:username username}))
+      (query-fn :create-user user))))
 
 (defn authenticate
   "Checks if request (with username/password :query-params)
@@ -34,7 +56,7 @@
          user (query-fn :find-user-by-username {:username username})]
      (log/info "authenticate:user" user)
      (if (and username password (hashers/check password (:password_hash user)))
-       (:uid user) nil))))
+       (read-vault user (secrets/slow-key-stretch-with-pbkdf2 password 64)) nil))))
 
 
 ;; Access Level Handlers

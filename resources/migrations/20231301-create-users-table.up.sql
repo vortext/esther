@@ -1,9 +1,8 @@
 create table users (
-    uid varchar primary key,
-    username text not null unique,
+    username text primary_key,
+    email text default "NA",
     password_hash text not null,
     vault text not null default "",
-    email text default "NA",
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp
 );

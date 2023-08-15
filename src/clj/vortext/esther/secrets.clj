@@ -8,6 +8,7 @@
             [buddy.core.nonce :as nonce]
             [buddy.core.crypto :as crypto]
             [buddy.core.kdf :as kdf]
+            [clojure.tools.logging :as log]
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.pprint :as pprint]
@@ -28,22 +29,24 @@
 (defn b64->bytes [^String s] (.decode (Base64/getDecoder) (.getBytes s)))
 
 
+;; Take a weak text passphrase and make it brute force resistant
 (defn slow-key-stretch-with-pbkdf2 [weak-text-key n-bytes]
   (kdf/get-bytes
-   (kdf/engine {:key weak-text-key
-                :salt (b64->bytes (:salt (secrets)))
-                :alg :pbkdf2
-                :digest :sha512
-                :iterations 1e5}) ;; target O(100ms) on commodity hardware
+   (kdf/engine
+    {:key weak-text-key
+     ;; Keep this constant across runs
+     :salt (b64->bytes (get :salt (secrets) "salt"))
+     :alg :pbkdf2
+     :digest :sha512
+     ;; Target O(100ms) on commodity hardware
+     :iterations 1e5})
    n-bytes))
 
 ;; (slow-key-stretch-with-pbkdf2 password 64)
 
 (defn encrypt
   "Encrypt and return a {:data <b64>, :iv <b64>} that can be decrypted with the
-  same `password`.
-
-  Performs pbkdf2 key stretching with quite a few iterations on `password`."
+  same `password`."
   [clear-text password]
   (let [initialization-vector (nonce/random-bytes 16)]
     {:data (bytes->b64
@@ -59,6 +62,7 @@
   "Decrypt and return the clear text for some output of `encrypt` given the
   same `password` used during encryption."
   [{:keys [data iv]} password]
+  (log/debug data iv)
   (codecs/bytes->str
    (crypto/decrypt
     (b64->bytes data)

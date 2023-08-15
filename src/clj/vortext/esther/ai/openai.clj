@@ -4,7 +4,7 @@
    [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
-   [vortext.esther.util :refer [parse-maybe-json]]
+   [vortext.esther.util :refer [parse-maybe-json pretty-json]]
    [jsonista.core :as json]
    [cheshire.core :as cheshire]
    [diehard.core :as dh]
@@ -15,11 +15,6 @@
 
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
-
-
-(defn pretty-json
-  [obj]
-  (cheshire/generate-string obj {:pretty true}))
 
 (defn generate-prompt
   [_memories _msg]

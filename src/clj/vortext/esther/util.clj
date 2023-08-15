@@ -4,6 +4,11 @@
    [cheshire.core :as cheshire]
    [jsonista.core :as json]))
 
+;; JSON utils
+(defn pretty-json
+  [obj]
+  (cheshire/generate-string obj {:pretty true}))
+
 (defn read-json-value
   [str]
   (json/read-value str json/keyword-keys-object-mapper))
