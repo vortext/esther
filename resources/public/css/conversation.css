@@ -45,6 +45,11 @@ body {
   padding-bottom: 1em;
 }
 
+.memory table {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 #user-value {
   border-bottom: 1px solid var(--subdued-color);
   padding: 1em 0;

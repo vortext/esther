@@ -7,7 +7,7 @@
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.signin :as signin]
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.util :refer [read-json-value pretty-json]]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [table.core :as t]))
@@ -35,9 +35,23 @@
         answer (-> data (assoc :response result))]
     (remember! opts user sid answer)))
 
+(defn keywords-table
+  [opts user]
+  (let [frecency-keywords (memory/frecency-keywords opts user)
+        ks [:value :frecency :frequency :recency]
+        formatted-keywords
+        (map (fn [kw]
+               (-> kw
+                   (update :frecency #(format "%.2f" %))
+                   (update :frequency #(format "%d" %))
+                   (update :recency #(format "%.2f" %))))
+             frecency-keywords)]
+    (table.core/table-str
+     (map #(select-keys % ks) formatted-keywords)
+     :style :github-markdown)))
 
-(defn inspect
-  [opts user _sid _data]
+(defn memories-table
+  [opts user]
   (let [memories (memory/last-memories opts user 5)
         responses (map
                    (fn [memory]
@@ -48,12 +62,26 @@
                         (clojure.string/join ", " kw))))
                    memories)
         ks [:emoji :energy :keywords :image-prompt]]
-    (log/debug "converse::inspect")
-    {:type :md-mono
-     :response
-     (t/table-str
-      (map #(select-keys % ks) responses)
-      :style :github-markdown)}))
+    (t/table-str
+     (map #(select-keys % ks) responses)
+     :style :github-markdown)))
+
+(defn status
+  [_opts user _sid _data]
+  {:type :htmx
+   :response
+   [:div.status
+    [:pre [:strong "username: "] (:username user)]]})
+
+(defn inspect
+  [opts user _sid _data]
+  {:type :md-mono
+   :response
+   (str
+    "**memories**"
+    (memories-table opts user)
+    "**keywords**"
+    (keywords-table opts user))})
 
 (defn logout
   [_opts _user _sid {:keys [request]}]
@@ -65,13 +93,12 @@
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
     [first-word (or rest "")]))
 
-(def commands
-  {:inspect inspect
-   :logout logout})
-
 (defn command
   [opts user sid data]
   (let [command (get-in data [:request :msg])
+        commands {:inspect inspect
+                  :status status
+                  :logout logout}
         [cmd _msg] (split-first-word
                     (apply str (rest command)))]
     (if-let [impl (get commands (keyword cmd))]
