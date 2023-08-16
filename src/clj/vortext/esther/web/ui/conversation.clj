@@ -20,16 +20,16 @@
   (let [response (:response (converse/answer! opts request))
         {:keys [energy type response]} response
         type (or type :default)
+        md #(markdown/md-to-html-string %)
         result
         (case type
-          :md-mono (markdown/md-to-html-string response)
-          :md-sans (markdown/md-to-html-string response)
-          :md-serif (markdown/md-to-html-string response)
           :htmx response
-          :default (markdown/md-to-html-string response))
+          :md-mono (md response)
+          :md-sans (md response)
+          :md-serif (md response)
+          :else (md response))
 
-        md-request (markdown/md-to-html-string
-                    (get-in request [:params :msg]))]
+        md-request (md (get-in request [:params :msg]))]
     (ui
      [:div.memory
       {"data-energy" energy}

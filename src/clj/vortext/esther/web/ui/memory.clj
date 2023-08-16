@@ -1,8 +1,7 @@
 (ns vortext.esther.web.ui.memory
   (:require
    [clojure.string :as str]
-   [table.core :as t]
-   [clojure.tools.logging :as log]))
+   [table.core :as t]))
 
 (defn keywords-table
   [keywords]
