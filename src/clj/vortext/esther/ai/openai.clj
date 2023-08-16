@@ -28,7 +28,7 @@
     (if (seq remainder)
       remainder
       (if (seq memories)
-        #{"user:returning-user" "user:no-relevant-keywords"}
+        #{"user:returning-user"}
         #{"user:new-user" "user:introductions-need"}))))
 
 (defn generate-prompt
