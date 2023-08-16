@@ -5,8 +5,7 @@
 ** DONE use results, better context (locale, time, memories)
 ** DONE markdown, KaTeX and such
 ** DONE /inspect command
-** TODO /status command
-** TODO /help command
+** DONE /status command
 ** DONE styling according to style vibes
 ** DONE user flow (just use sqllite)
 ** DONE vibes for login page
@@ -15,29 +14,30 @@
 ** DONE geoip for time of day?
 ** DONE maybe bouncing ball energy for loading?
 ** DONE introduce as book fiction literary work imaginary scene
-** TODO keyword frecency query
-** TODO multi user?
-- security
-x encrypt contents
-x encrypt keywords
-x add vault to user
-x uid in vault
-x more user information in session (vault)
-** TODO use data, iv as columns instead of the json for memory and memory_keywords
-** TODO input checking and santization (also converse.clj)
-** TODO check logging levels (disable debug outside dev)
-** TODO /imagine command
-- hook up StableDiffusion
-- integrate image describe into memory
-- store description and image in memory contents
+** DONE keyword frecency query
+** DONE multi user?
+_ encrypt contents
+_ encrypt keywords
+_ add vault to user
+_ uid in vault
+_ more user information in session (vault)
+** DONE use data, iv as columns instead of the json for memory and memory_keywords
 ** DONE better input UI? (textfield, resize, like Signal?)
 ** DONE just slurp the secrets.edn file and get rid of the rest (secrets.clj)
 ** DONE refactor memory to only have contents
 ** DONE error handling
-** TODO better integrate keywords in narrative
+** DONE better integrate keywords in narrative
+** TODO input checking and santization (also converse.clj)
+** TODO /imagine command
+- hook up StableDiffusion
+- integrate image describe into memory
+- store description and image in memory contents
+** TODO use image describe as context for converse
 ** TODO test infrastructure and test
 ** TODO security and hosting
+** TODO check logging levels (disable debug outside dev)
 ** TODO better intro flow
+** TODO /help command
 ** TODO app? legal, ethics, billing, subscriptions, etc.
-** TODO use keywords and image describe as context for converse
 * Ideas for later
+** TODO embeddings for memory retrieval of images
