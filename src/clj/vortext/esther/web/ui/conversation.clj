@@ -27,8 +27,7 @@
           :md-mono (md response)
           :md-sans (md response)
           :md-serif (md response)
-          :else (md response))
-
+          :default (md response))
         md-request (md (get-in request [:params :msg]))]
     (ui
      [:div.memory

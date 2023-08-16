@@ -8,19 +8,33 @@
    [vortext.esther.util :refer [parse-maybe-json pretty-json]]
    [jsonista.core :as json]
    [diehard.core :as dh]
+   [clojure.set :as set]
    [vortext.esther.config :refer [examples errors introductions]]
    [wkok.openai-clojure.api :as api]))
 
 (def model "gpt-3.5-turbo")
-
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
 
+(defn extract-keywords
+  [memories]
+  (into #{} (flatten (map #(get-in % [:response :keywords]) memories))))
+
+(defn relevant-keywords
+  [memories keywords]
+  (let [conversation-keywords (extract-keywords memories)
+        memory-keywords (into #{} (map :value keywords))
+        remainder (set/difference conversation-keywords memory-keywords)]
+    (if (seq remainder)
+      remainder
+      (if (seq memories)
+        #{"user:returning-user" "user:no-relevant-keywords"}
+        #{"user:new-user" "user:introductions-need"}))))
+
 (defn generate-prompt
-  [keywords]
+  [memories keywords]
   (let [example (first (shuffle examples))
-        keywords (if (seq keywords) keywords [{:value "user:new-user"}])
-        keyword-str (str/join "," (map :value keywords))]
+        keyword-str (str/join "," (relevant-keywords memories keywords))]
     (log/debug "openai::generate-prompt:keywords" keyword-str)
     (mustache/render
      (:initial scenarios)
@@ -73,7 +87,7 @@
 
 (defn complete
   [_ memories keywords request]
-  (let [prompt (generate-prompt keywords)
+  (let [prompt (generate-prompt memories keywords)
         conv (format-for-completion (get-contents-memories memories))
         submission
         (concat

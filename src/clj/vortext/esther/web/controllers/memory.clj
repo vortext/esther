@@ -63,6 +63,6 @@
          {:keys [uid secret]} (:vault user)
          cols [:fingerprint :frecency :recency :frequency]
          decrypt (fn [kw] (merge {:value (secrets/decrypt-from-sql kw secret)}
-                                (select-keys kw cols)))
+                                 (select-keys kw cols)))
          query-params {:uid uid :n n :lambda lambda}]
      (map decrypt (query-fn :frecency-keywords query-params)))))
