@@ -45,8 +45,8 @@ function getLocalContext() {
 function handleTextareaInput(e) {
   const textarea = e.target;
   var userInput = document.getElementById("user-input").value;
-  // If the Enter key is pressed without the Ctrl key
-  if (e.key === 'Enter' && !e.ctrlKey) {
+  // If the Enter key is pressed without the Shift key
+  if (e.key === 'Enter' && !e.shitKey) {
     e.preventDefault(); // Prevent the newline
 
     // Check if the input contains only whitespace
@@ -66,8 +66,8 @@ function handleTextareaInput(e) {
     return;
   }
 
-  // If the Enter key is pressed with the Ctrl key
-  if (e.key === 'Enter' && e.ctrlKey) {
+  // If the Enter key is pressed with the Shift key
+  if (e.key === 'Enter' && e.shiftKey) {
     const value = textarea.value;
     const startPos = textarea.selectionStart;
     const endPos = textarea.selectionEnd;
