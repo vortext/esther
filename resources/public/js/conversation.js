@@ -42,6 +42,8 @@ function getLocalContext() {
   };
 }
 
+
+
 function handleTextareaInput(e) {
   const textarea = e.target;
   var userInput = document.getElementById("user-input").value;
@@ -55,9 +57,21 @@ function handleTextareaInput(e) {
     const value = textarea.value;
     const startPos = textarea.selectionStart;
     const endPos = textarea.selectionEnd;
+    const newCaretPos = startPos + 1;
     textarea.value = value.substring(0, startPos) + '\n' + value.substring(endPos);
-    textarea.selectionStart = textarea.selectionEnd = startPos + 1;
     e.preventDefault();
+
+    // Apply the new selection asynchronously
+    setTimeout(() => {
+      textarea.focus();
+      textarea.selectionStart = newCaretPos;
+      textarea.selectionEnd = newCaretPos;
+
+      // Simulate a "right arrow" key press
+      const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+      textarea.dispatchEvent(event);
+    }, 0);
+
     return; // Return early to prevent further execution
   }
 
