@@ -31,14 +31,21 @@
         #{"user:returning-user"}
         #{"user:new-user" "user:introductions-need"}))))
 
+(defn keywords-to-markdown [keywords]
+  (clojure.string/join "\n" (map #(str "- " %) keywords)))
+
+
+(defn generate-context
+  [memories keywords]
+  (let [relevant-keywords (relevant-keywords memories keywords)]
+    (keywords-to-markdown relevant-keywords)))
+
 (defn generate-prompt
   [memories keywords]
-  (let [example (first (shuffle examples))
-        keyword-str (str/join "," (relevant-keywords memories keywords))]
-    (log/debug "openai::generate-prompt:keywords" keyword-str)
+  (let [example (first (shuffle examples))]
     (mustache/render
      (:initial scenarios)
-     {:keywords keyword-str
+     {:context (generate-context memories keywords)
       :example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
 
