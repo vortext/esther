@@ -65,15 +65,18 @@
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
     [first-word (or rest "")]))
 
+(def commands
+  {:inspect inspect
+   :logout logout})
+
 (defn command
   [opts user sid data]
   (let [command (get-in data [:request :msg])
         [cmd _msg] (split-first-word
-                    (apply str (rest command)))
-
-        impl {:inspect inspect
-              :logout logout}]
-    (((keyword cmd) impl) opts user sid data)))
+                    (apply str (rest command)))]
+    (if-let [impl (get commands (keyword cmd))]
+      (impl opts user sid data)
+      (:invalid-command errors))))
 
 (defn get-context
   [request]
@@ -82,7 +85,7 @@
 
 (defn answer!
   [opts request]
-  (when-let [uid (auth/authenticated? request)]
+  (when-let [_ (auth/authenticated? request)]
     (let [{:keys [params]} request
           user (get-in request [:session :user])
           sid (:sid params)

@@ -56,4 +56,14 @@
                :emoji "🖋️"
                :energy 0.2
                :keywords ["error:bad-gateway", "user:experienced-disconnect", "user:retry-later"]
-               :image-prompt "An inspirational writing desk, filled with journals, pens, and an inviting, creative vibe."}}
+               :image-prompt "An inspirational writing desk, filled with journals, pens, and an inviting, creative vibe."}
+ :invalid-command {:response "It seems we've woven a phrase that's beyond my understanding, like a cryptic verse in an ancient poem. Would you guide me through your thoughts once more?"
+                   :emoji "📜"
+                   :energy 0.2
+                   :keywords ["error:invalid-command", "user:guide-required"]
+                   :image-prompt "An old scroll, filled with undecipherable script, waiting to be interpreted."}
+ :unrecognized-input {:response "Ah, your words have the mysterious allure of a hidden path in a forest glade. While I'm momentarily lost, your guidance will help me find the way. Shall we explore together?"
+                      :emoji "🌲"
+                      :energy 0.3
+                      :keywords ["error:unrecognized-input", "user:joint-exploration"]
+                      :image-prompt "A hidden pathway in a lush forest, inviting the adventurous to discover its secrets."}}
