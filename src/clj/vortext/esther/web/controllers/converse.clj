@@ -24,12 +24,12 @@
 
 (defn complete!
   [opts user sid data]
-  (let [last-10-memories (memory/last-memories opts user)
-        last-10-memories (reverse last-10-memories)
+  (let [last-memories (memory/last-memories opts user)
+        last-memories (reverse last-memories)
         keyword-memories (memory/frecency-keywords opts user)
         result (openai/complete
                 opts
-                last-10-memories
+                last-memories
                 keyword-memories
                 (:request data))
         answer (-> data (assoc :response result))]
