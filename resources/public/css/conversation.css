@@ -1,3 +1,7 @@
+body {
+  margin: 3em; /* Adding some space around the body */
+}
+
 #container {
   max-width: 50em;
   margin: 3em auto;

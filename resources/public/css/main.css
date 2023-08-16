@@ -31,10 +31,6 @@ html {
   line-height: 1.6; /* Slightly increased line-height for a more book-like feel */
 }
 
-body {
-  margin: 3em; /* Adding some space around the body */
-}
-
 pre, code {
   font-family: "IBM Plex Mono", monospace;
 }

@@ -18,7 +18,7 @@
   (let [response (:response answer)
         keywords (map (fn [kw] (csk/->kebab-case (str/trim kw)))
                       (get response :keywords []))
-        _ (log/debug "converse::remember![gid,sid,keywords]" sid keywords)]
+        _ (log/debug "converse::remember![sid,keywords]" sid keywords)]
     (memory/remember! opts user sid answer keywords)))
 
 
