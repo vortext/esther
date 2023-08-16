@@ -3,7 +3,6 @@
    [vortext.esther.util.time :refer [unix-ts]]
    [vortext.esther.web.middleware.auth :as auth]
    [vortext.esther.config :refer [errors]]
-   [camel-snake-kebab.core :as csk]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.memory :refer [keywords-table memories-table]]
    [vortext.esther.web.ui.signin :as signin]
@@ -17,8 +16,7 @@
 (defn remember!
   [opts user sid answer]
   (let [response (:response answer)
-        keywords (map (fn [kw] (csk/->kebab-case (str/trim kw)))
-                      (get response :keywords []))
+        keywords (get response :keywords [])
         _ (log/debug "converse::remember![sid,keywords]" sid keywords)]
     (memory/remember! opts user sid answer keywords)))
 
