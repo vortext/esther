@@ -129,9 +129,18 @@ navigator.geolocation.getCurrentPosition(
   }
 );
 
+
 document.addEventListener('DOMContentLoaded', function() {
   var sidElements = document.querySelectorAll('.session-sid');
   sidElements.forEach(function(element) {
     element.value = window.appConfig.sid;
   });
+
+  // Focus input on window focus
+  document.addEventListener('focus', function() {
+    setTimeout(() => {
+      document.getElementById("user-input").focus();
+    }, 100);
+  });
+
 });
