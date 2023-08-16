@@ -5,6 +5,7 @@
    [clojure.tools.logging :as log]
    [clojure.string :as str]
    [clojure.java.io :as io]
+   [vortext.esther.web.controllers.memory :refer [extract-keywords first-image]]
    [vortext.esther.util :refer [parse-maybe-json pretty-json escape-newlines]]
    [jsonista.core :as json]
    [diehard.core :as dh]
@@ -13,40 +14,45 @@
    [wkok.openai-clojure.api :as api]))
 
 (def model "gpt-3.5-turbo")
+
 (def scenarios
   {:initial (slurp (io/resource "prompts/scenarios/initial.md"))})
 
-(defn extract-keywords
-  [memories]
-  (into #{} (flatten (map #(get-in % [:response :keywords]) memories))))
-
 (defn relevant-keywords
   [memories keywords]
-  (let [conversation-keywords (extract-keywords memories)
-        memory-keywords (into #{} (map :value keywords))
-        remainder (set/difference conversation-keywords memory-keywords)
+  (let [memory-keywords (into #{} (map :value keywords))
+        without #{"user:new-user" "user:introductions-need" "user:returning-user"}
+        remainder (set/difference memory-keywords without)
         to-include (if (seq remainder)
                      remainder
                      (if (seq memories)
                        #{"user:returning-user"}
                        #{"user:new-user" "user:introductions-need"}))]
-    (log/debug "openai::relevant-keywords:remainder" to-include)
     to-include))
 
 (defn keywords-to-markdown [keywords]
   (clojure.string/join "\n" (map #(str "- " %) keywords)))
 
-(defn generate-context
-  [memories keywords]
-  (let [relevant-keywords (relevant-keywords memories keywords)]
-    (keywords-to-markdown relevant-keywords)))
-
 (defn generate-prompt
   [memories keywords]
-  (let [example (first (shuffle examples))]
+  (let [example (first (shuffle examples))
+        memory-keywords (relevant-keywords memories keywords)
+        conversation-keywords (extract-keywords memories)
+        relevant-keywords (set/intersection
+                           memory-keywords
+                           conversation-keywords)
+        newest-first (reverse memories)
+        last-image (first-image newest-first)
+        has-image? (:image-prompt (first newest-first))]
+    (log/debug "openai::generate-prompt::relevant-keywords" relevant-keywords)
+    (log/debug "openai::generate-prompt::last-image" last-image)
+
     (mustache/render
      (:initial scenarios)
-     {:context (generate-context memories keywords)
+     {:keywords (keywords-to-markdown relevant-keywords)
+      :last-image last-image
+      :has-keywords? (boolean (seq relevant-keywords))
+      :has-image? (boolean (not has-image?))
       :example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
 
@@ -96,6 +102,7 @@
 (defn complete
   [_ memories keywords request]
   (let [prompt (generate-prompt memories keywords)
+        ;;_ (log/debug "openai::complete:prompt" prompt)
         conv (format-for-completion (get-contents-memories memories))
         submission
         (concat

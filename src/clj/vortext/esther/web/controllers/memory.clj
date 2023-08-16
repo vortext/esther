@@ -66,3 +66,11 @@
                                  (select-keys kw cols)))
          query-params {:uid uid :n n :lambda lambda}]
      (map decrypt (query-fn :frecency-keywords query-params)))))
+
+(defn extract-keywords
+  [memories]
+  (into #{} (flatten (map #(get-in % [:response :keywords]) memories))))
+
+(defn first-image
+  [memories]
+  (first (keep #(get-in % [:response :image-prompt]) memories)))
