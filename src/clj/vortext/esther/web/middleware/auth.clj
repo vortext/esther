@@ -1,6 +1,5 @@
 (ns vortext.esther.web.middleware.auth
   (:require
-   [clojure.tools.logging :as log]
    [buddy.hashers :as hashers]
    [buddy.core.hash :as hash]
    [vortext.esther.util :refer [read-json-value bytes->b64]]

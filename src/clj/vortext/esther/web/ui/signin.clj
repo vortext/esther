@@ -38,9 +38,8 @@
 
 (defn handler [{:keys [default-path] :as opts} request]
   (if-let [user (authenticate opts request)]
-    (do (log/debug "signin::handler:authenticate " user "redirecting to " default-path)
-        {:status 303
-         :session {:identity (get-in user [:vault :uid])
-                   :user user}
-         :headers {"Location" default-path}})
+    {:status 303
+     :session {:identity (get-in user [:vault :uid])
+               :user user}
+     :headers {"Location" default-path}}
     (render opts request "Invalid credentials")))
