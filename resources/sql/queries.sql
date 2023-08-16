@@ -33,7 +33,7 @@ select uid,
        data,
        seen as frequency,
        (julianday('now') - julianday(last_seen)) * 86400 as recency,
-       seen * exp(:lambda * (julianday('now') - julianday(last_seen)) * 86400) as frecency
+       seen / exp(:lambda * (julianday('now') - julianday(last_seen)) * 86400) as frecency
 from memory_keyword
 where uid = :uid
 order by frecency desc limit :n;

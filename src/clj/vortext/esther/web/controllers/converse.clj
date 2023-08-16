@@ -40,6 +40,13 @@
    [:div.status
     [:pre [:strong "username: "] (:username user)]]})
 
+(def lambda
+  {:week  1.6534e-6
+   :day   1.1574e-5
+   :hour  2.7701e-4
+   :month 5.5181e-7})
+
+
 (defn inspect
   [opts user _sid _data]
   {:type :md-mono
@@ -48,7 +55,7 @@
     "**memories**"
     (memories-table (memory/last-memories opts user 5))
     "**keywords**"
-    (keywords-table (memory/frecency-keywords opts user)))})
+    (keywords-table (memory/frecency-keywords opts user (:week lambda) 10)))})
 
 (defn logout
   [_opts _user _sid {:keys [request]}]
