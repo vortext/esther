@@ -42,15 +42,18 @@ function getLocalContext() {
   };
 }
 
+function resizeTextarea(e) {
+  const textarea = e.target;
+  textarea.style.height = 'auto'; // Reset height
+  textarea.style.height = (textarea.scrollHeight) + 'px';
+}
 
 
 function handleTextareaInput(e) {
   const textarea = e.target;
-  var userInput = document.getElementById("user-input").value;
 
   // Resize the textarea
-  textarea.style.height = 'auto'; // Reset height
-  textarea.style.height = (textarea.scrollHeight) + 'px';
+  resizeTextarea(e);
 
   // If the Enter key is pressed with the Shift key
   if (e.key === 'Enter' && e.shiftKey) {
@@ -80,7 +83,7 @@ function handleTextareaInput(e) {
     e.preventDefault(); // Prevent the newline
 
     // Check if the input contains only whitespace
-    if (userInput.trim() === "") {
+    if (textarea.value.trim() === "") {
       // If only whitespace, prevent the default behavior (submission)
       return;
     }
@@ -142,5 +145,4 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById("user-input").focus();
     }, 100);
   });
-
 });

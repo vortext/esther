@@ -2,6 +2,7 @@
   --font-family: "IBM Plex Serif", serif;
   --font-family-mono: "IBM Plex Mono", monospace;
   --font-family-sans: "IBM Plex Sans", sans;
+  --line-height: 1.6;
   --accent: #6F6E6C; /* Replaced with one of the dominant colors */
   --font-color: #242323; /* Darker color for text from the dominant palette */
   --background-color: #EEEEEC; /* Lighter background from the dominant palette */
@@ -28,7 +29,7 @@ html {
   background: var(--background-color);
   color: var(--font-color);
   font-family: var(--font-family);
-  line-height: 1.6; /* Slightly increased line-height for a more book-like feel */
+  line-height: var(--line-height); /* Slightly increased line-height for a more book-like feel */
 }
 
 pre, code {

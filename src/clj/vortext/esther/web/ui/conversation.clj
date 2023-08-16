@@ -64,6 +64,7 @@
       :placeholder "Dear Esther,"
       :name "msg"
       :rows 2
+      :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 
 (defn conversation [_opts request]
