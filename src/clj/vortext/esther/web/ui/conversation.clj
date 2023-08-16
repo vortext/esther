@@ -6,6 +6,7 @@
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
    [markdown.core :as markdown]
+   [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
 
@@ -16,11 +17,14 @@
     [:div.second]
     [:div.third]]])
 
+(defn unescape-newlines [s]
+  (str/replace s "\\n" "\n"))
+
 (defn message [opts request]
   (let [response (:response (converse/answer! opts request))
         {:keys [energy type response]} response
         type (or type :default)
-        md #(markdown/md-to-html-string %)
+        md #(markdown/md-to-html-string (unescape-newlines %))
         result
         (case type
           :htmx response

@@ -51,6 +51,16 @@ body {
   margin-bottom: 1em;
 }
 
+.memory pre {
+  white-space: pre-wrap;       /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  font-family: var(--font-family-mono);
+}
+
+
 #user-value {
   border-bottom: 1px solid var(--subdued-color);
   padding: 1em 0;
