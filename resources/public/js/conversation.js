@@ -45,26 +45,10 @@ function getLocalContext() {
 function handleTextareaInput(e) {
   const textarea = e.target;
   var userInput = document.getElementById("user-input").value;
-  // If the Enter key is pressed without the Shift key
-  if (e.key === 'Enter' && !e.shitKey) {
-    e.preventDefault(); // Prevent the newline
 
-    // Check if the input contains only whitespace
-    if (userInput.trim() === "") {
-      // If only whitespace, prevent the default behavior (submission)
-      return;
-    }
-    // Trigger the submit event for HTMX
-    const form = document.getElementById('message-form');
-    const event = new Event('submit', {
-      'bubbles': true,
-      'cancelable': true
-    });
-    form.dispatchEvent(event);
-    textarea.style.height = 'auto'; // Reset height
-
-    return;
-  }
+  // Resize the textarea
+  textarea.style.height = 'auto'; // Reset height
+  textarea.style.height = (textarea.scrollHeight) + 'px';
 
   // If the Enter key is pressed with the Shift key
   if (e.key === 'Enter' && e.shiftKey) {
@@ -74,20 +58,36 @@ function handleTextareaInput(e) {
     textarea.value = value.substring(0, startPos) + '\n' + value.substring(endPos);
     textarea.selectionStart = textarea.selectionEnd = startPos + 1;
     e.preventDefault();
+    return; // Return early to prevent further execution
   }
 
-  // Resize the textarea
-  textarea.style.height = 'auto'; // Reset height
-  textarea.style.height = (textarea.scrollHeight) + 'px';
-}
+  // If the Enter key is pressed without the Shift key
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); // Prevent the newline
 
+    // Check if the input contains only whitespace
+    if (userInput.trim() === "") {
+      // If only whitespace, prevent the default behavior (submission)
+      return;
+    }
+
+    // Trigger the submit event for HTMX
+    const form = document.getElementById('message-form');
+    const event = new Event('submit', {
+      'bubbles': true,
+      'cancelable': true
+    });
+    form.dispatchEvent(event);
+    textarea.style.height = 'auto'; // Reset height
+  }
+}
 
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
   let msg = document.querySelector('#user-input').value;
   let localContext = JSON.stringify(getLocalContext());
   document.getElementById("user-context").value = localContext;
-  document.getElementById('user-value').textContent = msg;
+  document.getElementById('user-value').innerHTML = marked.parse(msg);
   document.getElementById('user-input').disabled = true;
   document.getElementById('user-input').placeholder = '';
   document.getElementById('user-input').value = '';

@@ -8,7 +8,7 @@
    [vortext.esther.web.ui.signin :as signin]
 
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.util :refer [read-json-value escape-newlines]]
    [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
@@ -74,8 +74,7 @@
 
 (defn get-context
   [request]
-  (read-json-value
-   (get-in request [:params :context] "")))
+  (read-json-value (get-in request [:params :context] "")))
 
 (defn answer!
   [opts request]
@@ -83,7 +82,9 @@
     (let [{:keys [params]} request
           user (get-in request [:session :user])
           sid (:sid params)
-          request (assoc params :context (get-context request))
+          request (-> params
+                      (assoc :context (get-context request))
+                      (assoc :msg (get-in request [:params :msg])))
           data {:request request
                 :ts (unix-ts)}]
       (try

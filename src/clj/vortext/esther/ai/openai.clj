@@ -5,7 +5,7 @@
    [clojure.tools.logging :as log]
    [clojure.string :as str]
    [clojure.java.io :as io]
-   [vortext.esther.util :refer [parse-maybe-json pretty-json]]
+   [vortext.esther.util :refer [parse-maybe-json pretty-json escape-newlines]]
    [jsonista.core :as json]
    [diehard.core :as dh]
    [clojure.set :as set]
@@ -68,9 +68,6 @@
   (if (seq memories)
     memories
     [(first (shuffle (:imagine introductions)))]))
-
-(defn escape-newlines [s]
-  (clojure.string/replace s "\n" "\\\\n"))
 
 (defn openai-api-complete
   [model submission]

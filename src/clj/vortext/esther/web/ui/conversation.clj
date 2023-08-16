@@ -2,11 +2,10 @@
   (:require
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.ui.common :as common]
-   [vortext.esther.util :refer [random-base64]]
+   [vortext.esther.util :refer [random-base64 unescape-newlines]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
    [markdown.core :as markdown]
-   [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
 
@@ -16,9 +15,6 @@
     [:div.first]
     [:div.second]
     [:div.third]]])
-
-(defn unescape-newlines [s]
-  (str/replace s "\\n" "\n"))
 
 (defn message [opts request]
   (let [response (:response (converse/answer! opts request))
@@ -86,6 +82,7 @@
       {:sid sid}
       [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
       [[:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
+       [:script {:src "/resources/public/js/vendor/marked.min.js"}]
        [:script {:src "/resources/public/js/conversation.js"}]])
      [:body
       [:div#container

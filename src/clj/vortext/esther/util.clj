@@ -3,6 +3,7 @@
    [clojure.tools.logging :as log]
    [jsonista.core :as json]
 
+   [clojure.string :as str]
    [buddy.core.codecs :as codecs]
    [buddy.core.nonce :as nonce])
   (:import (java.util Base64)))
@@ -47,3 +48,10 @@
 (defn random-base64
   ([] (random-base64 64))
   ([l] (codecs/bytes->b64-str (random-id l) true)))
+
+;; Newlines
+(defn unescape-newlines [s]
+  (str/replace s "\\n" "\n"))
+
+(defn escape-newlines [s]
+  (clojure.string/replace s "\n" "\\\\n"))
