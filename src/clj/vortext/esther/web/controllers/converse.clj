@@ -5,12 +5,13 @@
    [vortext.esther.config :refer [errors]]
    [camel-snake-kebab.core :as csk]
    [vortext.esther.web.controllers.memory :as memory]
+   [vortext.esther.web.ui.memory :refer [keywords-table memories-table]]
    [vortext.esther.web.ui.signin :as signin]
+
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util :refer [read-json-value pretty-json]]
+   [vortext.esther.util :refer [read-json-value]]
    [clojure.string :as str]
-   [clojure.tools.logging :as log]
-   [table.core :as t]))
+   [clojure.tools.logging :as log]))
 
 
 (defn remember!
@@ -35,37 +36,6 @@
         answer (-> data (assoc :response result))]
     (remember! opts user sid answer)))
 
-(defn keywords-table
-  [opts user]
-  (let [frecency-keywords (memory/frecency-keywords opts user)
-        ks [:value :frecency :frequency :recency]
-        formatted-keywords
-        (map (fn [kw]
-               (-> kw
-                   (update :frecency #(format "%.2f" %))
-                   (update :frequency #(format "%d" %))
-                   (update :recency #(format "%.2f" %))))
-             frecency-keywords)]
-    (table.core/table-str
-     (map #(select-keys % ks) formatted-keywords)
-     :style :github-markdown)))
-
-(defn memories-table
-  [opts user]
-  (let [memories (memory/last-memories opts user 5)
-        responses (map
-                   (fn [memory]
-                     (let [response (:response memory)
-                           kw (:keywords response)]
-                       (assoc
-                        response :keywords
-                        (clojure.string/join ", " kw))))
-                   memories)
-        ks [:emoji :energy :keywords :image-prompt]]
-    (t/table-str
-     (map #(select-keys % ks) responses)
-     :style :github-markdown)))
-
 (defn status
   [_opts user _sid _data]
   {:type :htmx
@@ -79,9 +49,9 @@
    :response
    (str
     "**memories**"
-    (memories-table opts user)
+    (memories-table (memory/last-memories opts user 5))
     "**keywords**"
-    (keywords-table opts user))})
+    (keywords-table (memory/frecency-keywords opts user)))})
 
 (defn logout
   [_opts _user _sid {:keys [request]}]
