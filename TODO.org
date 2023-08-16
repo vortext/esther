@@ -28,14 +28,16 @@ _ more user information in session (vault)
 ** DONE error handling
 ** DONE better integrate keywords in narrative
 ** TODO input checking and santization (also converse.clj)
+** TODO check multi-line markdown
 ** TODO /imagine command
 - hook up StableDiffusion
 - integrate image describe into memory
 - store description and image in memory contents
 ** TODO use image describe as context for converse
-** TODO test infrastructure and test
-** TODO security and hosting
+** TODO something like argparse for commands?
 ** TODO check logging levels (disable debug outside dev)
+** TODO security and hosting
+** TODO test infrastructure and test
 ** TODO better intro flow
 ** TODO /help command
 ** TODO app? legal, ethics, billing, subscriptions, etc.
