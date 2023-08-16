@@ -1,0 +1,6 @@
+#+BEGIN_SRC sqlite :db "../esther_dev.db"
+  select * from memory limit 5;
+#+END_SRC
+
+#+RESULTS:
+| AAABif3i5satGjI5Ot9RxPmXk46SjsXNSqoGydgGzSNYY0u4A3-39winSTAKaX3OcFfRtksqmg5yAZmlIKxIAw | n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg= | AAABif3iyq_rmA | QXbLbJZxSNrgqcJ5/62UP/m+20T/9EIx+fj71Go++xx9hDOwpFdOqUq9Xo67D1ywxpvkhEd/Dv33yI6mB4pEDQs+pdgXjyDpnQjtjDq+Ud4VX5Hl7Q5mUmYQGpxGDzR37RTs4c079/ASvlcD7p7DpFc/ehCfnQ7Uju0L57lr2eVAUyBWyug2JTy/0qwTgANKy53ZS4xVBwx4CyjZ8Ce5QJDvXwq6Q7iJeO7V9PD87Sc3d+s/Y0bzAGNb42dDIdYDu274faQlO1NVnjjjS2Mc7YwqGnHZNRAUk35IJYriYB9TmFGIi1OKvi3ECUbPigZ5d7p6Gf/zvcZnAcWpTfgRrM+8acbKqavikaaZ/N+5CeObkzPXl2Pxxgyh5tMsH1Lsuu6h16LMou/oQXvr4+VXP20Fi5WY32EM+uAb2qmvktGWpDeHuF+oPKSJ21W9JQ1y1431PVUk4mXPWh+wHANh5su9ReWocYmjjVysqFei9x8= | wBscb+2WBA37PoKby/xp0g== | 2023-08-16 10:27:33 |
