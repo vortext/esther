@@ -24,16 +24,17 @@
   [memories keywords]
   (let [conversation-keywords (extract-keywords memories)
         memory-keywords (into #{} (map :value keywords))
-        remainder (set/difference conversation-keywords memory-keywords)]
-    (if (seq remainder)
-      remainder
-      (if (seq memories)
-        #{"user:returning-user"}
-        #{"user:new-user" "user:introductions-need"}))))
+        remainder (set/difference conversation-keywords memory-keywords)
+        to-include (if (seq remainder)
+                     remainder
+                     (if (seq memories)
+                       #{"user:returning-user"}
+                       #{"user:new-user" "user:introductions-need"}))]
+    (log/debug "openai::relevant-keywords:remainder" to-include)
+    to-include))
 
 (defn keywords-to-markdown [keywords]
   (clojure.string/join "\n" (map #(str "- " %) keywords)))
-
 
 (defn generate-context
   [memories keywords]

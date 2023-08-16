@@ -63,7 +63,7 @@
       :autofocus "true"
       :placeholder "Dear Esther,"
       :name "msg"
-      :rows 1
+      :rows 2
       :onkeydown "handleTextareaInput(event);"}]]])
 
 (defn conversation [_opts request]
