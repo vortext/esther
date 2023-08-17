@@ -11,7 +11,6 @@
    [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
-
 (defn status
   [_opts user _sid _args _data]
   {:type :htmx
@@ -36,7 +35,8 @@
    (str
     "**memories**"
     (memory-ui/md-memories-table
-     (memory/last-memories opts user 5))
+     (take 5 (filter (comp :conversation? :response)
+                     (memory/last-memories opts user 10))))
     "**keywords**"
     (memory-ui/md-keywords-table
      (memory/frecency-keywords opts user (:week lambda) 10)))})
