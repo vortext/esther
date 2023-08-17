@@ -37,3 +37,11 @@ select uid,
 from memory_keyword
 where uid = :uid
 order by frecency desc limit :n;
+
+-- :name clear-memory :! :1
+-- :doc clears all memories for a uid
+delete from memory where uid = :uid;
+
+-- :name clear-memory-keywords :! :1
+-- :doc clears all memory keywords for a uid
+delete from memory_keyword where uid = :uid;

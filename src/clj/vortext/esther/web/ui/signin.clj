@@ -8,7 +8,8 @@
 (defn logout-chat
   [_]
   [:form {:action "/logout" :method :post}
-   [:button {:name "logout" :value -1} "Logout"]])
+   [:button.button.button-primary
+    {:name "logout" :value -1} "Click to logout"]])
 
 (defn render
   [{:keys [default-path]} request error-message]
@@ -33,7 +34,8 @@
          [:div.form-group
           [:label "Password"
            [:input {:type "password" :name "password" :class "form-input"}]]]
-         [:button "Sign In"]]]]])))
+         [:button.button.button-primary
+          "Sign In"]]]]])))
 
 
 (defn handler [{:keys [default-path] :as opts} request]

@@ -72,17 +72,50 @@ table th {
   }
 }
 
-
-button {
-  background: var(--accent-primary);
-  color: var(--background-color);
-  border: none;
-  padding: 10px 20px;
+.button {
   font-family: var(--font-family-sans);
-  border-radius: 5px;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  padding: 10px 20px;
+  border: none;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  display: inline-block;
 }
 
-button:hover {
-  background: var(--accent-secondary);
+.button-primary {
+  background-color: var(--accent-primary);
+  color: #FFFFFF;
+}
+
+.button-primary:hover {
+  background-color: var(--accent-secondary);
+}
+
+.button-secondary {
+  background-color: var(--accent-secondary);
+  color: #FFFFFF;
+}
+
+.button-secondary:hover {
+  background-color: #c16840;
+}
+
+.button-info {
+  background-color: var(--desaturated-color1);
+  color: var(--font-color);
+}
+
+.button-info:hover {
+  background-color: var(--subdued-color);
+}
+
+.button-warning {
+  background-color: #FFC107;
+  color: var(--font-color);
+}
+
+.button-warning:hover {
+  background-color: #e0a800;
 }

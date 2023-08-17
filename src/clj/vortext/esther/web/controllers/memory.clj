@@ -74,3 +74,12 @@
 (defn first-image
   [memories]
   (first (keep #(get-in % [:response :image-prompt]) memories)))
+
+(defn clear!
+  [opts user]
+  (let [{:keys [connection query-fn]} (:db opts)
+        {:keys [uid]} (:vault user)]
+    (jdbc/with-transaction [tx connection]
+      (query-fn tx :clear-memory {:uid uid})
+      (query-fn tx :clear-memory-keywords {:uid uid}))
+    nil))

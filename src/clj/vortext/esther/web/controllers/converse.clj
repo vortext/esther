@@ -4,11 +4,11 @@
    [vortext.esther.web.middleware.auth :as auth]
    [vortext.esther.config :refer [errors]]
    [vortext.esther.web.controllers.memory :as memory]
-   [vortext.esther.web.ui.memory :refer [keywords-table memories-table]]
-   [vortext.esther.web.ui.signin :as signin]
+   [vortext.esther.web.ui.memory :as memory-ui]
+   [vortext.esther.web.ui.signin :as signin-ui]
 
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util :refer [read-json-value escape-newlines]]
+   [vortext.esther.util :refer [read-json-value]]
    [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
@@ -38,7 +38,10 @@
   {:type :htmx
    :response
    [:div.status
-    [:pre [:strong "username: "] (:username user)]]})
+    [:pre
+     [:strong "status: "] "ok"
+     [:br]
+     [:strong "username: "] (:username user)]]})
 
 (def lambda
   {:week  1.6534e-6
@@ -53,15 +56,21 @@
    :response
    (str
     "**memories**"
-    (memories-table (memory/last-memories opts user 5))
+    (memory-ui/md-memories-table
+     (memory/last-memories opts user 5))
     "**keywords**"
-    (keywords-table (memory/frecency-keywords opts user (:week lambda) 10)))})
+    (memory-ui/md-keywords-table
+     (memory/frecency-keywords opts user (:week lambda) 10)))})
 
 (defn logout
   [_opts _user _sid {:keys [request]}]
   {:type :htmx
-   :response (signin/logout-chat request)})
+   :response (signin-ui/logout-chat request)})
 
+(defn clear
+  [opts user _sid {:keys [_request]}]
+  {:type :htmx
+   :response (memory-ui/clear-form opts user)})
 
 (defn split-first-word [s]
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
@@ -72,6 +81,7 @@
   (let [command (get-in data [:request :msg])
         commands {:inspect inspect
                   :status status
+                  :clear clear
                   :logout logout}
         [cmd _msg] (split-first-word
                     (apply str (rest command)))]
@@ -85,25 +95,24 @@
 
 (defn answer!
   [opts request]
-  (when-let [_ (auth/authenticated? request)]
-    (let [{:keys [params]} request
-          user (get-in request [:session :user])
-          sid (:sid params)
-          request (-> params
-                      (assoc :context (get-context request))
-                      (assoc :msg (get-in request [:params :msg])))
-          data {:request request
-                :ts (unix-ts)}]
-      (try
-        (if (str/starts-with? (:msg params) "/")
-          (-> data
-              (assoc :response (command opts user sid data)))
+  (let [{:keys [params]} request
+        user (get-in request [:session :user])
+        sid (:sid params)
+        request (-> params
+                    (assoc :context (get-context request))
+                    (assoc :msg (get-in request [:params :msg])))
+        data {:request request
+              :ts (unix-ts)}]
+    (try
+      (if (str/starts-with? (:msg params) "/")
+        (-> data
+            (assoc :response (command opts user sid data)))
 
-          ;; Converse
-          (-> (complete! opts user sid data)
-              (assoc-in [:response :type] :md-serif)))
-        (catch Exception e
-          (do (log/warn e)
-              (assoc data :response (:internal-server-error errors))))))))
+        ;; Converse
+        (-> (complete! opts user sid data)
+            (assoc-in [:response :type] :md-serif)))
+      (catch Exception e
+        (do (log/warn e)
+            (assoc data :response (:internal-server-error errors)))))))
 
 ;;; Scratch

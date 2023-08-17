@@ -7,6 +7,7 @@
    [vortext.esther.web.middleware.auth :as auth]
    [vortext.esther.web.ui.conversation :as conversation]
    [vortext.esther.web.ui.signin :as signin]
+   [vortext.esther.web.ui.memory :as memory]
 
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.auth.accessrules :refer [wrap-access-rules]]
@@ -33,7 +34,9 @@
         :headers {"Location" "/"}})}]
    ["/user/conversation"
     {:get (partial conversation/render opts)
-     :post (partial conversation/message opts)}]])
+     :post (partial conversation/message opts)}]
+   ["/user/clear"
+    {:post (partial memory/clear opts)}]])
 
 (defn on-error
   [req _]

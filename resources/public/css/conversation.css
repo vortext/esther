@@ -61,6 +61,9 @@ body {
   font-family: var(--font-family-mono);
 }
 
+.memory form.confirmation button:first-child {
+    margin-right: 1em;
+}
 
 #user-value {
   border-bottom: 1px solid var(--subdued-color);
@@ -158,6 +161,7 @@ body {
   left: 40px;
   animation-delay: -0.1s;
 }
+
 
 @keyframes loading {
   0% { transform: translateY(0) scale(0.9); }
