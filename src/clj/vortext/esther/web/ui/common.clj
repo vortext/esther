@@ -3,12 +3,6 @@
    [vortext.esther.util :refer [random-base64]]
    [jsonista.core :as json]))
 
-(def ibm-plex "IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;1,400;1,500&display=swap")
-
-(defn font-link [font-param]
-  [:link {:rel "stylesheet"
-          :href (str "https://fonts.googleapis.com/css2?family=" font-param)}])
-
 (defn json-config
   [config]
   (let [sid (random-base64 10)
@@ -25,12 +19,9 @@
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    [:title "Esther"]
    (json-config config)
-   [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
-   [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
-   ;; Fonts
-   (font-link ibm-plex)
 
    ;; Styles
+   [:link {:rel "stylesheet" :href "/resources/public/css/fonts.css"}]
    [:link {:rel "stylesheet" :href "/resources/public/css/main.css"}]
    (concat styles)
 

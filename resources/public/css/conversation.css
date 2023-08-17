@@ -7,8 +7,9 @@ body {
   margin: 3em auto;
   padding-bottom: 6em;
 }
+
 #title {
-  font-weight: 300;
+  font-weight: lighter;
   text-align: center;
   color: var(--secondary-color); /* Subtle secondary color for title */
   margin-bottom: 1em;
