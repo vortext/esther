@@ -116,11 +116,13 @@
 (defn complete
   [_ memories keywords request]
   (let [last-memories (vec (take-last 10 memories))
+        prompt (generate-prompt last-memories keywords)
+
         for-conv (if (seq last-memories)
                    last-memories
                    [(first (shuffle (:imagine introductions)))])
-        prompt (generate-prompt for-conv keywords)
         conv (format-for-completion for-conv)
+
         last-image (first-image (reverse memories))
         defaults {:keywords (take 3 keywords)
                   :image-prompt last-image}
