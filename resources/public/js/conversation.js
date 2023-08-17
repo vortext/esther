@@ -15,6 +15,29 @@ function getSentimentEnergy() {
   return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
 }
 
+function getCurrentSeason(lat) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const marchEquinox = new Date(year, 2, 21);
+  const juneSolstice = new Date(year, 5, 21);
+  const septemberEquinox = new Date(year, 8, 23);
+  const decemberSolstice = new Date(year, 11, 21);
+
+  if (lat > 0) {
+    // Northern Hemisphere
+    if (now >= marchEquinox && now < juneSolstice) return 'spring';
+    if (now >= juneSolstice && now < septemberEquinox) return 'summer';
+    if (now >= septemberEquinox && now < decemberSolstice) return 'autumn';
+    return 'winter';
+  } else {
+    // Southern Hemisphere
+    if (now >= marchEquinox && now < juneSolstice) return 'autumn';
+    if (now >= juneSolstice && now < septemberEquinox) return 'winter';
+    if (now >= septemberEquinox && now < decemberSolstice) return 'spring';
+    return 'summer';
+  }
+}
+
 function getTimeOfDay(latitude, longitude) {
   const date = new Date();
 
@@ -37,6 +60,7 @@ function getTimeOfDay(latitude, longitude) {
 
 function getLocalContext() {
   return {
+    "current-season": getCurrentSeason(window.appConfig.latitude),
     "time-of-day": getTimeOfDay(window.appConfig.latitude,
                                 window.appConfig.longitude)
   };
