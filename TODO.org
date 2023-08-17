@@ -28,10 +28,10 @@ _ more user information in session (vault)
 ** DONE error handling
 ** DONE better integrate keywords in narrative
 ** DONE check multi-line markdown
-** TODO local version of fonts
-** TODO input checking and validation (also converse.clj)
+** DONE local version of fonts
+** DONE input checking and validation (also converse.clj)
 ** TODO something like argparse for commands?
-** TODO /reset command (clear all memory for uid)
+** DONE /clear command (clear all memory for uid)
 ** TODO /imagine command
 - hook up StableDiffusion
 - integrate image describe into memory
