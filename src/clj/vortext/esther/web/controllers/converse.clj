@@ -12,19 +12,6 @@
    [clojure.tools.logging :as log]))
 
 
-(defn complete!
-  [opts user sid data]
-  (let [last-memories (reverse (memory/last-memories opts user 10))
-        keyword-memories (memory/frecency-keywords opts user)
-        result (openai/complete
-                opts
-                last-memories
-                keyword-memories
-                (:request data))]
-    (memory/remember!
-     opts user sid
-     (-> data (assoc :response result)))))
-
 (defn status
   [_opts user _sid _args _data]
   {:type :htmx
@@ -68,7 +55,7 @@
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
     [first-word (or rest "")]))
 
-(defn command
+(defn command!
   [opts user sid data]
   (let [command (get-in data [:request :msg])
         commands {:inspect inspect
@@ -76,10 +63,30 @@
                   :clear clear
                   :logout logout}
         [cmd args] (split-first-word
-                    (apply str (rest command)))]
-    (if-let [impl (get commands (keyword cmd))]
-      (impl opts user sid args data)
-      (:invalid-command errors))))
+                    (apply str (rest command)))
+        response (if-let [impl (get commands (keyword cmd))]
+                   (impl opts user sid args data)
+                   (:invalid-command errors))]
+    (-> data (assoc :response response))))
+
+(defn converse!
+  [opts user _sid data]
+  (let [conversation (filter
+                      (comp :conversation? :response)
+                      (memory/last-memories opts user 10))
+        last-memories (reverse conversation)
+        keyword-memories (memory/frecency-keywords opts user)
+        result (openai/complete
+                opts
+                last-memories
+                keyword-memories
+                (:request data))]
+    (-> data
+        (assoc
+         :response
+         (-> result
+             (assoc :conversation? true)
+             (assoc :type :md-serif))))))
 
 (defn get-context
   [request]
@@ -89,12 +96,8 @@
   [opts user sid data]
   (try
     (if (str/starts-with? (get-in data [:request :msg]) "/")
-      (-> data
-          (assoc :response (command opts user sid data)))
-
-      ;; Converse
-      (-> (complete! opts user sid data)
-          (assoc-in [:response :type] :md-serif)))
+      (command! opts user sid data)
+      (converse! opts user sid data))
     (catch Exception e
       (do (log/warn e)
           (assoc data :response (:internal-server-error errors))))))
@@ -120,6 +123,10 @@
               :ts (unix-ts)}]
     (if-not (m/validate request-schema request)
       (:unrecognized-input errors)
-      (respond! opts user sid data))))
+      (let [memory (respond! opts user sid data)
+            type (keyword (:type (:response  memory)))]
+        (if-not (= type :htmx)
+          (memory/remember! opts user sid memory)
+          memory)))))
 
 ;;; Scratch

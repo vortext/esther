@@ -141,11 +141,4 @@ document.addEventListener('DOMContentLoaded', function() {
   sidElements.forEach(function(element) {
     element.value = window.appConfig.sid;
   });
-
-  // Focus input on window focus
-  document.addEventListener('focus', function() {
-    setTimeout(() => {
-      document.getElementById("user-input").focus();
-    }, 100);
-  });
 });

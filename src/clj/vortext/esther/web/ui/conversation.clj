@@ -30,7 +30,7 @@
   (let [{:keys [request response]} memory
         {:keys [energy type]} response
         response-msg (:response response)
-        type (or type :default)
+        type (or (keyword type) :default)
         msg (:msg request)]
     [:div.memory
      {"data-energy" energy}
@@ -44,7 +44,7 @@
           :md-mono (display-html response-msg)
           :md-sans (display-html response-msg)
           :md-serif (display-html response-msg)
-          :default (display-html response-msg)))]]))
+          (display-html response-msg)))]]))
 
 (defn message [opts request]
   (ui (memory-container (converse/answer! opts request))))
