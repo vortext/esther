@@ -8,8 +8,7 @@
    [vortext.esther.util.time :as time]
    [clojure.string :as str]
    [markdown.core :as markdown]
-   [clojure.tools.logging :as log])
-  (:import [com.vdurmont.emoji EmojiParser]))
+   [clojure.tools.logging :as log]))
 
 
 (def loading
@@ -35,7 +34,7 @@
     [:div.memory
      {"data-energy" energy}
      [:div.request
-      (display-html (EmojiParser/parseToUnicode msg))]
+      (display-html msg)]
      [:div.response {:class (name type)}
       (if (and (string? response) (str/blank? response))
         [:span.md-sans "Silence."]
@@ -66,17 +65,17 @@
      {:type "hidden"
       :name "context"
       :value "{}"}]
-    [:input.session-sid
+    [:input#user-sid.session-sid
      {:type "hidden"
       :name "sid"
       :value ""}]
     [:textarea#user-input
      {:autocomplete "off"
       :minlength 1
+      :name "msg"
       :maxlength 1024
       :autofocus "true"
       :placeholder "Dear Esther,"
-      :name "msg"
       :rows 2
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])

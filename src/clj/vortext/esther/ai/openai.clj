@@ -11,11 +11,10 @@
    [diehard.core :as dh]
    [clojure.set :as set]
    [malli.core :as m]
-
+   [vortext.esther.util.emoji :as emoji]
    [malli.error :as me]
    [vortext.esther.config :refer [examples errors introductions]]
-   [wkok.openai-clojure.api :as api])
-  (:import [com.vdurmont.emoji EmojiManager]))
+   [wkok.openai-clojure.api :as api]))
 
 (def model "gpt-3.5-turbo")
 
@@ -72,7 +71,7 @@
                [:fn {:error/message "response should be at most 2048 chars"}
                 (fn [s] (<= (count s) 2048))]]]
    [:emoji [:fn {:error/message "should contain a valid emoji"}
-            (fn [s] (EmojiManager/containsEmoji ^String s))]] ;; Using emoji-java
+            (fn [s] (emoji/emoji? s))]]
    [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
              (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
 

@@ -1,19 +1,5 @@
-function setSentiment(sentimentValue) {
-  sentimentValue = Math.max(0, Math.min(1, sentimentValue));
-  const duration = 1.2 - sentimentValue * 0.4;
-  const ease = `cubic-bezier(${0.2 + sentimentValue * 0.3}, 0.5, 0.5, 1)`;
-  const balls = document.querySelectorAll('.loading div');
-
-  balls.forEach((ball) => {
-    ball.style.animationDuration = `${duration}s`;
-    ball.style.animationTimingFunction = ease;
-  });
-}
-
-function getSentimentEnergy() {
-  const lastMemory = document.querySelector("#history .memory:last-child");
-  return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
-}
+var emoji = new EmojiConvertor();
+emoji.replace_mode = "unified";
 
 function getCurrentSeason(lat) {
   const now = new Date();
@@ -123,27 +109,49 @@ function handleTextareaInput(e) {
   }
 }
 
-var emoji = new EmojiConvertor();
-emoji.replace_mode = "unified";
+function setSentiment(sentimentValue) {
+  sentimentValue = Math.max(0, Math.min(1, sentimentValue));
+  const duration = 1.2 - sentimentValue * 0.4;
+  const ease = `cubic-bezier(${0.2 + sentimentValue * 0.3}, 0.5, 0.5, 1)`;
+  const balls = document.querySelectorAll('.loading div');
+
+  balls.forEach((ball) => {
+    ball.style.animationDuration = `${duration}s`;
+    ball.style.animationTimingFunction = ease;
+  });
+}
+
+function getSentimentEnergy() {
+  const lastMemory = document.querySelector("#history .memory:last-child");
+  return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
+}
 
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
+  // Get the form and input elements
   let userInput = document.getElementById('user-input');
-  let msg = userInput.value;
-  let localContext = JSON.stringify(getLocalContext());
-  document.getElementById("user-context").value = localContext;
-  let userValue = marked.parse(emoji.replace_colons(msg));
-  document.getElementById("user-value").innerHTML = userValue;
+  let userValue = document.getElementById("user-value");
+  let userContext = document.getElementById("user-context");
+  let userSid = document.getElementById("user-sid");
+
+  // Store the values in the hidden input fields
+  userContext.value = JSON.stringify(getLocalContext());
+  userSid.value = window.appConfig.sid;
+
+  // Update the UI
+  let msg = emoji.replace_colons(userInput.value);
+  userValue.innerHTML = marked.parse(msg);
   userInput.disabled = true;
   userInput.placeholder = '';
   userInput.value = '';
 }
 
+
 function afterConverseRequest() {
   let userInput = document.getElementById('user-input');
+  userInput.scrollIntoView({behavior: 'smooth'});
   userInput.focus();
   userInput.disabled = false;
-  userInput.scrollIntoView({behavior: 'smooth'});
 }
 
 function setPosition(lat, lon) {

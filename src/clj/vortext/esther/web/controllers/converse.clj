@@ -8,6 +8,7 @@
    [malli.core :as m]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.util.emoji :as emoji]
    [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
@@ -115,9 +116,10 @@
   (let [{:keys [params]} request
         user (get-in request [:session :user])
         sid (:sid params)
+        msg (emoji/parse-to-unicode
+             (get-in request [:params :msg]))
         request {:context (get-context request)
-                 :msg (get-in request [:params :msg])}
-
+                 :msg msg}
         data {:request request
               :ts (unix-ts)}]
     (if-not (m/validate request-schema request)
