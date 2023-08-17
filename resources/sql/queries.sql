@@ -19,6 +19,14 @@ select gid, data, iv from memory
 where uid = :uid
 order by created desc limit :n;
 
+-- :name todays-memories :? :*
+-- :doc Get the memories for the current day (from new to old)
+select gid, data, iv from memory
+where uid = :uid
+  and created_date = date('now')
+order by created desc;
+
+
 -- :name see-keyword :! :1
 -- :doc increments the seen counter of the keyword for uid
 insert into memory_keyword (uid, fingerprint, data, iv)

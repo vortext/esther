@@ -37,7 +37,9 @@
 
 (defn clear-form
   [_opts _user]
-  [:form.confirmation {:hx-post "/user/clear" :hx-swap "outerHTML"}
+  [:form.confirmation
+   {:hx-post "/user/clear"
+    :hx-swap "outerHTML"}
    [:button.button.button-primary
     {:name "action" :value "clear"} "Clear memory"]
    [:button.button.button-info

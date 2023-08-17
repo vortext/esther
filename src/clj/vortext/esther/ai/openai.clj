@@ -110,7 +110,6 @@
 
 (defn openai-api-complete
   [model submission]
-
   (dh/with-retry
       {:retry-on Exception
        :max-retries 2
@@ -136,9 +135,10 @@
 
 (defn complete
   [_ memories keywords request]
-  (let [prompt (generate-prompt memories keywords)
+  (let [last-memories (vec (take-last 10 memories))
+        prompt (generate-prompt last-memories keywords)
         ;;_ (log/debug "openai::complete:prompt" prompt)
-        conv (format-for-completion (get-contents-memories memories))
+        conv (format-for-completion (get-contents-memories last-memories))
         submission
         (concat
          [{:role "system"

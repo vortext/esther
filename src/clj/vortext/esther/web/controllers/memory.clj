@@ -48,6 +48,14 @@
       user
       (query-fn :last-n-memories {:uid uid :n n})))))
 
+(defn todays-memories
+  [opts user]
+  (let [{:keys [query-fn]} (:db opts)
+        uid (get-in user [:vault :uid])]
+    (construct-memories
+     user
+     (query-fn :todays-memories {:uid uid}))))
+
 (defn frecency-keywords
   "λ (lamda) is a decay constant that determines the rate of
     forgetting. The value of lambda will determine how quickly the

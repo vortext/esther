@@ -22,7 +22,7 @@
 
 (defn complete!
   [opts user sid data]
-  (let [last-memories (reverse (memory/last-memories opts user))
+  (let [last-memories (reverse (memory/todays-memories opts user))
         keyword-memories (memory/frecency-keywords opts user)
         result (openai/complete
                 opts

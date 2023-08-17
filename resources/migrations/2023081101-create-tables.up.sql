@@ -4,12 +4,13 @@ create table memory (
     sid                     text not null,
     data                    text not null,
     iv                      iv not null,
-    created                 timestamp with time zone default current_timestamp
+    created                 timestamp with time zone default current_timestamp,
+    created_date            text default (strftime('%Y-%m-%d', current_timestamp))
 );
 --;;
 create index memory_created on memory(uid, created);
 --;;
-create index memory_access on memory(uid, sid);
+create index memory_created_date on memory(uid, created_date);
 --;;
 create index memory_uid on memory(uid);
 --;;

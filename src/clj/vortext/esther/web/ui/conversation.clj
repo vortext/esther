@@ -1,6 +1,7 @@
 (ns vortext.esther.web.ui.conversation
   (:require
    [vortext.esther.web.controllers.converse :as converse]
+   [vortext.esther.web.controllers.memory :refer [todays-memories]]
    [vortext.esther.web.ui.common :as common]
    [vortext.esther.util :refer [random-base64 unescape-newlines]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
@@ -18,26 +19,35 @@
     [:div.second]
     [:div.third]]])
 
-(defn message [opts request]
-  (let [response (:response (converse/answer! opts request))
-        {:keys [energy type response]} response
+(defn display-html
+  [s]
+  (if (and (string? s) (not (str/blank? s)))
+    (markdown/md-to-html-string (unescape-newlines s))
+    "<span></span>"))
+
+(defn memory-container
+  [memory]
+  (let [{:keys [request response]} memory
+        {:keys [energy type]} response
+        response-msg (:response response)
         type (or type :default)
-        md #(markdown/md-to-html-string (unescape-newlines %))
-        request (get-in request [:params :msg])
-        md-request (md (EmojiParser/parseToUnicode request))]
-    (ui
-     [:div.memory
-      {"data-energy" energy}
-      [:div.request md-request]
-      [:div.response {:class (name type)}
-       (if (and (string? response) (str/blank? response))
-         [:span.md-sans "Silence."]
-         (case type
-           :htmx response
-           :md-mono (md response)
-           :md-sans (md response)
-           :md-serif (md response)
-           :default (md response)))]])))
+        msg (:msg request)]
+    [:div.memory
+     {"data-energy" energy}
+     [:div.request
+      (display-html (EmojiParser/parseToUnicode msg))]
+     [:div.response {:class (name type)}
+      (if (and (string? response) (str/blank? response))
+        [:span.md-sans "Silence."]
+        (case type
+          :htmx response-msg
+          :md-mono (display-html response-msg)
+          :md-sans (display-html response-msg)
+          :md-serif (display-html response-msg)
+          :default (display-html response-msg)))]]))
+
+(defn message [opts request]
+  (ui (memory-container (converse/answer! opts request))))
 
 
 (defn msg-input [_request]
@@ -71,14 +81,18 @@
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 
-(defn conversation [_opts request]
-  [:div.container
-   [:div#conversation.loading-state
-    [:div#history]
-    [:div#user-echo
-     [:div#user-value {:class "user-message"}]]
-    [:div#loading-response.loading-state loading]
-    (msg-input request)]])
+(defn conversation [opts request]
+  (let [user (get-in request [:session :user])
+        memories (reverse (todays-memories opts user))]
+    [:div.container
+     [:div#conversation.loading-state
+      [:div#history
+       (for [m memories]
+         (memory-container m))]
+      [:div#user-echo
+       [:div#user-value {:class "user-message"}]]
+      [:div#loading-response.loading-state loading]
+      (msg-input request)]]))
 
 (defn render [opts request]
   (let [sid (random-base64 10)]
