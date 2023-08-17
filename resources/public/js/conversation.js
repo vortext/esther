@@ -58,6 +58,13 @@ function resizeTextarea(e) {
   textarea.style.height = (textarea.scrollHeight) + 'px';
 }
 
+function focusTextArea(textarea) {
+  textarea.focus();
+  // Simulate a "right arrow" key press
+  const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+  textarea.dispatchEvent(event);
+
+}
 
 function handleTextareaInput(e) {
   const textarea = e.target;
@@ -76,13 +83,9 @@ function handleTextareaInput(e) {
 
     // Apply the new selection asynchronously
     setTimeout(() => {
-      textarea.focus();
       textarea.selectionStart = newCaretPos;
       textarea.selectionEnd = newCaretPos;
-
-      // Simulate a "right arrow" key press
-      const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-      textarea.dispatchEvent(event);
+      focusTextArea(textarea);
     }, 0);
 
     return; // Return early to prevent further execution
@@ -148,10 +151,14 @@ function beforeConverseRequest() {
 
 
 function afterConverseRequest() {
-  let userInput = document.getElementById('user-input');
-  userInput.scrollIntoView({behavior: 'smooth'});
-  userInput.focus();
-  userInput.disabled = false;
+  document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
+  let textarea = document.getElementById('user-input');
+
+  textarea.disabled = false;
+  setTimeout(() => {
+    console.log("focus!!");
+    focusTextArea(textarea);
+  }, 60);
 }
 
 function setPosition(lat, lon) {
@@ -172,8 +179,8 @@ navigator.geolocation.getCurrentPosition(
 
 
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   var sidElements = document.querySelectorAll('.session-sid');
-  document.getElementById('user-input').scrollIntoView({behavior: 'smooth'});
 
   sidElements.forEach(function(element) {
     element.value = window.appConfig.sid;

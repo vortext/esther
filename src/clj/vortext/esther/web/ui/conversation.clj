@@ -107,4 +107,5 @@
       [:div#container
        [:h1#title "Esther"]
        [:h2#subtitle (time/human-today) "."]
-       (conversation opts request)]])))
+       (conversation opts request)
+       [:div#bottom]]])))
