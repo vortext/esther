@@ -14,23 +14,22 @@
     (query-fn tx :see-keyword content)))
 
 (defn remember!
-  ([opts user sid content]
-   (remember! opts user sid content []))
-  ([opts user sid content keywords]
-   (let [{:keys [connection query-fn]} (:db opts)
-         {:keys [uid secret]} (:vault user)
-         gid (random-base64)
-         {:keys [data iv]} (secrets/encrypt-for-sql content secret)
-         memory {:gid gid
-                 :uid uid
-                 :sid sid
-                 :data data
-                 :iv iv}]
-     (jdbc/with-transaction [tx connection]
-       (query-fn tx :push-memory memory)
-       (doall
-        (map (fn [kw] (see-keyword query-fn tx user kw)) keywords)))
-     content)))
+  [opts user sid content]
+  (let [{:keys [connection query-fn]} (:db opts)
+        {:keys [uid secret]} (:vault user)
+        gid (random-base64)
+        {:keys [data iv]} (secrets/encrypt-for-sql content secret)
+        memory {:gid gid
+                :uid uid
+                :sid sid
+                :data data
+                :iv iv}]
+    (jdbc/with-transaction [tx connection]
+      (query-fn tx :push-memory memory)
+      (doall
+       (map (fn [kw] (see-keyword query-fn tx user kw))
+            (get (:response content) :keywords []))))
+    content))
 
 (defn construct-memories
   [user contents]
@@ -83,11 +82,22 @@
   [memories]
   (first (keep #(get-in % [:response :image-prompt]) memories)))
 
-(defn clear!
-  [opts user]
+(defn clear-all!
+  [opts user _]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (jdbc/with-transaction [tx connection]
-      (query-fn tx :clear-memory {:uid uid})
-      (query-fn tx :clear-memory-keywords {:uid uid}))
-    nil))
+      (query-fn tx :clear-all-memory-keywords {:uid uid})
+      (query-fn tx :clear-all-memory {:uid uid}))))
+
+(defn clear-today!
+  [opts user _]
+  (let [{:keys [query-fn]} (:db opts)
+        {:keys [uid]} (:vault user)]
+    (query-fn :clear-todays-memory {:uid uid})))
+
+(defn clear-session!
+  [opts user sid]
+  (let [{:keys [query-fn]} (:db opts)
+        {:keys [uid]} (:vault user)]
+    (query-fn :clear-session-memory {:uid uid :sid sid})))

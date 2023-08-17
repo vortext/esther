@@ -46,10 +46,18 @@ from memory_keyword
 where uid = :uid
 order by frecency desc limit :n;
 
--- :name clear-memory :! :1
+-- :name clear-all-memory :! :1
 -- :doc clears all memories for a uid
 delete from memory where uid = :uid;
 
--- :name clear-memory-keywords :! :1
+-- :name clear-todays-memory :! :1
+-- :doc clears todays memories for a uid
+delete from memory where uid = :uid and created_date = date('now');
+
+-- :name clear-session-memory :! :1
+-- :doc clears all memories for a uid and sid (session id)
+delete from memory where uid = :uid and sid = :sid;
+
+-- :name clear-all-memory-keywords :! :1
 -- :doc clears all memory keywords for a uid
 delete from memory_keyword where uid = :uid;

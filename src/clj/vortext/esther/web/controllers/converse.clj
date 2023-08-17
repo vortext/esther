@@ -12,14 +12,6 @@
    [clojure.tools.logging :as log]))
 
 
-(defn remember!
-  [opts user sid answer]
-  (let [response (:response answer)
-        keywords (get response :keywords [])
-        _ (log/debug "converse::remember![sid,keywords]" sid keywords)]
-    (memory/remember! opts user sid answer keywords)))
-
-
 (defn complete!
   [opts user sid data]
   (let [last-memories (reverse (memory/last-memories opts user 10))
@@ -28,12 +20,13 @@
                 opts
                 last-memories
                 keyword-memories
-                (:request data))
-        answer (-> data (assoc :response result))]
-    (remember! opts user sid answer)))
+                (:request data))]
+    (memory/remember!
+     opts user sid
+     (-> data (assoc :response result)))))
 
 (defn status
-  [_opts user _sid _data]
+  [_opts user _sid _args _data]
   {:type :htmx
    :response
    [:div.status
@@ -50,7 +43,7 @@
 
 
 (defn inspect
-  [opts user _sid _data]
+  [opts user _sid _args _data]
   {:type :md-mono
    :response
    (str
@@ -62,14 +55,14 @@
      (memory/frecency-keywords opts user (:week lambda) 10)))})
 
 (defn logout
-  [_opts _user _sid {:keys [request]}]
+  [_opts _user _sid _args {:keys [request]}]
   {:type :htmx
    :response (signin-ui/logout-chat request)})
 
 (defn clear
-  [opts user _sid {:keys [_request]}]
+  [opts user sid args {:keys [_request]}]
   {:type :htmx
-   :response (memory-ui/clear-form opts user)})
+   :response (memory-ui/clear-form opts user sid args)})
 
 (defn split-first-word [s]
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
@@ -82,10 +75,10 @@
                   :status status
                   :clear clear
                   :logout logout}
-        [cmd _msg] (split-first-word
+        [cmd args] (split-first-word
                     (apply str (rest command)))]
     (if-let [impl (get commands (keyword cmd))]
-      (impl opts user sid data)
+      (impl opts user sid args data)
       (:invalid-command errors))))
 
 (defn get-context
