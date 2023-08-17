@@ -22,14 +22,12 @@
 
 (defn md-memories-table
   [memories]
-  (let [responses (map
-                   (fn [memory]
-                     (let [response (:response memory)
-                           kw (:keywords response)]
-                       (assoc
-                        response :keywords
-                        (str/join ", " kw))))
-                   memories)
+  (let [responses
+        (map
+         (fn [memory]
+           (let [{:keys [keywords response]} memory]
+             (assoc response :keywords (str/join ", " keywords))))
+         memories)
         ks [:emoji :energy :keywords :image-prompt]]
     (t/table-str
      (map #(select-keys % ks) responses)
@@ -49,7 +47,8 @@
   [opts {:keys [params] :as request}]
   (let [action (keyword (:action params))
         user (get-in request [:session :user])]
-    (ui (if (= action :clear)
-          (do (memory/clear! opts user)
-              [:span "Wiped all memories of you."])
-          [:span "Let us continue."]))))
+    (if (= action :clear)
+      (-> (ui (do (memory/clear! opts user)
+                  [:span "Wiped all memories of you."]))
+          (assoc :headers {"HX-Redirect" "/"}))
+      (ui [:span "Let us continue."]))))

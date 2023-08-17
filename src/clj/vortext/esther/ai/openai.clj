@@ -87,13 +87,10 @@
                [:string {:min 1, :max 2048}]
                [:fn {:error/message "response should be at most 2048 chars"}
                 (fn [s] (<= (count s) 2048))]]]
-   [:emoji [:fn {:error/message "should be a valid emoji"}
+   [:emoji [:fn {:error/message "should contain a valid emoji"}
             (fn [s] (EmojiManager/containsEmoji ^String s))]] ;; Using emoji-java
    [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
-             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]
-   [:keywords [:vector {:optional true} :string]]
-   [:image-prompt [:key :optional]
-    [:string {:optional true, :min 1}]]])
+             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
 
 
 (defn validate

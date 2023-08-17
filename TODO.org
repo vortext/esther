@@ -30,7 +30,7 @@ _ more user information in session (vault)
 ** DONE check multi-line markdown
 ** DONE local version of fonts
 ** DONE input checking and validation (also converse.clj)
-** TODO something like argparse for commands?
+** DONE Remember and show for a day, clear page every day (aligns with the prominent date)
 ** DONE /clear command (clear all memory for uid)
 ** TODO /imagine command
 - hook up StableDiffusion
@@ -49,4 +49,3 @@ _ more user information in session (vault)
 ** TODO llma locally?
 ** TODO stablediffusion locally?
 ** TODO offline desktop app?
-** TODO Remember and show for a day, clear page every day (aligns with the prominent date)
