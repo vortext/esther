@@ -99,12 +99,15 @@ function handleTextareaInput(e) {
   }
 }
 
+var emoji = new EmojiConvertor();
+emoji.replace_mode = "unified";
+
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
   let msg = document.querySelector('#user-input').value;
   let localContext = JSON.stringify(getLocalContext());
   document.getElementById("user-context").value = localContext;
-  document.getElementById('user-value').innerHTML = marked.parse(msg);
+  document.getElementById('user-value').innerHTML = marked.parse(emoji.replace_colons(msg));
   document.getElementById('user-input').disabled = true;
   document.getElementById('user-input').placeholder = '';
   document.getElementById('user-input').value = '';

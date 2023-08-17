@@ -7,7 +7,8 @@
    [vortext.esther.util.time :as time]
    [clojure.string :as str]
    [markdown.core :as markdown]
-   [clojure.tools.logging :as log]))
+   [clojure.tools.logging :as log])
+  (:import [com.vdurmont.emoji EmojiParser]))
 
 
 (def loading
@@ -22,7 +23,8 @@
         {:keys [energy type response]} response
         type (or type :default)
         md #(markdown/md-to-html-string (unescape-newlines %))
-        md-request (md (get-in request [:params :msg]))]
+        request (get-in request [:params :msg])
+        md-request (md (EmojiParser/parseToUnicode request))]
     (ui
      [:div.memory
       {"data-energy" energy}
@@ -84,7 +86,8 @@
      (common/head
       {:sid sid}
       [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
-      [[:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
+      [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]
+       [:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
        [:script {:src "/resources/public/js/vendor/marked.min.js"}]
        [:script {:src "/resources/public/js/conversation.js"}]])
      [:body

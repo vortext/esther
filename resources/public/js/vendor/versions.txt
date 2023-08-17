@@ -1,3 +1,4 @@
 https://unpkg.com/htmx.org@1.9.4/dist/htmx.min.js
 https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js
 https://cdn.jsdelivr.net/npm/marked/marked.min.js
+https://cdnjs.cloudflare.com/ajax/libs/emoji-js/3.7.0/emoji.min.js
