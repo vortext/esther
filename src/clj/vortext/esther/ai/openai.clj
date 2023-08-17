@@ -10,8 +10,12 @@
    [jsonista.core :as json]
    [diehard.core :as dh]
    [clojure.set :as set]
+   [malli.core :as m]
+
+   [malli.error :as me]
    [vortext.esther.config :refer [examples errors introductions]]
-   [wkok.openai-clojure.api :as api]))
+   [wkok.openai-clojure.api :as api])
+  (:import [com.vdurmont.emoji EmojiManager]))
 
 (def model "gpt-3.5-turbo")
 
@@ -76,8 +80,37 @@
     memories
     [(first (shuffle (:imagine introductions)))]))
 
+
+(def response-schema
+  [:map
+   [:response [:and
+               [:string {:min 1, :max 2048}]
+               [:fn {:error/message "response should be at most 2048 chars"}
+                (fn [s] (<= (count s) 2048))]]]
+   [:emoji [:fn {:error/message "should be a valid emoji"}
+            (fn [s] (EmojiManager/isEmoji ^String s))]] ;; Using emoji-java
+   [:energy [:or [:string {:min 0, :max 10}]
+             [:fn {:error/message "Energy should be a float between 0 and 1"}
+              (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]]
+
+   [:keywords [:vector {:optional true} :string]]
+  [:image-prompt [:string {:optional true, :min 1}]]])
+
+
+(defn validate
+  [schema obj]
+  (if (not (m/validate schema obj))
+    (let [error (m/explain schema obj)
+          humanized (me/humanize error)]
+      (log/warn "openai::validate:error" humanized)
+      (-> (:validation-error errors)
+          (assoc :details humanized)))
+    ;; Valid
+    obj))
+
 (defn openai-api-complete
   [model submission]
+
   (dh/with-retry
       {:retry-on Exception
        :max-retries 2
@@ -95,9 +128,11 @@
                        :messages submission}
                       {:api-key (:openai-api-key (secrets))})
           first-choice ((comp :content :message)
-                        (get-in completion [:choices 0]))
-          json-obj? (parse-maybe-json (escape-newlines first-choice))]
-      (if json-obj? json-obj? (:json-parse-error errors)))))
+                        (get-in completion [:choices 0]))]
+      (if-let [json-obj? (parse-maybe-json (escape-newlines first-choice))]
+        (validate response-schema json-obj?)
+        (:json-parse-error errors)))))
+
 
 (defn complete
   [_ memories keywords request]

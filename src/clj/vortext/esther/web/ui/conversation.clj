@@ -5,6 +5,7 @@
    [vortext.esther.util :refer [random-base64 unescape-newlines]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
+   [clojure.string :as str]
    [markdown.core :as markdown]
    [clojure.tools.logging :as log]))
 
@@ -21,19 +22,20 @@
         {:keys [energy type response]} response
         type (or type :default)
         md #(markdown/md-to-html-string (unescape-newlines %))
-        result
-        (case type
-          :htmx response
-          :md-mono (md response)
-          :md-sans (md response)
-          :md-serif (md response)
-          :default (md response))
         md-request (md (get-in request [:params :msg]))]
     (ui
      [:div.memory
       {"data-energy" energy}
       [:div.request md-request]
-      [:div.response {:class (name type)} result]])))
+      [:div.response {:class (name type)}
+       (if (and (string? response) (str/blank? response))
+         [:span.md-sans "Silence."]
+         (case type
+           :htmx response
+           :md-mono (md response)
+           :md-sans (md response)
+           :md-serif (md response)
+           :default (md response)))]])))
 
 
 (defn msg-input [_request]

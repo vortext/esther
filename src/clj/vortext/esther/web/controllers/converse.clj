@@ -6,7 +6,7 @@
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
-
+   [malli.core :as m]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.util :refer [read-json-value]]
    [clojure.string :as str]
@@ -93,26 +93,43 @@
   [request]
   (read-json-value (get-in request [:params :context] "")))
 
+
+
+(defn- respond!
+  [opts user sid data]
+  (try
+    (if (str/starts-with? (get-in data [:request :msg]) "/")
+      (-> data
+          (assoc :response (command opts user sid data)))
+
+      ;; Converse
+      (-> (complete! opts user sid data)
+          (assoc-in [:response :type] :md-serif)))
+    (catch Exception e
+      (do (log/warn e)
+          (assoc data :response (:internal-server-error errors))))))
+
+(def request-schema
+  [:map
+   [:msg [:and
+          [:string {:min 1, :max 1024}]
+          [:fn {:error/message "msg should be at most 1024 chars"}
+           (fn [s] (<= (count s) 1024))]]]
+   [:context [:map {:optional true}]]])
+
+
 (defn answer!
   [opts request]
   (let [{:keys [params]} request
         user (get-in request [:session :user])
         sid (:sid params)
-        request (-> params
-                    (assoc :context (get-context request))
-                    (assoc :msg (get-in request [:params :msg])))
+        request {:context (get-context request)
+                 :msg (get-in request [:params :msg])}
+
         data {:request request
               :ts (unix-ts)}]
-    (try
-      (if (str/starts-with? (:msg params) "/")
-        (-> data
-            (assoc :response (command opts user sid data)))
-
-        ;; Converse
-        (-> (complete! opts user sid data)
-            (assoc-in [:response :type] :md-serif)))
-      (catch Exception e
-        (do (log/warn e)
-            (assoc data :response (:internal-server-error errors)))))))
+    (if-not (m/validate request-schema request)
+      (:unrecognized-input errors)
+      (respond! opts user sid data))))
 
 ;;; Scratch

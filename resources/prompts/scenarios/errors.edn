@@ -3,7 +3,6 @@
                     :energy 0.2
                     :keywords ["error:json-parse-error", "user:unexpected-twist", "user:return-soon"]
                     :image-prompt "A writer's desk, cluttered with crumpled paper, trying to unravel the perfect story."}
-
  :not-found {:response "Well, looks like we've ventured off the map and into the unknown. No worries, though! Let's write our own path from here."
              :emoji "🗺️"
              :energy 0.3
@@ -66,4 +65,23 @@
                       :emoji "🌲"
                       :energy 0.3
                       :keywords ["error:unrecognized-input", "user:joint-exploration"]
-                      :image-prompt "A hidden pathway in a lush forest, inviting the adventurous to discover its secrets."}}
+                      :image-prompt "A hidden pathway in a lush forest, inviting the adventurous to discover its secrets."}
+
+ :parsing-error {:response "Oh dear, it seems our conversation has become a tangled thread. Much like an intricate novel, we'll need to unravel this part to understand each other better. Allow me a moment to reflect, and we shall resume our journey."
+                 :emoji "📖"
+                 :energy 0.2
+                 :keywords ["error:parsing-error", "user:patient-understanding"]
+                 :image-prompt "An open book with twisted and intertwined threads, symbolizing complexity and the need for careful untangling."}
+
+ :validation-error {:response "Sometimes, even the best-planned narratives take unexpected turns. It seems our exchange has led us to such a point. Let's find the right path together and continue our dialogue."
+                    :emoji "🌅"
+                    :energy 0.3
+                    :keywords ["error:validation-error", "user:collaborative-solution"]
+                    :image-prompt "A winding path leading towards a new dawn, symbolizing hope and collaboration."}
+ :uncaught-exception {:response "Much like a tale where all is thrown into chaos by unforeseen events, it seems we've encountered a twist in our story. Fear not, for every tale has its resolution. Give me a moment to compose, and we shall continue."
+                      :emoji "🌪️"
+                      :energy 0.2
+                      :keywords ["error:internal-server-error", "user:patience-required"]
+                      :image-prompt "A tempestuous sea, symbolizing turmoil with a lighthouse in the distance, symbolizing guidance and hope."}
+
+ }
