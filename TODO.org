@@ -27,8 +27,9 @@ _ more user information in session (vault)
 ** DONE refactor memory to only have contents
 ** DONE error handling
 ** DONE better integrate keywords in narrative
-** TODO input checking and sanitation (also converse.clj)
 ** DONE check multi-line markdown
+** TODO local version of fonts
+** TODO input checking and validation (also converse.clj)
 ** TODO something like argparse for commands?
 ** TODO /reset command (clear all memory for uid)
 ** TODO /imagine command
@@ -45,5 +46,5 @@ _ more user information in session (vault)
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
 ** TODO embeddings for memory retrieval of images
-** TODO llma locally
-** TODO stablediffusion locally
+** TODO llma locally?
+** TODO stablediffusion locally?
