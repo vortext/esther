@@ -1,16 +1,6 @@
 // Mono
 @font-face {
   font-family: 'IBM Plex Mono';
-  font-weight: normal;
-  font-style: normal;
-  src: url('/resources/public//font/woff/IBMPlexMono-Regular.woff') format('woff');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-  font-display: swap;
-}
-
-/*
-@font-face {
-  font-family: 'IBM Plex Mono';
   font-weight: bold;
   font-style: italic;
   src: url('/resources/public//font/woff/IBMPlexMono-BoldItalic.woff') format('woff');
@@ -35,17 +25,18 @@
   font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-*/
 
-// Serif
 @font-face {
-  font-family: 'IBM Plex Serif';
+  font-family: 'IBM Plex Mono';
   font-weight: normal;
   font-style: normal;
-  src: url('/resources/public//font/woff/IBMPlexSerif-Regular.woff') format('woff');
+  src: url('/resources/public//font/woff/IBMPlexMono-Regular.woff') format('woff');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   font-display: swap;
 }
+
+// Serif
+
 
 @font-face {
   font-family: 'IBM Plex Serif';
@@ -93,16 +84,16 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-// Sans
 @font-face {
-  font-family: 'IBM Plex Sans';
+  font-family: 'IBM Plex Serif';
   font-weight: normal;
   font-style: normal;
-  src: url('/resources/public//font/woff/IBMPlexSans-Regular.woff') format('woff');
+  src: url('/resources/public//font/woff/IBMPlexSerif-Regular.woff') format('woff');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   font-display: swap;
 }
 
+// Sans
 @font-face {
   font-family: 'IBM Plex Sans';
   font-weight: bold;
@@ -128,4 +119,13 @@
   src: url('/resources/public//font/woff/IBMPlexSans-Italic.woff') format('woff');
   font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 300;
+  font-style: normal;
+  src: url('/resources/public//font/woff/IBMPlexSans-Regular.woff') format('woff');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  font-display: swap;
 }
