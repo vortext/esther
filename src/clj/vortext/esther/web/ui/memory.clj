@@ -23,15 +23,10 @@
 
 (defn md-memories-table
   [memories]
-  (let [responses
-        (map
-         (fn [memory]
-           (let [{:keys [keywords response]} memory]
-             (assoc response :keywords (str/join ", " keywords))))
-         memories)
-        ks [:emoji :energy :keywords :image-prompt]]
+  (let [ks [:emoji :energy :keywords :image-prompt]
+        csv-keywords #(assoc % :keywords (str/join ", " (:keywords %)))]
     (t/table-str
-     (map #(select-keys % ks) responses)
+     (map #(select-keys % ks) (map (comp csv-keywords :response) memories))
      :style :github-markdown)))
 
 (defn clear-form

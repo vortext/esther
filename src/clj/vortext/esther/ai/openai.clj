@@ -25,14 +25,13 @@
 (defn relevant-keywords
   [memories keywords]
   (let [memory-keywords (into #{} (map :value keywords))
-        without #{"user:new-user" "user:introductions-need" "user:returning-user"}
-        remainder (set/difference memory-keywords without)
-        to-include (if (seq remainder)
-                     remainder
-                     (if (seq memories)
-                       #{"user:returning-user"}
-                       #{"user:new-user" "user:introductions-need"}))]
-    to-include))
+        without #{"user:new-user" "user:introductions-wanted" "user:returning-user"}
+        remainder (set/difference memory-keywords without)]
+    (if (seq remainder)
+      remainder
+      (if (seq memories)
+        #{"user:returning-user"}
+        #{"user:new-user" "user:introductions-wanted"}))))
 
 (defn keywords-to-markdown [keywords]
   (clojure.string/join "\n" (map #(str "- " %) keywords)))
@@ -42,21 +41,13 @@
   (let [example (first (shuffle examples))
         memory-keywords (relevant-keywords memories keywords)
         conversation-keywords (extract-keywords memories)
-        relevant-keywords (set/intersection
+        relevant-keywords (set/difference
                            memory-keywords
-                           conversation-keywords)
-        newest-first (reverse memories)
-        last-image (first-image newest-first)
-        has-image? (:image-prompt (first newest-first))]
+                           conversation-keywords)]
     (log/debug "openai::generate-prompt::relevant-keywords" relevant-keywords)
-    (log/debug "openai::generate-prompt::last-image" last-image)
-
     (mustache/render
      (:initial scenarios)
      {:keywords (keywords-to-markdown relevant-keywords)
-      :last-image last-image
-      :has-keywords? (boolean (seq relevant-keywords))
-      :has-image? (boolean (not has-image?))
       :example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
 
@@ -73,13 +64,6 @@
                          (map user (map :request memories))
                          (map assistant (map :response memories)))]
     coversation-seq))
-
-(defn get-contents-memories
-  [memories]
-  (if (seq memories)
-    memories
-    [(first (shuffle (:imagine introductions)))]))
-
 
 (def response-schema
   [:map
@@ -132,9 +116,14 @@
 (defn complete
   [_ memories keywords request]
   (let [last-memories (vec (take-last 10 memories))
-        prompt (generate-prompt last-memories keywords)
-        ;;_ (log/debug "openai::complete:prompt" prompt)
-        conv (format-for-completion (get-contents-memories last-memories))
+        for-conv (if (seq last-memories)
+                   last-memories
+                   [(first (shuffle (:imagine introductions)))])
+        prompt (generate-prompt for-conv keywords)
+        conv (format-for-completion for-conv)
+        last-image (first-image (reverse memories))
+        defaults {:keywords (take 3 keywords)
+                  :image-prompt last-image}
         submission
         (concat
          [{:role "system"
@@ -142,7 +131,7 @@
          conv
          [{:role "user"
            :content (json/write-value-as-string request)}])]
-    (openai-api-complete model submission)))
+    (merge defaults (openai-api-complete model submission))))
 
 
 
