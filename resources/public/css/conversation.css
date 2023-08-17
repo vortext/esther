@@ -61,7 +61,7 @@ body {
   font-family: var(--font-family-mono);
 }
 
-.memory form.confirmation button:first-child {
+.memory form.confirmation button.button-primary {
   margin-right: 1em;
 }
 

@@ -33,23 +33,23 @@
   [_opts _user sid scope]
   (let [scope (if (and (string? scope)
                        (not (str/blank? scope)))
-                (keyword scope)
+                (keyword (str/trim scope))
                 :session)
         allowed #{:session :today :all}]
     (if (not (allowed scope))
       [:span "The only allowed options are " (h/oxford (map name allowed)) "."]
-      [:div
-       [:strong (str "Are you sure you want to clear " (name scope) " memory?")]
-       [:br]
-       [:form.confirmation
-        {:hx-post "/user/clear"
-         :hx-swap "outerHTML"}
-        [:button.button.button-primary
-         {:name "action" :value "clear"} "Clear memory"]
-        [:button.button.button-info
-         {:name "action" :value "cancel"} "Cancel"]
-        [:input {:type :hidden :name "sid" :value sid}]
-        [:input {:type :hidden :name "scope" :value scope}]]])))
+      [:form.confirmation
+       {:hx-post "/user/clear"
+        :hx-swap "outerHTML"}
+       [:div
+        {:style "padding-bottom: 1em"}
+        [:strong (str "Are you sure you want to clear " (name scope) " memory?")]]
+       [:button.button.button-primary
+        {:name "action" :value "clear"} "Clear memory"]
+       [:button.button.button-info
+        {:name "action" :value "cancel"} "Cancel"]
+       [:input {:type :hidden :name "sid" :value sid}]
+       [:input {:type :hidden :name "scope" :value scope}]])))
 
 (defn clear
   [opts {:keys [params] :as request}]
