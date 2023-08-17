@@ -22,25 +22,6 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 * Colors
 [[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)]]
 
-** dominant 5
-#+BEGIN_SRC css
-#F3EDE0
-#E6DDCC
-#BAAF9C
-#26231E
-#776C5D
-#+END_SRC
-** more colors
-#+BEGIN_SRC css
-#EDE7D8
-#302C26
-#A39783
-#885F4A
-#CABEA9
-#997B5C
-#AFA39C
-#9FA49F
-#+END_SRC
 ** Desaturated
 #+BEGIN_SRC css
 #E4E4E2
@@ -60,4 +41,23 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 #+BEGIN_SRC css
 #B52D10
 #EC8050
+#+END_SRC
+** saturated dominant 5
+#+BEGIN_SRC css
+#F3EDE0
+#E6DDCC
+#BAAF9C
+#26231E
+#776C5D
+#+END_SRC
+** more saturated colors
+#+BEGIN_SRC css
+#EDE7D8
+#302C26
+#A39783
+#885F4A
+#CABEA9
+#997B5C
+#AFA39C
+#9FA49F
 #+END_SRC
