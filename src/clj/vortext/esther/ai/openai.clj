@@ -89,12 +89,11 @@
                 (fn [s] (<= (count s) 2048))]]]
    [:emoji [:fn {:error/message "should be a valid emoji"}
             (fn [s] (EmojiManager/containsEmoji ^String s))]] ;; Using emoji-java
-   [:energy [:or [:string {:min 0, :max 10}]
-             [:fn {:error/message "Energy should be a float between 0 and 1"}
-              (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]]
-
+   [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
+             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]
    [:keywords [:vector {:optional true} :string]]
-   [:image-prompt [:string {:optional true, :min 1}]]])
+   [:image-prompt [:key :optional]
+    [:string {:optional true, :min 1}]]])
 
 
 (defn validate
