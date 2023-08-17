@@ -128,19 +128,22 @@ emoji.replace_mode = "unified";
 
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
-  let msg = document.querySelector('#user-input').value;
+  let userInput = document.getElementById('user-input');
+  let msg = userInput.value;
   let localContext = JSON.stringify(getLocalContext());
   document.getElementById("user-context").value = localContext;
-  document.getElementById('user-value').innerHTML = marked.parse(emoji.replace_colons(msg));
-  document.getElementById('user-input').disabled = true;
-  document.getElementById('user-input').placeholder = '';
-  document.getElementById('user-input').value = '';
+  let userValue = marked.parse(emoji.replace_colons(msg));
+  document.getElementById("user-value").innerHTML = userValue;
+  userInput.disabled = true;
+  userInput.placeholder = '';
+  userInput.value = '';
 }
 
 function afterConverseRequest() {
-  document.querySelector('#user-input').disabled = false;
-  document.getElementById('user-input').focus();
-  document.getElementById('user-input').scrollIntoView({behavior: 'smooth'});
+  let userInput = document.getElementById('user-input');
+  userInput.focus();
+  userInput.disabled = false;
+  userInput.scrollIntoView({behavior: 'smooth'});
 }
 
 function setPosition(lat, lon) {
@@ -162,6 +165,8 @@ navigator.geolocation.getCurrentPosition(
 
 document.addEventListener('DOMContentLoaded', function() {
   var sidElements = document.querySelectorAll('.session-sid');
+  document.getElementById('user-input').scrollIntoView({behavior: 'smooth'});
+
   sidElements.forEach(function(element) {
     element.value = window.appConfig.sid;
   });

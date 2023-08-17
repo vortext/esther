@@ -27,7 +27,6 @@
    :hour  2.7701e-4
    :month 5.5181e-7})
 
-
 (defn inspect
   [opts user _sid _args _data]
   {:type :md-mono
