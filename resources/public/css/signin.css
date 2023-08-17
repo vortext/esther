@@ -55,5 +55,9 @@ h1 {
 
 .error {
   color: var(--accent-primary);
-  font-family: var(--font-family-mono);
+  font-family: var(--font-family-sans);
+}
+
+label, input {
+  font-family: var(--font-family-sans);
 }

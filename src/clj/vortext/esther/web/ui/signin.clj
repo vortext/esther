@@ -28,10 +28,10 @@
           [:div.error error-message])
         [:form {:action "/signin" :method "POST"}
          [:div.form-group
-          [:label "Username: "
+          [:label "Username"
            [:input {:type "text" :name "username" :class "form-input"}]]]
          [:div.form-group
-          [:label "Password: "
+          [:label "Password"
            [:input {:type "password" :name "password" :class "form-input"}]]]
          [:button "Sign In"]]]]])))
 

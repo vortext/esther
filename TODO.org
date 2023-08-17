@@ -27,19 +27,23 @@ _ more user information in session (vault)
 ** DONE refactor memory to only have contents
 ** DONE error handling
 ** DONE better integrate keywords in narrative
-** TODO input checking and santization (also converse.clj)
-** TODO check multi-line markdown
+** TODO input checking and sanitation (also converse.clj)
+** DONE check multi-line markdown
+** TODO something like argparse for commands?
+** TODO /reset command (clear all memory for uid)
 ** TODO /imagine command
 - hook up StableDiffusion
 - integrate image describe into memory
 - store description and image in memory contents
 ** TODO use image describe as context for converse
-** TODO something like argparse for commands?
 ** TODO check logging levels (disable debug outside dev)
 ** TODO security and hosting
-** TODO test infrastructure and test
+** TODO test infrastructure and tests
 ** TODO better intro flow
 ** TODO /help command
+** TODO sign-up page
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
 ** TODO embeddings for memory retrieval of images
+** TODO llma locally
+** TODO stablediffusion locally
