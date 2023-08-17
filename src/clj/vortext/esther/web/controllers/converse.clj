@@ -1,7 +1,6 @@
 (ns vortext.esther.web.controllers.converse
   (:require
    [vortext.esther.util.time :refer [unix-ts]]
-   [vortext.esther.web.middleware.auth :as auth]
    [vortext.esther.config :refer [errors]]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.memory :as memory-ui]
@@ -92,8 +91,6 @@
 (defn get-context
   [request]
   (read-json-value (get-in request [:params :context] "")))
-
-
 
 (defn- respond!
   [opts user sid data]
