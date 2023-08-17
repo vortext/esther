@@ -48,3 +48,5 @@ _ more user information in session (vault)
 ** TODO embeddings for memory retrieval of images
 ** TODO llma locally?
 ** TODO stablediffusion locally?
+** TODO offline desktop app?
+** TODO Remember and show for a day, clear page every day (aligns with the prominent date)
