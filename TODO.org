@@ -33,11 +33,7 @@ _ more user information in session (vault)
 ** DONE Remember and show for a day, clear page every day (aligns with the prominent date)
 ** DONE /clear command (clear all memory for uid)
 ** DONE check logging levels (disable debug outside dev)
-** TODO /imagine command
-- hook up StableDiffusion
-- integrate image describe into memory
-- store description and image in memory contents
-** TODO use image describe as context for converse
+** TODO llma locally?
 ** TODO security and hosting
 ** TODO test infrastructure and tests
 ** TODO better intro flow
@@ -45,8 +41,13 @@ _ more user information in session (vault)
 ** TODO sign-up page
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
-** TODO embeddings for memory retrieval of images
-** TODO llma locally?
-** TODO stablediffusion locally?
+** TODO embeddings for memory retrieval and context
 ** TODO offline desktop app?
 ** TODO very briefly cache fingerprint -> keyword
+** TODO /imagine command
+- hook up image generation (StableDiffusionAPI is too crappy)
+- integrate image describe into memory
+- https://github.com/deep-floyd/IF maybe?
+- store description and image in memory contents
+- use image describe as context for converse
+- stablediffusion locally?
