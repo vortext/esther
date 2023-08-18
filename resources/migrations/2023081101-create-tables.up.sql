@@ -18,7 +18,7 @@ create index memory_uid on memory(uid);
 
 create table memory_keyword (
     uid                     text not null,
-    fingerprint             text not null,
+    fingerprint             text primary key,
     data                    text not null,
     iv                      iv not null,
     seen                    integer default 1,
