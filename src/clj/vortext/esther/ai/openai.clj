@@ -5,8 +5,10 @@
    [clojure.tools.logging :as log]
    [clojure.string :as str]
    [clojure.java.io :as io]
-   [vortext.esther.web.controllers.memory :refer [extract-keywords first-image]]
-   [vortext.esther.util :refer [parse-maybe-json pretty-json escape-newlines]]
+   [vortext.esther.web.controllers.memory :refer
+    [extract-keywords first-image]]
+   [vortext.esther.util :refer
+    [parse-maybe-json pretty-json escape-newlines strs-to-markdown-list]]
    [jsonista.core :as json]
    [diehard.core :as dh]
    [clojure.set :as set]
@@ -34,8 +36,6 @@
         #{"user:returning-user"}
         #{"user:new-user" "user:introductions-wanted"}))))
 
-(defn keywords-to-markdown [keywords]
-  (clojure.string/join "\n" (map #(str "- " %) keywords)))
 
 (defn generate-prompt
   [memories keywords]
@@ -48,7 +48,7 @@
     (log/debug "openai::generate-prompt::relevant-keywords" relevant-keywords)
     (mustache/render
      (:initial scenarios)
-     {:keywords (keywords-to-markdown relevant-keywords)
+     {:keywords (strs-to-markdown-list relevant-keywords)
       :example-request (pretty-json (:request example))
       :example-response (pretty-json (:response example))})))
 

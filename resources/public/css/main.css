@@ -124,3 +124,13 @@ table th {
 .hidden {
   visibility: hidden;
 }
+
+.md-mono {
+  font-family: var(--font-family-mono);
+}
+.md-sans {
+  font-family: var(--font-family-sans);
+}
+.md-serif {
+  font-family: var(--font-family-serif);
+}

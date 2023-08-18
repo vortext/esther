@@ -7,7 +7,7 @@
    [vortext.esther.web.ui.signin :as signin-ui]
    [malli.core :as m]
    [vortext.esther.ai.openai :as openai]
-   [vortext.esther.util :refer [read-json-value]]
+   [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
    [vortext.esther.util.emoji :as emoji]
    [clojure.string :as str]
    [clojure.tools.logging :as log]))
@@ -30,7 +30,7 @@
     {:type :md-mono
      :response
      (str
-      "#### scene "
+      "#### image-prompt "
       "\n\n"
       first-image
       "\n\n"
@@ -41,20 +41,30 @@
       (memory-ui/md-keywords-table
        (memory/frecency-keywords opts user :week 10)))}))
 
+(defn imagine
+  [opts user _sid _args _data]
+  (let [memories (filter (comp :conversation? :response)
+                         (memory/last-memories opts user 10))]
+    {:type :md-mono
+     :response
+     (strs-to-markdown-list
+      (map #(get-in % [:response :image-prompt])
+           memories))}))
+
 (defn logout
   [_opts _user _sid _args {:keys [request]}]
-  {:type :htmx
+  {:type :ui
    :response (signin-ui/logout-chat request)})
 
 (defn wipe
   [opts user sid args {:keys [_request]}]
-  {:type :htmx
+  {:type :ui
    :response (memory-ui/wipe-form opts user sid args)})
 
 
 (defn archive
   [opts user sid _args {:keys [_request]}]
-  {:type :htmx
+  {:type :ui
    :response (memory-ui/archive-form opts user sid)})
 
 (defn split-first-word [s]
@@ -67,6 +77,7 @@
         commands {:inspect inspect
                   :status status
                   :wipe wipe
+                  :imagine imagine
                   :archive archive
                   :logout logout}
         [cmd args] (split-first-word
@@ -133,7 +144,7 @@
       (:unrecognized-input errors)
       (let [memory (respond! opts user sid data)
             type (keyword (:type (:response  memory)))]
-        (if-not (= type :htmx)
+        (if-not (= type :ui)
           (memory/remember! opts user sid memory)
           memory)))))
 

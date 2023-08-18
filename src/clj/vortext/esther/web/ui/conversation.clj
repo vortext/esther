@@ -40,6 +40,7 @@
         [:span.md-sans "Silence."]
         (case type
           :htmx response-msg
+          :ui response-msg
           :md-mono (display-html response-msg)
           :md-sans (display-html response-msg)
           :md-serif (display-html response-msg)

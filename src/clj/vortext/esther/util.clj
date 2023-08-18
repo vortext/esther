@@ -55,3 +55,6 @@
 
 (defn escape-newlines [s]
   (clojure.string/replace s "\n" "\\\\n"))
+
+(defn strs-to-markdown-list [strs]
+  (clojure.string/join "\n" (map #(str "- " %) strs)))

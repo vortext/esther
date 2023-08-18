@@ -38,9 +38,7 @@ body {
 .memory .response {
   padding: 1em 0;
 }
-.memory .response.md-mono {
-  font-family: var(--font-family-mono);
-}
+
 
 .memory .request, .memory .response {
   padding-top: 1em;
