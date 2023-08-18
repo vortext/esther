@@ -58,14 +58,6 @@ function resizeTextarea(e) {
   textarea.style.height = (textarea.scrollHeight) + 'px';
 }
 
-function focusTextArea(textarea) {
-  textarea.focus();
-  // Simulate a "right arrow" key press
-  const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-  textarea.dispatchEvent(event);
-
-}
-
 function handleTextareaInput(e) {
   const textarea = e.target;
 
@@ -85,7 +77,13 @@ function handleTextareaInput(e) {
     setTimeout(() => {
       textarea.selectionStart = newCaretPos;
       textarea.selectionEnd = newCaretPos;
-      focusTextArea(textarea);
+
+      textarea.focus();
+      // Simulate a "right arrow" key press
+      const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+      textarea.dispatchEvent(event);
+
+
     }, 0);
 
     return; // Return early to prevent further execution
@@ -132,7 +130,7 @@ function getSentimentEnergy() {
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
   // Get the form and input elements
-  let userInput = document.getElementById('user-input');
+  let textarea = document.getElementById('user-input');
   let userValue = document.getElementById("user-value");
   let userContext = document.getElementById("user-context");
   let userSid = document.getElementById("user-sid");
@@ -142,23 +140,36 @@ function beforeConverseRequest() {
   userSid.value = window.appConfig.sid;
 
   // Update the UI
-  let msg = emoji.replace_colons(userInput.value);
+  let msg = emoji.replace_colons(textarea.value);
   userValue.innerHTML = marked.parse(msg);
-  userInput.disabled = true;
-  userInput.placeholder = '';
-  userInput.value = '';
+  textarea.classList.add('hidden');
+  textarea.placeholder = '';
+  textarea.value = '';
 }
 
+function focusWithoutScrolling(element) {
+  const x = window.scrollX;
+  const y = window.scrollY;
+  element.focus();
+  window.scrollTo(x, y);
+}
 
 function afterConverseRequest() {
-  document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   let textarea = document.getElementById('user-input');
+  let messagesContainer = document.getElementById('conversation');
+  let bottomElement = document.getElementById('conversation-bottom');
 
+  bottomElement.scrollIntoView({ behavior: 'smooth' });
+  textarea.classList.remove('hidden');
+
+  // Simulate a "right arrow" key press
   setTimeout(() => {
-    textarea.disabled = false;
-    focusTextArea(textarea);
-  }, 0);
+    focusWithoutScrolling(textarea);
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+    textarea.dispatchEvent(event);
+  }, 125);
 }
+
 
 function setPosition(lat, lon) {
   window.appConfig.latitude = lat;
@@ -178,7 +189,7 @@ navigator.geolocation.getCurrentPosition(
 
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
+  document.getElementById("conversation-bottom").scrollIntoView({behavior: 'smooth'});
   var sidElements = document.querySelectorAll('.session-sid');
 
   sidElements.forEach(function(element) {

@@ -119,3 +119,8 @@ table th {
 .button-warning:hover {
   background-color: #e0a800;
 }
+
+
+.hidden {
+  visibility: hidden;
+}
