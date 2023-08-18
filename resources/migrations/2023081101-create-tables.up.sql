@@ -5,7 +5,7 @@ create table memory (
     data           text not null,
     iv             text not null,
     created        timestamp with time zone default current_timestamp,
-    created_date   text default (strftime('%y-%m-%d', current_timestamp)),
+    created_date   text default (strftime('%Y-%m-%d', 'now')),
     archived       boolean not null default 0
 );
 --;;
