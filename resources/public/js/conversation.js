@@ -159,15 +159,15 @@ function afterConverseRequest() {
   let messagesContainer = document.getElementById('conversation');
   let bottomElement = document.getElementById('bottom');
 
-  bottomElement.scrollIntoView({ behavior: 'smooth' });
   textarea.classList.remove('hidden');
+  bottomElement.scrollIntoView({ behavior: 'smooth' });
 
   // Simulate a "right arrow" key press
   setTimeout(() => {
     focusWithoutScrolling(textarea);
     const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
     textarea.dispatchEvent(event);
-  }, 125);
+  }, 250);
 }
 
 

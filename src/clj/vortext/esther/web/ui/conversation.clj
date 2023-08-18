@@ -91,8 +91,7 @@
       [:div#user-echo
        [:div#user-value {:class "user-message"}]]
       [:div#loading-response.loading-state loading]
-      (msg-input request)]
-     [:div#conversation-bottom]]))
+      (msg-input request)]]))
 
 (defn render [opts request]
   (let [sid (random-base64 10)]
@@ -108,5 +107,5 @@
       [:div#container
        [:h1#title "Esther"]
        [:h2#subtitle (time/human-today) "."]
-       (conversation opts request)
-       [:div#body-bottom]]])))
+       (conversation opts request)]
+      [:div#bottom]])))
