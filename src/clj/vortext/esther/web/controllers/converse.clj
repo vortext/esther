@@ -24,16 +24,22 @@
 
 (defn inspect
   [opts user _sid _args _data]
-  {:type :md-mono
-   :response
-   (str
-    "**memories**"
-    (memory-ui/md-memories-table
-     (take 5 (filter (comp :conversation? :response)
-                     (memory/last-memories opts user 10))))
-    "**keywords**"
-    (memory-ui/md-keywords-table
-     (memory/frecency-keywords opts user :week 10)))})
+  (let [memories (filter (comp :conversation? :response)
+                         (memory/last-memories opts user 10))
+        first-image (memory/first-image memories)]
+    {:type :md-mono
+     :response
+     (str
+      "#### scene "
+      "\n\n"
+      first-image
+      "\n\n"
+      "#### memories"
+      (memory-ui/md-memories-table
+       (take 5 memories))
+      "#### keywords"
+      (memory-ui/md-keywords-table
+       (memory/frecency-keywords opts user :week 10)))}))
 
 (defn logout
   [_opts _user _sid _args {:keys [request]}]
