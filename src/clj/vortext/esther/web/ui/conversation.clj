@@ -1,7 +1,7 @@
 (ns vortext.esther.web.ui.conversation
   (:require
    [vortext.esther.web.controllers.converse :as converse]
-   [vortext.esther.web.controllers.memory :refer [todays-memories]]
+   [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.common :as common]
    [vortext.esther.util :refer [random-base64 unescape-newlines]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
@@ -82,7 +82,7 @@
 
 (defn conversation [opts request]
   (let [user (get-in request [:session :user])
-        memories (reverse (todays-memories opts user))]
+        memories (memory/todays-non-archived-memories opts user)]
     [:div.container
      [:div#conversation.loading-state
       [:div#history

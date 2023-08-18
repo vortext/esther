@@ -29,7 +29,7 @@
      (map #(select-keys % ks) (map (comp csv-keywords :response) memories))
      :style :github-markdown)))
 
-(defn clear-form
+(defn wipe-form
   [_opts _user sid scope]
   (let [scope (if (and (string? scope)
                        (not (str/blank? scope)))
@@ -39,28 +39,53 @@
     (if (not (allowed scope))
       [:span "The only allowed options are " (h/oxford (map name allowed)) "."]
       [:form.confirmation
-       {:hx-post "/user/clear"
+       {:hx-post "/user/wipe"
         :hx-swap "outerHTML"}
        [:div
         {:style "padding-bottom: 1em"}
-        [:strong (str "Are you sure you want to clear " (name scope) " memory?")]]
+        [:strong (str "Are you sure you want to wipe " (name scope) " memory?")]]
        [:button.button.button-primary
-        {:name "action" :value "clear"} "Clear memory"]
+        {:name "action" :value "wipe"} "Wipe memory"]
        [:button.button.button-info
         {:name "action" :value "cancel"} "Cancel"]
        [:input {:type :hidden :name "sid" :value sid}]
        [:input {:type :hidden :name "scope" :value scope}]])))
 
-(defn clear
+(defn wipe
   [opts {:keys [params] :as request}]
   (let [action (keyword (:action params))
         user (get-in request [:session :user])
         scope (keyword (:scope params))
-        scopes {:today memory/clear-today!
-                :session memory/clear-session!
-                :all memory/clear-all!}]
-    (if (= action :clear)
+        scopes {:today memory/wipe-today!
+                :session memory/wipe-session!
+                :all memory/wipe-all!}]
+    (if (= action :wipe)
       (-> (ui (do ((scopes scope) opts user (:sid params))
                   [:span "Wiped memories: " (name scope)]))
+          (assoc :headers {"HX-Redirect" "/"}))
+      (ui [:span "Let us continue."]))))
+
+
+(defn archive-form
+  [_opts _user sid]
+  [:form.confirmation
+   {:hx-post "/user/archive"
+    :hx-swap "outerHTML"}
+   [:div
+    {:style "padding-bottom: 1em"}
+    [:strong (str "Are you sure you want to archive this conversation?")]]
+   [:button.button.button-primary
+    {:name "action" :value "archive"} "Archive conversation"]
+   [:button.button.button-info
+    {:name "action" :value "cancel"} "Cancel"]
+   [:input {:type :hidden :name "sid" :value sid}]])
+
+(defn archive
+  [opts {:keys [params] :as request}]
+  (let [action (keyword (:action params))
+        user (get-in request [:session :user])]
+    (if (= action :archive)
+      (-> (ui (do (memory/archive-todays-memories opts user)
+                  [:span "Archived conversation."]))
           (assoc :headers {"HX-Redirect" "/"}))
       (ui [:span "Let us continue."]))))

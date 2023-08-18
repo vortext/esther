@@ -37,6 +37,7 @@
         decrypt #(secrets/decrypt-from-sql % secret)]
     (map decrypt contents)))
 
+
 (defn last-memories
   ([opts user]
    (last-memories opts user 10))
@@ -47,13 +48,19 @@
       user
       (query-fn :last-n-memories {:uid uid :n n})))))
 
-(defn todays-memories
+(defn todays-non-archived-memories
   [opts user]
   (let [{:keys [query-fn]} (:db opts)
         uid (get-in user [:vault :uid])]
     (construct-memories
      user
-     (query-fn :todays-memories {:uid uid}))))
+     (query-fn :todays-non-archived-memories {:uid uid}))))
+
+(defn archive-todays-memories
+  [opts user]
+  (let [{:keys [query-fn]} (:db opts)
+        uid (get-in user [:vault :uid])]
+    (query-fn :archive-todays-memories {:uid uid})))
 
 (def lambdas
   {:week  1.6534e-6
@@ -88,22 +95,22 @@
   [memories]
   (first (keep #(get-in % [:response :image-prompt]) memories)))
 
-(defn clear-all!
+(defn wipe-all!
   [opts user _]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (jdbc/with-transaction [tx connection]
-      (query-fn tx :clear-all-memory-keywords {:uid uid})
-      (query-fn tx :clear-all-memory {:uid uid}))))
+      (query-fn tx :wipe-all-memory-keywords {:uid uid})
+      (query-fn tx :wipe-all-memory {:uid uid}))))
 
-(defn clear-today!
+(defn wipe-today!
   [opts user _]
   (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
-    (query-fn :clear-todays-memory {:uid uid})))
+    (query-fn :wipe-todays-memory {:uid uid})))
 
-(defn clear-session!
+(defn wipe-session!
   [opts user sid]
   (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
-    (query-fn :clear-session-memory {:uid uid :sid sid})))
+    (query-fn :wipe-session-memory {:uid uid :sid sid})))

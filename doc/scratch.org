@@ -9,4 +9,25 @@
   select * from memory_keyword;
 #+end_src
 
+#+begin_src sqlite :db "../esther_dev.db"
+  alter table memory add column archived boolean default 0;
+#+end_src
+
+#+begin_src sqlite :db "../esther_dev.db"
+  alter table memory delete column archive;
+#+end_src
+
+
 #+RESULTS:
+
+
+#+begin_src sqlite :db "../esther_dev.db"
+  select gid, archived from memory order by created desc limit 5;
+#+end_src
+
+#+RESULTS:
+| AAABigi2gdTINdUeFyInCn4Y7HzvF3TBmNBUETw2iRjeuzj2rVeZjIiMPZok4Db9eRIop5nb1uPlSRQUYa5YCQ | 0 |
+| AAABigi1FqOgaQHZe0-dfYJp90-dMmo2Z2PapiDAXBD3ga8jxfPTHC9oIzgL4R9iKkgxsI7QDZJ_sT9_WxjU2g | 0 |
+| AAABigiz8bg-GfhVfP9jOg2GwG_3xymbX2VSaTb1J50QdjmKz1HID57Ed605VPtJrMWKR2vi_fLN6R4BKVSk0g | 0 |
+| AAABigizk8GWRfzKkFfrXfH4rBbn52NJAt53e6ce0--x-xWcVcOsVCDNKmPzFaGxkPZ-YfhmfxHiv1XuiL2lxQ | 0 |
+| AAABigiyzDOufTfYI8EDkNROoyH1CDrD4MjWYH4an9vHRaMvLckuqVUM3S9HTBZi3jW5dYdA0xGZurs38W4tCQ | 0 |

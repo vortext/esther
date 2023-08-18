@@ -40,10 +40,16 @@
   {:type :htmx
    :response (signin-ui/logout-chat request)})
 
-(defn clear
+(defn wipe
   [opts user sid args {:keys [_request]}]
   {:type :htmx
-   :response (memory-ui/clear-form opts user sid args)})
+   :response (memory-ui/wipe-form opts user sid args)})
+
+
+(defn archive
+  [opts user sid _args {:keys [_request]}]
+  {:type :htmx
+   :response (memory-ui/archive-form opts user sid)})
 
 (defn split-first-word [s]
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
@@ -54,7 +60,8 @@
   (let [command (get-in data [:request :msg])
         commands {:inspect inspect
                   :status status
-                  :clear clear
+                  :wipe wipe
+                  :archive archive
                   :logout logout}
         [cmd args] (split-first-word
                     (apply str (rest command)))

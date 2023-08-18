@@ -1,11 +1,12 @@
 create table memory (
-    gid                     text primary key,
-    uid                     text not null,
-    sid                     text not null,
-    data                    text not null,
-    iv                      iv not null,
-    created                 timestamp with time zone default current_timestamp,
-    created_date            text default (strftime('%Y-%m-%d', current_timestamp))
+    gid            text primary key,
+    uid            text not null,
+    sid            text not null,
+    data           text not null,
+    iv             text not null,
+    created        timestamp with time zone default current_timestamp,
+    created_date   text default (strftime('%y-%m-%d', current_timestamp)),
+    archived       boolean not null default 0
 );
 --;;
 create index memory_created on memory(uid, created);

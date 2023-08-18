@@ -19,13 +19,26 @@ select gid, data, iv from memory
 where uid = :uid
 order by created desc limit :n;
 
--- :name todays-memories :? :*
--- :doc Get the memories for the current day (from new to old)
+-- :name todays-non-archived-memories :? :*
+-- :doc Get the memories for the current day (from new to old) not archived
 select gid, data, iv from memory
 where uid = :uid
   and created_date = date('now')
+  and archived = 0;
 order by created desc;
 
+-- :name archive-memories :! :n
+-- :doc Archive memories by setting the archived flag to 1 for the given gids
+update memory
+set archived = 1
+where gid in (:v*:gids);
+
+-- :name archive-todays-memories :! :n
+-- :doc Archive all memories for the given uid for the current date
+update memory
+set archived = 1
+where uid = :uid
+  and created_date = date('now');
 
 -- :name see-keyword :! :1
 -- :doc increments the seen counter of the keyword for uid
@@ -46,18 +59,18 @@ from memory_keyword
 where uid = :uid
 order by frecency desc limit :n;
 
--- :name clear-all-memory :! :1
--- :doc clears all memories for a uid
+-- :name wipe-all-memory :! :1
+-- :doc wipes all memories for a uid
 delete from memory where uid = :uid;
 
--- :name clear-todays-memory :! :1
--- :doc clears todays memories for a uid
+-- :name wipe-todays-memory :! :1
+-- :doc wipes todays memories for a uid
 delete from memory where uid = :uid and created_date = date('now');
 
--- :name clear-session-memory :! :1
--- :doc clears all memories for a uid and sid (session id)
+-- :name wipe-session-memory :! :1
+-- :doc wipes all memories for a uid and sid (session id)
 delete from memory where uid = :uid and sid = :sid;
 
--- :name clear-all-memory-keywords :! :1
--- :doc clears all memory keywords for a uid
+-- :name wipe-all-memory-keywords :! :1
+-- :doc wipes all memory keywords for a uid
 delete from memory_keyword where uid = :uid;

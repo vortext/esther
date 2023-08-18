@@ -35,8 +35,10 @@
    ["/user/conversation"
     {:get (partial conversation/render opts)
      :post (partial conversation/message opts)}]
-   ["/user/clear"
-    {:post (partial memory/clear opts)}]])
+   ["/user/archive"
+    {:post (partial memory/archive opts)}]
+   ["/user/wipe"
+    {:post (partial memory/wipe opts)}]])
 
 (defn on-error
   [req _]
