@@ -157,7 +157,7 @@ function focusWithoutScrolling(element) {
 function afterConverseRequest() {
   let textarea = document.getElementById('user-input');
   let messagesContainer = document.getElementById('conversation');
-  let bottomElement = document.getElementById('conversation-bottom');
+  let bottomElement = document.getElementById('bottom');
 
   bottomElement.scrollIntoView({ behavior: 'smooth' });
   textarea.classList.remove('hidden');
@@ -189,7 +189,7 @@ navigator.geolocation.getCurrentPosition(
 
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById("conversation-bottom").scrollIntoView({behavior: 'smooth'});
+  document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   var sidElements = document.querySelectorAll('.session-sid');
 
   sidElements.forEach(function(element) {
