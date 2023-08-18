@@ -11,7 +11,8 @@
 (def alias->unicode
   (->> emojis
        (mapcat (fn [emoji]
-                 (map #(vector % (:unicode emoji)) (:allAliases emoji))))
+                 (map #(vector % (:unicode emoji))
+                      (:githubAliases emoji))))
        (into {})))
 
 (defn build-trie
