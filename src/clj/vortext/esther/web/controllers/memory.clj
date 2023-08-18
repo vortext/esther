@@ -55,6 +55,12 @@
      user
      (query-fn :todays-memories {:uid uid}))))
 
+(def lambdas
+  {:week  1.6534e-6
+   :day   1.1574e-5
+   :hour  2.7701e-4
+   :month 5.5181e-7})
+
 (defn frecency-keywords
   "λ (lamda) is a decay constant that determines the rate of
     forgetting. The value of lambda will determine how quickly the
@@ -63,7 +69,7 @@
     decay."
   ([opts user]
    (let [lambda 0.001
-         n 10]
+         n 25]
      (frecency-keywords opts user lambda n)))
   ([opts user lambda n]
    (let [{:keys [query-fn]} (:db opts)
@@ -71,7 +77,7 @@
          cols [:fingerprint :frecency :recency :frequency]
          decrypt (fn [kw] (merge {:value (secrets/decrypt-from-sql kw secret)}
                                  (select-keys kw cols)))
-         query-params {:uid uid :n n :lambda lambda}]
+         query-params {:uid uid :n n :lambda (lambda lambdas)}]
      (map decrypt (query-fn :frecency-keywords query-params)))))
 
 (defn extract-keywords

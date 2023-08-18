@@ -154,11 +154,10 @@ function afterConverseRequest() {
   document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   let textarea = document.getElementById('user-input');
 
-  textarea.disabled = false;
   setTimeout(() => {
-    console.log("focus!!");
+    textarea.disabled = false;
     focusTextArea(textarea);
-  }, 60);
+  }, 0);
 }
 
 function setPosition(lat, lon) {
