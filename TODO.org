@@ -32,12 +32,12 @@ _ more user information in session (vault)
 ** DONE input checking and validation (also converse.clj)
 ** DONE Remember and show for a day, clear page every day (aligns with the prominent date)
 ** DONE /clear command (clear all memory for uid)
+** DONE check logging levels (disable debug outside dev)
 ** TODO /imagine command
 - hook up StableDiffusion
 - integrate image describe into memory
 - store description and image in memory contents
 ** TODO use image describe as context for converse
-** TODO check logging levels (disable debug outside dev)
 ** TODO security and hosting
 ** TODO test infrastructure and tests
 ** TODO better intro flow
@@ -49,3 +49,4 @@ _ more user information in session (vault)
 ** TODO llma locally?
 ** TODO stablediffusion locally?
 ** TODO offline desktop app?
+** TODO very briefly cache fingerprint -> keyword
