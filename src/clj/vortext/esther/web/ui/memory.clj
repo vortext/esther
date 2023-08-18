@@ -24,9 +24,18 @@
 (defn md-memories-table
   [memories]
   (let [ks [:emoji :energy :keywords :image-prompt]
-        csv-keywords #(assoc % :keywords (str/join ", " (:keywords %)))]
+
+        update-kw
+        (fn [kw] (str/join
+                  ", "
+                  (filter #((complement str/starts-with?) % "context:") kw)))
+        formatted-memories
+        (map (fn [m]
+               (-> (:response m)
+                   (update :keywords update-kw)))
+             memories)]
     (t/table-str
-     (map #(select-keys % ks) (map (comp csv-keywords :response) memories))
+     (map #(select-keys % ks) formatted-memories)
      :style :github-markdown)))
 
 (defn wipe-form
