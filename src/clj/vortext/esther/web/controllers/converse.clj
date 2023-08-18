@@ -25,15 +25,10 @@
 (defn inspect
   [opts user _sid _args _data]
   (let [memories (filter (comp :conversation? :response)
-                         (memory/last-memories opts user 10))
-        first-image (memory/first-image memories)]
+                         (memory/last-memories opts user 10))]
     {:type :md-mono
      :response
      (str
-      "#### image-prompt "
-      "\n\n"
-      first-image
-      "\n\n"
       "#### memories"
       (memory-ui/md-memories-table
        (take 5 memories))
