@@ -3,6 +3,7 @@
 
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
            ;; Util
+           org.clojure/core.async {:mvn/version "1.6.673"}
            org.clj-commons/humanize {:mvn/version "1.0"}
            clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
            babashka/fs {:mvn/version "0.4.19"}
@@ -14,8 +15,8 @@
            net.fellbaum/jemoji {:mvn/version "1.1.6"}
            org.ahocorasick/ahocorasick {:mvn/version "0.6.3"}
            metosin/malli {:mvn/version "0.11.0"}
+           clj-http/clj-http {:mvn/version "3.12.3"}
 
-           camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
            ;; Security

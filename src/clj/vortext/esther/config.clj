@@ -10,9 +10,6 @@
   [options]
   (config/read-config system-filename options))
 
-(defn secrets []
-  (get-in (system-config {}) [:handler/ring :secrets]))
-
 (def examples
   (edn/read-string
    (slurp (io/resource "prompts/scenarios/examples.edn"))))
