@@ -49,6 +49,11 @@
   {:routes #ig/refset :reitit/routes
    :depends-on [:dev/init-test-user]}}
 
+ :ai.llm/complete-fn {:implementation :openai
+                      ;; :implementation :llama
+                      :model-path "models/ggml-model-q4_k_m.bin"
+                      :options {}}
+
  :router/core
  {:routes #ig/ref :router/routes}
  :reitit.routes/ui
@@ -56,6 +61,7 @@
                  :default-path "/user/conversation"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
+                 :ai {:complete-fn #ig/ref :ai.llm/complete-fn}
                  :env #ig/ref :system/env}}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}

@@ -1,3 +1,6 @@
-[submodule "path_to_submodule"] 
+[submodule "modules/kit-modules"] 
   path = modules/kit-modules
-  url = https://github.com/kit-clj/
+  url = https://github.com/kit-clj/modules
+[submodule "native/llama.cpp"]
+    path = native/llama.cpp
+    url = git://github.com/ggerganov/llama.cpp

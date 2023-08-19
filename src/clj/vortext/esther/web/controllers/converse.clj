@@ -7,7 +7,6 @@
    [vortext.esther.web.ui.signin :as signin-ui]
    [malli.core :as m]
    [vortext.esther.ai.llm :as llm]
-   [vortext.esther.ai.openai :refer [openai-api-complete]]
    [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
    [vortext.esther.util.emoji :as emoji]
    [clojure.string :as str]
@@ -90,11 +89,10 @@
                       (memory/last-memories opts user 10))
         last-memories (reverse conversation)
         keyword-memories (memory/frecency-keywords opts user :week 25)
-        result (llm/complete
-                openai-api-complete
-                last-memories
-                keyword-memories
-                (:request data))]
+        request (:request
+                 (assoc-in data [:request :scenario] :converse-minimal))
+        complete (get-in opts [:ai :complete-fn])
+        result (complete last-memories keyword-memories request)]
     (-> data
         (assoc
          :response

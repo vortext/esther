@@ -13,17 +13,17 @@
 (defn openai-api-complete
   [submission]
   (dh/with-retry
-    {:retry-on Exception
-     :max-retries 2
-     :on-retry
-     (fn [_val ex] (log/warn "openai::openai-api-complete:retrying..." ex))
-     :on-failure
-     (fn [_val ex]
-       (let [response (:internal-server-error errors)]
-         (log/warn "openai::openai-api-complete:failed..." ex response)
-         response))
-     :on-failed-attempt
-     (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
+      {:retry-on Exception
+       :max-retries 2
+       :on-retry
+       (fn [_val ex] (log/warn "openai::openai-api-complete:retrying..." ex))
+       :on-failure
+       (fn [_val ex]
+         (let [response (:internal-server-error errors)]
+           (log/warn "openai::openai-api-complete:failed..." ex response)
+           response))
+       :on-failed-attempt
+       (fn [_ _] (log/warn "openai::openai-api-complete:failed-attempt..."))}
     (let [completion (api/create-chat-completion
                       {:model model
                        :messages submission}
@@ -34,9 +34,4 @@
         json-obj?
         (:json-parse-error errors)))))
 
-
-
-
-
-
-;; Scratch
+(defn create-api-complete [_] openai-api-complete)

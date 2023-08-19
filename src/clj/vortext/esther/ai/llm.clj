@@ -4,6 +4,7 @@
    [clojure.tools.logging :as log]
    [clojure.string :as str]
    [clojure.java.io :as io]
+   [integrant.core :as ig]
    [vortext.esther.web.controllers.memory :refer
     [extract-keywords]]
    [vortext.esther.util :refer [strs-to-markdown-list]]
@@ -11,11 +12,14 @@
    [clojure.set :as set]
    [malli.core :as m]
    [vortext.esther.util.emoji :as emoji]
+   [vortext.esther.ai.openai :as openai]
+   [vortext.esther.ai.llama :as llama]
    [malli.error :as me]
    [vortext.esther.config :refer [examples errors introductions]]))
 
 (def scenarios
-  {:converse (slurp (io/resource "prompts/scenarios/converse.md"))})
+  {:converse-minimal (slurp (io/resource "prompts/scenarios/converse-minimal.md"))
+   :converse (slurp (io/resource "prompts/scenarios/converse.md"))})
 
 (defn relevant-keywords
   [memories keywords]
@@ -39,7 +43,7 @@
         relevant-keywords (set/difference
                            memory-keywords
                            conversation-keywords)]
-    (log/debug "openai::generate-prompt::relevant-keywords" relevant-keywords)
+    (log/debug "llm::generate-prompt::relevant-keywords" relevant-keywords)
     (mustache/render
      scenario
      {:keywords (strs-to-markdown-list relevant-keywords)
@@ -56,10 +60,15 @@
   #{:response :keywords
     :emoji :energy :image-prompt})
 
+(def request-keys
+  #{:msg :context})
+
 (defn conversation-seq
   [user assistant memories]
   (interleave
-   (map user (map :request memories))
+   (map user
+        (map #(select-keys % request-keys)
+             (map :request memories)))
    (map assistant
         (map
          #(select-keys % response-keys)
@@ -88,7 +97,7 @@
   (if (not (m/validate schema obj))
     (let [error (m/explain schema obj)
           humanized (me/humanize error)]
-      (log/warn "openai::validate:error" humanized obj)
+      (log/warn "llm::validate:error" humanized obj)
       (-> (:validation-error errors)
           (assoc :details humanized)))
     ;; Valid
@@ -98,7 +107,7 @@
   [memories keywords request]
   (let [last-memories (vec (take-last 10 memories))
 
-        scenario (:converse scenarios)
+        scenario ((:scenario request) scenarios)
         prompt (generate-prompt scenario last-memories keywords)
 
         for-conv (if (seq last-memories)
@@ -110,17 +119,23 @@
        :content prompt}]
      conv
      [{:role "user"
-       :content (json/write-value-as-string request)}])))
+       :content (json/write-value-as-string
+                 (select-keys request request-keys))}])))
 
-(defn submission-str
-  [submission]
-  (let [with-name #(if (= % "assistant") "esther" %)]
-    (str/join
-     "\n\n"
-     (map #(str (with-name (:role %)) ": " (:content %)) submission))))
 
-(defn complete
-  [impl memories keywords request]
-  (let [submission (generate-submission memories keywords request)]
-    (log/debug "llm::complete:submission" (submission-str submission))
-    (validate response-schema (impl submission))))
+
+(defn create-complete-fn
+  [complete-fn]
+  (fn [memories keywords request]
+    (let [submission (generate-submission memories keywords request)]
+      (validate response-schema (complete-fn submission)))))
+
+
+(defmethod ig/init-key :ai.llm/complete-fn
+  [_ {:keys [implementation]
+      :or   {implementation :openai}
+      :as   opts}]
+  (create-complete-fn
+   (case implementation
+     :openai (openai/create-api-complete opts)
+     :llama (llama/create-complete opts))))

@@ -47,10 +47,10 @@
            io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}
            org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
            buddy/buddy-auth {:mvn/version "3.0.323"}}
- :aliases {:local-llama {:jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]}
-           :build {:deps {io.github.clojure/tools.build
+ :aliases {:build {:deps {io.github.clojure/tools.build
                           {:git/sha "e3e3532"
                            :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
+                   :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                    :ns-default build}
 
 
@@ -65,6 +65,7 @@
                                 io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
                                 org.clojure/tools.namespace     {:mvn/version "1.2.0"}
                                 }
+                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}
@@ -85,6 +86,7 @@
                                 org.clojure/tools.namespace          {:mvn/version "1.2.0"}
                                 com.lambdaisland/classpath           {:mvn/version "0.0.27"}}
                   :exec-fn      cognitect.test-runner.api/test
+                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "env/test/resources" "test/clj"]
                   :main-opts   ["-e" "(require 'pjstadig.humane-test-output) (pjstadig.humane-test-output/activate!)"
                                 "-m" "cognitect.test-runner"]}}}
