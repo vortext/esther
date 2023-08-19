@@ -31,3 +31,22 @@
 | n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg= | 0 |   |
 | n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg= | 0 |   |
 | n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg= | 0 |   |
+
+
+
+#+begin_src shell 
+# get models from https://github.com/facebookresearch/llama
+git clone git@github.com:facebookresearch/llama.git # follow instructions 
+git clone git@github.com:ggerganov/llama.cpp.git # https://github.com/ggerganov/llama.cpp
+cd llama.cpp 
+
+sudo apt-get install nvidia-cuda-toolkit # check nvcc and nvidia-smi
+mkdir build && cd build 
+
+cmake --build . --config Release
+cd bin 
+
+python convert.py /array/Models/llama/llama-2-70b-chat --vocab-dir /array/Models/llama
+./quantize /array/Models/llama/llama-2-70b-chat/ggml-model-f32.bin  /array/Models/llama/llama-2-70b-chat/ggml-model-q4_0.bin q4_0 
+./main -m /array/Models/llama/llama-2-70b-chat/ggml-model-q4_0.bin -n 256 --repeat_penalty 1.0 -eps 1e-5 -gqa 8 --color -i -r "User:" -f ../../prompts/chat-with-bob.txt
+#+end src 

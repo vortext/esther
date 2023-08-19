@@ -6,7 +6,8 @@
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
    [malli.core :as m]
-   [vortext.esther.ai.openai :as openai]
+   [vortext.esther.ai.llm :as llm]
+   [vortext.esther.ai.openai :refer [openai-api-complete]]
    [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
    [vortext.esther.util.emoji :as emoji]
    [clojure.string :as str]
@@ -44,7 +45,7 @@
      :response
      (strs-to-markdown-list
       (map #(get-in % [:response :image-prompt])
-           memories))}))
+           (take 3 memories)))}))
 
 (defn logout
   [_opts _user _sid _args {:keys [request]}]
@@ -89,8 +90,8 @@
                       (memory/last-memories opts user 10))
         last-memories (reverse conversation)
         keyword-memories (memory/frecency-keywords opts user :week 25)
-        result (openai/complete
-                opts
+        result (llm/complete
+                openai-api-complete
                 last-memories
                 keyword-memories
                 (:request data))]
