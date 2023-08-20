@@ -49,16 +49,21 @@
   {:routes #ig/refset :reitit/routes
    :depends-on [:dev/init-test-user]}}
 
- :ai.llm/complete-fn {:implementation :openai
-                      ;; :implementation :llama
-                      :model-path "models/ggml-model-q4_k_m.bin"
-                      :options {}}
+ :ai.llm/complete-fn
+ {:implementation :llama-shell
+  :options
+  {:prompt :llama
+   :model-path
+   #or [#env GGML_MODEL_PATH "./models/TheBloke/llama-2-13b-chat.ggmlv3.q4_K_M.bin"]
+   :bin-dir
+   "./native/llama.cpp/build/bin"}}
 
  :router/core
  {:routes #ig/ref :router/routes}
  :reitit.routes/ui
  #profile {:dev {:base-path "",
                  :default-path "/user/conversation"
+                 :prompt "prompts/llama.md"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
                  :ai {:complete-fn #ig/ref :ai.llm/complete-fn}

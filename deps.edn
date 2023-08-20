@@ -3,9 +3,11 @@
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
            ;; Util
            org.clojure/core.async {:mvn/version "1.6.673"}
+           org.clojure/core.cache {:mvn/version "1.0.225"}
            org.clj-commons/humanize {:mvn/version "1.0"}
            clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
            babashka/fs {:mvn/version "0.4.19"}
+           babashka/process {:mvn/version "0.5.21"}
            markdown-clj/markdown-clj {:mvn/version "1.11.4"}
            table/table {:mvn/version "0.5.0"}
            diehard/diehard {:mvn/version "0.11.9"}
@@ -16,7 +18,7 @@
            metosin/malli {:mvn/version "0.11.0"}
            clj-http/clj-http {:mvn/version "3.12.3"}
            ;; AI
-           com.phronemophobic/llama-clj {:mvn/version "0.5"}
+           ;; com.phronemophobic/llama-clj {:mvn/version "0.5"}
 
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
@@ -50,10 +52,7 @@
  :aliases {:build {:deps {io.github.clojure/tools.build
                           {:git/sha "e3e3532"
                            :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
-                   :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                    :ns-default build}
-
-
            :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.0.27"}
                                 criterium/criterium             {:mvn/version "0.4.6"}
                                 expound/expound                 {:mvn/version "0.9.0"}
@@ -65,7 +64,7 @@
                                 io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
                                 org.clojure/tools.namespace     {:mvn/version "1.2.0"}
                                 }
-                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
+                  ;; :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}
@@ -86,7 +85,6 @@
                                 org.clojure/tools.namespace          {:mvn/version "1.2.0"}
                                 com.lambdaisland/classpath           {:mvn/version "0.0.27"}}
                   :exec-fn      cognitect.test-runner.api/test
-                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "env/test/resources" "test/clj"]
                   :main-opts   ["-e" "(require 'pjstadig.humane-test-output) (pjstadig.humane-test-output/activate!)"
                                 "-m" "cognitect.test-runner"]}}}

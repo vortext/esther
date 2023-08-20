@@ -44,11 +44,10 @@ function getTimeOfDay(latitude, longitude) {
   return 'night';
 }
 
-function getLocalContext() {
+function getLocalContext(latitude, longitude) {
   return {
-    "current-season": getCurrentSeason(window.appConfig.latitude),
-    "time-of-day": getTimeOfDay(window.appConfig.latitude,
-                                window.appConfig.longitude)
+    "current-season": getCurrentSeason(latitude),
+    "time-of-day": getTimeOfDay(latitude, longitude)
   };
 }
 
@@ -127,17 +126,22 @@ function getSentimentEnergy() {
   return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
 }
 
+function setContext() {
+  let context = getLocalContext(window.appConfig.latitude, window.appConfig.longitude);
+  let userContext = document.getElementById("user-context");
+  userContext.value = JSON.stringify(context);
+}
+
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
   // Get the form and input elements
   let textarea = document.getElementById('user-input');
   let userValue = document.getElementById("user-value");
-  let userContext = document.getElementById("user-context");
   let userSid = document.getElementById("user-sid");
 
   // Store the values in the hidden input fields
-  userContext.value = JSON.stringify(getLocalContext());
   userSid.value = window.appConfig.sid;
+  setContext();
 
   // Update the UI
   let msg = emoji.replace_colons(textarea.value);
@@ -171,26 +175,28 @@ function afterConverseRequest() {
 }
 
 
-function setPosition(lat, lon) {
-  window.appConfig.latitude = lat;
-  window.appConfig.longitude = lon;
+function setUserLocation(latitude, longitude) {
+  window.appConfig.latitude = latitude;
+  window.appConfig.longitude = longitude;
 }
-
-// Geolocation Handling
-navigator.geolocation.getCurrentPosition(
-  (position) => {
-    setPosition(position.coords.latitude, position.coords.longitude);
-  },
-  (error) => {
-    setPosition(51.509865, -0.118092); // London
-    console.warn('Geolocation error:', error);
-  }
-);
 
 
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   var sidElements = document.querySelectorAll('.session-sid');
+
+  // Geolocation Handling
+  setUserLocation(51.509865, -0.118092); // London
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setUserLocation(position.coords.latitude, position.coords.longitude);
+      setContext();
+    },
+    (error) => {
+      console.warn('Geolocation error:', error);
+      setContext();
+    }
+  );
 
   sidElements.forEach(function(element) {
     element.value = window.appConfig.sid;

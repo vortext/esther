@@ -6,7 +6,6 @@
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
    [malli.core :as m]
-   [vortext.esther.ai.llm :as llm]
    [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
    [vortext.esther.util.emoji :as emoji]
    [clojure.string :as str]
@@ -89,20 +88,15 @@
                       (memory/last-memories opts user 10))
         last-memories (reverse conversation)
         keyword-memories (memory/frecency-keywords opts user :week 25)
-        request (:request
-                 (assoc-in data [:request :scenario] :converse-minimal))
         complete (get-in opts [:ai :complete-fn])
-        result (complete last-memories keyword-memories request)]
+        ;; The actual LLM complete
+        result (complete opts user (:request data) last-memories keyword-memories)]
     (-> data
         (assoc
          :response
          (-> result
              (assoc :conversation? true)
              (assoc :type :md-serif))))))
-
-(defn get-context
-  [request]
-  (read-json-value (get-in request [:params :context] "")))
 
 (defn- respond!
   [opts user sid data]
@@ -122,20 +116,21 @@
            (fn [s] (<= (count s) 1024))]]]
    [:context [:map {:optional true}]]])
 
+(defn parse-context
+  [context-str]
+  (read-json-value context-str))
 
 (defn answer!
   [opts request]
   (let [{:keys [params]} request
         user (get-in request [:session :user])
         sid (:sid params)
-        msg (emoji/parse-to-unicode
-             (get-in request [:params :msg]))
-        request {:context (get-context request)
-                 :msg msg}
-        data {:request request
+        data {:request
+              {:context (parse-context (get params :context ""))
+               :msg (emoji/parse-to-unicode (:msg params))}
               :ts (unix-ts)}]
-    (if-not (m/validate request-schema request)
-      (:unrecognized-input errors)
+    (if-not (m/validate request-schema (:request data))
+      (assoc data :response (:unrecognized-input errors))
       (let [memory (respond! opts user sid data)
             type (keyword (:type (:response  memory)))]
         (if-not (= type :ui)

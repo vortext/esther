@@ -10,7 +10,6 @@
    [markdown.core :as markdown]
    [clojure.tools.logging :as log]))
 
-
 (def loading
   [:div.esther-typing-loading
    [:div.loading

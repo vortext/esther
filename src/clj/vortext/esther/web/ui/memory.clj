@@ -1,7 +1,7 @@
 (ns vortext.esther.web.ui.memory
   (:require
    [clojure.tools.logging :as log]
-   [vortext.esther.web.htmx :refer [page ui] :as htmx]
+   [vortext.esther.web.htmx :refer [ui] :as htmx]
    [clj-commons.humanize :as h]
    [vortext.esther.web.controllers.memory :as memory]
    [clojure.string :as str]
@@ -24,7 +24,6 @@
 (defn md-memories-table
   [memories]
   (let [ks [:emoji :energy :keywords :image-prompt]
-
         update-kw
         (fn [kw] (str/join
                   ", "

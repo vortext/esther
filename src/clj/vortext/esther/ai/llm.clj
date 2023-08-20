@@ -11,15 +11,12 @@
    [jsonista.core :as json]
    [clojure.set :as set]
    [malli.core :as m]
+   [babashka.fs :as fs]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.ai.llama :as llama]
    [malli.error :as me]
    [vortext.esther.config :refer [examples errors introductions]]))
-
-(def scenarios
-  {:converse-minimal (slurp (io/resource "prompts/scenarios/converse-minimal.md"))
-   :converse (slurp (io/resource "prompts/scenarios/converse.md"))})
 
 (defn relevant-keywords
   [memories keywords]
@@ -36,7 +33,7 @@
 
 
 (defn generate-prompt
-  [scenario memories keywords]
+  [prompt memories keywords]
   (let [example (first (shuffle examples))
         memory-keywords (relevant-keywords memories keywords)
         conversation-keywords (extract-keywords memories)
@@ -45,7 +42,7 @@
                            conversation-keywords)]
     (log/debug "llm::generate-prompt::relevant-keywords" relevant-keywords)
     (mustache/render
-     scenario
+     prompt
      {:keywords (strs-to-markdown-list relevant-keywords)
       :include-keywords? (boolean (seq relevant-keywords))
       :example-request (json/write-value-as-string (:request example))
@@ -97,18 +94,23 @@
   (if (not (m/validate schema obj))
     (let [error (m/explain schema obj)
           humanized (me/humanize error)]
-      (log/warn "llm::validate:error" humanized obj)
+      (log/warn "llm::validate:error" humanized)
       (-> (:validation-error errors)
           (assoc :details humanized)))
     ;; Valid
     obj))
 
-(defn generate-submission
-  [memories keywords request]
-  (let [last-memories (vec (take-last 10 memories))
+(def get-prompt
+  (memoize
+   (fn [path] (slurp (io/resource path)))))
 
-        scenario ((:scenario request) scenarios)
-        prompt (generate-prompt scenario last-memories keywords)
+(defn generate-submission
+  [opts request memories keywords]
+  (log/info [opts request memories keywords])
+  (let [last-memories (vec (take-last 10 memories))
+        prompt (generate-prompt
+                (get-prompt (:prompt opts))
+                last-memories keywords)
 
         for-conv (if (seq last-memories)
                    last-memories
@@ -122,20 +124,48 @@
        :content (json/write-value-as-string
                  (select-keys request request-keys))}])))
 
+(defn parse-number
+  [s]
+  (if (re-find #"^-?\d+\.?\d*$" s)
+    (read-string s)))
 
+(defn update-value
+  "Updates the given key in the given map. Uses the given function to transform the value, if needed."
+  [key transform-fn m default-value]
+  (let [value (get m key)
+        transformed-value (transform-fn value)]
+    (assoc m key (if transformed-value
+                   transformed-value
+                   (or (transform-fn (str value))
+                       default-value)))))
+
+(def clean-energy
+  (partial update-value :energy #(or (when (float? %) %) (parse-number (str %)))))
+
+(def clean-emoji
+  (partial update-value :emoji #(or (when (emoji/emoji? %) %) (first (emoji/emoji-in-str %)))))
+
+(defn clean-response
+  [response]
+  (-> response
+      (clean-energy 0.5)
+      (clean-emoji "🙃")))
 
 (defn create-complete-fn
   [complete-fn]
-  (fn [memories keywords request]
-    (let [submission (generate-submission memories keywords request)]
-      (validate response-schema (complete-fn submission)))))
+  (fn [opts user request memories keywords]
+    (let [submission (generate-submission opts request memories keywords)
+          response (complete-fn user submission)
+          cleaned-response (clean-response response)]
+      (validate response-schema cleaned-response))))
 
 
 (defmethod ig/init-key :ai.llm/complete-fn
-  [_ {:keys [implementation]
-      :or   {implementation :openai}
-      :as   opts}]
-  (create-complete-fn
-   (case implementation
-     :openai (openai/create-api-complete opts)
-     :llama (llama/create-complete opts))))
+[_ {:keys [implementation]
+    :or   {implementation :openai}
+    :as   opts}]
+(create-complete-fn
+ (case implementation
+   :openai (openai/create-api-complete opts)
+   :llama-shell (llama/create-complete-shell opts)
+   )))

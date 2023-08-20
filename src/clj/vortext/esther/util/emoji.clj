@@ -3,7 +3,11 @@
            [org.ahocorasick.trie Trie]))
 
 
-(defn emoji? [s] (EmojiManager/isEmoji ^String s))
+(defn emoji? [s]
+  (EmojiManager/isEmoji ^String s))
+
+(defn emoji-in-str [s]
+  (EmojiManager/extractEmojisInOrder ^String s))
 
 
 (defonce emojis (map bean (EmojiManager/getAllEmojis)))
