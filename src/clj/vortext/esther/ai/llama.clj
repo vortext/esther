@@ -21,8 +21,7 @@
 
 (defn as-role
   [entry]
-  (str (str/capitalize (named-role entry))
-       ": " (:content entry)))
+  (str (str/capitalize (named-role entry)) ":" (:content entry)))
 
 (defn generate-prompt-str
   [submission]
@@ -31,8 +30,7 @@
    (str/join
     "\n"
     (for [entry (rest submission)] (as-role entry)))
-   "\n"
-   "Esther: "))
+   "\n" "Esther:"))
 
 (defn parse
   [llama-output]
@@ -107,15 +105,14 @@
         seen-last-entry? (atom false)]
     (go-loop []
       (if-let [line (<! out-ch)]
-        (do (log/debug "llama::llama-subprocess:line" line)
-            (when (str/includes? line last-entry)
+        (do (when (str/includes? line last-entry)
               (reset! seen-last-entry? true))
             (if-let [json-obj (and @seen-last-entry?
                                    (str/includes? line (str/capitalize ai-name))
                                    (safe-parse line))]
               (if (:response json-obj)
                 (do
-                  (log/info "llama::llama-subprocess:json" json-obj)
+                  (log/debug "llama::llama-subprocess:json" json-obj)
                   ;;(shell "kill" "-INT" pid) ;; 2 - SIGINT - interupt process stream, ctrl-C
                   (>! response-ch json-obj)
                   (recur))

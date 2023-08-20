@@ -11,7 +11,6 @@
    [jsonista.core :as json]
    [clojure.set :as set]
    [malli.core :as m]
-   [babashka.fs :as fs]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.ai.llama :as llama]
@@ -106,7 +105,6 @@
 
 (defn generate-submission
   [opts request memories keywords]
-  (log/info [opts request memories keywords])
   (let [last-memories (vec (take-last 10 memories))
         prompt (generate-prompt
                 (get-prompt (:prompt opts))
@@ -143,7 +141,8 @@
   (partial update-value :energy #(or (when (float? %) %) (parse-number (str %)))))
 
 (def clean-emoji
-  (partial update-value :emoji #(or (when (emoji/emoji? %) %) (first (emoji/emoji-in-str %)))))
+  (partial update-value :emoji #(or (when (emoji/emoji? %) %)
+                                    (:emoji (first (emoji/emoji-in-str %))))))
 
 (defn clean-response
   [response]

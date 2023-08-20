@@ -32,9 +32,9 @@ Note: you must only return the valid JSON response. No other text outside the JS
 
 ### Example
 #### Input request
-{{{example-request}}}
+User:{{{example-request}}}
 
 #### Output response
-{{{example-response}}}
+Esther:{{{example-response}}}
 
-## Dialog between Esther and Bob. Complete as Esther.
+## Conversation between Esther and Bob. Respond to User as Esther.

@@ -3,14 +3,15 @@
            [org.ahocorasick.trie Trie]))
 
 
+(defonce emojis (map bean (EmojiManager/getAllEmojis)))
+
 (defn emoji? [s]
   (EmojiManager/isEmoji ^String s))
 
 (defn emoji-in-str [s]
-  (EmojiManager/extractEmojisInOrder ^String s))
+  (map bean (EmojiManager/extractEmojisInOrder ^String s)))
 
 
-(defonce emojis (map bean (EmojiManager/getAllEmojis)))
 
 (def alias->unicode
   (->> emojis
