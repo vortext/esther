@@ -3,7 +3,7 @@
    [clojure.tools.logging :as log]
    [clojure.core.async :as async :refer [chan go-loop <! go >! <!! close!]]
    [clojure.java.io :as io]
-   [babashka.process :refer [process destroy-tree alive?]]
+   [babashka.process :refer [shell process destroy-tree alive?]]
    [clojure.core.cache.wrapped :as w]
    [babashka.fs :as fs]
    [vortext.esther.util :refer
@@ -97,7 +97,7 @@
                     (process-cmd bin-dir model-path submission))
         {:keys [proc out-ch _in-ch]} subprocess
         response-ch (chan 32)
-        ;;pid (.pid (get-in subprocess [:proc :proc]))
+        pid (.pid (get-in subprocess [:proc :proc]))
         last-entry (:content (last submission))
         seen-last-entry? (atom false)]
     (go-loop []
@@ -112,7 +112,7 @@
             (if (:response json-obj)
               (do
                 (log/debug "llama::llama-subprocess:json" json-obj)
-                ;;(shell "kill" "-INT" pid) ;; 2 - SIGINT - interupt process stream, ctrl-C
+                (shell "kill" "-INT" pid) ;; 2 - SIGINT - interupt process stream, ctrl-C
                 (>! response-ch json-obj)
                 (recur))
               (recur))
