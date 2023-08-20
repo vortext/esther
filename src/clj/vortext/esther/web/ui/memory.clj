@@ -31,6 +31,7 @@
         formatted-memories
         (map (fn [m]
                (-> (:response m)
+                   (update :energy #(format "%.2f" %))
                    (update :keywords update-kw)))
              memories)]
     (t/table-str

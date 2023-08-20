@@ -10,6 +10,7 @@
    [vortext.esther.util :refer [strs-to-markdown-list]]
    [jsonista.core :as json]
    [clojure.set :as set]
+   [diehard.core :as dh]
    [malli.core :as m]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.ai.openai :as openai]
@@ -93,7 +94,7 @@
   (if (not (m/validate schema obj))
     (let [error (m/explain schema obj)
           humanized (me/humanize error)]
-      (log/warn "llm::validate:error" humanized)
+      (log/warn "llm::validate:error" obj humanized)
       (-> (:validation-error errors)
           (assoc :details humanized)))
     ;; Valid
@@ -144,8 +145,7 @@
           (or (when (and (float? %) (<= 0 % 1)) %)
               (parse-number (str %)))]
       (when (and parsed-val (<= 0 parsed-val 1))
-        parsed-val))))
-
+        (min 0.99 (float parsed-val))))))
 
 (def clean-emoji
   (partial
@@ -163,19 +163,31 @@
 (defn create-complete-fn
   [complete-fn]
   (fn [opts user request memories keywords]
-    (let [submission (generate-submission opts request memories keywords)
-          response (complete-fn user submission)
-          _ (log/debug "response" response)
-          cleaned-response (clean-response response)]
-      (validate response-schema cleaned-response))))
+    (dh/with-retry
+        {:retry-on Exception
+         :max-retries 1
+         :on-retry
+         (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
+         :on-failure
+         (fn [_val ex]
+           (let [response (:internal-server-error errors)]
+             (log/warn "llm::complete:failed..." ex response)
+             response))
+         :on-failed-attempt
+         (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
+      (dh/with-timeout {:timeout-ms 120000}
+        (let [submission (generate-submission opts request memories keywords)
+              response (complete-fn user submission)
+              cleaned-response (clean-response response)]
+          (validate response-schema cleaned-response))))))
 
 
 (defmethod ig/init-key :ai.llm/complete-fn
-[_ {:keys [implementation]
-    :or   {implementation :openai}
-    :as   opts}]
-(create-complete-fn
- (case implementation
-   :openai (openai/create-api-complete opts)
-   :llama-shell (llama/create-complete-shell opts)
-   )))
+  [_ {:keys [implementation]
+      :or   {implementation :openai}
+      :as   opts}]
+  (create-complete-fn
+   (case implementation
+     :openai (openai/create-api-complete opts)
+     :llama-shell (llama/create-complete-shell opts)
+     )))

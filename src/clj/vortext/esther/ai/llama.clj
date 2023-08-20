@@ -27,7 +27,7 @@
    (str/join
     "\n"
     (for [entry (rest submission)] (as-role entry)))
-   "\n" (str/capitalize ai-name) ":"))
+   "\n"))
 
 (defn parse
   [llama-output]
@@ -55,7 +55,7 @@
       "-m" model
       ;;"--simple-io"
       "-i"
-      "-r" (str/capitalize "user:")
+      "-r" "User:"
       "-eps" "1e-5" ;; for best generation quality LLaMA 2
       ;;"-gqa" "8"    ;; for 70B models to work
       "--ctx-size" 2048
@@ -65,8 +65,9 @@
 (defn process-channels
   [cmd]
   (let [_ (log/debug "llama::process-channels:cmd" cmd)
-        proc (process {:err :inherit
-                       :shutdown destroy-tree}
+        proc (process {:shutdown destroy-tree
+                       :err (java.io.OutputStream/nullOutputStream)
+                       :in (java.io.OutputStream/nullOutputStream)}
                       cmd)
         out-ch (chan 32)
         in-ch (chan 32)
@@ -100,15 +101,15 @@
         pid (.pid (get-in subprocess [:proc :proc]))
         last-entry (:content (last submission))
         seen-last-entry? (atom false)
-        sigint #(shell "kill" "-INT" pid)]
+        sigint #(do (log/info "sigint" pid) (shell "kill" "-USR1" pid))
+        status-ch (chan 8)
+        ]
     (go-loop []
       (if-let [line (<! out-ch)]
         (do (log/debug "llama:" line)
             (when (str/includes? line last-entry)
+              (go (>! status-ch :seen-last-entry))
               (reset! seen-last-entry? true))
-            (when (and @seen-last-entry? (str/starts-with? line (str/capitalize "user:")))
-              ;; 2 - SIGINT - interupt process stream, ctrl-C
-              (sigint))
             (if-let [json-obj (and @seen-last-entry?
                                    (str/includes? line (str/capitalize ai-name))
                                    (safe-parse line))]
@@ -125,7 +126,11 @@
           (destroy-tree proc)           ; Destroy the process
           (close! out-ch)               ; Close the output channel
           (throw (Exception. "Process completed without matching output")))))
-    (assoc subprocess :response-ch response-ch)))
+    (when (= (<!! status-ch) :seen-last-entry)
+      (log/info "booted")
+      (assoc subprocess
+             :status-ch status-ch
+             :response-ch response-ch))))
 
 (defn cached-spawn-subprocess
   [options cache uid submission]
@@ -138,21 +143,18 @@
   [options cache]
   (fn [user submission]
     (let [{:keys [uid]} (:vault user)
-          proc (cached-spawn-subprocess options cache uid submission)
-          pid (.pid (get-in proc [:proc :proc]))
-          proc (if (alive? (:proc proc))
-                 proc
-                 (do ;; not alive
-                   (log/debug "llama::create-complete-shell:proc" pid "is dead")
-                   (w/evict cache uid)
-                   (cached-spawn-subprocess options cache uid submission)))]
-      (log/debug "llama::complete-shell:cached")
-      (go (>! (:in-ch proc) (str (as-role (last submission)) "\n")))
+          running-proc? (when-let [proc (w/lookup cache uid)]
+                          (alive? (:proc proc)))
+          _ (when-not running-proc? (w/evict cache uid))
+          proc (cached-spawn-subprocess options cache uid submission)]
+      (when running-proc?
+        (log/info "llama::llama-complete-shell" "sending to proc..")
+        (go (>! (:in-ch proc) (str (last submission) "\n"))))
       (<!! (:response-ch proc)))))
 
 (defn create-complete-shell
   [{:keys [options]}]
-  (let [cache (w/lru-cache-factory {:threshold 2})]
+  (let [cache (w/lru-cache-factory {:threshold 32})]
     (llama-shell-complete-fn options cache)))
 
 ;; Todo make sure it works
