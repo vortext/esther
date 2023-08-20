@@ -10,6 +10,9 @@
    [kit.edge.server.undertow]
    [vortext.esther.web.handler]
 
+   ;; AI
+   [vortext.esther.ai.llm]
+
    ;; Routes
    [vortext.esther.web.routes.api]
    [vortext.esther.web.routes.ui]

@@ -6,12 +6,9 @@
    [babashka.process :refer [process destroy-tree alive?]]
    [clojure.core.cache.wrapped :as w]
    [babashka.fs :as fs]
-   [diehard.core :as dh]
-   [vortext.esther.config :refer [errors]]
    [vortext.esther.util :refer
     [parse-maybe-json escape-newlines]]
-   [clojure.string :as str])
-  (:import [dev.failsafe TimeoutExceededException]))
+   [clojure.string :as str]))
 
 (def ai-name "esther")
 
@@ -58,7 +55,7 @@
       "-m" model
       "--simple-io"
       "-i"
-      "-r" (str/capitalize "user: ")
+      "-r" (str/capitalize "user:")
       "-eps" "1e-5" ;; for best generation quality LLaMA 2
       ;;"-gqa" "8"    ;; for 70B models to work
       "--ctx-size" 2048
@@ -105,19 +102,21 @@
         seen-last-entry? (atom false)]
     (go-loop []
       (if-let [line (<! out-ch)]
-        (do (when (str/includes? line last-entry)
-              (reset! seen-last-entry? true))
-            (if-let [json-obj (and @seen-last-entry?
-                                   (str/includes? line (str/capitalize ai-name))
-                                   (safe-parse line))]
-              (if (:response json-obj)
-                (do
-                  (log/debug "llama::llama-subprocess:json" json-obj)
-                  ;;(shell "kill" "-INT" pid) ;; 2 - SIGINT - interupt process stream, ctrl-C
-                  (>! response-ch json-obj)
-                  (recur))
+        (do
+          (log/debug line)
+          (when (str/includes? line last-entry)
+            (reset! seen-last-entry? true))
+          (if-let [json-obj (and @seen-last-entry?
+                                 (str/includes? line (str/capitalize ai-name))
+                                 (safe-parse line))]
+            (if (:response json-obj)
+              (do
+                (log/debug "llama::llama-subprocess:json" json-obj)
+                ;;(shell "kill" "-INT" pid) ;; 2 - SIGINT - interupt process stream, ctrl-C
+                (>! response-ch json-obj)
                 (recur))
-              (recur)))
+              (recur))
+            (recur)))
         ;; Handle the case where the channel is closed and no matching output was found
         (do
           (destroy-tree proc)           ; Destroy the process
@@ -146,6 +145,7 @@
                      (w/evict cache uid)
                      (cached-spawn-subprocess options cache uid submission)))]
         (when cached?
+          (log/debug "llama::complete-shell:cached" (.pid (get-in proc [:proc :proc])))
           (go (>! (:in-ch proc) (str (as-role (last submission)) "\n"))))
         (<!! (:response-ch proc))
         #_(try
