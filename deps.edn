@@ -5,6 +5,7 @@
            org.clojure/core.async {:mvn/version "1.6.673"}
            org.clojure/core.cache {:mvn/version "1.0.225"}
            org.clj-commons/humanize {:mvn/version "1.0"}
+           ;;org.clj-commons/digest {:mvn/version "1.4.100"}
            clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
            babashka/fs {:mvn/version "0.4.19"}
            babashka/process {:mvn/version "0.5.21"}

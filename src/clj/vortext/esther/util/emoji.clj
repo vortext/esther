@@ -1,4 +1,5 @@
 (ns vortext.esther.util.emoji
+  (:require [clojure.string :as str])
   (:import [net.fellbaum.jemoji EmojiManager]
            [org.ahocorasick.trie Trie]))
 
@@ -17,7 +18,7 @@
   (->> emojis
        (mapcat (fn [emoji]
                  (map #(vector % (:unicode emoji))
-                      (:githubAliases emoji))))
+                      (:allAliases emoji))))
        (into {})))
 
 (defn build-trie
@@ -32,17 +33,18 @@
 (defn parse-to-unicode
   ([text] (parse-to-unicode trie alias->unicode text))
   ([trie alias->unicode text]
-   (let [emits (.parseText trie text)
-         sorted-emits (sort-by #(.getStart %) emits)]
-     (loop [remaining-emits sorted-emits
-            prev-end 0
-            result ""]
-       (if (empty? remaining-emits)
-         (str result (subs text prev-end))
-         (let [emit (first remaining-emits)
-               start (.getStart emit)
-               end (inc (.getEnd emit))
-               replacement (get alias->unicode (.getKeyword emit))]
-           (recur (rest remaining-emits)
-                  end
-                  (str result (subs text prev-end start) replacement))))))))
+   (when-not (str/blank? text)
+     (let [emits (.parseText trie text)
+           sorted-emits (sort-by #(.getStart %) emits)]
+       (loop [remaining-emits sorted-emits
+              prev-end 0
+              result ""]
+         (if (empty? remaining-emits)
+           (str result (subs text prev-end))
+           (let [emit (first remaining-emits)
+                 start (.getStart emit)
+                 end (inc (.getEnd emit))
+                 replacement (get alias->unicode (.getKeyword emit))]
+             (recur (rest remaining-emits)
+                    end
+                    (str result (subs text prev-end start) replacement)))))))))

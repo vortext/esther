@@ -27,7 +27,7 @@
    (str/join
     "\n"
     (for [entry (rest submission)] (as-role entry)))
-   "\n" "Esther:"))
+   "\n" (str/capitalize ai-name) ":"))
 
 (defn parse
   [llama-output]
@@ -53,7 +53,7 @@
      " "
      [(str (fs/real-path (fs/path bin-dir "main")))
       "-m" model
-      "--simple-io"
+      ;;"--simple-io"
       "-i"
       "-r" (str/capitalize "user:")
       "-eps" "1e-5" ;; for best generation quality LLaMA 2
@@ -99,24 +99,27 @@
         response-ch (chan 32)
         pid (.pid (get-in subprocess [:proc :proc]))
         last-entry (:content (last submission))
-        seen-last-entry? (atom false)]
+        seen-last-entry? (atom false)
+        sigint #(shell "kill" "-INT" pid)]
     (go-loop []
       (if-let [line (<! out-ch)]
-        (do
-          (log/debug line)
-          (when (str/includes? line last-entry)
-            (reset! seen-last-entry? true))
-          (if-let [json-obj (and @seen-last-entry?
-                                 (str/includes? line (str/capitalize ai-name))
-                                 (safe-parse line))]
-            (if (:response json-obj)
-              (do
-                (log/debug "llama::llama-subprocess:json" json-obj)
-                (shell "kill" "-INT" pid) ;; 2 - SIGINT - interupt process stream, ctrl-C
-                (>! response-ch json-obj)
+        (do (log/debug "llama:" line)
+            (when (str/includes? line last-entry)
+              (reset! seen-last-entry? true))
+            (when (and @seen-last-entry? (str/starts-with? line (str/capitalize "user:")))
+              ;; 2 - SIGINT - interupt process stream, ctrl-C
+              (sigint))
+            (if-let [json-obj (and @seen-last-entry?
+                                   (str/includes? line (str/capitalize ai-name))
+                                   (safe-parse line))]
+              (if (:response json-obj)
+                (do
+                  (log/debug "llama::llama-subprocess:json" json-obj)
+                  (sigint)
+                  (>! response-ch json-obj)
+                  (recur))
                 (recur))
-              (recur))
-            (recur)))
+              (recur)))
         ;; Handle the case where the channel is closed and no matching output was found
         (do
           (destroy-tree proc)           ; Destroy the process
@@ -131,28 +134,26 @@
      cache uid
      (fn [_uid] (llama-subprocess bin-dir model-path submission)))))
 
+(defn llama-shell-complete-fn
+  [options cache]
+  (fn [user submission]
+    (let [{:keys [uid]} (:vault user)
+          proc (cached-spawn-subprocess options cache uid submission)
+          pid (.pid (get-in proc [:proc :proc]))
+          proc (if (alive? (:proc proc))
+                 proc
+                 (do ;; not alive
+                   (log/debug "llama::create-complete-shell:proc" pid "is dead")
+                   (w/evict cache uid)
+                   (cached-spawn-subprocess options cache uid submission)))]
+      (log/debug "llama::complete-shell:cached")
+      (go (>! (:in-ch proc) (str (as-role (last submission)) "\n")))
+      (<!! (:response-ch proc)))))
+
 (defn create-complete-shell
   [{:keys [options]}]
-  (let [cache (w/lru-cache-factory {})]
-    (fn [user submission]
-      (let [{:keys [uid]} (:vault user)
-            cached? (w/lookup cache uid)
-            proc (cached-spawn-subprocess options cache uid submission)
-            proc (if (alive? (:proc proc))
-                   proc
-                   (do ;; not alive
-                     (log/debug "llama::create-complete-shell:proc" "not alive?")
-                     (w/evict cache uid)
-                     (cached-spawn-subprocess options cache uid submission)))]
-        (when cached?
-          (log/debug "llama::complete-shell:cached" (.pid (get-in proc [:proc :proc])))
-          (go (>! (:in-ch proc) (str (as-role (last submission)) "\n"))))
-        (<!! (:response-ch proc))
-        #_(try
-            (dh/with-timeout {:timeout-ms 8000}
-              )
-            (catch TimeoutExceededException _
-              (fn [_] (:gateway-timeout errors))))))))
+  (let [cache (w/lru-cache-factory {:threshold 2})]
+    (llama-shell-complete-fn options cache)))
 
 ;; Todo make sure it works
 ;; - Emoji don't work with llama.clj

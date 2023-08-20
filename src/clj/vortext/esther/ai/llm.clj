@@ -124,7 +124,7 @@
 
 (defn parse-number
   [s]
-  (if (re-find #"^-?\d+\.?\d*$" s)
+  (when (re-find #"^-?\d+\.?\d*$" s)
     (read-string s)))
 
 (defn update-value
@@ -138,11 +138,21 @@
                        default-value)))))
 
 (def clean-energy
-  (partial update-value :energy #(or (when (float? %) %) (parse-number (str %)))))
+  (partial
+   update-value :energy
+   #(let [parsed-val
+          (or (when (and (float? %) (<= 0 % 1)) %)
+              (parse-number (str %)))]
+      (when (and parsed-val (<= 0 parsed-val 1))
+        parsed-val))))
+
 
 (def clean-emoji
-  (partial update-value :emoji #(or (when (emoji/emoji? %) %)
-                                    (:emoji (first (emoji/emoji-in-str %))))))
+  (partial
+   update-value :emoji
+   #(or (when (emoji/emoji? %) %)
+        (:emoji (first (emoji/emoji-in-str
+                        (emoji/parse-to-unicode %)))))))
 
 (defn clean-response
   [response]
@@ -155,6 +165,7 @@
   (fn [opts user request memories keywords]
     (let [submission (generate-submission opts request memories keywords)
           response (complete-fn user submission)
+          _ (log/debug "response" response)
           cleaned-response (clean-response response)]
       (validate response-schema cleaned-response))))
 
