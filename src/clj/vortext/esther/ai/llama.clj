@@ -1,24 +1,20 @@
 (ns vortext.esther.ai.llama
   (:require
    [clojure.tools.logging :as log]
-   [clojure.core.async :as async :refer [chan go-loop <! go >! <!! close!]]
+   [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
-   [babashka.process :refer [shell process destroy-tree alive?]]
+   [babashka.process :refer [process destroy-tree alive?]]
    [clojure.core.cache.wrapped :as w]
    [babashka.fs :as fs]
    [vortext.esther.util :refer
     [parse-maybe-json escape-newlines]]
    [clojure.string :as str]))
 
-(def ai-name "esther")
-
-(defn named-role
-  [entry]
-  (if (= "assistant" (:role entry)) ai-name (:role entry)))
 
 (defn as-role
   [entry]
-  (str (str/capitalize (named-role entry)) ":" (:content entry)))
+  (str (if (= (:role entry) "assistant") "Esther:" "User:")
+       (:content entry)))
 
 (defn generate-prompt-str
   [submission]
@@ -26,7 +22,8 @@
    (:content (first submission)) ;; Instructions
    (str/join
     "\n"
-    (for [entry (rest submission)] (as-role entry)))
+    (for [entry (rest submission)]
+      (as-role entry)))
    "\n"))
 
 (defn parse
@@ -46,28 +43,33 @@
 (defn process-cmd
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
-        tmp (str (fs/delete-on-exit (fs/create-temp-file)))
+        ;;tmp (str (fs/delete-on-exit (fs/create-temp-file)))
+
+        tmp (str (fs/create-temp-file))
+        pty-bridge (str (fs/canonicalize (io/resource "scripts/pty_bridge.py")))
         model (str (fs/real-path (fs/path model-path)))]
     (spit tmp prompt)
-    (str/join
-     " "
-     [(str (fs/real-path (fs/path bin-dir "main")))
-      "-m" model
-      ;;"--simple-io"
-      "-i"
-      "-r" "User:"
-      "-eps" "1e-5" ;; for best generation quality LLaMA 2
-      ;;"-gqa" "8"    ;; for 70B models to work
-      "--ctx-size" 2048
-      "--threads" (.availableProcessors (Runtime/getRuntime))
-      "-f" (str tmp)])))
+    (str
+     "python " pty-bridge " '"
+     (str/join
+      " "
+      [(str (fs/real-path (fs/path bin-dir "main")))
+       "-m" model
+       "-i"
+       "--simple-io"
+       "-r" "User:"
+       "-eps" "1e-5" ;; for best generation quality LLaMA 2
+       ;;"-gqa" "8"    ;; for 70B models to work
+       "--ctx-size" 2048
+       "--threads" (.availableProcessors (Runtime/getRuntime))
+       "-f" (str tmp)])
+     "'")))
 
 (defn process-channels
   [cmd]
   (let [_ (log/debug "llama::process-channels:cmd" cmd)
         proc (process {:shutdown destroy-tree
-                       :err (java.io.OutputStream/nullOutputStream)
-                       :in (java.io.OutputStream/nullOutputStream)}
+                       :err (java.io.OutputStream/nullOutputStream)}
                       cmd)
         out-ch (chan 32)
         in-ch (chan 32)
@@ -76,17 +78,21 @@
       (with-open [wrtr (io/writer (:in proc))]
         (loop []
           (when-let [line (<! in-ch)]
-            (.write wrtr (str line "\n"))
+            (if (= line "[[CTRL-C]]")   ; Special trigger for Ctrl+C
+              (.write wrtr "[[CTRL-C]]")
+              (.write wrtr (str line "\n")))
             (.flush wrtr)
             (recur)))))
-    (go
-      (try
-        (loop []
-          (when-let [line (.readLine rdr)]
-            (>! out-ch line)
-            (recur)))
-        (finally
-          (.close rdr))))
+    (let [sb (StringBuilder.)]
+      (go-loop []
+        (let [char (char (.read rdr))]
+          (if (= char \newline)
+            (do
+              (log/debug  (str sb))
+              (>!! out-ch (str sb))
+              (.setLength sb 0))
+            (.append sb char))
+          (recur))))
     {:proc proc
      :in-ch in-ch
      :out-ch out-ch}))
@@ -96,38 +102,31 @@
   [bin-dir model-path submission]
   (let [subprocess (process-channels
                     (process-cmd bin-dir model-path submission))
-        {:keys [proc out-ch _in-ch]} subprocess
+        {:keys [proc out-ch in-ch]} subprocess
         response-ch (chan 32)
-        pid (.pid (get-in subprocess [:proc :proc]))
         last-entry (:content (last submission))
         seen-last-entry? (atom false)
-        sigint #(do (log/info "sigint" pid) (shell "kill" "-USR1" pid))
-        status-ch (chan 8)
-        ]
+        status-ch (chan 8)]
     (go-loop []
       (if-let [line (<! out-ch)]
-        (do (log/debug "llama:" line)
-            (when (str/includes? line last-entry)
-              (go (>! status-ch :seen-last-entry))
-              (reset! seen-last-entry? true))
-            (if-let [json-obj (and @seen-last-entry?
-                                   (str/includes? line (str/capitalize ai-name))
-                                   (safe-parse line))]
-              (if (:response json-obj)
-                (do
-                  (log/debug "llama::llama-subprocess:json" json-obj)
-                  (sigint)
-                  (>! response-ch json-obj)
-                  (recur))
+        (do
+          (when (str/includes? line last-entry)
+            (go (>! status-ch :seen-last-entry))
+            (reset! seen-last-entry? true))
+          (if-let [json-obj (and @seen-last-entry? (safe-parse line))]
+            (if (:response json-obj)
+              (do
+                (>! in-ch "[[CTRL-C]]")
+                (>! response-ch json-obj)
                 (recur))
-              (recur)))
+              (recur))
+            (recur)))
         ;; Handle the case where the channel is closed and no matching output was found
         (do
           (destroy-tree proc)           ; Destroy the process
           (close! out-ch)               ; Close the output channel
           (throw (Exception. "Process completed without matching output")))))
     (when (= (<!! status-ch) :seen-last-entry)
-      (log/info "booted")
       (assoc subprocess
              :status-ch status-ch
              :response-ch response-ch))))
@@ -148,8 +147,8 @@
           _ (when-not running-proc? (w/evict cache uid))
           proc (cached-spawn-subprocess options cache uid submission)]
       (when running-proc?
-        (log/info "llama::llama-complete-shell" "sending to proc..")
-        (go (>! (:in-ch proc) (str (last submission) "\n"))))
+        (let [entry (last submission)]
+          (go (>! (:in-ch proc) (as-role entry)))))
       (<!! (:response-ch proc)))))
 
 (defn create-complete-shell
@@ -159,3 +158,8 @@
 
 ;; Todo make sure it works
 ;; - Emoji don't work with llama.clj
+
+(comment
+  (def fast-in-terminal "python /array/Sync/projects/esther/resources/scripts/pty_bridge.py \"/array/Sync/projects/esther/native/llama.cpp/build/bin/main -m /array/Models/TheBloke/llama-2-7b-chat.ggmlv3.q4_K_M.bin -i --simple-io -r User: -eps 1e-5 --ctx-size 2048 --threads 48 -f /tmp/02f1ea1f-84d8-4a6e-a146-394d169924fa15377515098983504690f2ba3d4d-14bc-480d-b8b2-bb4b4cdac524\"")
+
+  (process {:out :inherit} fast-in-terminal))

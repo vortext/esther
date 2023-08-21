@@ -85,7 +85,7 @@
   [opts user _sid data]
   (let [conversation (filter
                       (comp :conversation? :response)
-                      (memory/last-memories opts user 10))
+                      (memory/last-memories opts user 5))
         last-memories (reverse conversation)
         keyword-memories (memory/frecency-keywords opts user :week 25)
         complete (get-in opts [:ai :complete-fn])

@@ -189,5 +189,4 @@
   (create-complete-fn
    (case implementation
      :openai (openai/create-api-complete opts)
-     :llama-shell (llama/create-complete-shell opts)
-     )))
+     :llama-shell (llama/create-complete-shell opts))))
