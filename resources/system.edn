@@ -54,7 +54,7 @@
   :options
   {:prompt :llama
    :model-path
-   #or [#env GGML_MODEL_PATH "./models/TheBloke/llama-2-13b-chat.ggmlv3.q4_K_M.bin"]
+   #or [#env GGML_MODEL_PATH "./models/TheBloke/llama-2-7b-chat.ggmlv3.q5_K_M.bin"]
    :bin-dir
    "./native/llama.cpp/build/bin"}}
 

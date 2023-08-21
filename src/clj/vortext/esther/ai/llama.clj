@@ -25,7 +25,7 @@
     "\n"
     (for [entry (rest submission)]
       (as-role entry)))
-   "\n"))
+   "\n\n"))
 
 (defn parse
   [llama-output]
@@ -90,7 +90,6 @@
         (let [char (char (.read rdr))]
           (if (= char \newline)
             (do
-              (log/debug  (str sb))
               (>!! out-ch (str sb))
               (.setLength sb 0))
             (.append sb char))
@@ -109,6 +108,7 @@
         last-entry (:content (last submission))
         stop #(go (>! in-ch "[[CTRL-C]]"))
         seen-last-entry? (atom false)
+        seen-closing-brace? (atom false)
         status-ch (chan 8)]
     (go-loop []
       (if-let [line (<! out-ch)]
@@ -116,15 +116,17 @@
           (when (str/includes? line last-entry)
             (go (>! status-ch :seen-last-entry))
             (reset! seen-last-entry? true))
-          (if-let [json-obj (and @seen-last-entry? (safe-parse line))]
+          (when (str/includes? line "}")
+            (reset! seen-closing-brace? true))
+          (if-let [json-obj (and @seen-last-entry? @seen-closing-brace? (safe-parse line))]
             (if (:response json-obj)
               (do
                 (stop)
+                (log/debug json-obj)
                 (>! response-ch json-obj)
                 (recur))
               (recur))
-            (do (when @seen-last-entry?
-                  (>! in-ch "The JSON was not well formed.")
+            (do (when (and @seen-last-entry? @seen-closing-brace?)
                   (>! response-ch (:json-parse-error errors))
                   (stop))
                 (recur))))
