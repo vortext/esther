@@ -3,8 +3,10 @@
    [clojure.tools.logging :as log]
    [jsonista.core :as json]
 
+   [babashka.process :refer [shell]]
    [clojure.string :as str]
    [buddy.core.codecs :as codecs]
+   [babashka.fs :as fs]
    [buddy.core.nonce :as nonce])
   (:import (java.util Base64)))
 
@@ -21,15 +23,27 @@
   [str]
   (json/read-value str json/keyword-keys-object-mapper))
 
+(defn repair-json
+  [maybe-json]
+  (let [cmd "node_modules/jsonrepair/bin/cli.js"
+        cmd (str (fs/canonicalize (fs/path cmd)))
+        result (shell {:in maybe-json :cmd [cmd]
+                       :err :string
+                       :out :string})]
+    (if (empty? (:out result))
+      (throw (Exception. (:err result)))
+      (:out result))))
+
 (defn parse-maybe-json
   [maybe-json]
   (try
-    (json/read-value maybe-json json/keyword-keys-object-mapper)
+    (read-json-value maybe-json)
     (catch com.fasterxml.jackson.core.JsonParseException e
       (log/warn ["JSON Parsing Error at line " (.getLineNr (.getLocation e))
                  ", column " (.getColumnNr (.getLocation e))
                  ": " e maybe-json])
       (try
+        (parse-maybe-json (repair-json maybe-json))
         (catch Exception _ maybe-json)))))
 
 ;; Base64

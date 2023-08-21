@@ -48,7 +48,7 @@
 
         tmp (str (fs/create-temp-file))
         pty-bridge (str (fs/canonicalize (io/resource "scripts/pty_bridge.py")))
-        model (str (fs/real-path (fs/path model-path)))]
+        model (str (fs/canonicalize (fs/path model-path)))]
     (spit tmp prompt)
     (str
      "python " pty-bridge " '"
@@ -125,7 +125,8 @@
               (recur))
             (do (when @seen-last-entry?
                   (>! in-ch "The JSON was not well formed.")
-                  (>! response-ch (:json-parse-error errors)))
+                  (>! response-ch (:json-parse-error errors))
+                  (stop))
                 (recur))))
         ;; Handle the case where the channel is closed and no matching output was found
         (do

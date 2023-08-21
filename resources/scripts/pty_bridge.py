@@ -30,12 +30,6 @@ def main():
     def write(fd, data):
         os.write(fd, data.encode())
 
-    def handle_sigint(signum, frame):
-        os.kill(pid, signal.SIGKILL)  # Kill the child process
-        os.waitpid(pid, 0) # Wait for child process to terminate
-        os.close(master) # Close the master end of the PTY
-        sys.exit(1)  # Exit the parent process
-
     # Open PTY
     master, slave = pty.openpty()
 
@@ -50,9 +44,6 @@ def main():
 
     # Fork a child process
     pid = os.fork()
-
-    # Register the signal handler
-    signal.signal(signal.SIGINT, handle_sigint)
 
     if pid == 0: # Child process
         os.close(master)
@@ -77,7 +68,7 @@ def main():
                 input_data = sys.stdin.readline()
                 if input_data.strip() == '[[CTRL-C]]':
                     sys.stdout.write('pty_bridge:[[CTRL-C]]\n')
-                    write(master, '\x03') # Send ASCII ETX character
+                    os.kill(pid, signal.SIGINT)
                 else:
                     write(master, input_data)
 
