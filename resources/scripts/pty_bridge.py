@@ -76,6 +76,7 @@ def main():
             while True:
                 input_data = sys.stdin.readline()
                 if input_data.strip() == '[[CTRL-C]]':
+                    sys.stdout.write('pty_bridge:[[CTRL-C]]\n')
                     write(master, '\x03') # Send ASCII ETX character
                 else:
                     write(master, input_data)

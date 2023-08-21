@@ -1,6 +1,7 @@
 (ns vortext.esther.ai.llama
   (:require
    [clojure.tools.logging :as log]
+   [vortext.esther.config :refer [errors]]
    [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
    [babashka.process :refer [process destroy-tree alive?]]
@@ -79,7 +80,8 @@
         (loop []
           (when-let [line (<! in-ch)]
             (if (= line "[[CTRL-C]]")   ; Special trigger for Ctrl+C
-              (.write wrtr "[[CTRL-C]]")
+              (do (log/debug "[[CTRL_C]]")
+                  (.write wrtr "[[CTRL-C]]"))
               (.write wrtr (str line "\n")))
             (.flush wrtr)
             (recur)))))
@@ -105,6 +107,7 @@
         {:keys [proc out-ch in-ch]} subprocess
         response-ch (chan 32)
         last-entry (:content (last submission))
+        stop #(go (>! in-ch "[[CTRL-C]]"))
         seen-last-entry? (atom false)
         status-ch (chan 8)]
     (go-loop []
@@ -116,11 +119,14 @@
           (if-let [json-obj (and @seen-last-entry? (safe-parse line))]
             (if (:response json-obj)
               (do
-                (>! in-ch "[[CTRL-C]]")
+                (stop)
                 (>! response-ch json-obj)
                 (recur))
               (recur))
-            (recur)))
+            (do (when @seen-last-entry?
+                  (>! in-ch "The JSON was not well formed.")
+                  (>! response-ch (:json-parse-error errors)))
+                (recur))))
         ;; Handle the case where the channel is closed and no matching output was found
         (do
           (destroy-tree proc)           ; Destroy the process
@@ -155,11 +161,3 @@
   [{:keys [options]}]
   (let [cache (w/lru-cache-factory {:threshold 32})]
     (llama-shell-complete-fn options cache)))
-
-;; Todo make sure it works
-;; - Emoji don't work with llama.clj
-
-(comment
-  (def fast-in-terminal "python /array/Sync/projects/esther/resources/scripts/pty_bridge.py \"/array/Sync/projects/esther/native/llama.cpp/build/bin/main -m /array/Models/TheBloke/llama-2-7b-chat.ggmlv3.q4_K_M.bin -i --simple-io -r User: -eps 1e-5 --ctx-size 2048 --threads 48 -f /tmp/02f1ea1f-84d8-4a6e-a146-394d169924fa15377515098983504690f2ba3d4d-14bc-480d-b8b2-bb4b4cdac524\"")
-
-  (process {:out :inherit} fast-in-terminal))
