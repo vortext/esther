@@ -182,7 +182,6 @@ function setUserLocation(latitude, longitude) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   var sidElements = document.querySelectorAll('.session-sid');
 
   // Geolocation Handling
@@ -201,4 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
   sidElements.forEach(function(element) {
     element.value = window.appConfig.sid;
   });
+  setTimeout(() => {
+    document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
+  },0);
 });
