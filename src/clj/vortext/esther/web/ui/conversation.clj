@@ -17,10 +17,15 @@
     [:div.second]
     [:div.third]]])
 
+(defn auto-link-urls [text]
+  (clojure.string/replace text
+                          #"(https?://[^\s]+)"
+                          "<$1>"))
+
 (defn display-html
   [s]
   (if (and (string? s) (not (str/blank? s)))
-    (markdown/md-to-html-string (unescape-newlines s))
+    (markdown/md-to-html-string (auto-link-urls (unescape-newlines s)))
     "<span></span>"))
 
 (defn memory-container
