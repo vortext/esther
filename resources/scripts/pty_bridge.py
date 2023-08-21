@@ -66,7 +66,7 @@ def main():
         def write_loop():
             while True:
                 input_data = sys.stdin.readline()
-                if input_data.strip() == '[[CTRL-C]]':
+                if input_data.strip() == '[CTRL-C]':
                     write(master, '\x03')
                     os.kill(pid, signal.SIGINT)
                 else:

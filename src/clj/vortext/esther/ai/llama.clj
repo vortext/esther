@@ -79,10 +79,7 @@
       (with-open [wrtr (io/writer (:in proc))]
         (loop []
           (when-let [line (<! in-ch)]
-            (if (= line "[[CTRL-C]]")   ; Special trigger for Ctrl+C
-              (do (log/debug "[[CTRL_C]]")
-                  (.write wrtr "[[CTRL-C]]"))
-              (.write wrtr (str line "\n")))
+            (.write wrtr (str line "\n"))
             (.flush wrtr)
             (recur)))))
     (let [sb (StringBuilder.)]
@@ -106,13 +103,14 @@
         {:keys [proc out-ch in-ch]} subprocess
         response-ch (chan 32)
         last-entry (:content (last submission))
-        stop #(go (>! in-ch "[[CTRL-C]]"))
+        stop #(go (>! in-ch "[CTRL-C]"))
         seen-last-entry? (atom false)
         seen-closing-brace? (atom false)
         status-ch (chan 8)]
     (go-loop []
       (if-let [line (<! out-ch)]
         (do
+          (log/debug line)
           (when (str/includes? line last-entry)
             (go (>! status-ch :seen-last-entry))
             (reset! seen-last-entry? true))
