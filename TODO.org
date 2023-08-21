@@ -33,7 +33,8 @@ _ more user information in session (vault)
 ** DONE Remember and show for a day, clear page every day (aligns with the prominent date)
 ** DONE /clear command (clear all memory for uid)
 ** DONE check logging levels (disable debug outside dev)
-** TODO llma locally?
+** DONE llma locally
+** TODO dark mode
 ** TODO security and hosting
 ** TODO test infrastructure and tests
 ** TODO better intro flow
@@ -41,9 +42,11 @@ _ more user information in session (vault)
 ** TODO sign-up page
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
+** TODO calendar page (for memories)
+** TODO image upload (img-to-text?)
+** TODO url handling
 ** TODO embeddings for memory retrieval and context
 ** TODO offline desktop app?
-** TODO very briefly cache fingerprint -> keyword
 ** TODO /imagine command
 - hook up image generation (StableDiffusionAPI is too crappy)
 - integrate image describe into memory
