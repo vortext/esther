@@ -25,7 +25,7 @@
 
 (defn repair-json
   [maybe-json]
-  (let [cmd "node_modules/jsonrepair/bin/cli.js"
+  (let [cmd "scripts/jsonrepair/bin/cli.js"
         cmd (str (fs/canonicalize (fs/path cmd)))
         result (shell {:in maybe-json :cmd [cmd]
                        :err :string

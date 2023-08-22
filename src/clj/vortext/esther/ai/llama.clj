@@ -95,7 +95,6 @@
      :in-ch in-ch
      :out-ch out-ch}))
 
-
 (defn llama-subprocess
   [bin-dir model-path submission]
   (let [subprocess (process-channels
@@ -103,31 +102,23 @@
         {:keys [proc out-ch in-ch]} subprocess
         response-ch (chan 32)
         last-entry (:content (last submission))
-        stop #(go (>! in-ch "[CTRL-C]"))
+        stop #(go (>! in-ch "[[STOP]]"))
         seen-last-entry? (atom false)
-        seen-closing-brace? (atom false)
+        partial-json (atom "")
         status-ch (chan 8)]
     (go-loop []
       (if-let [line (<! out-ch)]
-        (do
-          (log/debug line)
-          (when (str/includes? line last-entry)
-            (go (>! status-ch :seen-last-entry))
-            (reset! seen-last-entry? true))
-          (when (str/includes? line "}")
-            (reset! seen-closing-brace? true))
-          (if-let [json-obj (and @seen-last-entry? @seen-closing-brace? (safe-parse line))]
-            (if (:response json-obj)
-              (do
-                (stop)
-                (log/debug json-obj)
-                (>! response-ch json-obj)
-                (recur))
-              (recur))
-            (do (when (and @seen-last-entry? @seen-closing-brace?)
-                  (>! response-ch (:json-parse-error errors))
-                  (stop))
-                (recur))))
+        (do (when (str/includes? line last-entry)
+              (>! status-ch :seen-last-entry)
+              (reset! seen-last-entry? true))
+            (when @seen-last-entry?
+              (swap! partial-json str line)
+              (when-let [json-obj (safe-parse @partial-json)]
+                (when (:response json-obj)
+                  (stop)
+                  (>! response-ch json-obj))
+                (reset! partial-json "")))
+            (recur))
         ;; Handle the case where the channel is closed and no matching output was found
         (do
           (destroy-tree proc)           ; Destroy the process
@@ -135,8 +126,9 @@
           (throw (Exception. "Process completed without matching output")))))
     (when (= (<!! status-ch) :seen-last-entry)
       (assoc subprocess
-             :status-ch status-ch
              :response-ch response-ch))))
+
+
 
 (defn cached-spawn-subprocess
   [options cache uid submission]

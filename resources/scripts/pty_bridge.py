@@ -6,6 +6,7 @@ import select
 import threading
 import signal
 import termios
+import atexit
 
 def main():
     def read(fd):
@@ -49,12 +50,10 @@ def main():
         os.close(master)
         os.dup2(slave, 0) # Redirect stdin
         os.dup2(slave, 1) # Redirect stdout
+        os.close(slave)  # Close slave after redirection
         command_line = sys.argv[1]
         command_parts = shlex.split(command_line)
         os.execvp(command_parts[0], command_parts) # Execute command
-
-        os.close(slave)
-
     else: # Parent process
         os.close(slave)
         def read_thread():
@@ -66,14 +65,18 @@ def main():
         def write_loop():
             while True:
                 input_data = sys.stdin.readline()
-                if input_data.strip() == '[CTRL-C]':
+                if input_data.strip() == '[[STOP]]':
                     write(master, '\x03')
-                    os.kill(pid, signal.SIGINT)
                 else:
                     write(master, input_data)
 
         threading.Thread(target=read_thread, daemon=True).start()
         write_loop()  # Run write_loop in main thread
+
+        def terminate_child():
+            os.kill(pid, signal.SIGTERM) # or signal.SIGKILL
+
+        atexit.register(terminate_child)
 
 if __name__ == '__main__':
     main()
