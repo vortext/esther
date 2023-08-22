@@ -108,17 +108,19 @@
         status-ch (chan 8)]
     (go-loop []
       (if-let [line (<! out-ch)]
-        (do (when (str/includes? line last-entry)
-              (>! status-ch :seen-last-entry)
-              (reset! seen-last-entry? true))
-            (when @seen-last-entry?
-              (swap! partial-json str line)
-              (when-let [json-obj (safe-parse @partial-json)]
-                (when (:response json-obj)
-                  (stop)
-                  (>! response-ch json-obj))
-                (reset! partial-json "")))
-            (recur))
+        (do
+          (log/debug line)
+          (when (str/includes? line last-entry)
+            (>! status-ch :seen-last-entry)
+            (reset! seen-last-entry? true))
+          (when @seen-last-entry?
+            (swap! partial-json str line)
+            (when-let [json-obj (safe-parse @partial-json)]
+              (when (:response json-obj)
+                (stop)
+                (>! response-ch json-obj))
+              (reset! partial-json "")))
+          (recur))
         ;; Handle the case where the channel is closed and no matching output was found
         (do
           (destroy-tree proc)           ; Destroy the process

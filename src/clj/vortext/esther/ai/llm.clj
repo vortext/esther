@@ -11,11 +11,8 @@
    [jsonista.core :as json]
    [clojure.set :as set]
    [diehard.core :as dh]
-   [malli.core :as m]
-   [vortext.esther.util.emoji :as emoji]
    [vortext.esther.ai.openai :as openai]
    [vortext.esther.ai.llama :as llama]
-   [malli.error :as me]
    [vortext.esther.config :refer [examples errors introductions]]))
 
 (defn relevant-keywords
@@ -77,43 +74,20 @@
         assistant (partial as-role "assistant")]
     (conversation-seq user assistant memories)))
 
-(def response-schema
-  [:map
-   [:response [:and
-               [:string {:min 1, :max 2048}]
-               [:fn {:error/message "response should be at most 2048 chars"}
-                (fn [s] (<= (count s) 2048))]]]
-   [:emoji [:fn {:error/message "should contain a valid emoji"}
-            (fn [s] (emoji/emoji? s))]]
-   [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
-             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
-
-
-(defn validate
-  [schema obj]
-  (if (not (m/validate schema obj))
-    (let [error (m/explain schema obj)
-          humanized (me/humanize error)]
-      (log/warn "llm::validate:error" obj humanized)
-      (-> (:validation-error errors)
-          (assoc :details humanized)))
-    ;; Valid
-    obj))
-
 (def get-prompt
   (memoize
    (fn [path] (slurp (io/resource path)))))
 
 (defn generate-submission
   [opts request memories keywords]
-  (let [last-memories (vec (take-last 10 memories))
+  (let [last-memories (vec (take-last 5 memories))
         prompt (generate-prompt
                 (get-prompt (:prompt opts))
                 last-memories keywords)
 
         for-conv (if (seq last-memories)
                    last-memories
-                   [(first (shuffle (:imagine introductions)))])
+                   [(rand-nth (:first-time introductions))])
         conv (format-for-completion for-conv)]
     (concat
      [{:role "system"
@@ -123,63 +97,25 @@
        :content (json/write-value-as-string
                  (select-keys request request-keys))}])))
 
-(defn parse-number
-  [s]
-  (when (re-find #"^-?\d+\.?\d*$" s)
-    (read-string s)))
-
-(defn update-value
-  "Updates the given key in the given map. Uses the given function to transform the value, if needed."
-  [key transform-fn m default-value]
-  (let [value (get m key)
-        transformed-value (transform-fn value)]
-    (assoc m key (if transformed-value
-                   transformed-value
-                   (or (transform-fn (str value))
-                       default-value)))))
-
-(def clean-energy
-  (partial
-   update-value :energy
-   #(let [parsed-val
-          (or (when (and (float? %) (<= 0 % 1)) %)
-              (parse-number (str %)))]
-      (when (and parsed-val (<= 0 parsed-val 1))
-        (min 0.99 (float parsed-val))))))
-
-(def clean-emoji
-  (partial
-   update-value :emoji
-   #(or (when (emoji/emoji? %) %)
-        (:emoji (first (emoji/emoji-in-str
-                        (emoji/parse-to-unicode %)))))))
-
-(defn clean-response
-  [response]
-  (-> response
-      (clean-energy 0.5)
-      (clean-emoji "🙃")))
-
 (defn create-complete-fn
   [complete-fn]
   (fn [opts user request memories keywords]
     (dh/with-retry
-        {:retry-on Exception
-         :max-retries 1
-         :on-retry
-         (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
-         :on-failure
-         (fn [_val ex]
-           (let [response (:internal-server-error errors)]
-             (log/warn "llm::complete:failed..." ex response)
-             response))
-         :on-failed-attempt
-         (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
-      (dh/with-timeout {:timeout-ms 120000}
-        (let [submission (generate-submission opts request memories keywords)
-              response (complete-fn user submission)
-              cleaned-response (clean-response response)]
-          (validate response-schema cleaned-response))))))
+      {:retry-on Exception
+       :max-retries 1
+       :on-retry
+       (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
+       :on-failure
+       (fn [_val ex]
+         (let [response (:internal-server-error errors)]
+           (log/warn "llm::complete:failed..." ex response)
+           response))
+       :on-failed-attempt
+       (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
+      (dh/with-timeout {:timeout-ms 60000}
+        (complete-fn
+         user
+         (generate-submission opts request memories keywords))))))
 
 
 (defmethod ig/init-key :ai.llm/complete-fn

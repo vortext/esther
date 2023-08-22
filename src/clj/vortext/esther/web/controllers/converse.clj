@@ -6,6 +6,7 @@
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
    [malli.core :as m]
+   [malli.error :as me]
    [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
    [vortext.esther.util.emoji :as emoji]
    [clojure.string :as str]
@@ -81,6 +82,68 @@
                    (:invalid-command errors))]
     (-> data (assoc :response response))))
 
+
+(def response-schema
+  [:map
+   [:response
+    [:and
+     [:string {:min 1, :max 2048}]
+     [:fn {:error/message "response should be at most 2048 chars"}
+      (fn [s] (<= (count s) 2048))]]]
+   [:emoji [:fn {:error/message "should contain a valid emoji"}
+            (fn [s] (emoji/emoji? s))]]
+   [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
+             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
+
+
+(defn validate
+  [schema obj]
+  (if (not (m/validate schema obj))
+    (let [error (m/explain schema obj)
+          humanized (me/humanize error)]
+      (log/warn "llm::validate:error" obj humanized)
+      (-> (:validation-error errors)
+          (assoc :details humanized)))
+    ;; Valid
+    obj))
+
+(defn parse-number
+  [s]
+  (when (re-find #"^-?\d+\.?\d*$" s)
+    (read-string s)))
+
+(defn update-value
+  "Updates the given key in the given map. Uses the given function to transform the value, if needed."
+  [key transform-fn m default-value]
+  (let [value (get m key)
+        transformed-value (transform-fn value)]
+    (assoc m key (if transformed-value
+                   transformed-value
+                   (or (transform-fn (str value))
+                       default-value)))))
+
+(def clean-energy
+  (partial
+   update-value :energy
+   #(let [parsed-val
+          (or (when (and (float? %) (<= 0 % 1)) %)
+              (parse-number (str %)))]
+      (when (and parsed-val (<= 0 parsed-val 1))
+        (min 0.99 (float parsed-val))))))
+
+(def clean-emoji
+  (partial
+   update-value :emoji
+   #(or (when (emoji/emoji? %) %)
+        (:emoji (first (emoji/emoji-in-str
+                        (emoji/parse-to-unicode %)))))))
+
+(defn clean-response
+  [response]
+  (-> response
+      (clean-energy 0.5)
+      (clean-emoji "🙃")))
+
 (defn converse!
   [opts user _sid data]
   (let [conversation (filter
@@ -90,11 +153,14 @@
         keyword-memories (memory/frecency-keywords opts user :week 25)
         complete (get-in opts [:ai :complete-fn])
         ;; The actual LLM complete
-        result (complete opts user (:request data) last-memories keyword-memories)]
+        response (complete opts user (:request data) last-memories keyword-memories)
+        validate-response #(validate response-schema %)]
     (-> data
         (assoc
          :response
-         (-> result
+         (-> response
+             (clean-response)
+             (validate-response)
              (assoc :conversation? true)
              (assoc :type :md-serif))))))
 
