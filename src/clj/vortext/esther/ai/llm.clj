@@ -74,15 +74,11 @@
         assistant (partial as-role "assistant")]
     (conversation-seq user assistant memories)))
 
-(def get-prompt
-  (memoize
-   (fn [path] (slurp (io/resource path)))))
-
 (defn generate-submission
   [opts request memories keywords]
   (let [last-memories (vec (take-last 5 memories))
         prompt (generate-prompt
-                (get-prompt (:prompt opts))
+                (slurp (io/resource (:prompt opts)))
                 last-memories keywords)
 
         for-conv (if (seq last-memories)
@@ -101,18 +97,18 @@
   [complete-fn]
   (fn [opts user request memories keywords]
     (dh/with-retry
-      {:retry-on Exception
-       :max-retries 1
-       :on-retry
-       (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
-       :on-failure
-       (fn [_val ex]
-         (let [response (:internal-server-error errors)]
-           (log/warn "llm::complete:failed..." ex response)
-           response))
-       :on-failed-attempt
-       (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
-      (dh/with-timeout {:timeout-ms 60000}
+        {:retry-on Exception
+         :max-retries 1
+         :on-retry
+         (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
+         :on-failure
+         (fn [_val ex]
+           (let [response (:internal-server-error errors)]
+             (log/warn "llm::complete:failed..." ex response)
+             response))
+         :on-failed-attempt
+         (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
+      (dh/with-timeout {:timeout-ms 12000}
         (complete-fn
          user
          (generate-submission opts request memories keywords))))))

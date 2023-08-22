@@ -39,9 +39,6 @@
   (try
     (read-json-value maybe-json)
     (catch com.fasterxml.jackson.core.JsonParseException e
-      (log/warn ["JSON Parsing Error at line " (.getLineNr (.getLocation e))
-                 ", column " (.getColumnNr (.getLocation e))
-                 ": " e maybe-json])
       (try
         (parse-maybe-json (repair-json maybe-json))
         (catch Exception _ maybe-json)))))

@@ -18,7 +18,7 @@
   (->> emojis
        (mapcat (fn [emoji]
                  (map #(vector % (:unicode emoji))
-                      (:allAliases emoji))))
+                      (:discordAliases emoji))))
        (into {})))
 
 (defn build-trie

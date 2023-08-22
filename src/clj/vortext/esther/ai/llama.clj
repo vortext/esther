@@ -137,13 +137,23 @@
      cache uid
      (fn [_uid] (llama-subprocess bin-dir model-path submission)))))
 
+(defn checked-proc?
+  [cache uid]
+  (let [proc (w/lookup cache uid)
+        java-proc (:proc proc)]
+    (if (and java-proc (alive? java-proc))
+      true
+      (when java-proc
+        (destroy-tree java-proc)
+        (log/debug "process was dead")
+        (w/evict cache uid)
+        false))))
+
 (defn llama-shell-complete-fn
   [options cache]
   (fn [user submission]
     (let [{:keys [uid]} (:vault user)
-          running-proc? (when-let [proc (w/lookup cache uid)]
-                          (alive? (:proc proc)))
-          _ (when-not running-proc? (w/evict cache uid))
+          running-proc? (checked-proc? cache uid)
           proc (cached-spawn-subprocess options cache uid submission)]
       (when running-proc?
         (let [entry (last submission)]
