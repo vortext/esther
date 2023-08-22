@@ -2,13 +2,13 @@
   (:require
    [clojure.tools.logging :as log]
    [jsonista.core :as json]
-
-   [babashka.process :refer [shell]]
    [clojure.string :as str]
    [buddy.core.codecs :as codecs]
    [babashka.fs :as fs]
-   [buddy.core.nonce :as nonce])
-  (:import (java.util Base64)))
+   [buddy.core.nonce :as nonce]
+   [vortext.esther.util.polyglot :as polyglot])
+  (:import
+   (java.util Base64)))
 
 (def pretty-object-mapper
   (json/object-mapper
@@ -23,16 +23,14 @@
   [str]
   (json/read-value str json/keyword-keys-object-mapper))
 
-(defn repair-json
-  [maybe-json]
-  (let [cmd "scripts/jsonrepair/bin/cli.js"
-        cmd (str (fs/canonicalize (fs/path cmd)))
-        result (shell {:in maybe-json :cmd [cmd]
-                       :err :string
-                       :out :string})]
-    (if (empty? (:out result))
-      (throw (Exception. (:err result)))
-      (:out result))))
+(def repair-json
+  (let [script "scripts/jsonrepair/lib/umd/jsonrepair.js"
+        script (str (fs/canonicalize (fs/path script)))
+        context (polyglot/load-js (slurp script))
+        jsonrepair-fn (polyglot/js-object-fn context "JSONRepair" "jsonrepair")]
+    (fn [args]
+      (jsonrepair-fn args))))
+
 
 (defn parse-maybe-json
   [maybe-json]

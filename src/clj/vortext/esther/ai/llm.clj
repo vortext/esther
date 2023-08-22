@@ -5,8 +5,7 @@
    [clojure.string :as str]
    [clojure.java.io :as io]
    [integrant.core :as ig]
-   [vortext.esther.web.controllers.memory :refer
-    [extract-keywords]]
+   [vortext.esther.web.controllers.memory :refer [extract-keywords]]
    [vortext.esther.util :refer [strs-to-markdown-list]]
    [jsonista.core :as json]
    [clojure.set :as set]
@@ -97,18 +96,18 @@
   [complete-fn]
   (fn [opts user request memories keywords]
     (dh/with-retry
-        {:retry-on Exception
-         :max-retries 1
-         :on-retry
-         (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
-         :on-failure
-         (fn [_val ex]
-           (let [response (:internal-server-error errors)]
-             (log/warn "llm::complete:failed..." ex response)
-             response))
-         :on-failed-attempt
-         (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
-      (dh/with-timeout {:timeout-ms 12000}
+      {:retry-on Exception
+       :max-retries 1
+       :on-retry
+       (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
+       :on-failure
+       (fn [_val ex]
+         (let [response (:internal-server-error errors)]
+           (log/warn "llm::complete:failed..." ex response)
+           response))
+       :on-failed-attempt
+       (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
+      (dh/with-timeout {:timeout-ms 45000}
         (complete-fn
          user
          (generate-submission opts request memories keywords))))))

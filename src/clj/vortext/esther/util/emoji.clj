@@ -12,8 +12,6 @@
 (defn emoji-in-str [s]
   (map bean (EmojiManager/extractEmojisInOrder ^String s)))
 
-
-
 (def alias->unicode
   (->> emojis
        (mapcat (fn [emoji]

@@ -37,7 +37,7 @@ Respond to user inputs as Esther, adhering to the following well-formed JSON for
     "format": "emoji"
   },
   "energy": {
-    "description": "A value from 0 to 1 with one decimal places (e.g., 0.5), representing the energy level of the conversation.",
+    "description": "A value from 0 to 1, representing the energy level of the conversation.",
     "type": "number",
     "minimum": 0.0,
     "maximum": 1.0
