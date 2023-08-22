@@ -1,3 +1,4 @@
+;; "Inspired" by https://github.com/wavejumper/clj-polyglot
 (ns vortext.esther.util.polyglot
   (:refer-clojure :exclude [import load-file load-string eval])
   (:require [clojure.tools.logging :as log])
@@ -64,7 +65,7 @@
     :else
     arg))
 
-(defn load-js [js-code]
+(defn js-ctx [js-code]
   (let [context (Context/create (into-array String ["js"]))
         _result (.eval context "js" js-code)]
     context))
@@ -74,7 +75,7 @@
     (doseq [key (.getMemberKeys bindings)]
       (println key))))
 
-(defn eval-js
+(defn eval
   [value args]
   (let [result (.execute value (into-array Object (map serialize-arg args)))]
     (deserialize result)))
@@ -85,11 +86,50 @@
   (let [js-object (.getMember (.getBindings context "js") object-name)
         js-fn (.getMember js-object fn-name)]
     (fn [& args]
-      (eval-js js-fn args))))
+      (eval js-fn args))))
+
+(defn from
+  [^Context ctx ^String module-name]
+  (let [bindings (.getBindings ctx "js")]
+    ^Value (.getMember bindings module-name)))
+
+(defn import
+  ([^Value member members]
+   (into {}
+         (map (fn [f]
+                [f (.getMember member (name f))]))
+         members))
+  ([^Value value api-name members]
+   (let [member (.getMember value (name api-name))]
+     (into {}
+           (map (fn [f]
+                  [f (.getMember member (name f))]))
+           members))))
+
+(defn eval
+  [api member & args]
+  (let [value  (get api member)
+        result (.execute ^Value value (into-array Object (map serialize-arg args)))]
+    (deserialize result)))
 
 
+(defn js-api
+  [slurpable api-name api-fns]
+  (let [src (slurp slurpable)
+        ctx (js-ctx src)
+        obj (from ctx api-name)
+        api (import obj api-fns)]
+    (into {} (map (fn [[k _]] [k (partial eval api k)]) api))))
 
 ;; Scratch
 (comment
+  ;; It works!
+  (def asciichart
+    (js-api
+     "https://cdn.jsdelivr.net/npm/asciichart@1.5.21/asciichart.js"
+     "asciichart"
+     [:plot]))
+
+
   (def test-broken-json "{\"test\" \"test\"}")
   (def test-json "{\"test\":\"test\"}"))

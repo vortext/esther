@@ -26,8 +26,7 @@
 (def repair-json
   (let [script "scripts/jsonrepair/lib/umd/jsonrepair.js"
         script (str (fs/canonicalize (fs/path script)))
-        context (polyglot/load-js (slurp script))
-        jsonrepair-fn (polyglot/js-object-fn context "JSONRepair" "jsonrepair")]
+        jsonrepair-fn (:jsonrepair (polyglot/js-api script "JSONRepair" [:jsonrepair]))]
     (fn [args]
       (jsonrepair-fn args))))
 
