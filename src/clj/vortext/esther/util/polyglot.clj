@@ -107,9 +107,8 @@
            members))))
 
 (defn eval
-  [api member & args]
-  (let [value  (get api member)
-        result (.execute ^Value value (into-array Object (map serialize-arg args)))]
+  [value & args]
+  (let [result (.execute ^Value value (into-array Object (map serialize-arg args)))]
     (deserialize result)))
 
 
@@ -119,7 +118,7 @@
         ctx (js-ctx src)
         obj (from ctx api-name)
         api (import obj api-fns)]
-    (into {} (map (fn [[k _]] [k (partial eval api k)]) api))))
+    (into {} (map (fn [[k _]] [k (partial eval (get api k))]) api))))
 
 ;; Scratch
 (comment
@@ -130,6 +129,7 @@
      "asciichart"
      [:plot]))
 
+  ((:plot asciichart) (range 10))
 
   (def test-broken-json "{\"test\" \"test\"}")
   (def test-json "{\"test\":\"test\"}"))
