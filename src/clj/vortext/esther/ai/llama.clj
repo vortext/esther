@@ -128,8 +128,6 @@
       (assoc subprocess
              :response-ch response-ch))))
 
-
-
 (defn cached-spawn-subprocess
   [options cache uid submission]
   (let [{:keys [model-path bin-dir]} options]
