@@ -12,7 +12,7 @@ def main():
     def read(fd):
         buffer = b""
         while True:
-            chunk = os.read(fd, 32)  # Read 32 bytes at a time
+            chunk = os.read(fd, 2)
             buffer += chunk
             try:
                 # Attempt to decode buffer as UTF-8
