@@ -35,9 +35,10 @@ _ more user information in session (vault)
 ** DONE check logging levels (disable debug outside dev)
 ** DONE llma locally
 ** DONE url handling (it renders)
-** TODO llama tweaks
+** DONE llama tweaks
 - json grammar :D
 - performance tweaks (gpu layers, cores)
+** TODO move Llama config to system.edn
 ** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
 ** TODO embeddings for memory retrieval and context
 - https://github.com/nmslib/hnswlib
