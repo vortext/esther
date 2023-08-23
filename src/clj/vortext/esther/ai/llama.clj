@@ -60,7 +60,7 @@
        "-m" model
        "--grammar-file" gbnf
 
-       "--n-gpu-layers" 200000 ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
+       "--n-gpu-layers" 35 ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
        "-eps" "1e-5" ;; for best generation quality LLaMA 2
        "--ctx-size" 2048
        "-i"
