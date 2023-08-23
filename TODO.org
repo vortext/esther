@@ -35,10 +35,13 @@ _ more user information in session (vault)
 ** DONE check logging levels (disable debug outside dev)
 ** DONE llma locally
 ** DONE url handling (it renders)
+** TODO llama tweaks
+- json grammar :D
+- performance tweaks (gpu layers, cores)
 ** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
 ** TODO embeddings for memory retrieval and context
 - https://github.com/nmslib/hnswlib
-- https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"]
+- https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"] (too slow)
 - https://github.com/stepstone-tech/hnswlib-jna
 ** TODO dark mode
 ** TODO security and hosting
