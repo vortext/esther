@@ -3,18 +3,20 @@ role      ::= [A-Z][a-z]+ ":"
 
 value     ::= kwarray | string | number | ("true" | "false" | "null") ws
 
-response  ::= "{" (ws "response:" ws string ws ","
-                   ws "emoji:" ws emoji ws ","
-                   ws "image-prompt:" ws string ws ","
-                   ws "energy:" ws number ws ","
-                   ws "keywords:" ws kwarray ws "}") ws "\n"
+quote ::= "\""
+
+response  ::= "{" (ws quote "response" quote ":" ws string ","
+                   ws quote "emoji" quote ":" ws emoji ","
+                   ws quote "image-prompt" quote ":" ws string ","
+                   ws quote "energy" quote ":" ws number ","
+                   ws quote "keywords" quote ":" ws kwarray ws "}") "\n"
 
 
-emoji     ::=  "\"" ([^"\\] | "\\" unicode unicode?) "\"" ws
+emoji     ::= quote ([^"\\] | "\\" unicode unicode?) quote
 
 kwarray   ::= "[" ws keyword ("," ws keyword)* "]" ws
 
-keyword   ::= [a-z]+ ":" [a-zA-Z]+
+keyword   ::= quote [a-z]+ ":" [a-zA-Z]+ quote
 
 unicode ::=  (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
 
