@@ -1,0 +1,26 @@
+root      ::= role response
+role      ::= [A-Z][a-z]+ ":"
+
+value     ::= kwarray | string | number | ("true" | "false" | "null") ws
+
+response  ::= "{" (ws "response:" ws string ws ","
+                   ws "emoji:" ws emoji ws ","
+                   ws "image-prompt:" ws string ws ","
+                   ws "energy:" ws number ws ","
+                   ws "keywords:" ws kwarray ws "}") ws "\n"
+
+
+emoji     ::=  "\"" ([^"\\] | "\\" unicode unicode?) "\"" ws
+
+kwarray   ::= "[" ws keyword ("," ws keyword)* "]" ws
+
+keyword   ::= [a-z]+ ":" [a-zA-Z]+
+
+unicode ::=  (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
+
+
+string ::= "\"" ([^"\\] | "\\" unicode )* "\"" ws
+
+number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
+
+ws        ::= [ ]?
