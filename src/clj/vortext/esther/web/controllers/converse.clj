@@ -193,7 +193,7 @@
         sid (:sid params)
         data {:request
               {:context (parse-context (get params :context ""))
-               :msg (emoji/parse-to-unicode (:msg params))}
+               :msg (emoji/parse-to-unicode (str/trim (:msg params)))}
               :ts (unix-ts)}]
     (if-not (m/validate request-schema (:request data))
       (assoc data :response (:unrecognized-input errors))

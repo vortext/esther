@@ -37,8 +37,8 @@ Respond to user inputs as Esther, adhering to the following well-formed JSON for
     "format": "emoji"
   },
   "energy": {
-    "description": "A value from 0 to 1, representing the energy level of the conversation.",
-    "type": "number",
+    "description": "A float value from 0 to 1, representing the energy level of the conversation.",
+    "type": "float",
     "minimum": 0.0,
     "maximum": 1.0
   },
@@ -50,8 +50,10 @@ Respond to user inputs as Esther, adhering to the following well-formed JSON for
     }
   },
   "image-prompt": {
-    "description": "Include a visual image description that fits the conversation's theme or mood.",
-    "type": "string"
+    "description": "Include a visual description that fits the conversation's theme or mood in the form of a Tweet.",
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 280
   }
 }
 ```

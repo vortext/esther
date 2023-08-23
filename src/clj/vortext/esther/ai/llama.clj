@@ -1,20 +1,19 @@
 (ns vortext.esther.ai.llama
   (:require
    [clojure.tools.logging :as log]
-   [vortext.esther.config :refer [errors]]
    [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
    [babashka.process :refer [process destroy-tree alive?]]
    [clojure.core.cache.wrapped :as w]
    [babashka.fs :as fs]
-   [vortext.esther.util :refer
-    [parse-maybe-json escape-newlines]]
+   [vortext.esther.util :refer [read-json-value escape-newlines]]
    [clojure.string :as str]))
 
+(def ai-name "Esther")
 
 (defn as-role
   [entry]
-  (str (if (= (:role entry) "assistant") "Esther:" "User:")
+  (str (if (= (:role entry) "assistant") (str ai-name ":") "User:")
        (:content entry)))
 
 (defn generate-prompt-str
@@ -26,20 +25,6 @@
     (for [entry (rest submission)]
       (as-role entry)))
    "\n\n"))
-
-(defn parse
-  [llama-output]
-  (let [maybe-json (subs
-                    llama-output
-                    (str/index-of llama-output "{")
-                    (inc (str/last-index-of llama-output "}")))]
-    (parse-maybe-json (escape-newlines maybe-json))))
-
-(defn safe-parse
-  [llama-output]
-  (try
-    (parse llama-output)
-    (catch Exception _ nil)))
 
 (defn process-cmd
   [bin-dir model-path submission]
@@ -59,15 +44,15 @@
       [(str (fs/real-path (fs/path bin-dir "main")))
        "-m" model
        "--grammar-file" gbnf
-
-       "--n-gpu-layers" 35 ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
+       ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
+       "--n-gpu-layers" 20
        "-eps" "1e-5" ;; for best generation quality LLaMA 2
        "--ctx-size" 2048
        "-i"
        "--simple-io" ;; required
        "-r" "User:"
        ;;"-gqa" "8"    ;; for 70B models to work
-       "--threads" (max 16 (/ 2  (.availableProcessors (Runtime/getRuntime))))
+       "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
        "-f" (str tmp)])
      "'")))
 
@@ -79,6 +64,7 @@
                       cmd)
         out-ch (chan 32)
         in-ch (chan 32)
+        sigint #(go (>! in-ch "[[STOP]]"))
         rdr (io/reader (:out proc))]
     (go
       (with-open [wrtr (io/writer (:in proc))]
@@ -91,56 +77,84 @@
       (go-loop []
         (let [char (char (.read rdr))]
           (if (= char \newline)
-            (do
-              (>!! out-ch (str sb))
+            (let [line (str sb)]
+              (>!! out-ch line)
               (.setLength sb 0))
             (.append sb char))
           (recur))))
     {:proc proc
      :in-ch in-ch
-     :out-ch out-ch}))
+     :out-ch out-ch
+     :sigint sigint
+     :destroy #(((:shutdown proc)) (close! out-ch) (close! in-ch))}))
 
-(defn llama-subprocess
-  [bin-dir model-path submission]
-  (let [subprocess (process-channels
-                    (process-cmd bin-dir model-path submission))
-        {:keys [proc out-ch in-ch]} subprocess
-        response-ch (chan 32)
+(defn safe-parse
+  [output]
+  (try
+    (when (seq output)
+      (let [start (str/index-of output "{")
+            end (str/last-index-of output "}")]
+        (when (and start end)
+          (read-json-value (escape-newlines
+                            (subs output start (inc end)))))))
+    (catch com.fasterxml.jackson.core.JsonParseException e (log/warn e))))
+
+(defn handle-json-parsing [subprocess partial-json-ch response-ch]
+  (go-loop [partial-json ""]
+    (if-let [line (<! partial-json-ch)]
+      (let [new-partial-json (str partial-json line)
+            json-obj (safe-parse new-partial-json)]
+        (log/debug "JSON object" json-obj)
+        (if-not json-obj
+          (recur new-partial-json)
+          (if (:response json-obj)
+            (do
+              (>! response-ch json-obj)
+              ((:sigint subprocess))
+              (recur ""))
+            (recur ""))))
+      ((:sigint subprocess)))))
+
+(defn handle-output-channel
+  [subprocess last-entry process-ready? partial-json-ch status-ch]
+  (go-loop []
+    (if-let [line (<! (:out-ch subprocess))]
+      (do
+        (log/debug "Read line:" line)
+        (when (str/includes? line last-entry)
+          (log/debug "Seen last entry")
+          (>! status-ch :started?)
+          (reset! process-ready? true))
+        (when @process-ready?
+          (>! partial-json-ch line))
+        (recur))
+      (do
+        ((:destroy subprocess))
+        (close! partial-json-ch)
+        (close! status-ch)
+        (throw (Exception. "Process completed without matching output"))))))
+
+(defn subprocess [bin-dir model-path submission]
+  (let [subprocess (process-channels (process-cmd bin-dir model-path submission))
         last-entry (:content (last submission))
-        stop #(go (>! in-ch "[[STOP]]"))
-        seen-last-entry? (atom false)
-        partial-json (atom "")
-        status-ch (chan 8)]
-    (go-loop []
-      (if-let [line (<! out-ch)]
-        (do
-          (log/debug line)
-          (when (str/includes? line last-entry)
-            (>! status-ch :seen-last-entry)
-            (reset! seen-last-entry? true))
-          (when @seen-last-entry?
-            (swap! partial-json str line)
-            (when-let [json-obj (safe-parse @partial-json)]
-              (when (:response json-obj)
-                (stop)
-                (>! response-ch json-obj))
-              (reset! partial-json "")))
-          (recur))
-        ;; Handle the case where the channel is closed and no matching output was found
-        (do
-          (destroy-tree proc)           ; Destroy the process
-          (close! out-ch)               ; Close the output channel
-          (throw (Exception. "Process completed without matching output")))))
-    (when (= (<!! status-ch) :seen-last-entry)
-      (assoc subprocess
-             :response-ch response-ch))))
+        process-ready? (atom false)
+        response-ch (chan 32)
+        partial-json-ch (chan 32)
+        status-ch (chan 32)]
+
+    (handle-json-parsing subprocess partial-json-ch response-ch)
+    (handle-output-channel subprocess last-entry process-ready? partial-json-ch status-ch)
+
+    (when (= (<!! status-ch) :started?) ;; Todo failed condition
+      (assoc subprocess :response-ch response-ch))))
+
 
 (defn cached-spawn-subprocess
   [options cache uid submission]
   (let [{:keys [model-path bin-dir]} options]
     (w/lookup-or-miss
      cache uid
-     (fn [_uid] (llama-subprocess bin-dir model-path submission)))))
+     (fn [_uid] (subprocess bin-dir model-path submission)))))
 
 (defn checked-proc?
   [cache uid]
@@ -162,6 +176,7 @@
           proc (cached-spawn-subprocess options cache uid submission)]
       (when running-proc?
         (let [entry (last submission)]
+          (log/debug "running-proc? yes" (:proc proc) entry)
           (go (>! (:in-ch proc) (as-role entry)))))
       (<!! (:response-ch proc)))))
 

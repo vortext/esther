@@ -9,7 +9,7 @@ response  ::= "{" (ws quote "response" quote ":" ws string ","
                    ws quote "emoji" quote ":" ws emoji ","
                    ws quote "image-prompt" quote ":" ws string ","
                    ws quote "energy" quote ":" ws number ","
-                   ws quote "keywords" quote ":" ws kwarray ws "}") "\n"
+                   ws quote "keywords" quote ":" ws kwarray ws "}")
 
 
 emoji     ::= quote ([^"\\] | "\\" unicode unicode?) quote

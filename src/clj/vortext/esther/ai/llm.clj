@@ -96,18 +96,18 @@
   [complete-fn]
   (fn [opts user request memories keywords]
     (dh/with-retry
-      {:retry-on Exception
-       :max-retries 1
-       :on-retry
-       (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
-       :on-failure
-       (fn [_val ex]
-         (let [response (:internal-server-error errors)]
-           (log/warn "llm::complete:failed..." ex response)
-           response))
-       :on-failed-attempt
-       (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
-      (dh/with-timeout {:timeout-ms 16000}
+        {:retry-on Exception
+         :max-retries 1
+         :on-retry
+         (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
+         :on-failure
+         (fn [_val ex]
+           (let [response (:internal-server-error errors)]
+             (log/warn "llm::complete:failed..." ex response)
+             response))
+         :on-failed-attempt
+         (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
+      (dh/with-timeout {:timeout-ms 32000}
         (complete-fn
          user
          (generate-submission opts request memories keywords))))))
