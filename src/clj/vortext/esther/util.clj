@@ -26,9 +26,9 @@
 (def repair-json
   (let [script "scripts/jsonrepair/lib/umd/jsonrepair.js"
         script (str (fs/canonicalize (fs/path script)))
-        jsonrepair-fn (:jsonrepair (polyglot/js-api script "JSONRepair" [:jsonrepair]))]
+        jsonrepair (polyglot/js-api script "JSONRepair" [:jsonrepair])]
     (fn [args]
-      (jsonrepair-fn args))))
+      ((:jsonrepair jsonrepair) args))))
 
 
 (defn parse-maybe-json
