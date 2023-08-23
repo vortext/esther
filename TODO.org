@@ -34,6 +34,12 @@ _ more user information in session (vault)
 ** DONE /clear command (clear all memory for uid)
 ** DONE check logging levels (disable debug outside dev)
 ** DONE llma locally
+** DONE url handling (it renders)
+** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
+** TODO embeddings for memory retrieval and context
+- https://github.com/nmslib/hnswlib
+- https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"]
+- https://github.com/stepstone-tech/hnswlib-jna
 ** TODO dark mode
 ** TODO security and hosting
 ** TODO test infrastructure and tests
@@ -44,8 +50,6 @@ _ more user information in session (vault)
 * Ideas for later
 ** TODO calendar page (for memories)
 ** TODO image upload (img-to-text?)
-** TODO url handling
-** TODO embeddings for memory retrieval and context
 ** TODO offline desktop app?
 ** TODO /imagine command
 - hook up image generation (StableDiffusionAPI is too crappy)
