@@ -93,7 +93,7 @@
                  (select-keys request request-keys))}])))
 
 (defn create-complete-fn
-  [complete-fn]
+  [llm-complete]
   (fn [opts user request memories keywords]
     (dh/with-retry
         {:retry-on Exception
@@ -108,16 +108,23 @@
          :on-failed-attempt
          (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
       (dh/with-timeout {:timeout-ms 32000}
-        (complete-fn
+        ((:complete-fn llm-complete)
          user
          (generate-submission opts request memories keywords))))))
 
 
-(defmethod ig/init-key :ai.llm/complete-fn
-  [_ {:keys [implementation]
-      :or   {implementation :openai}
+(defmethod ig/init-key :ai.llm/llm-complete
+  [_ {:keys [impl]
+      :or   {impl :openai}
       :as   opts}]
-  (create-complete-fn
-   (case implementation
-     :openai (openai/create-api-complete opts)
-     :llama-shell (llama/create-complete-shell opts))))
+  (let [instance
+        (case impl
+          :openai (openai/create-api-complete opts)
+          :llama-shell (llama/create-complete-shell opts))]
+    {:impl instance
+     :complete-fn  (create-complete-fn instance)}
+    ))
+
+
+(defmethod ig/halt-key! :ai.llm/llm-complete [_ {:keys [impl]}]
+  ((:shutdown-fn impl)))

@@ -33,13 +33,13 @@
       ((:jsonrepair jsonrepair) args))))
 
 
-(defn parse-maybe-json
+(defn parse-repair-json
   [maybe-json]
   (try
     (read-json-value maybe-json)
     (catch com.fasterxml.jackson.core.JsonParseException _e
       (try
-        (parse-maybe-json (repair-json maybe-json))
+        (parse-repair-json (repair-json maybe-json))
         (catch Exception _ maybe-json)))))
 
 ;; Base64
@@ -63,8 +63,16 @@
 (defn unescape-newlines [s]
   (str/replace s "\\n" "\n"))
 
-(defn escape-newlines [s]
-  (clojure.string/replace s "\n" "\\\\n"))
+(defn escape-json [s]
+  (->> s
+       (eduction (map #(cond
+                         (= % \newline) "\\n"
+                         (= % \return) "\\r"
+                         ;;(= % \\) "\\\\"
+                         ;;(= % \") "\\\""
+                         :else %)))
+       (apply str)))
+
 
 (defn strs-to-markdown-list [strs]
   (clojure.string/join "\n" (map #(str "- " %) strs)))

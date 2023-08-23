@@ -151,7 +151,7 @@
                       (memory/last-memories opts user 5))
         last-memories (reverse conversation)
         keyword-memories (memory/frecency-keywords opts user :week 25)
-        complete (get-in opts [:ai :complete-fn])
+        complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
         response (complete opts user (:request data) last-memories keyword-memories)
         validate-response #(validate response-schema %)]

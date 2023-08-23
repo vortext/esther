@@ -6,13 +6,16 @@ import select
 import threading
 import signal
 import termios
-import atexit
 
 def main():
     def read(fd):
         buffer = b""
         while True:
-            chunk = os.read(fd, 2)
+            try:
+                chunk = os.read(fd, 2)
+            except OSError:
+                break # Stop reading if an I/O error occurs
+
             buffer += chunk
             try:
                 # Attempt to decode buffer as UTF-8
@@ -46,6 +49,12 @@ def main():
     # Fork a child process
     pid = os.fork()
 
+    def monitor_child():
+        os.waitpid(pid, 0)
+        os.close(master) # Close the master end of the PTY
+
+    threading.Thread(target=monitor_child, daemon=True).start()
+
     if pid == 0: # Child process
         os.close(master)
         os.dup2(slave, 0) # Redirect stdin
@@ -60,7 +69,7 @@ def main():
             read(master)
             print("Child process has terminated, exiting.")
             os.close(master) # Close the master end of the PTY
-            sys.exit(0)  # Exit the parent process
+            os._exit(1)
 
         def write_loop():
             while True:
@@ -72,11 +81,6 @@ def main():
 
         threading.Thread(target=read_thread, daemon=True).start()
         write_loop()  # Run write_loop in main thread
-
-        def terminate_child():
-            os.kill(pid, signal.SIGTERM) # or signal.SIGKILL
-
-        atexit.register(terminate_child)
 
 if __name__ == '__main__':
     main()

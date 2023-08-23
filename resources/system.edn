@@ -49,14 +49,11 @@
   {:routes #ig/refset :reitit/routes
    :depends-on [:dev/init-test-user]}}
 
- :ai.llm/complete-fn
- {:implementation :llama-shell
+ :ai.llm/llm-complete
+ {:impl :llama-shell
   :options
-  {:prompt :llama
-   :model-path
-   #or [#env GGML_MODEL_PATH "./models/TheBloke/llama-2-7b-chat.ggmlv3.q5_K_M.bin"]
-   :bin-dir
-   "./native/llama.cpp/build/bin"}}
+  {:model-path #or [#env GGML_MODEL_PATH "./models/TheBloke/llama-2-7b-chat.ggmlv3.q5_K_M.bin"]
+   :bin-dir "./native/llama.cpp/build/bin"}}
 
  :router/core
  {:routes #ig/ref :router/routes}
@@ -66,7 +63,7 @@
                  :prompt "prompts/llama.md"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
-                 :ai {:complete-fn #ig/ref :ai.llm/complete-fn}
+                 :ai {:complete-fn #ig/ref :ai.llm/llm-complete}
                  :env #ig/ref :system/env}}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}

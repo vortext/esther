@@ -3,7 +3,7 @@
    [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]
    [vortext.esther.util :refer
-    [parse-maybe-json escape-newlines]]
+    [parse-repair-json escape-json]]
    [diehard.core :as dh]
    [vortext.esther.config :refer [errors]]
    [wkok.openai-clojure.api :as api]))
@@ -11,7 +11,7 @@
 (def model "gpt-3.5-turbo")
 
 (defn openai-api-complete
-  [submission]
+  [_user submission]
   (dh/with-retry
       {:retry-on Exception
        :max-retries 2
@@ -30,8 +30,9 @@
                       {:api-key (:openai-api-key (secrets))})
           first-choice ((comp :content :message)
                         (get-in completion [:choices 0]))]
-      (if-let [json-obj? (parse-maybe-json (escape-newlines first-choice))]
+      (if-let [json-obj? (parse-repair-json (escape-json first-choice))]
         json-obj?
         (:json-parse-error errors)))))
 
-(defn create-api-complete [_] openai-api-complete)
+(defn create-api-complete [_] {:complete-fn openai-api-complete
+                               :shutdown-fn identity})
