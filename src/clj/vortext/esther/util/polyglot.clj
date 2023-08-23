@@ -65,9 +65,9 @@
     :else
     arg))
 
-(defn js-ctx [js-code]
-  (let [context (Context/create (into-array String ["js"]))
-        _result (.eval context "js" js-code)]
+(defn create-ctx [lang src]
+  (let [context (Context/create (into-array String [lang]))
+        _result (.eval context "js" src)]
     context))
 
 (defn print-global-keys [context]
@@ -115,7 +115,7 @@
 (defn js-api
   [slurpable api-name api-fns]
   (let [src (slurp slurpable)
-        ctx (js-ctx src)
+        ctx (create-ctx "js" src)
         obj (from ctx api-name)
         api (import obj api-fns)]
     (into {} (map (fn [[k _]] [k (partial eval (get api k))]) api))))

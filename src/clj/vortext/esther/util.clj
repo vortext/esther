@@ -3,6 +3,7 @@
    [clojure.tools.logging :as log]
    [jsonista.core :as json]
    [clojure.string :as str]
+   [clojure.java.io :as io]
    [buddy.core.codecs :as codecs]
    [babashka.fs :as fs]
    [buddy.core.nonce :as nonce]
@@ -25,7 +26,8 @@
 
 (def repair-json
   (let [script "scripts/jsonrepair/lib/umd/jsonrepair.js"
-        script (str (fs/canonicalize (fs/path script)))
+        script (str (fs/canonicalize (io/resource script)))
+
         jsonrepair (polyglot/js-api script "JSONRepair" [:jsonrepair])]
     (fn [args]
       ((:jsonrepair jsonrepair) args))))
@@ -35,7 +37,7 @@
   [maybe-json]
   (try
     (read-json-value maybe-json)
-    (catch com.fasterxml.jackson.core.JsonParseException e
+    (catch com.fasterxml.jackson.core.JsonParseException _e
       (try
         (parse-maybe-json (repair-json maybe-json))
         (catch Exception _ maybe-json)))))
