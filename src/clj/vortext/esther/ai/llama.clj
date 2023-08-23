@@ -138,8 +138,7 @@
       (do
         ((:shutdown-fn subprocess))
         (close! partial-json-ch)
-        (go (>! status-ch :stream-closed))
-        (throw (Exception. "Process completed without matching output")))))
+        (go (>! status-ch :stream-closed)))))
   subprocess)
 
 (defn start-subprocess! [bin-dir model-path submission]
@@ -196,10 +195,9 @@
 
 (defn shutdown-everything
   [cache]
-  (log/debug "shutdown current cache:" @cache)
   (doseq [v (vals @cache)]
     (when-let [shutdown (:shutdown-fn v)]
-      (log/warn "shutting down" (shutdown v)))))
+      (log/warn "shutting down" (shutdown)))))
 
 (defn create-complete-shell
   [{:keys [options]}]
