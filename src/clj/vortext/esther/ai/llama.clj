@@ -56,13 +56,14 @@
       " "
       [(str (fs/real-path (fs/path bin-dir "main")))
        "-m" model
+       "--n-gpu-layers" 200000 ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
+       "-eps" "1e-5" ;; for best generation quality LLaMA 2
+       "--ctx-size" 2048
        "-i"
        "--simple-io"
        "-r" "User:"
-       "-eps" "1e-5" ;; for best generation quality LLaMA 2
        ;;"-gqa" "8"    ;; for 70B models to work
-       "--ctx-size" 2048
-       "--threads" (.availableProcessors (Runtime/getRuntime))
+       "--threads" (max 16 (/ 2  (.availableProcessors (Runtime/getRuntime))))
        "-f" (str tmp)])
      "'")))
 

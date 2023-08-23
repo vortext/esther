@@ -107,7 +107,7 @@
            response))
        :on-failed-attempt
        (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
-      (dh/with-timeout {:timeout-ms 45000}
+      (dh/with-timeout {:timeout-ms 8000}
         (complete-fn
          user
          (generate-submission opts request memories keywords))))))
