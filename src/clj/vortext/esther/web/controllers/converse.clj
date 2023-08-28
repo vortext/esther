@@ -9,6 +9,7 @@
    [malli.error :as me]
    [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
    [vortext.esther.util.emoji :as emoji]
+   [vortext.esther.common :refer [parse-number update-value]]
    [clojure.string :as str]
    [clojure.tools.logging :as log]))
 
@@ -106,21 +107,6 @@
           (assoc :details humanized)))
     ;; Valid
     obj))
-
-(defn parse-number
-  [s]
-  (when (re-find #"^-?\d+\.?\d*$" s)
-    (read-string s)))
-
-(defn update-value
-  "Updates the given key in the given map. Uses the given function to transform the value, if needed."
-  [key transform-fn m default-value]
-  (let [value (get m key)
-        transformed-value (transform-fn value)]
-    (assoc m key (if transformed-value
-                   transformed-value
-                   (or (transform-fn (str value))
-                       default-value)))))
 
 (def clean-energy
   (partial

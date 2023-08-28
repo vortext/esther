@@ -40,3 +40,17 @@ Note that, just like with [CIDER](#cider), this alias runs nREPL during developm
 
 ### Useful
 browser-sync start --proxy http://localhost:3000 --files="**/*"
+
+### GraalVM
+Get GraalVM https://www.graalvm.org/downloads/
+
+```shell
+# Put in .bashrc or .zshrc, etc
+export JAVA_HOME=~/Sync/etc/graalvm-jdk-20.0.2+9.1
+export PATH=$JAVA_HOME/bin/:$PATH
+export PATH=$PATH:~/.local/bin/:~/bin/
+export LLVM_TOOLCHAIN=$(lli --print-toolchain-path)
+```
+
+
+`gu install llvm llvm-toolchain js wasm`
