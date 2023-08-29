@@ -38,12 +38,17 @@ _ more user information in session (vault)
 ** DONE llama tweaks
 - json grammar :D
 - performance tweaks (gpu layers, cores)
-** TODO keep for llama.cpp
+** DONE keep for llama.cpp
 - calculate token-length (and set)
 - up the context
+** TODO try openorca-platypus2-13b
+- Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
 ** TODO move Llama config to system.edn
 ** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
 ** TODO embeddings for memory retrieval and context
+- Add memories during converse into associative mem
+- Retrieve similar memories (if any) => guids (associate)
+- Inject similar memories in user request context
 - https://github.com/nmslib/hnswlib
 - https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"] (too slow)
 - https://github.com/stepstone-tech/hnswlib-jna

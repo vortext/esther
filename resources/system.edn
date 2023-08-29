@@ -52,7 +52,7 @@
  :ai.llm/llm-complete
  {:impl :llama-shell
   :options
-  {:model-path #or [#env GGML_MODEL_PATH "./models/llama/llama-2-7b-chat/ggml-model_q5_K_M.guff"]
+  {:model-path #or [#env GGML_MODEL_PATH "./models/TheBloke/openorcaxopenchat-preview2-13b.ggmlv3.q4_K_M.bin"]
    :bin-dir "./native/llama.cpp/build/bin"}}
 
  :router/core

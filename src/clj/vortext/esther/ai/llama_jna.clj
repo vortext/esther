@@ -373,7 +373,7 @@
 
 (def ^:private llama-token-to-str
   (.getFunction ^com.sun.jna.NativeLibrary raw/libllama
-                "llama_token_to_piece"))
+                "llama_token_to_str"))
 
 (defn decode-token-to-char
   "Returns a transducer that expects a stream of llama tokens

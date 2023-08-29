@@ -12,6 +12,7 @@
    [clojure.string :as str]))
 
 (def ai-name "Esther")
+(def end-of-turn "<|end_of_turn|>")
 
 (defn num-tokens
   [model-path text]
@@ -23,22 +24,23 @@
 
 (defn as-role
   [entry]
-  (str (if (= (:role entry) "assistant") (str ai-name ":") "User:")
+  (str (if (= (:role entry) "assistant") (str ai-name ": ") "User: ")
        (:content entry)))
 
 (defn generate-prompt-str
   [submission]
   (str
-   (:content (first submission)) ;; Instructions
+   (str (str/trim (:content (first submission))) end-of-turn "\n") ;; Instructions
    (str/join
-    "\n"
+    (str end-of-turn "\n")
     (for [entry (rest submission)]
-      (as-role entry)))
-   "\n\n"))
+      (str (as-role entry))))
+   (str end-of-turn "\n\n")))
 
 (defn shell-cmd
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
+        _ (log/info prompt)
         instructions (:content (first submission))
         keep-n-tokens (num-tokens model-path instructions)
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
@@ -202,7 +204,7 @@
           (when running-proc?
             (let [entry (last submission)]
               (log/debug "running-proc? yes" (:proc proc))
-              (go (>! (:in-ch proc) (as-role entry)))))
+              (go (>! (:in-ch proc) (str (as-role entry) end-of-turn "\n")))))
           (<!! (:response-ch proc))
           (catch Exception _e (:uncaught-exception errors)))))))
 
