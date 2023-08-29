@@ -1,5 +1,5 @@
 (ns vortext.esther.ai.llama.util
-  (:require [vortext.esther.ai.llama-clj :as llama]
+  (:require [vortext.esther.ai.llama-jna :as llama]
             [vortext.esther.ai.llama.raw :as raw]
             [clojure.string :as str])
   (:import com.sun.jna.Memory))
