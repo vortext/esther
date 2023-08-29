@@ -107,6 +107,7 @@
       [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]
        [:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
        [:script {:src "/resources/public/js/vendor/marked.min.js"}]
+       [:script {:src "/resources/public/js/vendor/lunarphase.js"}]
        [:script {:src "/resources/public/js/conversation.js"}]])
      [:body
       [:div#container

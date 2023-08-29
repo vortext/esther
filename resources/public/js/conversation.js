@@ -47,7 +47,8 @@ function getTimeOfDay(latitude, longitude) {
 function getLocalContext(latitude, longitude) {
   return {
     "current-season": getCurrentSeason(latitude),
-    "time-of-day": getTimeOfDay(latitude, longitude)
+    "time-of-day": getTimeOfDay(latitude, longitude),
+    "lunar-phase": lunarphase.Moon.lunarPhaseEmoji()
   };
 }
 
