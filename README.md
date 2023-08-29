@@ -50,7 +50,19 @@ export JAVA_HOME=~/Sync/etc/graalvm-jdk-20.0.2+9.1
 export PATH=$JAVA_HOME/bin/:$PATH
 export PATH=$PATH:~/.local/bin/:~/bin/
 export LLVM_TOOLCHAIN=$(lli --print-toolchain-path)
+
+# Then also
+gu install js llvm llvm-toolchain
 ```
 
 
-`gu install llvm llvm-toolchain js wasm`
+### llama.cpp
+Make sure CUDA works (nvidia-smi and nvcc)
+[TODO] figure out deps
+
+```shell
+mkdir build
+cd build
+cmake -DBUILD_SHARED_LIBS=ON -DLLAMA_CUBLAS=ON ..
+cmake --build . --config Release
+```

@@ -1,6 +1,7 @@
 {:paths   ["src/clj"
            "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
+
            ;; Util
            org.clojure/core.async {:mvn/version "1.6.673"}
            org.clojure/core.cache {:mvn/version "1.0.225"}
@@ -18,17 +19,22 @@
            metosin/malli {:mvn/version "0.11.0"}
            clj-http/clj-http {:mvn/version "3.12.3"}
 
+           net.java.dev.jna/jna {:mvn/version "5.13.0"}
+           com.phronemophobic/clong {:mvn/version "1.1"}
+
            ;; GraalVM
            org.graalvm.truffle/truffle-api {:mvn/version "23.0.1"}
            org.graalvm.js/js {:mvn/version "23.0.1"}
            org.graalvm.js/js-scriptengine {:mvn/version "23.0.1"}
+
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
+
            ;; Security
            buddy/buddy-core {:mvn/version "1.11.423"}
            buddy/buddy-hashers {:mvn/version "2.0.167"}
+
            ;; AI
-           ;; com.phronemophobic/llama-clj {:mvn/version "0.5"}
            net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
            com.github.jelmerk/hnswlib-core {:mvn/version "1.1.0"}
            com.github.jelmerk/hnswlib-utils {:mvn/version "1.1.0"}
@@ -58,7 +64,8 @@
  :aliases {:build {:deps {io.github.clojure/tools.build
                           {:git/sha "e3e3532"
                            :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
-                   :ns-default build}
+                   :ns-default build
+                   :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]}
            :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.0.27"}
                                 criterium/criterium             {:mvn/version "0.4.6"}
                                 expound/expound                 {:mvn/version "0.9.0"}
@@ -68,9 +75,8 @@
                                 ring/ring-devel                 {:mvn/version "1.9.5"}
                                 ring/ring-mock                  {:mvn/version "0.4.0"}
                                 io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
-                                org.clojure/tools.namespace     {:mvn/version "1.2.0"}
-                                }
-                  ;; :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
+                                org.clojure/tools.namespace     {:mvn/version "1.2.0"}}
+                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}

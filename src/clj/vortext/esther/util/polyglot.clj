@@ -1,7 +1,8 @@
 ;; "Inspired" by https://github.com/wavejumper/clj-polyglot
 (ns vortext.esther.util.polyglot
   (:refer-clojure :exclude [import load-file load-string eval])
-  (:require [clojure.tools.logging :as log])
+  (:require [clojure.tools.logging :as log]
+            [clojure.java.io :as io])
   (:import (org.graalvm.polyglot Context Value)
            (org.graalvm.polyglot.proxy ProxyArray ProxyObject)))
 
@@ -65,9 +66,21 @@
     :else
     arg))
 
+
+(defn context-builder
+  [lang]
+  (doto (Context/newBuilder (into-array String [lang]))
+    #_(.option "js.timer-resolution" "1")
+    #_(.option "js.java-package-globals" "false")
+    #_(.out System/out)
+    #_(.err System/err)
+    #_(.allowAllAccess true)
+    #_(.allowNativeAccess true)
+    ))
+
 (defn create-ctx [lang src]
-  (let [context (Context/create (into-array String [lang]))
-        _result (.eval context "js" src)]
+  (let [context (.build (context-builder "js"))
+        _result (.eval context lang src)]
     context))
 
 (defn print-global-keys [context]
@@ -79,14 +92,6 @@
   [value args]
   (let [result (.execute value (into-array Object (map serialize-arg args)))]
     (deserialize result)))
-
-
-(defn js-object-fn
-  [context object-name fn-name]
-  (let [js-object (.getMember (.getBindings context "js") object-name)
-        js-fn (.getMember js-object fn-name)]
-    (fn [& args]
-      (eval js-fn args))))
 
 (defn from
   [^Context ctx ^String module-name]
@@ -112,22 +117,34 @@
     (deserialize result)))
 
 
-(defn js-api
-  [slurpable api-name api-fns]
+(defn lang-api
+  [lang slurpable api-name api-fns]
   (let [src (slurp slurpable)
-        ctx (create-ctx "js" src)
+        ctx (create-ctx lang src)
         obj (from ctx api-name)
         api (import obj api-fns)]
     (into {} (map (fn [[k _]] [k (partial eval (get api k))]) api))))
 
-;; Scratch
+(defn js-api
+  [slurpable api-name api-fns]
+  (lang-api "js" slurpable api-name api-fns))
+
+(defn llvm-api
+  [slurpable api-name api-fns]
+  (lang-api "llvm" slurpable api-name api-fns))
+
 (comment
-  ;; It works!
-  (def asciichart
-    (js-api
-     "https://cdn.jsdelivr.net/npm/asciichart@1.5.21/asciichart.js"
-     "asciichart"
-     [:plot]))
+  (def x (js-api "/media/array/Sync/Projects/esther/node_modules/llama-tokenizer-js/llama-tokenizer.js"
+                 "llamaTokenizer"
+                 [:encode :decode]))
+
+  ;; Scratch
+  ( def asciichart
+   (js-api
+    "https://cdn.jsdelivr.net/npm/asciichart@1.5.21/asciichart.js"
+    "asciichart"
+    [:plot]))
+
 
   ((:plot asciichart) (range 10))
 

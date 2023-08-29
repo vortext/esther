@@ -38,6 +38,9 @@ _ more user information in session (vault)
 ** DONE llama tweaks
 - json grammar :D
 - performance tweaks (gpu layers, cores)
+** TODO keep for llama.cpp
+- calculate token-length (and set)
+- up the context
 ** TODO move Llama config to system.edn
 ** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
 ** TODO embeddings for memory retrieval and context
