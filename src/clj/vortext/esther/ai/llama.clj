@@ -58,13 +58,13 @@
        "--grammar-file" gbnf
        ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
        "--n-gpu-layers" 20
-       ;; "-eps" "1e-5" ;; for best generation quality LLaMA 2 (doesn't work anymore?)
+       "-eps" "1e-5" ;; for best generation quality LLaMA 2 (doesn't work anymore with guff?)
        "--ctx-size" 4096
        ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
        ;; Also see https://github.com/belladoreai/llama-tokenizer-js
        "--keep" keep-n-tokens
        "-i"
-       "--simple-io" ;; required
+       "--simple-io" ;; required for pty-bridge?
        "-r" "User:"
        ;;"-gqa" "8"    ;; for 70B models to work
        "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
