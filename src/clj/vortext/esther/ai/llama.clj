@@ -144,6 +144,7 @@
   (go-loop []
     (if-let [line (<! (:out-ch subprocess))]
       (do
+        (log/info "llama:line" line)
         (when (str/includes? line last-entry)
           (>! status-ch :ready)
           (reset! process-ready? true))
