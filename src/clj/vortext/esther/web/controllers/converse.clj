@@ -5,6 +5,7 @@
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
+   [vortext.esther.api.weatherapi :as weather]
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
@@ -14,7 +15,7 @@
    [clojure.tools.logging :as log]))
 
 (defn status
-  [_opts user _sid _args _data]
+  [_opts user _args _data]
   {:type :htmx
    :response
    [:div.status
@@ -24,7 +25,7 @@
      [:strong "username: "] (:username user)]]})
 
 (defn inspect
-  [opts user _sid _args _data]
+  [opts user _args _data]
   (let [memories (filter (comp :conversation? :response)
                          (memory/last-memories opts user 10))]
     {:type :md-mono
@@ -38,7 +39,7 @@
        (memory/frecency-keywords opts user :week 10)))}))
 
 (defn imagine
-  [opts user _sid _args _data]
+  [opts user _args _data]
   (let [memories (filter (comp :conversation? :response)
                          (memory/last-memories opts user 10))]
     {:type :md-mono
@@ -48,27 +49,27 @@
            (take 3 memories)))}))
 
 (defn logout
-  [_opts _user _sid _args {:keys [request]}]
+  [_opts _user _args {:keys [request]}]
   {:type :ui
    :response (signin-ui/logout-chat request)})
 
 (defn wipe
-  [opts user sid args {:keys [_request]}]
+  [opts user args {:keys [_request]}]
   {:type :ui
-   :response (memory-ui/wipe-form opts user sid args)})
+   :response (memory-ui/wipe-form opts user args)})
 
 
 (defn archive
-  [opts user sid _args {:keys [_request]}]
+  [opts user _args {:keys [_request]}]
   {:type :ui
-   :response (memory-ui/archive-form opts user sid)})
+   :response (memory-ui/archive-form opts user)})
 
 (defn split-first-word [s]
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
     [first-word (or rest "")]))
 
 (defn command!
-  [opts user sid data]
+  [opts user data]
   (let [command (get-in data [:request :msg])
         commands {:inspect inspect
                   :status status
@@ -79,7 +80,7 @@
         [cmd args] (split-first-word
                     (apply str (rest command)))
         response (if-let [impl (get commands (keyword cmd))]
-                   (impl opts user sid args data)
+                   (impl opts user args data)
                    (:invalid-command errors))]
     (-> data (assoc :response response))))
 
@@ -131,7 +132,7 @@
       (clean-emoji "🙃")))
 
 (defn converse!
-  [opts user _sid data]
+  [opts user data]
   (let [conversation (filter
                       (comp :conversation? :response)
                       (memory/last-memories opts user 5))
@@ -151,11 +152,11 @@
              (assoc :type :md-serif))))))
 
 (defn- respond!
-  [opts user sid data]
+  [opts user data]
   (try
     (if (str/starts-with? (get-in data [:request :msg]) "/")
-      (command! opts user sid data)
-      (converse! opts user sid data))
+      (command! opts user data)
+      (converse! opts user data))
     (catch Exception e
       (do (log/warn e)
           (assoc data :response (:internal-server-error errors))))))
@@ -168,25 +169,33 @@
            (fn [s] (<= (count s) 1024))]]]
    [:context [:map {:optional true}]]])
 
-(defn parse-context
-  [context-str]
-  (read-json-value context-str))
+(defn create-context
+  [_opts request]
+  (let [{:keys [params]} request
+        ctx (read-json-value (get params :context ""))
+        ip (get-in ctx [:remote-addr :ip])
+        current-weather (weather/current-weather ip)
+        relevant-kw [:weather :time-of-day :lunar-phase :season]]
+    (-> ctx
+        (assoc :weather current-weather)
+        (select-keys relevant-kw))))
 
 (defn answer!
   [opts request]
-  (let [{:keys [params]} request
-        user (get-in request [:session :user])
-        sid (:sid params)
-        data {:request
-              {:context (parse-context (get params :context ""))
-               :msg (emoji/parse-to-unicode (str/trim (:msg params)))}
-              :ts (unix-ts)}]
-    (if-not (m/validate request-schema (:request data))
-      (assoc data :response (:unrecognized-input errors))
-      (let [memory (respond! opts user sid data)
-            type (keyword (:type (:response  memory)))]
-        (if-not (= type :ui)
-          (memory/remember! opts user sid memory)
-          memory)))))
+  (try
+    (let [{:keys [params]} request
+          user (get-in request [:session :user])
+          data {:request
+                {:context (create-context opts request)
+                 :msg (emoji/parse-to-unicode (str/trim (:msg params)))}
+                :ts (unix-ts)}]
+      (if-not (m/validate request-schema (:request data))
+        (assoc data :response (:unrecognized-input errors))
+        (let [memory (respond! opts user data)
+              type (keyword (:type (:response  memory)))]
+          (if-not (= type :ui)
+            (memory/remember! opts user memory)
+            memory))))
+    (catch Exception _ (:internal-server-error errors))))
 
 ;;; Scratch

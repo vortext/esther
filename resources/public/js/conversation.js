@@ -1,7 +1,7 @@
 var emoji = new EmojiConvertor();
 emoji.replace_mode = "unified";
 
-function getCurrentSeason(lat) {
+function getCurrentSeason(latitude) {
   const now = new Date();
   const year = now.getFullYear();
   const marchEquinox = new Date(year, 2, 21);
@@ -9,7 +9,7 @@ function getCurrentSeason(lat) {
   const septemberEquinox = new Date(year, 8, 23);
   const decemberSolstice = new Date(year, 11, 21);
 
-  if (lat > 0) {
+  if (latitude > 0) {
     // Northern Hemisphere
     if (now >= marchEquinox && now < juneSolstice) return 'spring';
     if (now >= juneSolstice && now < septemberEquinox) return 'summer';
@@ -44,12 +44,20 @@ function getTimeOfDay(latitude, longitude) {
   return 'night';
 }
 
-function getLocalContext(latitude, longitude) {
+function getLocalContext() {
+  let latitude = window.appConfig.latitude;
+  let longitude = window.appConfig.longitude;
   return {
     "current-season": getCurrentSeason(latitude),
     "time-of-day": getTimeOfDay(latitude, longitude),
-    "lunar-phase": lunarphase.Moon.lunarPhaseEmoji()
+    "lunar-phase": lunarphase.Moon.lunarPhase(),
+    "remote-addr": window.appConfig.remoteAddr
   };
+}
+
+function setLocalContext() {
+  let userContext = document.getElementById("user-context");
+  userContext.value = JSON.stringify(getLocalContext());
 }
 
 function resizeTextarea(e) {
@@ -127,22 +135,13 @@ function getSentimentEnergy() {
   return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
 }
 
-function setContext() {
-  let context = getLocalContext(window.appConfig.latitude, window.appConfig.longitude);
-  let userContext = document.getElementById("user-context");
-  userContext.value = JSON.stringify(context);
-}
-
 function beforeConverseRequest() {
   setSentiment(getSentimentEnergy());
+  setLocalContext();
+
   // Get the form and input elements
   let textarea = document.getElementById('user-input');
   let userValue = document.getElementById("user-value");
-  let userSid = document.getElementById("user-sid");
-
-  // Store the values in the hidden input fields
-  userSid.value = window.appConfig.sid;
-  setContext();
 
   // Update the UI
   let msg = emoji.replace_colons(textarea.value);
@@ -175,32 +174,33 @@ function afterConverseRequest() {
   }, 250);
 }
 
-
-function setUserLocation(latitude, longitude) {
-  window.appConfig.latitude = latitude;
-  window.appConfig.longitude = longitude;
-}
-
-
 document.addEventListener('DOMContentLoaded', function() {
-  var sidElements = document.querySelectorAll('.session-sid');
+  // For geoip weather data
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      window.appConfig.remoteAddr = data;
+      setLocalContext();
+    })
+    .catch(error => {
+      console.error('Error fetching remoteAddr:', error);
+      setLocalContext();
+    });
 
-  // Geolocation Handling
-  setUserLocation(51.509865, -0.118092); // London
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      setUserLocation(position.coords.latitude, position.coords.longitude);
-      setContext();
+      console.log(position);
+      window.appConfig.latitude = position.coords.latitude;
+      window.appConfig.longitude = position.coords.longitude;
+      setLocalContext();
     },
     (error) => {
       console.warn('Geolocation error:', error);
-      setContext();
+      // London as default
+      setLocalContext();
     }
   );
 
-  sidElements.forEach(function(element) {
-    element.value = window.appConfig.sid;
-  });
   setTimeout(() => {
     document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   },0);

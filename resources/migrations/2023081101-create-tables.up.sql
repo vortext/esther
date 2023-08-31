@@ -1,7 +1,6 @@
 create table memory (
     gid            text primary key,
     uid            text not null,
-    sid            text not null,
     data           text not null,
     iv             text not null,
     created        timestamp with time zone default current_timestamp,

@@ -1,16 +1,14 @@
 (ns vortext.esther.web.ui.common
   (:require
-   [vortext.esther.util :refer [random-base64]]
    [jsonista.core :as json]))
 
 (defn json-config
   [config]
-  (let [sid (random-base64 10)
-        cfg {:sid sid}]
+  (let [base-cfg {}]
     [:script {:type "text/javascript"}
      (str "window.appConfig = "
           (json/write-value-as-string
-           (merge cfg (or config {}))) ";")]))
+           (merge base-cfg (or config {}))) ";")]))
 
 (defn head
   [config styles scripts]

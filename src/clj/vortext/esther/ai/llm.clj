@@ -10,7 +10,6 @@
    [jsonista.core :as json]
    [clojure.set :as set]
    [diehard.core :as dh]
-   [vortext.esther.ai.openai :as openai]
    [vortext.esther.ai.llama :as llama]
    [vortext.esther.config :refer [examples errors introductions]]))
 
@@ -119,7 +118,6 @@
       :as   opts}]
   (let [instance
         (case impl
-          :openai (openai/create-api-complete opts)
           :llama-shell (llama/create-complete-shell opts))]
     {:impl instance
      :complete-fn  (create-complete-fn instance)}

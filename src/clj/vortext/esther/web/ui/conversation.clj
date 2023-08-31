@@ -70,10 +70,6 @@
      {:type "hidden"
       :name "context"
       :value "{}"}]
-    [:input#user-sid.session-sid
-     {:type "hidden"
-      :name "sid"
-      :value ""}]
     [:textarea#user-input
      {:autocomplete "off"
       :minlength 1
@@ -99,19 +95,19 @@
       (msg-input request)]]))
 
 (defn render [opts request]
-  (let [sid (random-base64 10)]
-    (page
-     (common/head
-      {:sid sid}
-      [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
-      [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]
-       [:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
-       [:script {:src "/resources/public/js/vendor/marked.min.js"}]
-       [:script {:src "/resources/public/js/vendor/lunarphase.js"}]
-       [:script {:src "/resources/public/js/conversation.js"}]])
-     [:body
-      [:div#container
-       [:h1#title "Esther"]
-       [:h2#subtitle (time/human-today) "."]
-       (conversation opts request)]
-      [:div#bottom]])))
+  (page
+   (common/head
+    {:latitude 51.509865
+     :longitude -0.118092}
+    [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
+    [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]
+     [:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
+     [:script {:src "/resources/public/js/vendor/marked.min.js"}]
+     [:script {:src "/resources/public/js/vendor/lunarphase.js"}]
+     [:script {:src "/resources/public/js/conversation.js"}]])
+   [:body
+    [:div#container
+     [:h1#title "Esther"]
+     [:h2#subtitle (time/human-today) "."]
+     (conversation opts request)]
+    [:div#bottom]]))

@@ -14,14 +14,13 @@
     (query-fn tx :see-keyword content)))
 
 (defn remember!
-  [opts user sid content]
+  [opts user content]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid secret]} (:vault user)
         gid (random-base64)
         {:keys [data iv]} (secrets/encrypt-for-sql content secret)
         memory {:gid gid
                 :uid uid
-                :sid sid
                 :data data
                 :iv iv}]
     (jdbc/with-transaction [tx connection]
@@ -96,7 +95,7 @@
   (first (keep #(get-in % [:response :image-prompt]) memories)))
 
 (defn wipe-all!
-  [opts user _]
+  [opts user]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (jdbc/with-transaction [tx connection]
@@ -104,13 +103,7 @@
       (query-fn tx :wipe-all-memory {:uid uid}))))
 
 (defn wipe-today!
-  [opts user _]
+  [opts user]
   (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (query-fn :wipe-todays-memory {:uid uid})))
-
-(defn wipe-session!
-  [opts user sid]
-  (let [{:keys [query-fn]} (:db opts)
-        {:keys [uid]} (:vault user)]
-    (query-fn :wipe-session-memory {:uid uid :sid sid})))

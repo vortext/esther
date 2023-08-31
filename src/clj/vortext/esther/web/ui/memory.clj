@@ -39,12 +39,12 @@
      :style :github-markdown)))
 
 (defn wipe-form
-  [_opts _user sid scope]
+  [_opts _user scope]
   (let [scope (if (and (string? scope)
                        (not (str/blank? scope)))
                 (keyword (str/trim scope))
                 :session)
-        allowed #{:session :today :all}]
+        allowed #{:today :all}]
     (if (not (allowed scope))
       [:span "The only allowed options are " (h/oxford (map name allowed)) "."]
       [:form.confirmation
@@ -57,7 +57,6 @@
         {:name "action" :value "wipe"} "Wipe memory"]
        [:button.button.button-info
         {:name "action" :value "cancel"} "Cancel"]
-       [:input {:type :hidden :name "sid" :value sid}]
        [:input {:type :hidden :name "scope" :value scope}]])))
 
 (defn wipe
@@ -66,17 +65,16 @@
         user (get-in request [:session :user])
         scope (keyword (:scope params))
         scopes {:today memory/wipe-today!
-                :session memory/wipe-session!
                 :all memory/wipe-all!}]
     (if (= action :wipe)
-      (-> (ui (do ((scopes scope) opts user (:sid params))
+      (-> (ui (do ((scopes scope) opts user)
                   [:span "Wiped memories: " (name scope)]))
           (assoc :headers {"HX-Redirect" "/"}))
       (ui [:span "Let us continue."]))))
 
 
 (defn archive-form
-  [_opts _user sid]
+  [_opts _user]
   [:form.confirmation
    {:hx-post "/user/archive"
     :hx-swap "outerHTML"}
@@ -86,8 +84,7 @@
    [:button.button.button-primary
     {:name "action" :value "archive"} "Archive conversation"]
    [:button.button.button-info
-    {:name "action" :value "cancel"} "Cancel"]
-   [:input {:type :hidden :name "sid" :value sid}]])
+    {:name "action" :value "cancel"} "Cancel"]])
 
 (defn archive
   [opts {:keys [params] :as request}]

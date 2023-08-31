@@ -10,8 +10,8 @@ select * from users where username = :username limit 1;
 -- Memory
 -- :name push-memory :! :n
 -- :doc Insert a single memory
-insert into memory (gid, uid, sid, data, iv)
-values (:gid, :uid, :sid, :data, :iv)
+insert into memory (gid, uid, data, iv)
+values (:gid, :uid, :data, :iv)
 
 -- :name last-n-memories :? :*
 -- :doc Get the last entries (from new to old)
@@ -66,10 +66,6 @@ delete from memory where uid = :uid;
 -- :name wipe-todays-memory :! :1
 -- :doc wipes todays memories for a uid
 delete from memory where uid = :uid and created_date = date('now');
-
--- :name wipe-session-memory :! :1
--- :doc wipes all memories for a uid and sid (session id)
-delete from memory where uid = :uid and sid = :sid;
 
 -- :name wipe-all-memory-keywords :! :1
 -- :doc wipes all memory keywords for a uid
