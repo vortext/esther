@@ -48,7 +48,7 @@ function getLocalContext() {
   let latitude = window.appConfig.latitude;
   let longitude = window.appConfig.longitude;
   return {
-    "current-season": getCurrentSeason(latitude),
+    "season": getCurrentSeason(latitude),
     "time-of-day": getTimeOfDay(latitude, longitude),
     "lunar-phase": lunarphase.Moon.lunarPhase(),
     "remote-addr": window.appConfig.remoteAddr
@@ -189,7 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      console.log(position);
       window.appConfig.latitude = position.coords.latitude;
       window.appConfig.longitude = position.coords.longitude;
       setLocalContext();

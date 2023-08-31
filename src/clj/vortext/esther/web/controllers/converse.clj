@@ -12,6 +12,7 @@
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.common :refer [parse-number update-value]]
    [clojure.string :as str]
+   [clojure.set :as set]
    [clojure.tools.logging :as log]))
 
 (defn status
@@ -131,6 +132,30 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
+(defn relevant-keywords
+  [memories keywords]
+  (let [memory-keywords (into #{} (map :value keywords))
+        without #{"user:new-user" "user:introductions-wanted" "user:returning-user"}
+        remainder (set/difference memory-keywords without)
+        filter-context #(not (str/starts-with? % "context:"))
+        remainder (into #{} (filter filter-context remainder))]
+    (if (seq remainder)
+      remainder
+      (if (seq memories)
+        #{"user:returning-user"}
+        #{"user:new-user"}))))
+
+(defn request-keywords
+  [memories keywords]
+  (let [memory-keywords (relevant-keywords memories keywords)
+        conversation-keywords (memory/extract-keywords memories)
+        relevant-keywords (set/difference
+                           memory-keywords
+                           conversation-keywords)]
+    (log/debug "llm::generate-prompt::relevant-keywords" relevant-keywords)
+    relevant-keywords))
+
+
 (defn converse!
   [opts user data]
   (let [conversation (filter
@@ -138,9 +163,12 @@
                       (memory/last-memories opts user 5))
         last-memories (reverse conversation)
         keyword-memories (memory/frecency-keywords opts user :week 25)
+        keywords (request-keywords last-memories keyword-memories)
+        request (-> (:request data)
+                    (update :context #(assoc % :keywords keywords)))
         complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
-        response (complete opts user (:request data) last-memories keyword-memories)
+        response (complete opts user request last-memories)
         validate-response #(validate response-schema %)]
     (-> data
         (assoc
@@ -169,12 +197,14 @@
            (fn [s] (<= (count s) 1024))]]]
    [:context [:map {:optional true}]]])
 
+
 (defn create-context
-  [_opts request]
+  [_opts _user request]
   (let [{:keys [params]} request
         ctx (read-json-value (get params :context ""))
         ip (get-in ctx [:remote-addr :ip])
         current-weather (weather/current-weather ip)
+
         relevant-kw [:weather :time-of-day :lunar-phase :season]]
     (-> ctx
         (assoc :weather current-weather)
@@ -186,7 +216,7 @@
     (let [{:keys [params]} request
           user (get-in request [:session :user])
           data {:request
-                {:context (create-context opts request)
+                {:context (create-context opts user request)
                  :msg (emoji/parse-to-unicode (str/trim (:msg params)))}
                 :ts (unix-ts)}]
       (if-not (m/validate request-schema (:request data))

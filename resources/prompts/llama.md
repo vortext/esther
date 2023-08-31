@@ -24,7 +24,7 @@ Respond to User as Esther using this format (newlines optional):
     "type": "string",
   },
   "energy": {
-    "description": "A value between 0.0 and 1.0 representing the energy level.",
+    "description": "A value between 0.0 and 1.0 representing the vibes.",
     "type": "float"
   },
   "keywords": {
@@ -40,12 +40,5 @@ Respond to User as Esther using this format (newlines optional):
   }
 }
 ```
-{{#include-keywords?}}
-## Backstory
-The user's preferences or characteristics are reflected in the following keywords:
-{{keywords}}
-
-These keywords may guide your response, allowing you to tailor it to the user's specific context.
-{{/include-keywords?}}
 
 ## Conversation between Esther and User. Respond to User as Esther.

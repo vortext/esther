@@ -203,9 +203,10 @@
         (:uncaught-exception errors)
         (try
           (when running-proc?
-            (let [entry (last submission)]
-              (log/debug "running-proc? yes" (:proc proc))
-              (go (>! (:in-ch proc) (str (as-role entry) end-of-turn "\n")))))
+            (let [entry (last submission)
+                  line (str (as-role entry) end-of-turn "\n")]
+              (log/debug "running-proc? yes." "sending" line)
+              (go (>! (:in-ch proc) line))))
           (<!! (:response-ch proc))
           (catch Exception _e (:uncaught-exception errors)))))))
 
