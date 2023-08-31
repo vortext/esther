@@ -77,7 +77,7 @@
       :maxlength 1024
       :autofocus "true"
       :placeholder "Dear Esther,"
-      :rows 2
+      :rows 8
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 
@@ -97,7 +97,9 @@
 (defn render [opts request]
   (page
    (common/head
-    {:latitude 51.509865
+    {;; London as default
+     ;; [TODO] Don't rely on ip addr for weather info
+     :latitude 51.509865
      :longitude -0.118092}
     [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
     [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]

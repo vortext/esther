@@ -60,10 +60,19 @@ function setLocalContext() {
   userContext.value = JSON.stringify(getLocalContext());
 }
 
+function scrollToView(element) {
+  const rect = element.getBoundingClientRect();
+  const padding = 140;
+  if (rect.bottom > window.innerHeight) {
+    window.scrollBy(0, rect.bottom - window.innerHeight + padding);
+  }
+}
+
 function resizeTextarea(e) {
   const textarea = e.target;
   textarea.style.height = 'auto'; // Reset height
   textarea.style.height = (textarea.scrollHeight) + 'px';
+  scrollToView(textarea);
 }
 
 function handleTextareaInput(e) {
@@ -71,6 +80,7 @@ function handleTextareaInput(e) {
 
   // Resize the textarea
   resizeTextarea(e);
+  scrollToView(textarea);
 
   // If the Enter key is pressed with the Shift key
   if (e.key === 'Enter' && e.shiftKey) {
@@ -118,10 +128,10 @@ function handleTextareaInput(e) {
   }
 }
 
-function setSentiment(sentimentValue) {
-  sentimentValue = Math.max(0, Math.min(1, sentimentValue));
-  const duration = 1.2 - sentimentValue * 0.4;
-  const ease = `cubic-bezier(${0.2 + sentimentValue * 0.3}, 0.5, 0.5, 1)`;
+function setEnergy(energyValue) {
+  energyValue = Math.max(0, Math.min(1, energyValue));
+  const duration = 1.2 - energyValue * 0.4;
+  const ease = `cubic-bezier(${0.2 + energyValue * 0.3}, 0.5, 0.5, 1)`;
   const balls = document.querySelectorAll('.loading div');
 
   balls.forEach((ball) => {
@@ -130,13 +140,13 @@ function setSentiment(sentimentValue) {
   });
 }
 
-function getSentimentEnergy() {
+function getEnergyEnergy() {
   const lastMemory = document.querySelector("#history .memory:last-child");
   return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
 }
 
 function beforeConverseRequest() {
-  setSentiment(getSentimentEnergy());
+  setEnergy(getEnergyEnergy());
   setLocalContext();
 
   // Get the form and input elements
