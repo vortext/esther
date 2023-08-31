@@ -43,19 +43,26 @@ _ more user information in session (vault)
 - up the context
 ** TODO try openorca-platypus2-13b
 - Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
+** TODO get rid of sid
+** TODO link parsing?
+** TODO weather API integration
+** TODO fix mutli-line input scroll to bottom of page (css?)
 ** TODO move Llama config to system.edn
+** TODO deprecate openai
 ** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)
 - Inject similar memories in user request context
-- https://github.com/nmslib/hnswlib
+- https://github.com/nmslib/hnswlib (via GraalVM llvm?)
 - https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"] (too slow)
 - https://github.com/stepstone-tech/hnswlib-jna
+** TODO harmonize emoji (and markdown?) handling using graalvm?
 ** TODO dark mode
 ** TODO security and hosting
 ** TODO test infrastructure and tests
 ** TODO better intro flow
+** TODO share a page (static gen)
 ** TODO /help command
 ** TODO sign-up page
 ** TODO app? legal, ethics, billing, subscriptions, etc.
@@ -63,7 +70,7 @@ _ more user information in session (vault)
 ** TODO calendar page (for memories)
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
-** TODO /imagine command
+** TODO /imagine command (no solutions for this ATM)
 - hook up image generation (StableDiffusionAPI is too crappy)
 - integrate image describe into memory
 - https://github.com/deep-floyd/IF maybe?
