@@ -8,12 +8,13 @@
    [vortext.esther.api.weatherapi :as weather]
    [malli.core :as m]
    [malli.error :as me]
-   [vortext.esther.util :refer [read-json-value strs-to-markdown-list]]
+   [vortext.esther.util.json :as json]
    [vortext.esther.util.emoji :as emoji]
+   [vortext.esther.util.markdown :as markdown]
    [vortext.esther.common :refer [parse-number update-value]]
+   [clojure.tools.logging :as log]
    [clojure.string :as str]
-   [clojure.set :as set]
-   [clojure.tools.logging :as log]))
+   [clojure.set :as set]))
 
 (defn status
   [_opts user _args _data]
@@ -45,7 +46,7 @@
                          (memory/last-memories opts user 10))]
     {:type :md-mono
      :response
-     (strs-to-markdown-list
+     (markdown/strs-to-markdown-list
       (map #(get-in % [:response :image-prompt])
            (take 3 memories)))}))
 
@@ -134,17 +135,16 @@
 
 (defn context-keywords
   [memories keywords]
-  (let [conversation-keywords (memory/extract-keywords memories)
+  (let [k 10
+        conversation-keywords (memory/extract-keywords memories)
         freceny-keywords (into #{} (map :value keywords))
         without #{"user:new-user" "user:returning-user"}
         keywords (set/difference
                   (set/difference freceny-keywords without)
                   conversation-keywords)
-        default (if (seq memories) #{"user:returning-user"} #{"user:new-user"})
-        result (if (seq keywords) keywords default)
-        ]
+        default (if (seq memories) #{} #{"user:new-user"})
+        result (take k (if (seq keywords) keywords default))]
     (log/debug "llm::generate-prompt::relevant-keywords" result)
-    (log/debug conversation-keywords freceny-keywords)
     result))
 
 
@@ -154,7 +154,7 @@
                       (comp :conversation? :response)
                       (memory/last-memories opts user 10))
         last-memories (reverse conversation)
-        keyword-memories (memory/frecency-keywords opts user :week 5)
+        keyword-memories (memory/frecency-keywords opts user :week 25)
         keywords (context-keywords last-memories keyword-memories)
         request (-> (:request data)
                     (update :context #(assoc % :keywords keywords)))
@@ -193,7 +193,7 @@
 (defn create-context
   [_opts _user request]
   (let [{:keys [params]} request
-        ctx (read-json-value (get params :context ""))
+        ctx (json/read-json-value (get params :context ""))
         ip (get-in ctx [:remote-addr :ip])
         current-weather (weather/current-weather ip)
 

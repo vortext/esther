@@ -7,7 +7,7 @@
    [jsonista.core :as json]
    [diehard.core :as dh]
    [vortext.esther.ai.llama :as llama]
-   [vortext.esther.config :refer [errors introductions]]))
+   [vortext.esther.config :refer [errors]]))
 
 
 (defn generate-prompt
@@ -80,14 +80,12 @@
 
 (defmethod ig/init-key :ai.llm/llm-complete
   [_ {:keys [impl]
-      :or   {impl :openai}
       :as   opts}]
   (let [instance
         (case impl
           :llama-shell (llama/create-complete-shell opts))]
     {:impl instance
-     :complete-fn  (create-complete-fn instance)}
-    ))
+     :complete-fn  (create-complete-fn instance)}))
 
 
 (defmethod ig/halt-key! :ai.llm/llm-complete [_ {:keys [impl]}]

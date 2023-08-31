@@ -79,12 +79,12 @@
     ))
 
 (defn create-ctx [lang src]
-  (let [context (.build (context-builder "js"))
+  (let [context (.build (context-builder lang))
         _result (.eval context lang src)]
     context))
 
-(defn print-global-keys [context]
-  (let [bindings (.getBindings context "js")]
+(defn print-global-keys [lang context]
+  (let [bindings (.getBindings context lang)]
     (doseq [key (.getMemberKeys bindings)]
       (println key))))
 
@@ -94,8 +94,8 @@
     (deserialize result)))
 
 (defn from
-  [^Context ctx ^String module-name]
-  (let [bindings (.getBindings ctx "js")]
+  [^String lang ^Context ctx ^String module-name]
+  (let [bindings (.getBindings ctx lang)]
     ^Value (.getMember bindings module-name)))
 
 (defn import
@@ -121,7 +121,7 @@
   [lang slurpable api-name api-fns]
   (let [src (slurp slurpable)
         ctx (create-ctx lang src)
-        obj (from ctx api-name)
+        obj (from lang ctx api-name)
         api (import obj api-fns)]
     (into {} (map (fn [[k _]] [k (partial eval (get api k))]) api))))
 
@@ -129,9 +129,9 @@
   [slurpable api-name api-fns]
   (lang-api "js" slurpable api-name api-fns))
 
-(defn llvm-api
-  [slurpable api-name api-fns]
-  (lang-api "llvm" slurpable api-name api-fns))
+#_(defn llvm-api
+    [slurpable api-name api-fns]
+    (lang-api "llvm" slurpable api-name api-fns))
 
 (comment
   (def x (js-api "/media/array/Sync/Projects/esther/node_modules/llama-tokenizer-js/llama-tokenizer.js"

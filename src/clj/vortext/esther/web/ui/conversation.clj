@@ -3,11 +3,10 @@
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.common :as common]
-   [vortext.esther.util :refer [random-base64 unescape-newlines]]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
+   [vortext.esther.util.markdown :as markdown]
    [clojure.string :as str]
-   [markdown.core :as markdown]
    [clojure.tools.logging :as log]))
 
 (def loading
@@ -17,15 +16,11 @@
     [:div.second]
     [:div.third]]])
 
-(defn auto-link-urls [text]
-  (clojure.string/replace text
-                          #"(https?://[^\s]+)"
-                          "<$1>"))
 
 (defn display-html
   [s]
   (if (and (string? s) (not (str/blank? s)))
-    (markdown/md-to-html-string (auto-link-urls (unescape-newlines s)))
+    (markdown/parse s)
     "<span></span>"))
 
 (defn memory-container

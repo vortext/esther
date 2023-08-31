@@ -2,9 +2,9 @@
   (:require
    [buddy.hashers :as hashers]
    [buddy.core.hash :as hash]
-   [vortext.esther.util :refer [read-json-value bytes->b64]]
+   [vortext.esther.util :refer [bytes->b64]]
+   [vortext.esther.util.json :as json]
    [vortext.esther.secrets :as secrets]
-   [jsonista.core :as json]
    [buddy.auth.backends :refer [session]]
    [buddy.auth.accessrules :refer [error]]))
 
@@ -14,10 +14,10 @@
 (defn read-vault
   [user password]
   (let [encrypted-vault
-        (read-json-value (:vault user))
+        (json/read-json-value (:vault user))
 
         decrypted-vault
-        (read-json-value (secrets/decrypt encrypted-vault password))]
+        (json/read-json-value (secrets/decrypt encrypted-vault password))]
     (assoc user :vault decrypted-vault)))
 
 (defn write-vault

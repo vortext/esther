@@ -2,10 +2,10 @@
   (:require
    [clojure.tools.logging :as log]
    [vortext.esther.web.htmx :refer [ui] :as htmx]
+   [vortext.esther.util.markdown :as markdown]
    [clj-commons.humanize :as h]
    [vortext.esther.web.controllers.memory :as memory]
-   [clojure.string :as str]
-   [table.core :as t]))
+   [clojure.string :as str]))
 
 (defn md-keywords-table
   [keywords]
@@ -17,9 +17,8 @@
                    (update :frequency #(format "%d" %))
                    (update :recency #(format "%.2f" %))))
              keywords)]
-    (t/table-str
-     (map #(select-keys % ks) formatted-keywords)
-     :style :github-markdown)))
+    (markdown/table
+     (map #(select-keys % ks) formatted-keywords))))
 
 (defn md-memories-table
   [memories]
@@ -34,9 +33,8 @@
                    (update :energy #(format "%.2f" %))
                    (update :keywords update-kw)))
              memories)]
-    (t/table-str
-     (map #(select-keys % ks) formatted-memories)
-     :style :github-markdown)))
+    (markdown/table
+     (map #(select-keys % ks) formatted-memories))))
 
 (defn wipe-form
   [_opts _user scope]

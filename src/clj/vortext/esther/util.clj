@@ -1,52 +1,15 @@
 (ns vortext.esther.util
   (:require
    [clojure.tools.logging :as log]
-   [jsonista.core :as json]
-   [clojure.string :as str]
-   [clojure.java.io :as io]
    [buddy.core.codecs :as codecs]
-   [babashka.fs :as fs]
-   [buddy.core.nonce :as nonce]
-   [vortext.esther.util.polyglot :as polyglot])
+   [buddy.core.nonce :as nonce])
   (:import
    (java.util Base64)))
-
-(def pretty-object-mapper
-  (json/object-mapper
-   {:pretty true}))
-
-;; JSON utils
-(defn pretty-json
-  [obj]
-  (json/write-value-as-string obj pretty-object-mapper))
-
-(defn read-json-value
-  [str]
-  (json/read-value str json/keyword-keys-object-mapper))
-
-(def repair-json
-  (let [script "scripts/jsonrepair/lib/umd/jsonrepair.js"
-        script (str (fs/canonicalize (io/resource script)))
-
-        jsonrepair (polyglot/js-api script "JSONRepair" [:jsonrepair])]
-    (fn [args]
-      ((:jsonrepair jsonrepair) args))))
-
-
-(defn parse-repair-json
-  [maybe-json]
-  (try
-    (read-json-value maybe-json)
-    (catch com.fasterxml.jackson.core.JsonParseException _e
-      (try
-        (parse-repair-json (repair-json maybe-json))
-        (catch Exception _ maybe-json)))))
 
 ;; Base64
 (defn bytes->b64 [^bytes b] (String. (.encode (Base64/getEncoder) b)))
 (defn b64->bytes [^String s]
   (codecs/b64->bytes s))
-
 
 ;; Random
 (defn random-id
@@ -58,21 +21,3 @@
 (defn random-base64
   ([] (random-base64 64))
   ([l] (codecs/bytes->b64-str (random-id l) true)))
-
-;; Newlines
-(defn unescape-newlines [s]
-  (str/replace s "\\n" "\n"))
-
-(defn escape-json [s]
-  (->> s
-       (eduction (map #(cond
-                         (= % \newline) "\\n"
-                         (= % \return) "\\r"
-                         ;;(= % \\) "\\\\"
-                         ;;(= % \") "\\\""
-                         :else %)))
-       (apply str)))
-
-
-(defn strs-to-markdown-list [strs]
-  (clojure.string/join "\n" (map #(str "- " %) strs)))

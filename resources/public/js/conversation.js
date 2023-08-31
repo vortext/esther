@@ -140,13 +140,13 @@ function setEnergy(energyValue) {
   });
 }
 
-function getEnergyEnergy() {
+function getEnergy() {
   const lastMemory = document.querySelector("#history .memory:last-child");
   return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
 }
 
 function beforeConverseRequest() {
-  setEnergy(getEnergyEnergy());
+  setEnergy(getEnergy());
   setLocalContext();
 
   // Get the form and input elements

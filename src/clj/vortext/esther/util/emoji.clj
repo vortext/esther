@@ -1,7 +1,9 @@
 (ns vortext.esther.util.emoji
-  (:require [clojure.string :as str])
-  (:import [net.fellbaum.jemoji EmojiManager]
-           [org.ahocorasick.trie Trie]))
+  (:require
+   [clojure.string :as str])
+  (:import
+   [net.fellbaum.jemoji EmojiManager]
+   [org.ahocorasick.trie Trie]))
 
 
 (defonce emojis (map bean (EmojiManager/getAllEmojis)))

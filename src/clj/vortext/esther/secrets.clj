@@ -11,8 +11,8 @@
             [clojure.tools.logging :as log]
             [babashka.fs :as fs]
             [clojure.edn :as edn]
-            [jsonista.core :as json]
-            [vortext.esther.util :refer [read-json-value bytes->b64 b64->bytes]]))
+            [vortext.esther.util.json :as json]
+            [vortext.esther.util :refer [bytes->b64 b64->bytes]]))
 
 (def secrets
   (memoize
@@ -68,7 +68,7 @@
 
 (defn decrypt-from-sql
   [{:keys [_data _iv] :as content} password]
-  (read-json-value (decrypt content (b64->bytes password))))
+  (json/read-json-value (decrypt content (b64->bytes password))))
 
 (defn encrypt-for-sql
   [{:keys [_data _iv] :as content} password]

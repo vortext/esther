@@ -4,9 +4,9 @@
    [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
    [babashka.process :refer [process destroy-tree alive?]]
-   [clojure.core.cache.wrapped :as w]
    [babashka.fs :as fs]
-   [vortext.esther.util :refer [read-json-value escape-json]]
+   [clojure.core.cache.wrapped :as w]
+   [vortext.esther.util.json :as json]
    [vortext.esther.ai.llama-jna :as llama]
    [vortext.esther.config :refer [errors]]
    [clojure.string :as str]))
@@ -40,7 +40,7 @@
 (defn shell-cmd
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
-        _ (log/info prompt)
+        _ (log/debug "shell-cmd:prompt" prompt)
         instructions (:content (first submission))
         keep-n-tokens (num-tokens model-path instructions)
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
@@ -119,8 +119,7 @@
       (let [start (str/index-of output "{")
             end (str/last-index-of output "}")]
         (when (and start end)
-          (read-json-value (escape-json
-                            (subs output start (inc end)))))))
+          (json/read-json-value (subs output start (inc end))))))
     (catch com.fasterxml.jackson.core.JsonParseException e (log/warn e))))
 
 (defn handle-json-parsing [subprocess partial-json-ch response-ch]
