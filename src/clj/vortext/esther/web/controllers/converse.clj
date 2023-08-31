@@ -135,7 +135,7 @@
 (defn relevant-keywords
   [memories keywords]
   (let [memory-keywords (into #{} (map :value keywords))
-        without #{"user:new-user" "user:introductions-wanted" "user:returning-user"}
+        without #{"user:new-user" "user:returning-user"}
         remainder (set/difference memory-keywords without)
         filter-context #(not (str/starts-with? % "context:"))
         remainder (into #{} (filter filter-context remainder))]
