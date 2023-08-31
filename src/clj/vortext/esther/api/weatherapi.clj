@@ -2,6 +2,7 @@
   (:require
    [clj-http.client :as client]
    [clojure.core.memoize :as memoize]
+   [camel-snake-kebab.core :as csk]
    [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]))
 
@@ -27,7 +28,5 @@
   [location]
   (try
     (let [current-weather (:current (weatherapi-current location))]
-      {:temp-c (:feelslike_c current-weather)
-       :cloud (:cloud current-weather)
-       :weather (get-in current-weather condition-text-ks)})
+      (csk/->kebab-case (get-in current-weather condition-text-ks)))
     (catch Exception _ {})))

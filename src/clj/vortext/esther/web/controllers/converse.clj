@@ -6,6 +6,7 @@
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
    [vortext.esther.api.weatherapi :as weather]
+   [camel-snake-kebab.core :as csk]
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.util.json :as json]
@@ -133,20 +134,23 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
-(defn context-keywords
+(defn memory-keywords
   [memories keywords]
-  (let [k 10
-        conversation-keywords (memory/extract-keywords memories)
+  (let [conversation-keywords (memory/extract-keywords memories)
         freceny-keywords (into #{} (map :value keywords))
         without #{"user:new-user" "user:returning-user"}
         keywords (set/difference
                   (set/difference freceny-keywords without)
                   conversation-keywords)
-        default (if (seq memories) #{"user:returning-user"} #{"user:new-user"})
-        result (take k (if (seq keywords) keywords default))]
+        default (if (seq memories) #{""} #{"user:new-user"})
+        result (if (seq keywords) keywords default)]
     (log/debug "llm::generate-prompt::relevant-keywords" result)
     result))
 
+(defn namespace-keywordize-map
+  [obj]
+  (into #{}
+        (map (fn [[k v]] (csk/->kebab-case (str (name k) ":" (str v)))) obj)))
 
 (defn converse!
   [opts user data]
@@ -154,10 +158,14 @@
                       (comp :conversation? :response)
                       (memory/last-memories opts user 10))
         last-memories (reverse conversation)
-        keyword-memories (memory/frecency-keywords opts user :week 25)
-        keywords (context-keywords last-memories keyword-memories)
+        keyword-memories (memory/frecency-keywords opts user :week 10)
+        memory-keywords (memory-keywords last-memories keyword-memories)
+        current-context (get-in data [:request :context])
+        context-keywords (namespace-keywordize-map current-context)
+        _ (log/debug "converse!current-context" context-keywords)
+        new-context (set/union memory-keywords context-keywords)
         request (-> (:request data)
-                    (update :context #(assoc % :keywords keywords)))
+                    (assoc :context new-context))
         complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
         response (complete opts user request last-memories)

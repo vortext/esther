@@ -50,8 +50,8 @@ function getLocalContext() {
   return {
     "season": getCurrentSeason(latitude),
     "time-of-day": getTimeOfDay(latitude, longitude),
-    "lunar-phase": lunarphase.Moon.lunarPhase(),
-    "remote-addr": window.appConfig.remoteAddr
+    "lunar-phase": lunarphase.Moon.lunarPhaseEmoji(),
+    "remote-addr": window.appConfig.remoteAddr // For weather geo-ip ...
   };
 }
 
