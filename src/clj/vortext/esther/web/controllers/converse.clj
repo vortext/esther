@@ -132,38 +132,30 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
-(defn relevant-keywords
+(defn context-keywords
   [memories keywords]
-  (let [memory-keywords (into #{} (map :value keywords))
+  (let [conversation-keywords (memory/extract-keywords memories)
+        freceny-keywords (into #{} (map :value keywords))
         without #{"user:new-user" "user:returning-user"}
-        remainder (set/difference memory-keywords without)
-        filter-context #(not (str/starts-with? % "context:"))
-        remainder (into #{} (filter filter-context remainder))]
-    (if (seq remainder)
-      remainder
-      (if (seq memories)
-        #{"user:returning-user"}
-        #{"user:new-user"}))))
-
-(defn request-keywords
-  [memories keywords]
-  (let [memory-keywords (relevant-keywords memories keywords)
-        conversation-keywords (memory/extract-keywords memories)
-        relevant-keywords (set/difference
-                           memory-keywords
-                           conversation-keywords)]
-    (log/debug "llm::generate-prompt::relevant-keywords" relevant-keywords)
-    relevant-keywords))
+        keywords (set/difference
+                  (set/difference freceny-keywords without)
+                  conversation-keywords)
+        default (if (seq memories) #{"user:returning-user"} #{"user:new-user"})
+        result (if (seq keywords) keywords default)
+        ]
+    (log/debug "llm::generate-prompt::relevant-keywords" result)
+    (log/debug conversation-keywords freceny-keywords)
+    result))
 
 
 (defn converse!
   [opts user data]
   (let [conversation (filter
                       (comp :conversation? :response)
-                      (memory/last-memories opts user 5))
+                      (memory/last-memories opts user 10))
         last-memories (reverse conversation)
-        keyword-memories (memory/frecency-keywords opts user :week 25)
-        keywords (request-keywords last-memories keyword-memories)
+        keyword-memories (memory/frecency-keywords opts user :week 5)
+        keywords (context-keywords last-memories keyword-memories)
         request (-> (:request data)
                     (update :context #(assoc % :keywords keywords)))
         complete (get-in opts [:ai :complete-fn :complete-fn])

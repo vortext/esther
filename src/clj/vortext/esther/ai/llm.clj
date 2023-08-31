@@ -7,16 +7,12 @@
    [jsonista.core :as json]
    [diehard.core :as dh]
    [vortext.esther.ai.llama :as llama]
-   [vortext.esther.config :refer [examples errors introductions]]))
+   [vortext.esther.config :refer [errors introductions]]))
 
 
 (defn generate-prompt
   [prompt]
-  (let [example (first (shuffle examples))]
-    (mustache/render
-     prompt
-     {:example-request (json/write-value-as-string (:request example))
-      :example-response (json/write-value-as-string (:response example))})))
+  (mustache/render prompt {}))
 
 (defn as-role
   [role e]
@@ -52,11 +48,7 @@
   (let [last-memories (vec (take-last 5 memories))
         prompt (generate-prompt
                 (slurp (io/resource (:prompt opts))))
-
-        for-conv (if (seq last-memories)
-                   last-memories
-                   [(rand-nth (:first-time introductions))])
-        conv (format-for-completion for-conv)]
+        conv (format-for-completion last-memories)]
     (concat
      [{:role "system"
        :content prompt}]
