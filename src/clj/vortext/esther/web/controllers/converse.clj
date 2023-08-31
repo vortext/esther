@@ -142,7 +142,7 @@
         keywords (set/difference
                   (set/difference freceny-keywords without)
                   conversation-keywords)
-        default (if (seq memories) #{""} #{"user:new-user"})
+        default (if (seq memories) #{} #{"user:new-user"})
         result (if (seq keywords) keywords default)]
     (log/debug "llm::generate-prompt::relevant-keywords" result)
     result))
@@ -150,7 +150,7 @@
 (defn namespace-keywordize-map
   [obj]
   (into #{}
-        (map (fn [[k v]] (csk/->kebab-case (str (name k) ":" (str v)))) obj)))
+        (keep (fn [[k v]] (csk/->kebab-case (str (name k) ":" (str v)))) obj)))
 
 (defn converse!
   [opts user data]
