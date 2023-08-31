@@ -14,11 +14,12 @@
 (defn emoji-in-str [s]
   (map bean (EmojiManager/extractEmojisInOrder ^String s)))
 
-(def alias->unicode
+(defn- alias->unicode
+  [k]
   (->> emojis
        (mapcat (fn [emoji]
                  (map #(vector % (:unicode emoji))
-                      (:slackAliases emoji))))
+                      (k emoji))))
        (into {})))
 
 (defn build-trie
@@ -28,10 +29,7 @@
       (.addKeyword builder alias))
     (.build builder)))
 
-(defonce trie (build-trie alias->unicode))
-
 (defn parse-to-unicode
-  ([text] (parse-to-unicode trie alias->unicode text))
   ([trie alias->unicode text]
    (when-not (str/blank? text)
      (let [emits (.parseText trie text)
@@ -48,3 +46,11 @@
              (recur (rest remaining-emits)
                     end
                     (str result (subs text prev-end start) replacement)))))))))
+
+(defn create-replace-fn
+  [key]
+  (let [alias-map (alias->unicode key)
+        trie (build-trie alias-map)]
+    (partial parse-to-unicode trie alias-map)))
+
+(def replace-slack-aliasses (create-replace-fn :slackAliases))

@@ -125,7 +125,7 @@
    update-value :emoji
    #(or (when (emoji/emoji? %) %)
         (:emoji (first (emoji/emoji-in-str
-                        (emoji/parse-to-unicode %)))))))
+                        (emoji/replace-slack-aliasses %)))))))
 
 (defn clean-response
   [response]
@@ -142,7 +142,7 @@
         keywords (set/difference
                   (set/difference freceny-keywords without)
                   conversation-keywords)
-        default (if (seq memories) #{} #{"user:new-user"})
+        default (if (seq memories) #{"user:returning-user"} #{"user:new-user"})
         result (take k (if (seq keywords) keywords default))]
     (log/debug "llm::generate-prompt::relevant-keywords" result)
     result))
@@ -209,7 +209,7 @@
           user (get-in request [:session :user])
           data {:request
                 {:context (create-context opts user request)
-                 :msg (emoji/parse-to-unicode (str/trim (:msg params)))}
+                 :msg (emoji/replace-slack-aliasses (str/trim (:msg params)))}
                 :ts (unix-ts)}]
       (if-not (m/validate request-schema (:request data))
         (assoc data :response (:unrecognized-input errors))
@@ -218,6 +218,8 @@
           (if-not (= type :ui)
             (memory/remember! opts user memory)
             memory))))
-    (catch Exception _ (:internal-server-error errors))))
+    (catch Exception e
+      (log/warn e)
+      (:internal-server-error errors))))
 
 ;;; Scratch
