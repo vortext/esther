@@ -43,12 +43,12 @@ _ more user information in session (vault)
 - up the context
 ** TODO try openorca-platypus2-13b
 - Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
-** TODO get rid of sid
+** DONE get rid of sid
 ** TODO link parsing?
-** TODO weather API integration
-** TODO fix mutli-line input scroll to bottom of page (css?)
+** DONE weather API integration
+** DONE fix mutli-line input scroll to bottom of page (css?)
 ** TODO move Llama config to system.edn
-** TODO deprecate openai
+** DONE deprecate openai
 ** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
@@ -57,10 +57,12 @@ _ more user information in session (vault)
 - https://github.com/nmslib/hnswlib (via GraalVM llvm?)
 - https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"] (too slow)
 - https://github.com/stepstone-tech/hnswlib-jna
-** TODO harmonize emoji (and markdown?) handling using graalvm?
+** DONE harmonize markdown handling using graalvm
+** TODO harmonize emoji handling using graalvm?
 ** TODO dark mode
 ** TODO security and hosting
 ** TODO test infrastructure and tests
+** TODO deploy and build shizzle (Github actions?)
 ** TODO better intro flow
 ** TODO share a page (static gen)
 ** TODO /help command
