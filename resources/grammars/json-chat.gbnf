@@ -8,9 +8,9 @@ value     ::= kwarray | string | number | ("true" | "false" | "null") ws
 
 response  ::= "{" (quote "response" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
-                   quote "image-prompt" quote ": " string ","
                    quote "energy" quote ": " number ","
-                   quote "keywords" quote ": " kwarray ws "}") eot
+                   quote "keywords" quote ": " kwarray ","
+                   quote "image-prompt" quote ": " string ws "}") eot
 
 
 kwarray   ::= "[" ws keyword ("," ws keyword)* "]"
