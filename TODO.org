@@ -49,7 +49,7 @@ _ more user information in session (vault)
 ** DONE fix mutli-line input scroll to bottom of page (css?)
 ** TODO move Llama config to system.edn
 ** DONE deprecate openai
-** TODO integrate NER (from https://github.com/spencermountain/compromise) or ONNX?
+** TODO integrate https://github.com/spencermountain/compromise?
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)
@@ -69,9 +69,11 @@ _ more user information in session (vault)
 ** TODO sign-up page
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
-** TODO calendar page (for memories)
+** TODO calendar page (for memories)?
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
+** TODO weird bug where login shows in memory.
+** TODO better error handling subprocesses (get rid of pty_bridge?)
 ** TODO /imagine command (no solutions for this ATM)
 - hook up image generation (StableDiffusionAPI is too crappy)
 - integrate image describe into memory

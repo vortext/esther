@@ -20,11 +20,11 @@ Respond using the format below. Every field is essential for a valid response:
     "format": "markdown"
   },
   "emoji": {
-    "description": "A unicode emoticon you deem fitting for the conversation.",
+    "description": "A unicode emoji you deem fitting for the response.",
     "type": "utf-8 emoji"
   },
   "energy": {
-    "description": "A value between 0.0 and 1.0 you can use to serialize contextual information.",
+    "description": "A value between 0.0 and 1.0 you can use, 0.0 means calm.",
     "type": "float"
   },
   "keywords": {
