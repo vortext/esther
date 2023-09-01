@@ -14,7 +14,7 @@ response  ::= "{" (quote "response" quote ": " string ","
 
 
 kwarray   ::= "[" ws keyword ("," ws keyword)* "]"
-keyword   ::= quote [a-z]+ ":" [a-zA-Z0-9-]+ quote
+keyword   ::= quote [a-zA-Z0-9-]+ ":" [a-zA-Z0-9-]+ quote
 
 unicode   ::=  (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
 string    ::= quote ([^"\\] | "\\" unicode )* quote
