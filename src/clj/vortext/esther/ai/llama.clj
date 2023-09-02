@@ -7,20 +7,11 @@
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
    [vortext.esther.util.json :as json]
-   [vortext.esther.ai.llama-jna :as llama]
    [vortext.esther.config :refer [errors]]
    [clojure.string :as str]))
 
 (def ai-name "Esther")
 (def end-of-turn "<|end_of_turn|>")
-
-(defn num-tokens
-  [model-path text]
-  (let [ctx (llama/create-context model-path {})
-        add-bos? true
-        [num-tokens _token-buf] (llama/tokenize ctx text add-bos?)]
-    (.close ctx)
-    num-tokens))
 
 (defn as-role
   [entry]
@@ -40,9 +31,6 @@
 (defn shell-cmd
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
-        _ (log/debug "shell-cmd:prompt" prompt)
-        instructions (:content (first submission))
-        keep-n-tokens (num-tokens model-path instructions)
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
 
         tmp (str (fs/delete-on-exit (fs/create-temp-file)))
@@ -58,15 +46,13 @@
        "--grammar-file" gbnf
        ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
        "--n-gpu-layers" 20
-       "-eps" "1e-5" ;; for best generation quality LLaMA 2 (doesn't work anymore with guff?)
-       "--ctx-size" 4096
+       "--ctx-size" (* 2 2084)
        ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
        ;; Also see https://github.com/belladoreai/llama-tokenizer-js
-       "--keep" keep-n-tokens
+       "--keep" -1
        "-i"
        "--simple-io" ;; required for pty-bridge?
        "-r" "User:"
-       ;;"-gqa" "8"    ;; for 70B models to work
        "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
        "-f" (str tmp)])
      "'")))

@@ -45,6 +45,7 @@ _ more user information in session (vault)
 - Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
 ** DONE get rid of sid
 ** TODO link parsing?
+** TODO experiment with multi-turn
 ** DONE weather API integration
 ** DONE fix mutli-line input scroll to bottom of page (css?)
 ** TODO move Llama config to system.edn
