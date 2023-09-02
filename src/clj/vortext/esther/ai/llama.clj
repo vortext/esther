@@ -26,32 +26,32 @@
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
 
         tmp (str (fs/delete-on-exit (fs/create-temp-file)))
-        pty-bridge (str (fs/canonicalize (io/resource "scripts/pty_bridge.py")))
         model (str (fs/canonicalize (fs/path model-path)))]
     (spit tmp prompt)
-    (str
-     "python " pty-bridge " '"
-     (str/join
-      " "
-      [(str (fs/real-path (fs/path bin-dir "main")))
-       "-m" model
-       "--grammar-file" gbnf
-       ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
-       "--n-gpu-layers" 20
-       "--ctx-size" (* 2 2084)
-       ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
-       ;; Also see https://github.com/belladoreai/llama-tokenizer-js
-       "--keep" -1
-       "--prompt-cache" prompt-cache
-       "-i"
-       "--simple-io" ;; required for pty-bridge?
-       "--interactive-first"
-       "-r" "User:"
-       "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
-       "-f" (str tmp)])
-     "'")))
+    (str/join
+     " "
+     [(str (fs/real-path (fs/path bin-dir "main")))
+      "-m" model
+      "--grammar-file" gbnf
+      ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
+      "--n-gpu-layers" 20
+      "--ctx-size" (* 2 2084)
+      ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
+      ;; Also see https://github.com/belladoreai/llama-tokenizer-js
+      "--keep" -1
+      "--prompt-cache" prompt-cache
+      "-i"
+      "--simple-io"
+      "--interactive-first"
+      "-r" "User:"
+      "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
+      "-f" (str tmp)])))
 
-(defn pty-bridge-process
+(defn send-sigint [pid]
+  (let [cmd (str "kill -INT " pid)]
+    (.exec (Runtime/getRuntime) cmd)))
+
+(defn llama-process
   [status-ch cmd]
   (let [_ (log/debug "llama::process-channels:cmd" cmd)
         proc (process {:shutdown destroy-tree
@@ -59,7 +59,7 @@
                       cmd)
         out-ch (chan 32)
         in-ch (chan 32)
-        sigint #(go (>! in-ch "[[STOP]]"))
+        sigint #(send-sigint (.pid (:proc proc)))
         rdr (io/reader (:out proc))
         shutdown-fn #(do
                        (log/warn "destroying" (:proc proc))
@@ -142,10 +142,10 @@
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
         status-ch (chan)
-        pty (pty-bridge-process status-ch (shell-cmd bin-dir model-path submission))]
+        llama (llama-process status-ch (shell-cmd bin-dir model-path submission))]
     (when-let [subprocess
-               (and pty
-                    (-> pty
+               (and llama
+                    (-> llama
                         (handle-json-parsing partial-json-ch response-ch)
                         (handle-output-channel partial-json-ch status-ch)
                         (assoc :response-ch response-ch)))]

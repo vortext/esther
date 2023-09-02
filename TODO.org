@@ -49,6 +49,8 @@ _ more user information in session (vault)
 ** DONE weather API integration
 ** DONE fix mutli-line input scroll to bottom of page (css?)
 ** TODO move Llama config to system.edn
+** TODO time of day etc context in prompt
+** TODO history on first request
 ** DONE deprecate openai
 ** TODO integrate https://github.com/spencermountain/compromise?
 ** TODO embeddings for memory retrieval and context
