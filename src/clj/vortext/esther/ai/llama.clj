@@ -3,6 +3,7 @@
    [clojure.tools.logging :as log]
    [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
+   [clj-commons.digest :as digest]
    [babashka.process :refer [process destroy-tree alive?]]
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
@@ -10,27 +11,18 @@
    [vortext.esther.config :refer [errors]]
    [clojure.string :as str]))
 
-(def ai-name "Esther")
 (def end-of-turn "<|end_of_turn|>")
-
-(defn as-role
-  [entry]
-  (str (if (= (:role entry) "assistant") (str ai-name ": ") "User: ")
-       (:content entry)))
 
 (defn generate-prompt-str
   [submission]
-  (str
-   (str (str/trim (:content (first submission))) end-of-turn "\n") ;; Instructions
-   (str/join
-    (str end-of-turn "\n")
-    (for [entry (rest submission)]
-      (str (as-role entry))))
-   (str end-of-turn "\n\n")))
+  ;; Instructions
+  (str (str/trim (:content (first submission))) end-of-turn "\n\n"))
 
 (defn shell-cmd
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
+        instructions (:content (first submission))
+        prompt-cache (fs/canonicalize (str "cache/" (digest/md5 instructions)))
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
 
         tmp (str (fs/delete-on-exit (fs/create-temp-file)))
@@ -50,8 +42,10 @@
        ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
        ;; Also see https://github.com/belladoreai/llama-tokenizer-js
        "--keep" -1
+       "--prompt-cache" prompt-cache
        "-i"
        "--simple-io" ;; required for pty-bridge?
+       "--interactive-first"
        "-r" "User:"
        "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
        "-f" (str tmp)])
@@ -125,39 +119,38 @@
   subprocess)
 
 (defn handle-output-channel
-  [subprocess last-entry process-ready? partial-json-ch status-ch]
-  (go-loop []
-    (if-let [line (<! (:out-ch subprocess))]
-      (do
-        (log/info "llama:line" line)
-        (when (str/includes? line last-entry)
-          (>! status-ch :ready)
-          (reset! process-ready? true))
-        (when @process-ready?
-          (>! partial-json-ch line))
-        (recur))
-      (do
-        ((:shutdown-fn subprocess))
-        (close! partial-json-ch)
-        (go (>! status-ch :stream-closed)))))
+  [subprocess partial-json-ch status-ch]
+  (let [process-ready? (atom false)]
+    (go-loop []
+      (if-let [line (<! (:out-ch subprocess))]
+        (do
+          (log/info "llama:line" line)
+          (when (and (not @process-ready?)
+                     (str/includes? line end-of-turn))
+            (>! status-ch :ready)
+            (reset! process-ready? true))
+          (when @process-ready?
+            (>! partial-json-ch line))
+          (recur))
+        (do
+          ((:shutdown-fn subprocess))
+          (close! partial-json-ch)
+          (go (>! status-ch :stream-closed))))))
   subprocess)
 
 (defn start-subprocess! [bin-dir model-path submission]
-  (let [last-entry (:content (last submission))
-        process-ready? (atom false)
-        response-ch (chan 32)
+  (let [response-ch (chan 32)
         partial-json-ch (chan 32)
-        status-ch (chan 32)
+        status-ch (chan)
         pty (pty-bridge-process status-ch (shell-cmd bin-dir model-path submission))]
     (when-let [subprocess
                (and pty
                     (-> pty
                         (handle-json-parsing partial-json-ch response-ch)
-                        (handle-output-channel last-entry process-ready? partial-json-ch status-ch)
+                        (handle-output-channel partial-json-ch status-ch)
                         (assoc :response-ch response-ch)))]
-      (if (alive? (:proc subprocess))
-        (when (= (<!! status-ch) :ready) subprocess)
-        subprocess))))
+      (when (alive? (:proc subprocess))
+        (when (= (<!! status-ch) :ready) subprocess)))))
 
 (defn cached-spawn-subprocess
   [options cache uid submission]
@@ -187,11 +180,11 @@
       (if-not proc
         (:uncaught-exception errors)
         (try
-          (when running-proc?
-            (let [entry (last submission)
-                  line (str (as-role entry) end-of-turn "\n")]
-              (log/debug "running-proc? yes." "sending" line)
-              (go (>! (:in-ch proc) line))))
+          (let [entry (:content (last submission))
+                obj (if-not running-proc? entry (dissoc entry :keywords))
+                line (str "User: " (json/write-value-as-string obj) end-of-turn "\n")]
+            (log/debug "Sending" line)
+            (go (>! (:in-ch proc) line)))
           (<!! (:response-ch proc))
           (catch Exception _e (:uncaught-exception errors)))))))
 

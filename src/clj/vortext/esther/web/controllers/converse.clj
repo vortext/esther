@@ -135,16 +135,12 @@
       (clean-emoji "🙃")))
 
 (defn memory-keywords
-  [memories keywords]
-  (let [conversation-keywords (memory/extract-keywords memories)
-        freceny-keywords (into #{} (map :value keywords))
+  [keywords]
+  (let [freceny-keywords (into #{} (map :value keywords))
         without #{"user:new-user" "user:returning-user"}
-        keywords (set/difference
-                  (set/difference freceny-keywords without)
-                  conversation-keywords)
-        default (if (seq memories) #{} #{"user:new-user"})
-        result (if (seq keywords) keywords default)]
-    (log/debug "llm::generate-prompt::relevant-keywords" result)
+        keywords (set/difference freceny-keywords without)
+        default (if (seq keywords) #{"user:returning-user"} #{"user:new-user"})
+        result (set/union keywords default)]
     result))
 
 (defn namespace-keywordize-map
@@ -154,21 +150,18 @@
 
 (defn converse!
   [opts user data]
-  (let [conversation (filter
-                      (comp :conversation? :response)
-                      (memory/last-memories opts user 10))
-        last-memories (reverse conversation)
-        keyword-memories (memory/frecency-keywords opts user :week 10)
-        memory-keywords (memory-keywords last-memories keyword-memories)
+  (let [keyword-memories (memory/frecency-keywords opts user :week 10)
+        memory-keywords (memory-keywords keyword-memories)
         current-context (get-in data [:request :context])
         context-keywords (namespace-keywordize-map current-context)
-        _ (log/debug "converse!current-context" context-keywords)
         new-context (set/union memory-keywords context-keywords)
+        _ (log/debug "converse!new-context" new-context)
         request (-> (:request data)
-                    (assoc :context new-context))
+                    (dissoc :context)
+                    (assoc :keywords new-context))
         complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
-        response (complete opts user request last-memories)
+        response (complete opts user request)
         validate-response #(validate response-schema %)]
     (-> data
         (assoc

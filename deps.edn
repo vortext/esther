@@ -7,7 +7,7 @@
            org.clojure/core.cache {:mvn/version "1.0.225"}
            org.clojure/core.memoize {:mvn/version "1.0.257"}
            org.clj-commons/humanize {:mvn/version "1.0"}
-           ;;org.clj-commons/digest {:mvn/version "1.4.100"}
+           org.clj-commons/digest {:mvn/version "1.4.100"}
            clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
            camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
            babashka/fs {:mvn/version "0.4.19"}
