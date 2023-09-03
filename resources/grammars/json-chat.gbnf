@@ -1,5 +1,5 @@
 root      ::= role response
-role      ::= [A-Z][a-z]+ ": "
+role      ::= "Esther: "
 quote     ::= "\""
 eot       ::= "<|end_of_turn|>"
 ws        ::= [\n ]?
@@ -19,8 +19,8 @@ keyword   ::= quote [a-zA-Z0-9-]+ ":" [a-zA-Z0-9-]+ quote
 unicode   ::=  (["\\/bfnrt] | "u" [0-9a-fa-f] [0-9a-fa-f] [0-9a-fa-f] [0-9a-fa-f]) # escapes
 string    ::= quote ([^"\\] | "\\" unicode )* quote
 
-emoticon  ::=  "u" "1f" [3-6] [0-9a-fA-f] [0-9a-fA-f] # matches a subset of valid emoji Unicode sequences
-emoji     ::=  quote ([^"\\] | "\\" emoticon ) quote
+emoticon  ::=   (["\\/bfnrt] | "u" "1f" [3-6] [0-9a-fA-f] [0-9a-fA-f]) # matches a subset of valid emoji Unicode sequences
+emoji     ::=  quote ([^"\\emoticon] ) quote
 
 
 number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?

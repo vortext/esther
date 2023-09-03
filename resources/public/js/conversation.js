@@ -50,7 +50,7 @@ function getLocalContext() {
   return {
     "season": getCurrentSeason(latitude),
     "time-of-day": getTimeOfDay(latitude, longitude),
-    "lunar-phase": lunarphase.Moon.lunarPhaseEmoji(),
+    "lunar-phase": lunarphase.Moon.lunarPhase(),
     "remote-addr": window.appConfig.remoteAddr // For weather geo-ip ...
   };
 }
@@ -155,7 +155,7 @@ function beforeConverseRequest() {
 
   // Update the UI
   let msg = emoji.replace_colons(textarea.value);
-  userValue.innerHTML = marked.parse(msg);
+  userValue.innerHTML = marked.parse(msg, {"gfm": true, "breaks": true});
   textarea.classList.add('hidden');
   textarea.placeholder = '';
   textarea.value = '';

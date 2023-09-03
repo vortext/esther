@@ -20,7 +20,7 @@
 (defn display-html
   [s]
   (if (and (string? s) (not (str/blank? s)))
-    (markdown/parse s)
+    (markdown/parse s {"gfm" true "breaks" true})
     "<span></span>"))
 
 (defn memory-container
@@ -29,11 +29,11 @@
         {:keys [energy type]} response
         response-msg (:response response)
         type (or (keyword type) :default)
-        msg (:msg request)]
+        request-msg (:msg request)]
     [:div.memory
      {"data-energy" energy}
      [:div.request
-      (display-html msg)]
+      (display-html request-msg)]
      [:div.response {:class (name type)}
       (if (and (string? response) (str/blank? response))
         [:span.md-sans "Silence."]

@@ -10,8 +10,8 @@
   (let [script "public/js/vendor/marked.min.js"
         script (str (fs/canonicalize (io/resource script)))
         marked (polyglot/js-api script "marked" [:parse])]
-    (fn [args]
-      ((:parse marked) args))))
+    (fn [& args]
+      (apply (:parse marked) args))))
 
 (defn strs-to-markdown-list [strs]
   (str/join "\n" (map #(str "- " (str/trim %)) strs)))
