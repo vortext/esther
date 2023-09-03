@@ -5,24 +5,30 @@
    [clojure.java.io :as io]
    [integrant.core :as ig]
    [diehard.core :as dh]
+   [vortext.esther.util.time :refer [human-today]]
+   [vortext.esther.util.markdown :refer [strs-to-markdown-list]]
    [vortext.esther.ai.llama :as llama]
    [vortext.esther.config :refer [errors]]))
 
 
 (defn generate-prompt
-  [prompt]
-  (mustache/render prompt {}))
+  [prompt context]
+  (mustache/render
+   prompt
+   {:today (human-today)
+    :context (strs-to-markdown-list context)}))
 
 (def response-keys
   #{:response :keywords
     :emoji :energy :image-prompt})
 
 (def request-keys
-  #{:msg :keywords})
+  #{:msg :context})
 
 (defn generate-submission
-  [opts request]
-  (let [prompt (generate-prompt (slurp (io/resource (:prompt opts))))]
+  [opts context request]
+  (let [promt-str (slurp (io/resource (:prompt opts)))
+        prompt  (generate-prompt promt-str context)]
     (concat
      [{:role "system"
        :content prompt}]
@@ -31,7 +37,7 @@
 
 (defn create-complete-fn
   [llm-complete]
-  (fn [opts user request]
+  (fn [opts user context request]
     (dh/with-retry
         {:retry-on Exception
          :max-retries 1
@@ -45,7 +51,7 @@
          :on-failed-attempt
          (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
       (select-keys
-       ((:complete-fn llm-complete) user (generate-submission opts request))
+       ((:complete-fn llm-complete) user (generate-submission opts context request))
        response-keys))))
 
 

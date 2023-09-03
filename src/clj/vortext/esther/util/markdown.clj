@@ -14,7 +14,7 @@
       ((:parse marked) args))))
 
 (defn strs-to-markdown-list [strs]
-  (str/join "\n" (map #(str "- " %) strs)))
+  (str/join "\n" (map #(str "- " (str/trim %)) strs)))
 
 (defn table
   [obj]

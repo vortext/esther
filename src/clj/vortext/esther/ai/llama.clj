@@ -21,8 +21,8 @@
 (defn shell-cmd
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
-        instructions (:content (first submission))
-        prompt-cache (fs/canonicalize (str "cache/" (digest/md5 instructions)))
+        cache-file (str "cache/" (digest/md5 prompt) ".bin")
+        prompt-cache (fs/canonicalize cache-file)
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
 
         tmp (str (fs/delete-on-exit (fs/create-temp-file)))
@@ -181,9 +181,9 @@
         (:uncaught-exception errors)
         (try
           (let [entry (:content (last submission))
-                obj (if-not running-proc? entry (dissoc entry :keywords))
+                obj (if-not running-proc? entry (dissoc entry :context))
                 line (str "User: " (json/write-value-as-string obj) end-of-turn "\n")]
-            (log/debug "Sending" line)
+            (log/debug "shell-complete-fn::complete" line)
             (go (>! (:in-ch proc) line)))
           (<!! (:response-ch proc))
           (catch Exception _e (:uncaught-exception errors)))))))

@@ -6,13 +6,12 @@
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.signin :as signin-ui]
    [vortext.esther.api.weatherapi :as weather]
-   [camel-snake-kebab.core :as csk]
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.util.json :as json]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.util.markdown :as markdown]
-   [vortext.esther.common :refer [parse-number update-value]]
+   [vortext.esther.common :refer [parse-number update-value namespace-keywordize-map]]
    [clojure.tools.logging :as log]
    [clojure.string :as str]
    [clojure.set :as set]))
@@ -100,7 +99,6 @@
    [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
              (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
 
-
 (defn validate
   [schema obj]
   (if (not (m/validate schema obj))
@@ -124,7 +122,7 @@
 (def clean-emoji
   (partial
    update-value :emoji
-   #(or (when (emoji/emoji? %) %)
+   #(or (when (emoji/valid-emoji? %) %)
         (:emoji (first (emoji/emoji-in-str
                         (emoji/replace-slack-aliasses %)))))))
 
@@ -143,25 +141,16 @@
         result (set/union keywords default)]
     result))
 
-(defn namespace-keywordize-map
-  [obj]
-  (into #{}
-        (keep (fn [[k v]] (csk/->kebab-case (str (name k) ":" (str v)))) obj)))
-
 (defn converse!
   [opts user data]
-  (let [keyword-memories (memory/frecency-keywords opts user :week 10)
-        memory-keywords (memory-keywords keyword-memories)
+  (let [memory-keywords (memory-keywords (memory/frecency-keywords opts user :week 10))
         current-context (get-in data [:request :context])
         context-keywords (namespace-keywordize-map current-context)
-        new-context (set/union memory-keywords context-keywords)
-        _ (log/debug "converse!new-context" new-context)
         request (-> (:request data)
-                    (dissoc :context)
-                    (assoc :keywords new-context))
+                    (assoc :context memory-keywords))
         complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
-        response (complete opts user request)
+        response (complete opts user context-keywords request)
         validate-response #(validate response-schema %)]
     (-> data
         (assoc
@@ -212,6 +201,7 @@
                 {:context (create-context opts user request)
                  :msg (emoji/replace-slack-aliasses (str/trim (:msg params)))}
                 :ts (unix-ts)}]
+      (log/debug "answer!" params)
       (if-not (m/validate request-schema (:request data))
         (assoc data :response (:unrecognized-input errors))
         (let [memory (respond! opts user data)

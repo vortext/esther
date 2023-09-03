@@ -17,8 +17,10 @@ keyword   ::= quote [a-zA-Z0-9-]+ ":" [a-zA-Z0-9-]+ quote
 
 
 unicode   ::=  (["\\/bfnrt] | "u" [0-9a-fa-f] [0-9a-fa-f] [0-9a-fa-f] [0-9a-fa-f]) # escapes
-emoticon  ::=  (["\\/bfnrt] | "u" "1f" [3-6] [0-9a-fA-f] [0-9a-fA-f]) # escapes
 string    ::= quote ([^"\\] | "\\" unicode )* quote
-emoji     ::= quote ([^"\\] | "\\" emoticon) quote
+
+emoticon  ::=  "u" "1f" [3-6] [0-9a-fA-f] [0-9a-fA-f] # matches a subset of valid emoji Unicode sequences
+emoji     ::=  quote ([^"\\] | "\\" emoticon ) quote
+
 
 number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
