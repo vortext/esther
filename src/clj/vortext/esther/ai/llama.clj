@@ -43,7 +43,6 @@
       "-i"
       "--simple-io"
       "--interactive-first"
-      "-r" "User:"
       "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
       "-f" (str tmp)])))
 
