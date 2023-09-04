@@ -36,7 +36,7 @@
            buddy/buddy-hashers {:mvn/version "2.0.167"}
 
            ;; AI
-           net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
+           ;; net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
            com.github.jelmerk/hnswlib-core {:mvn/version "1.1.0"}
            com.github.jelmerk/hnswlib-utils {:mvn/version "1.1.0"}
 

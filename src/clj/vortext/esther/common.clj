@@ -20,8 +20,11 @@
 
 (defn namespace-keywordize-map
   [obj]
-  (into
-   #{}
-   (keep (fn [[k v]]
-           (csk/->kebab-case
-            (str (name k) ":" (str/trim (str/lower-case  (str v)))))) obj)))
+  (let [f (fn [[k v]]
+            (csk/->kebab-case
+             (str (name k) ":" (str/trim (str/lower-case  (str v))))))]
+    (into #{} (keep f obj))))
+
+(defn split-first-word [s]
+  (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
+    [first-word (or rest "")]))
