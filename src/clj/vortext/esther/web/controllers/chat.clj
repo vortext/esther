@@ -52,7 +52,7 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
-(defn memory-keywords
+(defn user-keywords
   [keywords]
   (let [freceny-keywords (into #{} (map :value keywords))
         without #{"user:new-user" "user:returning-user"}
@@ -63,20 +63,23 @@
 
 (defn converse!
   [opts user data]
-  (let [memory-keywords (memory-keywords (memory/frecency-keywords opts user :week 10))
+  (let [keywords (memory/frecency-keywords opts user :week 10)
+        user-keywords (user-keywords keywords)
         current-context (get-in data [:request :context])
         context-keywords (common/namespace-keywordize-map current-context)
         request (-> (:request data)
-                    (assoc :context memory-keywords))
+                    (assoc :context user-keywords))
         complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
         response (complete opts user context-keywords request)
         validate-response #(validate response-schema %)]
-    (-> data
-        (assoc
-         :response
-         (-> response
-             (clean-response)
-             (validate-response)
-             (assoc :conversation? true)
-             (assoc :type :md-serif))))))
+    (try
+      (-> data
+          (assoc
+           :response
+           (-> response
+               (clean-response)
+               (validate-response)
+               (assoc :conversation? true)
+               (assoc :type :md-serif))))
+      (catch Exception e (do (log/warn e) (:internal-server-error errors))))))
