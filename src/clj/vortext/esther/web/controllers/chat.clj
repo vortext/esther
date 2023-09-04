@@ -17,7 +17,7 @@
      [:fn {:error/message "response should be at most 2048 chars"}
       (fn [s] (<= (count s) 2048))]]]
    [:emoji [:fn {:error/message "should contain a valid emoji"}
-            (fn [s] (emoji/emoji? s))]]
+            (fn [s] (emoji/unicode-emoji? s))]]
    [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
              (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
 
