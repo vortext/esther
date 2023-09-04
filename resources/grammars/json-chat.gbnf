@@ -12,9 +12,6 @@ response  ::= "{" (quote "response" quote ": " string ","
                    quote "keywords" quote ": " kwarray ","
                    quote "image-prompt" quote ": " string ws "}") eot
 
-kwarray   ::= "[" ws keyword ("," ws keyword)* "]"
-keyword   ::= quote [a-zA-Z0-9-]+ ":" [a-zA-Z0-9-]+ quote
-
 
 unicode   ::=  (["\\/bfnrt] | "u" [0-9a-fa-f] [0-9a-fa-f] [0-9a-fa-f] [0-9a-fa-f]) # escapes
 string    ::= quote ([^"\\] | "\\" unicode )* quote
@@ -24,3 +21,7 @@ emoji     ::=  quote ([^"\\emoticon] ) quote
 
 
 number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
+
+ns        ::= "user" | "esther" | "topic" | "concept" | "vibe" | "entity" | "event"
+keyword   ::= quote ns ":" [a-zA-Z0-9-]+ quote
+kwarray   ::= "[" ws keyword ("," ws keyword)* "]"
