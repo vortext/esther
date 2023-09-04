@@ -21,3 +21,10 @@
 (def introductions
   (edn/read-string
    (slurp (io/resource "prompts/introductions.edn"))))
+
+(def response-keys
+  #{:response :keywords
+    :emoji :energy :image-prompt})
+
+(def request-keys
+  #{:msg :context})

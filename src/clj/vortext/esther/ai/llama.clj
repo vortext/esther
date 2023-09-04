@@ -1,5 +1,6 @@
 (ns vortext.esther.ai.llama
   (:require
+   [diehard.core :as dh]
    [clojure.tools.logging :as log]
    [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
@@ -9,7 +10,8 @@
    [clojure.core.cache.wrapped :as w]
    [vortext.esther.util.json :as json]
    [vortext.esther.config :refer [errors]]
-   [clojure.string :as str]))
+   [clojure.string :as str])
+  (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "<|end_of_turn|>")
 
@@ -165,27 +167,37 @@
     (if (and java-proc (alive? java-proc))
       proc
       (when java-proc
-        (destroy-tree java-proc)
+        ((:shutdown-fn proc))
         (log/debug "process was dead")
         (w/evict cache uid)
         nil))))
 
+(defn- internal-shell-complete-fn
+  [options cache user submission]
+  (let [{:keys [uid]} (:vault user)
+        running-proc? (checked-proc? cache uid)
+        proc (cached-spawn-subprocess options cache uid submission)]
+    (if-not proc
+      (:uncaught-exception errors)
+      (try
+        (let [entry (:content (last submission))
+              obj (if-not running-proc?
+                    entry (-> entry (dissoc :context)))
+              line (str "User: " (json/write-value-as-string obj) end-of-turn "\n")]
+          (log/debug "shell-complete-fn::complete" line)
+          (go (>! (:in-ch proc) line)))
+        (<!! (:response-ch proc))
+        (catch Exception _e (:uncaught-exception errors))))))
+
 (defn shell-complete-fn
   [options cache]
   (fn [user submission]
-    (let [{:keys [uid]} (:vault user)
-          running-proc? (checked-proc? cache uid)
-          proc (cached-spawn-subprocess options cache uid submission)]
-      (if-not proc
-        (:uncaught-exception errors)
-        (try
-          (let [entry (:content (last submission))
-                obj (if-not running-proc? entry (dissoc entry :context))
-                line (str "User: " (json/write-value-as-string obj) end-of-turn "\n")]
-            (log/debug "shell-complete-fn::complete" line)
-            (go (>! (:in-ch proc) line)))
-          (<!! (:response-ch proc))
-          (catch Exception _e (:uncaught-exception errors)))))))
+    (try
+      (internal-shell-complete-fn options cache user submission)
+      (catch TimeoutExceededException e
+        (do (log/warn "shell-complete-fn::timeout" e)
+            ((:shutdown-fn (w/lookup cache (get-in user [:vault :uid]))))
+            (:gateway-timeout errors))))))
 
 (defn shutdown-everything
   [cache]

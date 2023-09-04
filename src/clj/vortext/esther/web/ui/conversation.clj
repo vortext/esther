@@ -72,7 +72,7 @@
       :maxlength 1024
       :autofocus "true"
       :placeholder "Dear Esther,"
-      :rows 8
+      :rows 12
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 

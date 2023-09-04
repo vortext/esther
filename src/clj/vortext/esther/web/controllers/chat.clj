@@ -6,6 +6,7 @@
    [malli.error :as me]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.common :as common ]
+   [vortext.esther.config :refer [response-keys request-keys]]
    [clojure.tools.logging :as log]
    [clojure.set :as set]))
 
@@ -64,11 +65,18 @@
 (defn converse!
   [opts user data]
   (let [keywords (memory/frecency-keywords opts user :week 10)
+        history (filter (comp :conversation? :response)
+                        (memory/last-memories opts user 10))
+        history (map (fn [{:keys [request response]}]
+                       {:response (select-keys response response-keys)
+                        :request (select-keys request [:msg])}
+                       ) history)
         user-keywords (user-keywords keywords)
         current-context (get-in data [:request :context])
         context-keywords (common/namespace-keywordize-map current-context)
         request (-> (:request data)
-                    (assoc :context user-keywords))
+                    (assoc :context {:history history
+                                     :keywords user-keywords}))
         complete (get-in opts [:ai :complete-fn :complete-fn])
         ;; The actual LLM complete
         response (complete opts user context-keywords request)

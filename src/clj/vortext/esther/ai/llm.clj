@@ -5,6 +5,7 @@
    [clojure.java.io :as io]
    [integrant.core :as ig]
    [diehard.core :as dh]
+   [vortext.esther.config :refer [response-keys request-keys]]
    [vortext.esther.util.time :refer [human-today]]
    [vortext.esther.util.markdown :refer [strs-to-markdown-list]]
    [vortext.esther.ai.llama :as llama]
@@ -17,13 +18,6 @@
    prompt
    {:today (human-today)
     :context (strs-to-markdown-list context)}))
-
-(def response-keys
-  #{:response :keywords
-    :emoji :energy :image-prompt})
-
-(def request-keys
-  #{:msg :context})
 
 (defn generate-submission
   [opts context request]
