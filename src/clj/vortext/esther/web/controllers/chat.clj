@@ -66,7 +66,7 @@
   [opts user data]
   (let [keywords (memory/frecency-keywords opts user :week 10)
         history (filter (comp :conversation? :response)
-                        (memory/last-memories opts user 10))
+                        (reverse (memory/last-memories opts user 10)))
         history (map (fn [{:keys [request response]}]
                        {:response (select-keys response response-keys)
                         :request (select-keys request [:msg])}

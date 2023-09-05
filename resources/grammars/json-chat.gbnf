@@ -16,6 +16,6 @@ emoji     ::= quote ([^"\\:]) quote
 
 number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
 
-ns        ::= "user" | "theme" | "topic" | "concept" | "thing" | "person"
+ns        ::= "user" | "theme" | "topic" | "concept" | "thing" | "person" | "event" | "entity"
 keyword   ::= quote ns ":" [a-zA-Z0-9-]+ quote
 kwarray   ::= "[" ws keyword ("," ws keyword)+ "]"
