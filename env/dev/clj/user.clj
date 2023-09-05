@@ -41,7 +41,8 @@
 
 (def refresh repl/refresh)
 
-
+(compile 'vortext.esther)
+(binding [*compile-files* true] (require 'user :reload-all))
 
 (comment
   (go)

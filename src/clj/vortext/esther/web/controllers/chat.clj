@@ -1,18 +1,17 @@
 (ns vortext.esther.web.controllers.chat
   (:require
-   [vortext.esther.config :refer [errors]]
+   [vortext.esther.config :refer [errors response-keys]]
    [vortext.esther.web.controllers.memory :as memory]
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.common :as common ]
-   [vortext.esther.config :refer [response-keys request-keys]]
    [clojure.tools.logging :as log]
    [clojure.set :as set]))
 
 (def response-schema
   [:map
-   [:response
+   [:reply
     [:and
      [:string {:min 1, :max 2048}]
      [:fn {:error/message "response should be at most 2048 chars"}
@@ -66,11 +65,13 @@
   [opts user data]
   (let [keywords (memory/frecency-keywords opts user :week 10)
         history (filter (comp :conversation? :response)
-                        (reverse (memory/last-memories opts user 10)))
-        history (map (fn [{:keys [request response]}]
-                       {:response (select-keys response response-keys)
-                        :request (select-keys request [:msg])}
-                       ) history)
+                        (memory/last-memories opts user 10))
+        history (reverse
+                 (map (fn [{:keys [request response ts]}]
+                        {:response (select-keys response response-keys)
+                         :request (select-keys request [:msg])
+                         :unix-ts ts})
+                      (take 3 history)))
         user-keywords (user-keywords keywords)
         current-context (get-in data [:request :context])
         context-keywords (common/namespace-keywordize-map current-context)

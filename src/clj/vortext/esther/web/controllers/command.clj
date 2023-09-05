@@ -10,7 +10,7 @@
 (defn status
   [_opts user _args _data]
   {:type :htmx
-   :response
+   :reply
    [:div.status
     [:pre
      [:strong "status: "] "ok"
@@ -20,7 +20,7 @@
 (defn inspect
   [opts user _args _data]
   {:type :md-mono
-   :response
+   :reply
    (str
     "#### memories"
     (memory-ui/md-memories-table
@@ -30,7 +30,7 @@
 (defn keywords
   [opts user _args _data]
   {:type :md-mono
-   :response
+   :reply
    (str
     "#### keywords"
     (memory-ui/md-keywords-table
@@ -41,7 +41,7 @@
   (let [memories (filter (comp :conversation? :response)
                          (memory/last-memories opts user 10))]
     {:type :md-mono
-     :response
+     :reply
      (markdown/strs-to-markdown-list
       (map #(get-in % [:response :image-prompt])
            (take 3 memories)))}))

@@ -103,14 +103,15 @@
           (json/read-json-value (subs output start (inc end))))))
     (catch com.fasterxml.jackson.core.JsonParseException e (log/warn e))))
 
-(defn handle-json-parsing [subprocess partial-json-ch response-ch]
+(defn handle-json-parsing
+  [subprocess partial-json-ch response-ch]
   (go-loop [partial-json ""]
     (if-let [line (<! partial-json-ch)]
-      (let [new-partial-json (str partial-json line)
+      (let [new-partial-json (str partial-json "\\n" line)
             json-obj (safe-parse new-partial-json)]
         (if-not json-obj
           (recur new-partial-json)
-          (if (:response json-obj)
+          (if (:reply json-obj)
             (do
               (>! response-ch json-obj)
               ((:sigint subprocess))
@@ -160,7 +161,7 @@
      cache uid
      (fn [_uid] (start-subprocess! bin-dir model-path submission)))))
 
-(defn checked-proc?
+(defn checked-proc
   [cache uid]
   (let [proc (w/lookup cache uid)
         java-proc (:proc proc)]
@@ -175,7 +176,7 @@
 (defn- internal-shell-complete-fn
   [options cache user submission]
   (let [{:keys [uid]} (:vault user)
-        running-proc? (checked-proc? cache uid)
+        running-proc? (checked-proc cache uid)
         proc (cached-spawn-subprocess options cache uid submission)]
     (if-not proc
       (:uncaught-exception errors)
@@ -193,7 +194,8 @@
   [options cache]
   (fn [user submission]
     (try
-      (internal-shell-complete-fn options cache user submission)
+      (dh/with-timeout {:timeout-ms 120000}
+        (internal-shell-complete-fn options cache user submission))
       (catch TimeoutExceededException e
         (do (log/warn "shell-complete-fn::timeout" e)
             ((:shutdown-fn (w/lookup cache (get-in user [:vault :uid]))))

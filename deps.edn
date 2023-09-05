@@ -20,13 +20,9 @@
            metosin/malli {:mvn/version "0.11.0"}
            clj-http/clj-http {:mvn/version "3.12.3"}
 
-           net.java.dev.jna/jna {:mvn/version "5.13.0"}
-           com.phronemophobic/clong {:mvn/version "1.1"}
-
            ;; GraalVM
            org.graalvm.truffle/truffle-api {:mvn/version "23.0.1"}
            org.graalvm.js/js {:mvn/version "23.0.1"}
-           org.graalvm.js/js-scriptengine {:mvn/version "23.0.1"}
 
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
@@ -34,11 +30,6 @@
            ;; Security
            buddy/buddy-core {:mvn/version "1.11.423"}
            buddy/buddy-hashers {:mvn/version "2.0.167"}
-
-           ;; AI
-           ;; net.clojars.wkok/openai-clojure {:mvn/version "0.9.0"}
-           com.github.jelmerk/hnswlib-core {:mvn/version "1.1.0"}
-           com.github.jelmerk/hnswlib-utils {:mvn/version "1.1.0"}
 
            ;; Ring
            metosin/ring-http-response {:mvn/version "0.9.3"}
@@ -77,7 +68,6 @@
                                 ring/ring-mock                  {:mvn/version "0.4.0"}
                                 io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
                                 org.clojure/tools.namespace     {:mvn/version "1.2.0"}}
-                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}

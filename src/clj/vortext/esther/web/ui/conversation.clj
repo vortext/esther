@@ -26,8 +26,7 @@
 (defn memory-container
   [memory]
   (let [{:keys [request response]} memory
-        {:keys [energy type]} response
-        response-msg (:response response)
+        {:keys [energy type reply]} response
         type (or (keyword type) :default)
         request-msg (:msg request)]
     [:div.memory
@@ -38,12 +37,12 @@
       (if (and (string? response) (str/blank? response))
         [:span.md-sans "Silence."]
         (case type
-          :htmx response-msg
-          :ui response-msg
-          :md-mono (display-html response-msg)
-          :md-sans (display-html response-msg)
-          :md-serif (display-html response-msg)
-          (display-html response-msg)))]]))
+          :htmx reply
+          :ui reply
+          :md-mono (display-html reply)
+          :md-sans (display-html reply)
+          :md-serif (display-html reply)
+          (display-html reply)))]]))
 
 (defn message [opts request]
   (ui (memory-container (converse/answer! opts request))))

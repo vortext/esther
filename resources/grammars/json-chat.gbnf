@@ -4,18 +4,18 @@ quote     ::= "\""
 eot       ::= "<|end_of_turn|>"
 ws        ::= [\n ]?
 
-response  ::= "{" (quote "response" quote ": " string ","
+response  ::= "{" (quote "reply" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
                    quote "energy" quote ": " number ","
                    quote "keywords" quote ": " kwarray ","
                    quote "image-prompt" quote ": " string ws "}") eot
 
 string    ::= quote ([^"\\])* quote
-emoji     ::= quote ([^"\\:]) quote
+emoji     ::= quote ([^"\\:]) quote # Ugly hack
 
 
 number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
 
 ns        ::= "user" | "theme" | "topic" | "concept" | "thing" | "person" | "event" | "entity"
 keyword   ::= quote ns ":" [a-zA-Z0-9-]+ quote
-kwarray   ::= "[" ws keyword ("," ws keyword)+ "]"
+kwarray   ::= "[" keyword ","  keyword "," keyword "]"
