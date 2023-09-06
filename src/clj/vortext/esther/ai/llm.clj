@@ -31,30 +31,19 @@
 (defn create-complete-fn
   [llm-complete]
   (fn [opts user context request]
-    (dh/with-retry
-        {:retry-on Exception
-         :max-retries 1
-         :on-retry
-         (fn [_val ex] (log/warn "llm::complete:retrying..." ex))
-         :on-failure
-         (fn [_val ex]
-           (let [response (:internal-server-error errors)]
-             (log/warn "llm::complete:failed..." ex response)
-             response))
-         :on-failed-attempt
-         (fn [_ _] (log/warn "llm::complete:failed-attempt..."))}
+    (let [submission (generate-submission opts context request)]
       (select-keys
-       ((:complete-fn llm-complete) user (generate-submission opts context request))
+       ((:complete-fn llm-complete) user submission)
        response-keys))))
 
 
 (defmethod ig/init-key :ai.llm/llm-interface
-  [_ {:keys [impl]
-      :as   opts}]
-  (let [instance (case impl :llama-shell (llama/create-interface opts))]
-    {:impl instance
-     :shutdown-fn (:shutdown-fn instance)
-     :complete-fn  (create-complete-fn instance)}))
+           [_ {:keys [impl]
+                     :as   opts}]
+           (let [instance (case impl :llama-shell (llama/create-interface opts))]
+             {:impl instance
+                    :shutdown-fn (:shutdown-fn instance)
+                    :complete-fn  (create-complete-fn instance)}))
 
 
 (defmethod ig/halt-key! :ai.llm/llm-interface [_ {:keys [impl]}]

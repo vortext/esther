@@ -205,10 +205,10 @@
   ([cache]
    (doseq [v (vals @cache)]
      (when-let [shutdown (:shutdown-fn v)]
-       (log/warn "shutting down" (shutdown)))))
+       (shutdown))))
   ([cache uid]
    (when-let [shutdown (:shutdown-fn (checked-proc cache uid))]
-     (log/warn "shutting down" (shutdown)))))
+     (shutdown))))
 
 (defn create-interface
   [{:keys [options]}]

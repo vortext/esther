@@ -53,27 +53,18 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
-(defn user-keywords
-  [keywords]
-  (let [freceny-keywords (into #{} (map :value keywords))
-        without #{"user:new-user" "user:returning-user"}
-        keywords (set/difference freceny-keywords without)
-        default (if (seq keywords) #{"user:returning-user"} #{"user:new-user"})
-        result (set/union keywords default)]
-    result))
-
 (defn converse!
   [opts user data]
   (let [keywords (memory/frecency-keywords opts user :week 10)
+        user-keywords (into #{} (map :value keywords))
         history (filter (comp :conversation? :response)
-                        (memory/last-memories opts user 10))
+                                 (memory/last-memories opts user 10))
         history (reverse
                  (map (fn [{:keys [request response ts]}]
                         {:response (select-keys response response-keys)
                          :request (select-keys request [:msg])
                          :moment (time/human-time-ago ts)})
                       (take 3 history)))
-        user-keywords (user-keywords keywords)
         current-context (get-in data [:request :context])
         context-keywords (common/namespace-keywordize-map current-context)
         request (-> (:request data)

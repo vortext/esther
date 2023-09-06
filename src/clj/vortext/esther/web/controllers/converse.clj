@@ -61,7 +61,7 @@
     (catch Exception e
       (log/warn e)
       {:request request
-       :type :md-sans
+       :type :md-serif
        :reply (:internal-server-error errors)})))
 
 ;;; Scratch
