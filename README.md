@@ -1,8 +1,10 @@
 # esther
 
+clj -P -Sthreads 1 if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` for some reason
+
 Start a [REPL](#repls) in your editor or terminal of choice.
 ```
-clj -M:dev:cider
+clj -M:dev:cider 
 ```
 Start the server with:
 

@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [import load-file load-string eval])
   (:require [clojure.tools.logging :as log]
             [clojure.java.io :as io])
-  (:import (org.graalvm.polyglot context Value Source)
+  (:import (org.graalvm.polyglot Context Value Source)
            (org.graalvm.polyglot.proxy ProxyArray ProxyObject)))
 
 (defn deserialize-number
