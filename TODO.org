@@ -41,16 +41,16 @@ _ more user information in session (vault)
 ** DONE keep for llama.cpp
 - calculate token-length (and set)
 - up the context
-** TODO try openorca-platypus2-13b
+** DONE try openorca-platypus2-13b
 - Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
 ** DONE get rid of sid
 ** TODO link parsing?
-** TODO experiment with multi-turn
+** DONE experiment with multi-turn
 ** DONE weather API integration
 ** DONE fix mutli-line input scroll to bottom of page (css?)
 ** TODO move Llama config to system.edn
-** TODO time of day etc context in prompt
-** TODO history on first request
+** DONE time of day etc context in prompt
+** DONE history on first request
 ** DONE deprecate openai
 ** TODO integrate https://github.com/spencermountain/compromise?
 ** TODO embeddings for memory retrieval and context
@@ -61,6 +61,7 @@ _ more user information in session (vault)
 - https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"] (too slow)
 - https://github.com/stepstone-tech/hnswlib-jna
 ** DONE harmonize markdown handling using graalvm
+** DONE get rid of pty_bridy.py
 ** TODO harmonize emoji handling using graalvm?
 ** TODO dark mode
 ** TODO security and hosting
@@ -76,7 +77,7 @@ _ more user information in session (vault)
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
 ** TODO weird bug where login shows in memory.
-** TODO better error handling subprocesses (get rid of pty_bridge?)
+** TODO better error handling subprocesses
 ** TODO /imagine command (no solutions for this ATM)
 - hook up image generation (StableDiffusionAPI is too crappy)
 - integrate image describe into memory
