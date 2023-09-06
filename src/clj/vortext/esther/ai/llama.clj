@@ -144,7 +144,8 @@
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
         status-ch (chan)
-        llama (llama-process status-ch (shell-cmd bin-dir model-path submission))]
+        cmd (shell-cmd bin-dir model-path submission)
+        llama (llama-process status-ch cmd)]
     (when-let [subprocess
                (and llama
                     (-> llama
@@ -212,7 +213,7 @@
 
 (defn create-interface
   [{:keys [options]}]
-  (let [cache (w/lru-cache-factory {:threshold 32})
+  (let [cache (w/lru-cache-factory {:threshold 1}) ;; yeah GPU mem will be an issue
         complete-fn (shell-complete-fn options cache)]
     {:shutdown-fn (partial shutdown-fn cache)
      :complete-fn complete-fn}))

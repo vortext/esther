@@ -7,8 +7,7 @@
    [malli.error :as me]
    [vortext.esther.util.emoji :as emoji]
    [vortext.esther.common :as common ]
-   [clojure.tools.logging :as log]
-   [clojure.set :as set]))
+   [clojure.tools.logging :as log]))
 
 (def response-schema
   [:map

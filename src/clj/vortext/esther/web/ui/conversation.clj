@@ -6,9 +6,7 @@
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
    [vortext.esther.util.markdown :as markdown]
-   [clojure.string :as str]
-   [clojure.tools.logging :as log]
-   [clojure.test :as test]))
+   [clojure.string :as str]))
 
 (def loading
   [:div.esther-typing-loading
@@ -47,7 +45,6 @@
 
 (defn message [opts request]
   (ui (memory-container (converse/answer! opts request))))
-
 
 (defn msg-input [_request]
   [:div.input-form
