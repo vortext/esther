@@ -24,7 +24,7 @@
   [bin-dir model-path submission]
   (let [prompt (generate-prompt-str submission)
         cache-file (str "cache/" (digest/md5 prompt) ".bin")
-        prompt-cache (fs/canonicalize cache-file)
+        prompt-cache (fs/delete-on-exit (fs/canonicalize cache-file))
         gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
 
         tmp (str (fs/delete-on-exit (fs/create-temp-file)))

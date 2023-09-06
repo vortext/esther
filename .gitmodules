@@ -4,3 +4,6 @@
 [submodule "native/llama.cpp"]
     path = native/llama.cpp
     url = git://github.com/ggerganov/llama.cpp
+[submodule "native/native/hnswlib"]
+	path = native/native/hnswlib
+	url = git@github.com:joelkuiper/hnswlib.git

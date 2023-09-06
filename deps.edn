@@ -24,6 +24,9 @@
            org.graalvm.truffle/truffle-api {:mvn/version "23.0.1"}
            org.graalvm.js/js {:mvn/version "23.0.1"}
 
+           ;; Matrix
+           uncomplicate/neanderthal {:mvn/version "0.46.0"}
+
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
 

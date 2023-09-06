@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [import load-file load-string eval])
   (:require [clojure.tools.logging :as log]
             [clojure.java.io :as io])
-  (:import (org.graalvm.polyglot Context Value)
+  (:import (org.graalvm.polyglot context Value Source)
            (org.graalvm.polyglot.proxy ProxyArray ProxyObject)))
 
 (defn deserialize-number
@@ -66,6 +66,9 @@
     :else
     arg))
 
+(defn source
+  [lang path]
+  (.build (Source/newBuilder lang (io/file path))))
 
 (defn context-builder
   [lang]
@@ -75,12 +78,11 @@
     #_(.out System/out)
     #_(.err System/err)
     #_(.allowAllAccess true)
-    #_(.allowNativeAccess true)
-    ))
+    (.allowNativeAccess true)))
 
 (defn create-ctx [lang src]
   (let [context (.build (context-builder lang))
-        _result (.eval context lang src)]
+        _result (.eval context (source lang src))]
     context))
 
 (defn print-global-keys [lang context]
@@ -118,20 +120,15 @@
 
 
 (defn lang-api
-  [lang slurpable api-name api-fns]
-  (let [src (slurp slurpable)
-        ctx (create-ctx lang src)
+  [lang src api-name api-fns]
+  (let [ctx (create-ctx lang src)
         obj (from lang ctx api-name)
         api (import obj api-fns)]
     (into {} (map (fn [[k _]] [k (partial eval (get api k))]) api))))
 
 (defn js-api
-  [slurpable api-name api-fns]
-  (lang-api "js" slurpable api-name api-fns))
-
-#_(defn llvm-api
-    [slurpable api-name api-fns]
-    (lang-api "llvm" slurpable api-name api-fns))
+  [src api-name api-fns]
+  (lang-api "js" src api-name api-fns))
 
 (comment
   (def x (js-api "/media/array/Sync/Projects/esther/node_modules/llama-tokenizer-js/llama-tokenizer.js"

@@ -15,7 +15,6 @@
     [:div.second]
     [:div.third]]])
 
-
 (defn display-html
   [s]
   (if (and (string? s) (not (str/blank? s)))
