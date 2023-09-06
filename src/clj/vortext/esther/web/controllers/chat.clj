@@ -2,6 +2,7 @@
   (:require
    [vortext.esther.config :refer [errors response-keys]]
    [vortext.esther.web.controllers.memory :as memory]
+   [vortext.esther.util.time :as time]
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.util.emoji :as emoji]
@@ -70,7 +71,7 @@
                  (map (fn [{:keys [request response ts]}]
                         {:response (select-keys response response-keys)
                          :request (select-keys request [:msg])
-                         :unix-ts ts})
+                         :moment (time/human-time-ago ts)})
                       (take 3 history)))
         user-keywords (user-keywords keywords)
         current-context (get-in data [:request :context])

@@ -56,4 +56,5 @@
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
 
 (defn -main [& _]
+  (log/info "starting...")
   (start-app))

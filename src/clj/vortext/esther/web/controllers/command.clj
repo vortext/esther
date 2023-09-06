@@ -49,18 +49,18 @@
 (defn logout
   [_opts _user _args {:keys [request]}]
   {:type :ui
-   :response (signin-ui/logout-chat request)})
+   :reply (signin-ui/logout-chat request)})
 
 (defn wipe
   [opts user args {:keys [_request]}]
   {:type :ui
-   :response (memory-ui/wipe-form opts user args)})
+   :reply (memory-ui/wipe-form opts user args)})
 
 
 (defn archive
   [opts user _args {:keys [_request]}]
   {:type :ui
-   :response (memory-ui/archive-form opts user)})
+   :reply (memory-ui/archive-form opts user)})
 
 
 (defn command!

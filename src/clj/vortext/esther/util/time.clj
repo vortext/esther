@@ -28,4 +28,23 @@
           " of " (month-name month locale) ", "
           year))))
 
-(defn unix-ts [] (inst-ms (java.time.Instant/now)))
+(defn instant-to-local-date-time
+  ([instant]
+   (instant-to-local-date-time
+    instant
+    (java.time.ZoneId/systemDefault)))
+  ([instant zone-id]
+   (.toLocalDateTime (.atZone instant zone-id))))
+
+(defn now [] (java.time.Instant/now))
+
+(defn unix-ts [] (inst-ms (now)))
+
+(defn millis-to-instant [millis]
+  (java.time.Instant/ofEpochMilli millis))
+
+(defn human-time-ago
+  [epoch-milli]
+  (h/datetime
+   (instant-to-local-date-time (millis-to-instant epoch-milli))
+   (millis-to-instant (unix-ts))))

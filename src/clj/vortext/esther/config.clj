@@ -23,7 +23,7 @@
    (slurp (io/resource "prompts/introductions.edn"))))
 
 (def response-keys
-  #{:response :keywords
+  #{:reply :keywords
     :emoji :energy :image-prompt})
 
 (def request-keys

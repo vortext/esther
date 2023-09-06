@@ -7,7 +7,8 @@
    [vortext.esther.util.time :as time]
    [vortext.esther.util.markdown :as markdown]
    [clojure.string :as str]
-   [clojure.tools.logging :as log]))
+   [clojure.tools.logging :as log]
+   [clojure.test :as test]))
 
 (def loading
   [:div.esther-typing-loading

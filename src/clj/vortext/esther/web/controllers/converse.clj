@@ -60,6 +60,7 @@
             memory))))
     (catch Exception e
       (log/warn e)
-      (:internal-server-error errors))))
+      {:request request
+       :response (:internal-server-error errors)})))
 
 ;;; Scratch

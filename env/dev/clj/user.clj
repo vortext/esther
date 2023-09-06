@@ -13,24 +13,31 @@
    [lambdaisland.classpath.watch-deps :as watch-deps]      ;; hot loading for deps
    [vortext.esther.core]))
 
+(println "user.clj")
+
 ;; uncomment to enable hot loading for deps
-(watch-deps/start! {:aliases [:dev :test]})
+;; (watch-deps/start! {:aliases [:dev :test]})
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 
 (add-tap (bound-fn* clojure.pprint/pprint))
 
+(println "user.clj:ig/prep")
+
 (defn dev-prep!
   []
-  (integrant.repl/set-prep! (fn []
-                              (-> (vortext.esther.config/system-config {:profile :dev})
-                                  (ig/prep)))))
+  (println "user.clj::dev-prep!")
+  (integrant.repl/set-prep!
+   (fn []
+     (-> (vortext.esther.config/system-config {:profile :dev})
+         (ig/prep)))))
 
 (defn test-prep!
   []
-  (integrant.repl/set-prep! (fn []
-                              (-> (vortext.esther.config/system-config {:profile :test})
-                                  (ig/prep)))))
+  (integrant.repl/set-prep!
+   (fn []
+     (-> (vortext.esther.config/system-config {:profile :test})
+         (ig/prep)))))
 
 ;; Can change this to test-prep! if want to run tests as the test profile in your repl
 ;; You can run tests in the dev profile, too, but there are some differences between
@@ -40,9 +47,6 @@
 (repl/set-refresh-dirs "src/clj")
 
 (def refresh repl/refresh)
-
-(compile 'vortext.esther)
-(binding [*compile-files* true] (require 'user :reload-all))
 
 (comment
   (go)
