@@ -79,7 +79,7 @@
         request (-> (:request data)
                     (assoc :context {:history history
                                      :keywords user-keywords}))
-        complete (get-in opts [:ai :complete-fn :complete-fn])
+        complete (get-in opts [:ai :llm :complete-fn])
         ;; The actual LLM complete
         response (complete opts user context-keywords request)
         validate-response #(validate response-schema %)]

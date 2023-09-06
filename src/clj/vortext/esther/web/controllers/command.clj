@@ -53,8 +53,11 @@
 
 (defn wipe
   [opts user args {:keys [_request]}]
-  {:type :ui
-   :reply (memory-ui/wipe-form opts user args)})
+  (let [{:keys [uid]} (:vault user)
+        shutdown (get-in opts [:ai :llm :shutdown-fn])]
+    (shutdown uid)
+    {:type :ui
+     :reply (memory-ui/wipe-form opts user args)}))
 
 
 (defn archive

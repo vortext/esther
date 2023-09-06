@@ -201,15 +201,18 @@
             ((:shutdown-fn (w/lookup cache (get-in user [:vault :uid]))))
             (:gateway-timeout errors))))))
 
-(defn shutdown-everything
-  [cache]
-  (doseq [v (vals @cache)]
-    (when-let [shutdown (:shutdown-fn v)]
-      (log/warn "shutting down" (shutdown)))))
+(defn shutdown-fn
+  ([cache]
+   (doseq [v (vals @cache)]
+     (when-let [shutdown (:shutdown-fn v)]
+       (log/warn "shutting down" (shutdown)))))
+  ([cache uid]
+   (when-let [shutdown (:shutdown-fn (checked-proc cache uid))]
+     (log/warn "shutting down" (shutdown)))))
 
 (defn create-complete-shell
   [{:keys [options]}]
   (let [cache (w/lru-cache-factory {:threshold 32})
         complete-fn (shell-complete-fn options cache)]
-    {:shutdown-fn #(shutdown-everything cache)
+    {:shutdown-fn (partial shutdown-fn cache)
      :complete-fn complete-fn}))

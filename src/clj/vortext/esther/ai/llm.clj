@@ -5,11 +5,10 @@
    [clojure.java.io :as io]
    [integrant.core :as ig]
    [diehard.core :as dh]
-   [vortext.esther.config :refer [response-keys request-keys]]
+   [vortext.esther.config :refer [response-keys request-keys errors]]
    [vortext.esther.util.time :refer [human-today]]
    [vortext.esther.util.markdown :refer [strs-to-markdown-list]]
-   [vortext.esther.ai.llama :as llama]
-   [vortext.esther.config :refer [errors]]))
+   [vortext.esther.ai.llama :as llama]))
 
 
 (defn generate-prompt
@@ -49,15 +48,13 @@
        response-keys))))
 
 
-(defmethod ig/init-key :ai.llm/llm-complete
+(defmethod ig/init-key :ai.llm/llm-interface
   [_ {:keys [impl]
       :as   opts}]
-  (let [instance
-        (case impl
-          :llama-shell (llama/create-complete-shell opts))]
+  (let [instance (case impl :llama-shell (llama/create-complete-shell opts))]
     {:impl instance
      :complete-fn  (create-complete-fn instance)}))
 
 
-(defmethod ig/halt-key! :ai.llm/llm-complete [_ {:keys [impl]}]
+(defmethod ig/halt-key! :ai.llm/llm-interface [_ {:keys [impl]}]
   ((:shutdown-fn impl)))

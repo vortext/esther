@@ -49,7 +49,7 @@
   {:routes #ig/refset :reitit/routes
    :depends-on [:dev/init-test-user]}}
 
- :ai.llm/llm-complete
+ :ai.llm/llm-interface
  {:impl :llama-shell
   :options
   {:model-path #or [#env GGML_MODEL_PATH "./models/openorcaxopenchat-preview2-13b.ggmlv3.q4_K_M.bin"]
@@ -63,7 +63,7 @@
                  :prompt "prompts/llama.md"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
-                 :ai {:complete-fn #ig/ref :ai.llm/llm-complete}
+                 :ai {:llm #ig/ref :ai.llm/llm-interface}
                  :env #ig/ref :system/env}}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}
