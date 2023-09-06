@@ -51,8 +51,9 @@
 (defmethod ig/init-key :ai.llm/llm-interface
   [_ {:keys [impl]
       :as   opts}]
-  (let [instance (case impl :llama-shell (llama/create-complete-shell opts))]
+  (let [instance (case impl :llama-shell (llama/create-interface opts))]
     {:impl instance
+     :shutdown-fn (:shutdown-fn instance)
      :complete-fn  (create-complete-fn instance)}))
 
 

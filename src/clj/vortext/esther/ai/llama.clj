@@ -210,7 +210,7 @@
    (when-let [shutdown (:shutdown-fn (checked-proc cache uid))]
      (log/warn "shutting down" (shutdown)))))
 
-(defn create-complete-shell
+(defn create-interface
   [{:keys [options]}]
   (let [cache (w/lru-cache-factory {:threshold 32})
         complete-fn (shell-complete-fn options cache)]
