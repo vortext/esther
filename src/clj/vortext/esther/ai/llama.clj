@@ -39,10 +39,15 @@
       "--grammar-file" gbnf
       ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
       "--n-gpu-layers" 18
+      "--threads" 32
       "--ctx-size" (* 2 2084)
+
+      ;; Mirostat: A Neural Text Decoding Algorithm that Directly Controls Perplexity
+      ;; https://arxiv.org/abs/2007.14966
       "--mirostat" 2
       "--mirostat-ent" 5
       "--mirostat-lr" 0.1
+
       ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
       ;; Also see https://github.com/belladoreai/llama-tokenizer-js
       "--keep" -1
@@ -50,7 +55,6 @@
       "-i"
       "--simple-io"
       "--interactive-first"
-      "--threads" (- (.availableProcessors (Runtime/getRuntime)) 4)
       "-f" (str tmp)])))
 
 (defn send-sigint [pid]
@@ -131,7 +135,7 @@
     (go-loop []
       (if-let [line (<! (:out-ch subprocess))]
         (do
-          (log/info "llama:line" line)
+          (log/debug "line" line)
           (when (and (not @process-ready?)
                      (str/includes? line end-of-turn))
             (>! status-ch :ready)
