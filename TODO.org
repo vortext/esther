@@ -76,18 +76,19 @@ _ more user information in session (vault)
 - wait for llama.cpp to fix it?
 ** TODO harmonize emoji handling using graalvm?
 ** TODO keyword_memory_lookup table and logic
+** TODO switch to guff when out of beta
 ** TODO dark mode
-** TODO security and hosting
-** TODO test infrastructure and tests
-** TODO deploy and build shizzle (Github actions?)
 ** TODO better intro flow
 ** TODO share a page (static gen)
 ** TODO /help command
 ** TODO sign-up page
-** TODO app? legal, ethics, billing, subscriptions, etc.
 ** TODO weird bug where login shows in memory.
 ** TODO better error handling subprocesses
 ** TODO calendar page (for memories)?
+** TODO security and hosting
+** TODO test infrastructure and tests
+** TODO deploy and build shizzle (Github actions?)
+** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?

@@ -52,7 +52,7 @@
  :ai.llm/llm-interface
  {:impl :llama-shell
   :options
-  {:model-path #or [#env GGML_MODEL_PATH "./models/mythomax-l2-13b.ggmlv3.q6_K.bin"]
+  {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
    :bin-dir "./native/llama.cpp/build/bin"}}
 
  :router/core
