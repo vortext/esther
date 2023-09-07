@@ -2,7 +2,7 @@
   (:require
    [diehard.core :as dh]
    [clojure.tools.logging :as log]
-   [clojure.core.async :as async :refer [chan go-loop <! go >! <!! >!! close!]]
+   [clojure.core.async :as async :refer [alts! timeout chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
    [clj-commons.digest :as digest]
    [babashka.process :refer [process destroy-tree alive?]]
@@ -14,6 +14,8 @@
   (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "") ;; <|end_of_turn|>
+
+(def wait-for (* 1000 60 1)) ;; 1 minute
 
 (defn generate-prompt-str
   [submission]
@@ -48,7 +50,7 @@
       "-i"
       "--simple-io"
       "--interactive-first"
-      "--threads" (- (.availableProcessors (Runtime/getRuntime)) 2)
+      "--threads" (- (.availableProcessors (Runtime/getRuntime)) 4)
       "-f" (str tmp)])))
 
 (defn send-sigint [pid]
@@ -198,14 +200,21 @@
               line (str "User: " (json/write-value-as-string obj) end-of-turn "\n")]
           (log/debug "shell-complete-fn::complete" line)
           (go (>! (:in-ch proc) line)))
-        (<!! (:response-ch proc))
+        (let [response-ch (:response-ch proc)
+              t (timeout wait-for)]
+          (<!! (go
+                 (let [[v ch] (alts! [response-ch t])]
+               (if (= ch t)
+                 (throw (Exception. "Timeout"))
+                 v)))))
         (catch Exception _e (:uncaught-exception errors))))))
+
 
 (defn shell-complete-fn
   [options cache]
   (fn [user submission]
     (try
-      (dh/with-timeout {:timeout-ms 30000}
+      (dh/with-timeout {:timeout-ms wait-for}
         (internal-shell-complete-fn options cache user submission))
       (catch TimeoutExceededException e
         (do (log/warn "shell-complete-fn::timeout" e)
