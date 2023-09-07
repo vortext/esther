@@ -4,14 +4,6 @@
    [com.phronemophobic.clong.clang :as clong]
    [com.phronemophobic.clong.gen.jna :as gen]
    [clojure.tools.logging :as log])
-  (:import
-   java.io.PushbackReader
-   com.sun.jna.Memory
-   com.sun.jna.Pointer
-   com.sun.jna.ptr.PointerByReference
-   com.sun.jna.Library
-   com.sun.jna.ptr.LongByReference
-   com.sun.jna.Structure)
   )
 
 (def header-path
