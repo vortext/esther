@@ -5,21 +5,17 @@
    [clojure.java.io :as io]
    [integrant.core :as ig]
    [vortext.esther.config :refer [response-keys request-keys]]
-   [vortext.esther.util.time :refer [human-today]]
-   [vortext.esther.util.markdown :refer [strs-to-markdown-list]]
    [vortext.esther.ai.llama :as llama]))
 
 
 (defn generate-prompt
   [prompt context]
-  (mustache/render
-   prompt
-   {:today (human-today)
-    :context (strs-to-markdown-list context)}))
+  (mustache/render prompt context))
 
 (defn generate-submission
-  [opts context request]
+  [opts request]
   (let [promt-str (slurp (io/resource (:prompt opts)))
+        context (:request-context request)
         prompt  (generate-prompt promt-str context)]
     (concat
      [{:role "system"
@@ -29,8 +25,8 @@
 
 (defn create-complete-fn
   [llm-complete]
-  (fn [opts user context request]
-    (let [submission (generate-submission opts context request)]
+  (fn [opts user request]
+    (let [submission (generate-submission opts request)]
       (select-keys
        ((:complete-fn llm-complete) user submission)
        response-keys))))

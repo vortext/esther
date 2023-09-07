@@ -56,7 +56,7 @@
   [opts user data]
   (let [keywords (memory/frecency-keywords opts user :week 10)
         user-keywords (into #{} (map :value keywords))
-        user-keywords (if  (seq user-keywords) user-keywords #{"user:new-user"})
+        user-keywords (if (seq user-keywords) user-keywords #{"user:new-user"})
         history (filter (comp :conversation? :response)
                         (memory/last-memories opts user 10))
         history (reverse
@@ -65,15 +65,16 @@
                          :request (select-keys request [:msg])
                          :moment (time/human-time-ago ts)})
                       (take 3 history)))
+
+        request-context (get-in data [:request :context])
         request (-> (:request data)
+                    (assoc :request-context request-context)
                     (assoc :context {:history history
                                      :keywords user-keywords}))
 
-        current-context (get-in data [:request :context])
-        context-keywords (common/namespace-keywordize-map current-context)
         complete (get-in opts [:ai :llm :complete-fn])
         ;; The actual LLM complete
-        response (complete opts user context-keywords request)
+        response (complete opts user request)
         validate-response #(validate response-schema %)]
     (try
       (-> data

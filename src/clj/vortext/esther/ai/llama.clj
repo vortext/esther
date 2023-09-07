@@ -38,9 +38,9 @@
       "-m" model
       "--grammar-file" gbnf
       ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
-      "--n-gpu-layers" 18
+      "--n-gpu-layers" 19
       "--threads" 32
-      "--ctx-size" (* 2 2084)
+      "--ctx-size" (* 2 2048)
 
       ;; Mirostat: A Neural Text Decoding Algorithm that Directly Controls Perplexity
       ;; https://arxiv.org/abs/2007.14966
@@ -67,8 +67,8 @@
         proc (process {:shutdown destroy-tree
                        :err (java.io.OutputStream/nullOutputStream)}
                       cmd)
-        out-ch (chan 32)
-        in-ch (chan 32)
+        out-ch (chan 128)
+        in-ch (chan 128)
         sigint #(send-sigint (.pid (:proc proc)))
         rdr (io/reader (:out proc))
         shutdown-fn #(do
@@ -102,7 +102,7 @@
      :sigint sigint
      :shutdown-fn shutdown-fn}))
 
-(defn safe-parse
+(defn extract-json-parse
   [output]
   (try
     (when (seq output)
@@ -117,7 +117,7 @@
   (go-loop [partial-json ""]
     (if-let [line (<! partial-json-ch)]
       (let [new-partial-json (str partial-json "\\n" line)
-            json-obj (safe-parse new-partial-json)]
+            json-obj (extract-json-parse new-partial-json)]
         (if-not json-obj
           (recur new-partial-json)
           (if (:reply json-obj)

@@ -2,6 +2,7 @@
   (:require
    [vortext.esther.util.time :refer [unix-ts]]
    [vortext.esther.config :refer [errors]]
+   [vortext.esther.util.time :as time]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.controllers.command :refer [command!]]
    [vortext.esther.web.controllers.chat :refer [converse!]]
@@ -27,10 +28,9 @@
         ctx (json/read-json-value (get params :context ""))
         ip (get-in ctx [:remote-addr :ip])
         current-weather (weather/current-weather ip)
-        context-kw [:weather :time-of-day :lunar-phase :season]]
-    (-> ctx
-        (assoc :weather current-weather)
-        (select-keys context-kw))))
+        more-ctx {:weather current-weather
+                  :today (time/human-today)}]
+    (merge ctx more-ctx)))
 
 (defn- respond!
   [opts user data]
