@@ -52,7 +52,7 @@
  :ai.llm/llm-interface
  {:impl :llama-shell
   :options
-  {:model-path #or [#env GGML_MODEL_PATH "./models/openorcaxopenchat-preview2-13b.ggmlv3.q4_K_M.bin"]
+  {:model-path #or [#env GGML_MODEL_PATH "./models/mythomax-l2-13b.ggmlv3.q6_K.bin"]
    :bin-dir "./native/llama.cpp/build/bin"}}
 
  :router/core
@@ -60,7 +60,7 @@
  :reitit.routes/ui
  #profile {:dev {:base-path "",
                  :default-path "/user/conversation"
-                 :prompt "prompts/llama.md"
+                 :prompt "prompts/chat.md"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
                  :ai {:llm #ig/ref :ai.llm/llm-interface}

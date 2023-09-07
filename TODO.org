@@ -44,6 +44,10 @@ _ more user information in session (vault)
 ** DONE try openorca-platypus2-13b
 - Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
 ** DONE get rid of sid
+** TODO Try https://huggingface.co/Gryphe/MythoMax-L2-13b
+- MythoMax-L2-13B-GGML-Q6_K with llamacpp, and Mirostat set to Mirostat 2, Tau 5, Eta 0.1
+- https://www.reddit.com/r/LocalLLaMA/comments/167088h/why_are_the_answers_getting_dumber_as_the/
+- different prompt format
 ** TODO link parsing?
 ** DONE experiment with multi-turn
 ** DONE weather API integration
@@ -57,12 +61,21 @@ _ more user information in session (vault)
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)
 - Inject similar memories in user request context
-- https://github.com/nmslib/hnswlib (via GraalVM llvm?)
-- https://github.com/jelmerk/hnswlib [com.github.jelmerk/hnswlib-core "1.1.0"] (too slow)
-- https://github.com/stepstone-tech/hnswlib-jna
+- https://github.com/nmslib/hnswlib (via JNA clong clang?)
+- split out api gen so don't depend on the whole of llvm
+- does it need the stdlib in the api?
+- get it to work simple example
+- get it to work persistence, how to deal with scoping to user?!
+- get it to work with embeddings and real data (find or generate some dataset)
+- how to generate the proper amount of context? (summarization???)
 ** DONE harmonize markdown handling using graalvm
 ** DONE get rid of pty_bridy.py
+** TODO embeddings
+- onnx bert?
+- bert.cpp / jna?
+- wait for llama.cpp to fix it?
 ** TODO harmonize emoji handling using graalvm?
+** TODO keyword_memory_lookup table and logic
 ** TODO dark mode
 ** TODO security and hosting
 ** TODO test infrastructure and tests
@@ -72,12 +85,12 @@ _ more user information in session (vault)
 ** TODO /help command
 ** TODO sign-up page
 ** TODO app? legal, ethics, billing, subscriptions, etc.
-* Ideas for later
-** TODO calendar page (for memories)?
-** TODO image upload (img-to-text?)
-** TODO offline desktop app?
 ** TODO weird bug where login shows in memory.
 ** TODO better error handling subprocesses
+** TODO calendar page (for memories)?
+* Ideas for later
+** TODO image upload (img-to-text?)
+** TODO offline desktop app?
 ** TODO /imagine command (no solutions for this ATM)
 - hook up image generation (StableDiffusionAPI is too crappy)
 - integrate image describe into memory

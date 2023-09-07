@@ -4,8 +4,7 @@
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
    [integrant.core :as ig]
-   [diehard.core :as dh]
-   [vortext.esther.config :refer [response-keys request-keys errors]]
+   [vortext.esther.config :refer [response-keys request-keys]]
    [vortext.esther.util.time :refer [human-today]]
    [vortext.esther.util.markdown :refer [strs-to-markdown-list]]
    [vortext.esther.ai.llama :as llama]))

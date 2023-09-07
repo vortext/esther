@@ -13,7 +13,7 @@
    [clojure.string :as str])
   (:import [dev.failsafe TimeoutExceededException]))
 
-(def end-of-turn "<|end_of_turn|>")
+(def end-of-turn "") ;; <|end_of_turn|>
 
 (defn generate-prompt-str
   [submission]
@@ -25,7 +25,7 @@
   (let [prompt (generate-prompt-str submission)
         cache-file (str "cache/" (digest/md5 prompt) ".bin")
         prompt-cache (fs/delete-on-exit (fs/canonicalize cache-file))
-        gbnf (str (fs/canonicalize (io/resource "grammars/json-chat.gbnf")))
+        gbnf (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))
 
         tmp (str (fs/delete-on-exit (fs/create-temp-file)))
         model (str (fs/canonicalize (fs/path model-path)))]
@@ -36,8 +36,11 @@
       "-m" model
       "--grammar-file" gbnf
       ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
-      "--n-gpu-layers" 20
+      "--n-gpu-layers" 18
       "--ctx-size" (* 2 2084)
+      "--mirostat" 2
+      "--mirostat-ent" 5
+      "--mirostat-lr" 0.1
       ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
       ;; Also see https://github.com/belladoreai/llama-tokenizer-js
       "--keep" -1
@@ -45,7 +48,7 @@
       "-i"
       "--simple-io"
       "--interactive-first"
-      "--threads" (max 32 (/ 2  (.availableProcessors (Runtime/getRuntime))))
+      "--threads" (- (.availableProcessors (Runtime/getRuntime)) 2)
       "-f" (str tmp)])))
 
 (defn send-sigint [pid]
@@ -140,7 +143,8 @@
           (go (>! status-ch :stream-closed))))))
   subprocess)
 
-(defn start-subprocess! [bin-dir model-path submission]
+(defn start-subprocess!
+  [bin-dir model-path submission]
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
         status-ch (chan)
@@ -152,8 +156,14 @@
                         (handle-json-parsing partial-json-ch response-ch)
                         (handle-output-channel partial-json-ch status-ch)
                         (assoc :response-ch response-ch)))]
-      (when (alive? (:proc subprocess))
-        (when (= (<!! status-ch) :ready) subprocess)))))
+      (if (alive? (:proc subprocess))
+        (when (= (<!! status-ch) :ready) subprocess)
+        (do
+          (log/warn "llama:process-dead")
+          (close! partial-json-ch)
+          (go (>! response-ch (:internal-server-error errors)))
+          {:proc nil
+           :response-ch response-ch})))))
 
 (defn cached-spawn-subprocess
   [options cache uid submission]
@@ -195,7 +205,7 @@
   [options cache]
   (fn [user submission]
     (try
-      (dh/with-timeout {:timeout-ms 120000}
+      (dh/with-timeout {:timeout-ms 30000}
         (internal-shell-complete-fn options cache user submission))
       (catch TimeoutExceededException e
         (do (log/warn "shell-complete-fn::timeout" e)
