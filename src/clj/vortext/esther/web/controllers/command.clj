@@ -44,7 +44,7 @@
      :reply
      (markdown/strs-to-markdown-list
       (map #(get-in % [:response :imagination])
-           (take 3 memories)))}))
+           (reverse (take 3 memories))))}))
 
 (defn logout
   [_opts _user _args {:keys [request]}]

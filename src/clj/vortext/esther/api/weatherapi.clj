@@ -2,7 +2,6 @@
   (:require
    [clj-http.client :as client]
    [clojure.core.memoize :as memoize]
-   [camel-snake-kebab.core :as csk]
    [vortext.esther.secrets :refer [secrets]]
    [clojure.tools.logging :as log]))
 
@@ -21,12 +20,9 @@
    ;; 3 hours
    :ttl/threshold (* 3 60 60 1000)))
 
-(def condition-text-ks
-  [:condition :text])
-
 (defn current-weather
   [location]
   (try
     (let [current-weather (:current (weatherapi-current location))]
-      (csk/->kebab-case (get-in current-weather condition-text-ks)))
+      (get-in current-weather [:condition :text]))
     (catch Exception _ {})))

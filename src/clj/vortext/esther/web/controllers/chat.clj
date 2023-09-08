@@ -57,22 +57,24 @@
   (let [keywords (memory/frecency-keywords opts user :week 10)
         keywords (if-let [kws (seq keywords)]
                    (into #{} (map :value kws))
-                   #{"user:new-user"})
+                   #{})
 
         k 3
         conversation-memories (filter (comp :conversation? :response)
                                       (memory/last-memories opts user 10))
-        memories (reverse
-                  (map (fn [{:keys [request response ts]}]
-                         {:moment (time/human-time-ago ts)
-                          :request (select-keys request [:msg])
-                          :response (select-keys response response-keys)
-                          }) (take k conversation-memories)))
         request-context (get-in data [:request :context])
-        request (-> (:request data)
-                    (assoc :request request-context)
-                    (assoc :context {:memories memories
-                                     :keywords keywords}))
+        memories
+        (reverse
+         (map (fn [{:keys [request response ts]}]
+                {:moment (time/human-time-ago ts)
+                 :request (select-keys request [:msg])
+                 :response (select-keys response [:emoji :energy :reply :imagination])
+                 }) (take k conversation-memories)))
+        request
+        (-> (:request data)
+            (assoc :request-context request-context)
+            (assoc :context {:memories memories
+                             :keywords keywords}))
         llm-complete (get-in opts [:ai :llm :complete-fn])
         ;; The actual LLM complete
         response (llm-complete opts user request)
