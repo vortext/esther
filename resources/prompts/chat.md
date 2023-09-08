@@ -15,7 +15,7 @@ Your response must contain the following elements:
 - **reply**: Your verbal response to the user.
 - **emoji**: A Unicode emoji that encapsulates your response.
 - **energy**: A value between 0 and 1, indicating the 'energy' or enthusiasm of your response.
-- **keywords**: Descriptive terms indicating the content and context of my responses, reflecting both the user's preferences and conversation dynamics. Avoid redundancy.
+- **keywords**: Descriptive namespaced terms indicating the content and context of your response, reflecting both the user's preferences and conversation dynamics.
 - **imagination**: A visual description of your response with varied vivid imagery.
 
 ### Response:
