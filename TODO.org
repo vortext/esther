@@ -57,7 +57,12 @@ _ more user information in session (vault)
 ** TODO use proper locale for times
 ** TODO better handling of location data
 ** TODO clear cache of llama.cpp daily (integrate quartz)
+** TODO use a single map from the whole req-rep thread with namespaced keywords.
+** TODO return edn instead of JSON from llm?
 ** TODO link parsing?
+** TODO ui things
+- Discoverability of input bar
+- Button for archive or other commands?
 ** TODO integrate https://github.com/spencermountain/compromise?
 ** TODO Try https://huggingface.co/Gryphe/MythoMax-L2-13b
 - MythoMax-L2-13B-GGML-Q6_K with llamacpp, and Mirostat set to Mirostat 2, Tau 5, Eta 0.1
