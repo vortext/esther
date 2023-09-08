@@ -43,7 +43,7 @@
     {:type :md-mono
      :reply
      (markdown/strs-to-markdown-list
-      (map #(get-in % [:response :image-prompt])
+      (map #(get-in % [:response :imagination])
            (take 3 memories)))}))
 
 (defn logout

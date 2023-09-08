@@ -8,7 +8,7 @@ response  ::= "{" (quote "reply" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
                    quote "energy" quote ": " number ","
                    quote "keywords" quote ": " kwarray ","
-                   quote "image-prompt" quote ": " string "}")
+                   quote "imagination" quote ": " string "}")
 
 string ::=
   quote (

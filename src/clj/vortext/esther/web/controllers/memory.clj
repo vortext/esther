@@ -92,7 +92,7 @@
 
 (defn first-image
   [memories]
-  (first (keep #(get-in % [:response :image-prompt]) memories)))
+  (first (keep #(get-in % [:response :imagination]) memories)))
 
 (defn wipe-all!
   [opts user]

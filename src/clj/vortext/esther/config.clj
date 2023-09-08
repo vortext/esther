@@ -24,7 +24,7 @@
 
 (def response-keys
   #{:reply :keywords
-    :emoji :energy :image-prompt})
+    :emoji :energy :imagination})
 
 (def request-keys
   #{:msg :context})

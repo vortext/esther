@@ -22,7 +22,7 @@
 
 (defn md-memories-table
   [memories]
-  (let [ks [:emoji :energy :keywords :image-prompt]
+  (let [ks [:emoji :energy :keywords :imagination]
         update-kw
         (fn [kw] (str/join
                   ", "
