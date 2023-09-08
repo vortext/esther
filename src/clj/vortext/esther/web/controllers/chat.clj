@@ -55,26 +55,27 @@
 (defn converse!
   [opts user data]
   (let [keywords (memory/frecency-keywords opts user :week 10)
-        user-keywords (into #{} (map :value keywords))
-        user-keywords (if (seq user-keywords) user-keywords #{"user:new-user"})
-        history (filter (comp :conversation? :response)
-                        (memory/last-memories opts user 10))
-        history (reverse
-                 (map (fn [{:keys [request response ts]}]
-                        {:response (select-keys response response-keys)
-                         :request (select-keys request [:msg])
-                         :moment (time/human-time-ago ts)})
-                      (take 3 history)))
+        keywords (if-let [kws (seq keywords)]
+                   (into #{} (map :value kws))
+                   #{"user:new-user"})
 
+        k 3
+        conversation-memories (filter (comp :conversation? :response)
+                                      (memory/last-memories opts user 10))
+        memories (reverse
+                  (map (fn [{:keys [request response ts]}]
+                         {:moment (time/human-time-ago ts)
+                          :request (select-keys request [:msg])
+                          :response (select-keys response response-keys)
+                          }) (take k conversation-memories)))
         request-context (get-in data [:request :context])
         request (-> (:request data)
-                    (assoc :request-context request-context)
-                    (assoc :context {:history history
-                                     :keywords user-keywords}))
-
-        complete (get-in opts [:ai :llm :complete-fn])
+                    (assoc :request request-context)
+                    (assoc :context {:memories memories
+                                     :keywords keywords}))
+        llm-complete (get-in opts [:ai :llm :complete-fn])
         ;; The actual LLM complete
-        response (complete opts user request)
+        response (llm-complete opts user request)
         validate-response #(validate response-schema %)]
     (try
       (-> data
