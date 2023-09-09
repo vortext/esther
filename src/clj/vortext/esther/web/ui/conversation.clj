@@ -81,7 +81,7 @@
 (defn conversation
   [opts request]
   (let [user (get-in request [:session :user])
-        memories (memory/todays-non-archived-memories opts user)]
+        memories (reverse (memory/todays-non-archived-memories opts user))]
     [:div.container
      [:div#conversation.loading-state
       [:div#history

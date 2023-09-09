@@ -17,13 +17,12 @@
   (let [promt-str (slurp (io/resource (:prompt opts)))
         {:keys [:local/context :memory/events :user/memories :user/keywords]} obj
         prompt  (generate-prompt promt-str context)
-        content (-> events first :event/content :content)]
-    (log/info obj)
+        request-content (-> events first :event/content :content)]
     {:llm/prompt prompt
      :llm/submission
-     {:content content
-      :context {:memories memories
-                :keywords keywords}}}))
+     {:context {:memories memories
+                :keywords keywords}
+      :content request-content}}))
 
 
 (defn create-complete-fn

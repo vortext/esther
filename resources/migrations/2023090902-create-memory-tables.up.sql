@@ -1,3 +1,5 @@
+pragma foreign_keys = on;
+--;;
 create table memory (
     gid            text primary key,
     uid            text not null,
@@ -5,7 +7,8 @@ create table memory (
     iv             text not null,
     created        timestamp with time zone default current_timestamp,
     created_date   text default (date('now')),
-    archived       boolean not null default 0
+    archived       boolean not null default 0,
+    conversation   boolean not null default 0
 );
 --;;
 create index memory_created on memory(uid, created);
@@ -30,3 +33,16 @@ create index memory_keyword_access on memory_keyword(uid);
 create index memory_keyword_last_seen on memory_keyword(uid, last_seen);
 --;;
 create index memory_keyword_uid_seen on memory_keyword(uid, seen);
+--;;
+
+create table memory_keyword_lookup (
+    gid            text not null,
+    fingerprint    text not null,
+    primary key (gid, fingerprint),
+    foreign key (gid) references memory(gid),
+    foreign key (fingerprint) references memory_keyword(fingerprint)
+)
+--;;
+create index memory_keyword_lookup_gid on memory_keyword_lookup(gid);
+--;;
+create index memory_keyword_lookup_fingerpint on memory_keyword_lookup(fingerprint);

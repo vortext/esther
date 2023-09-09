@@ -57,16 +57,16 @@
   [{:keys [:memory/events :memory/ts]}]
   (let [relevant-ks [:content :emoji :imagination]]
     {:moment (time/human-time-ago ts)
-     :events (map #(merge
-                    {:role (:event/role %)}
-                    (select-keys (:event/content %) relevant-ks))
+     :events (map (fn [e]
+                    {(:event/role e)
+                     (select-keys (:event/content e) relevant-ks)})
                   events)}))
 
 (defn ->user-context
   [opts user obj]
   (let [keywords (memory/frecency-keywords opts user :week 10)
         keywords (into #{} (map :value keywords))
-        memories (memory/recent-conversation opts user)]
+        memories (reverse (memory/recent-conversation opts user))]
     (merge obj {:user/keywords keywords
                 :user/memories (map ->memory-context memories)})))
 

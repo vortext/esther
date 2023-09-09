@@ -10,13 +10,20 @@ select * from users where username = :username limit 1;
 -- Memory
 -- :name push-memory :! :n
 -- :doc Insert a single memory
-insert into memory (gid, uid, data, iv)
-values (:gid, :uid, :data, :iv)
+insert into memory (gid, uid, data, iv, conversation)
+values (:gid, :uid, :data, :iv, :conversation)
 
 -- :name last-n-memories :? :*
--- :doc Get the last entries (from new to old)
+-- :doc Get the last memories (from new to old)
 select gid, data, iv from memory
 where uid = :uid
+order by created desc limit :n;
+
+-- :name last-n-conversation-memories :? :*
+-- :doc Get the last memories (from new to old) where conversation = 1
+select gid, data, iv from memory
+where uid = :uid
+  and conversation = 1
 order by created desc limit :n;
 
 -- :name todays-non-archived-memories :? :*
@@ -24,7 +31,7 @@ order by created desc limit :n;
 select gid, data, iv from memory
 where uid = :uid
   and created_date = date('now')
-  and archived = 0;
+  and archived = 0
 order by created desc;
 
 -- :name archive-memories :! :n
@@ -45,6 +52,11 @@ where uid = :uid
 insert into memory_keyword (uid, fingerprint, data, iv)
 values(:uid, :fingerprint, :data, :iv)
 on conflict(uid, fingerprint) do update set seen=seen+1, last_seen=current_timestamp;
+
+-- :name associate-keyword :! :n
+-- :doc associates a memory gid with a keyword fingerprint
+insert into memory_keyword_lookup (gid, fingerprint)
+values (:gid, :fingerprint)
 
 -- :name frecency-keywords :? :* :1
 -- :doc returns the frecency of keywords for a uid with exponential decay

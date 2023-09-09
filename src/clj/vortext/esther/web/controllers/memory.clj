@@ -11,11 +11,8 @@
         {:keys [data iv]} (secrets/encrypt-for-sql kw secret)
         fingerprint (-> (hash/sha256 (str uid kw)) (bytes->b64))
         content {:uid uid :data data :iv iv :fingerprint fingerprint}]
-    (query-fn tx :see-keyword content)))
-
-(defn first-event
-  [obj]
-  (first (:memory/events obj)))
+    (query-fn tx :see-keyword content)
+    fingerprint))
 
 (defn remember!
   [opts user obj]
@@ -24,14 +21,20 @@
         {:keys [:memory/events :memory/gid]} obj
         [_ response] events
         {:keys [data iv]} (secrets/encrypt-for-sql obj secret)
+        conversation? (boolean (:event/conversation? response))
         memory {:gid gid
                 :uid uid
                 :data data
+                :conversation conversation?
                 :iv iv}]
     (jdbc/with-transaction [tx connection]
       (query-fn tx :push-memory memory)
       (doall
-       (map (fn [kw] (see-keyword query-fn tx user kw))
+       (map (fn [kw]
+              (let [fingerprint (see-keyword query-fn tx user kw)]
+                (query-fn tx :associate-keyword
+                          {:gid gid
+                           :fingerprint fingerprint})))
             (get-in response [:event/content :keywords] []))))
     obj))
 
@@ -55,10 +58,12 @@
 (defn recent-conversation
   ([opts user]
    (recent-conversation opts user 5))
-  ([opts user k]
-   (let [memories (last-memories opts user k)
-         conversation? #(-> % :memory/events second :event/conversation?)]
-     (filter conversation? memories))))
+  ([opts user n]
+   (let [{:keys [query-fn]} (:db opts)
+         uid (get-in user [:vault :uid])]
+     (construct-memories
+      user
+      (query-fn :last-n-conversation-memories {:uid uid :n n})))))
 
 (defn todays-non-archived-memories
   [opts user]
