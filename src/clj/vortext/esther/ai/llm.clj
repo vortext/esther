@@ -13,20 +13,23 @@
   (mustache/render prompt context))
 
 (defn generate-submission
-  [opts request]
+  [opts {:keys [:local/context :converse/request :user/memories :user/keywords]}]
   (let [promt-str (slurp (io/resource (:prompt opts)))
-        context (:request-context request)
+        {:keys [content _context]} request
         prompt  (generate-prompt promt-str context)]
     (concat
      [{:role "system"
        :content prompt}]
      [{:role "user"
-       :content (select-keys request request-keys)}])))
+       :content {:content content
+                 :context {:memories memories
+                           :keywords keywords}}}])))
+
 
 (defn create-complete-fn
   [llm-complete]
-  (fn [opts user request]
-    (let [submission (generate-submission opts request)]
+  (fn [opts user obj]
+    (let [submission (generate-submission opts obj)]
       (select-keys
        ((:complete-fn llm-complete) user submission)
        response-keys))))

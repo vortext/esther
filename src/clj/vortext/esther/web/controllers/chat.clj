@@ -1,17 +1,17 @@
 (ns vortext.esther.web.controllers.chat
   (:require
-   [vortext.esther.config :refer [errors response-keys]]
+   [vortext.esther.config :refer [errors response-keys wrapped-error]]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.util.time :as time]
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.util.emoji :as emoji]
-   [vortext.esther.common :as common ]
+   [vortext.esther.common :as common]
    [clojure.tools.logging :as log]))
 
 (def response-schema
   [:map
-   [:reply
+   [:content
     [:and
      [:string {:min 1, :max 2048}]
      [:fn {:error/message "response should be at most 2048 chars"}
@@ -52,40 +52,35 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
-(defn converse!
-  [opts user data]
-  (let [keywords (memory/frecency-keywords opts user :week 10)
-        keywords (if-let [kws (seq keywords)]
-                   (into #{} (map :value kws))
-                   #{})
+(defn ->user-context
+  [opts user obj]
 
-        k 3
-        conversation-memories (filter (comp :conversation? :response)
-                                      (memory/last-memories opts user 10))
-        request-context (get-in data [:request :context])
+  (let [keywords (memory/frecency-keywords opts user :week 10)
+        keywords (into #{} (map :value keywords))
+
+        k 3 ;; [FIXME] simply put the conversation? flag in the database
+        memories (filter :memory/conversation? (memory/last-memories opts user))
         memories
         (reverse
-         (map (fn [{:keys [request response ts]}]
+         (map (fn [{:keys [:converse/request :converse/response :local/ts]}]
                 {:moment (time/human-time-ago ts)
-                 :request (select-keys request [:msg])
-                 :response (select-keys response [:emoji :energy :reply :imagination])
-                 }) (take k conversation-memories)))
-        request
-        (-> (:request data)
-            (assoc :request-context request-context)
-            (assoc :context {:memories memories
-                             :keywords keywords}))
-        llm-complete (get-in opts [:ai :llm :complete-fn])
-        ;; The actual LLM complete
-        response (llm-complete opts user request)
+                 :request (select-keys request [:content])
+                 :response (select-keys response [:emoji :content :imagination])})
+              (take k memories)))]
+    (merge obj {:user/keywords keywords
+                :user/memories memories})))
+
+
+(defn converse!
+  [opts user obj]
+  (let [llm-complete (get-in opts [:ai :llm :complete-fn])
         validate-response #(validate response-schema %)]
     (try
-      (-> data
-          (assoc
-           :response
-           (-> response
-               (clean-response)
-               (validate-response)
-               (assoc :conversation? true)
-               (assoc :type :md-serif))))
-      (catch Exception e (do (log/warn e) (:internal-server-error errors))))))
+      (-> obj
+          (merge {:memory/conversation? true
+                  :ui/type :md-serif
+                  :converse/response
+                  (-> (llm-complete opts user (->user-context opts user obj))
+                      (clean-response)
+                      (validate-response))}))
+      (catch Exception e (wrapped-error :internal-server-error e)))))

@@ -4,7 +4,7 @@ quote     ::= "\""
 eot       ::= "<|end_of_turn|>"
 ws        ::= [\n ]?
 
-response  ::= "{" (quote "reply" quote ": " string ","
+response  ::= "{" (quote "content" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
                    quote "energy" quote ": " number ","
                    quote "keywords" quote ": " kwarray ","

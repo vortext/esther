@@ -24,12 +24,10 @@
   [memories]
   (let [ks [:emoji :energy :keywords :imagination]
         update-kw
-        (fn [kw] (str/join
-                  ", "
-                  (filter #((complement str/starts-with?) % "context:") kw)))
+        (fn [kw] (str/join ", " kw))
         formatted-memories
         (map (fn [m]
-               (-> (:response m)
+               (-> (:converse/response m)
                    (update :energy #(format "%.2f" %))
                    (update :keywords update-kw)))
              memories)]

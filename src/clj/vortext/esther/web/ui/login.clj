@@ -6,7 +6,7 @@
    [vortext.esther.web.middleware.auth :refer [authenticate authenticated?]]))
 
 (defn logout-chat
-  [_]
+  []
   [:form {:action "/logout" :method :post}
    [:button.button.button-primary
     {:name "logout" :value -1} "Click to logout"]])

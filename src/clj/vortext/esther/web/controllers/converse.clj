@@ -1,11 +1,11 @@
 (ns vortext.esther.web.controllers.converse
   (:require
-   [vortext.esther.util.time :refer [unix-ts]]
-   [vortext.esther.config :refer [errors]]
-   [vortext.esther.util.time :as time]
+   [vortext.esther.util.time :refer [unix-ts] :as time]
+   [vortext.esther.config :refer [errors wrapped-error]]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.controllers.command :refer [command!]]
    [vortext.esther.web.controllers.chat :refer [converse!]]
+   [vortext.esther.util :refer [random-base64]]
    [vortext.esther.api.weatherapi :as weather]
    [malli.core :as m]
    [vortext.esther.util.json :as json]
@@ -15,53 +15,53 @@
 
 (def request-schema
   [:map
-   [:msg [:and
-          [:string {:min 1, :max 1024}]
-          [:fn {:error/message "msg should be at most 1024 chars"}
-           (fn [s] (<= (count s) 1024))]]]
-   [:context [:map {:optional true}]]])
-
-
-(defn create-context
-  [_opts _user request]
-  (let [{:keys [params]} request
-        ctx (json/read-json-value (get params :context ""))
-        ip (get-in ctx [:remote-addr :ip])
-        current-weather (weather/current-weather ip)
-        more-ctx {:weather current-weather
-                  :today (time/human-today)}]
-    (merge ctx more-ctx)))
+   [:content
+    [:and
+     [:string {:min 1, :max 1024}]
+     [:fn {:error/message "content should be at most 1024 chars"}
+      (fn [s] (<= (count s) 1024))]]]])
 
 (defn- respond!
-  [opts user data]
-  (try
-    (if (str/starts-with? (get-in data [:request :msg]) "/")
-      (command! opts user data)
-      (converse! opts user data))
-    (catch Exception e
-      (do (log/warn e)
-          (assoc data :response (:internal-server-error errors))))))
+  [opts user {:keys [:converse/request] :as obj}]
+  (merge
+   obj
+   (try
+     (if (str/starts-with? (:content request) "/")
+       (command! opts user obj)
+       (converse! opts user obj))
+     (catch Exception e
+       (wrapped-error :internal-server-error e)))))
+
+(defn create-local-context
+  [context]
+  (let [ip (get-in context [:remote-addr :ip])]
+    (merge (dissoc context :remote-addr)
+           {:weather (weather/current-weather ip)
+            :today (time/human-today)})))
+
+(defn make-request-obj
+  [request]
+  (let [{:keys [params]} request
+        {:keys [context content]} params
+        context (create-local-context (json/read-json-value context))
+        request-content (emoji/replace-slack-aliasses (str/trim content))]
+    {:local/gid (random-base64)
+     :local/ts (unix-ts)
+     :local/context context
+     :converse/request {:content request-content}}))
 
 (defn answer!
   [opts request]
-  (try
-    (let [{:keys [params]} request
-          user (get-in request [:session :user])
-          data {:request
-                {:context (create-context opts user request)
-                 :msg (emoji/replace-slack-aliasses (str/trim (:msg params)))}
-                :ts (unix-ts)}]
-      (if-not (m/validate request-schema (:request data))
-        (assoc data :response (:unrecognized-input errors))
-        (let [memory (respond! opts user data)
-              type (keyword (:type (:response  memory)))]
+  (let [obj (make-request-obj request)
+        user (get-in request [:session :user])]
+    (if-not (m/validate request-schema (:converse/request obj))
+      (wrapped-error :unrecognized-input nil)
+      (try
+        (let [{:keys [:ui/type] :as response} (respond! opts user obj)]
           (if-not (= type :ui)
-            (memory/remember! opts user memory)
-            memory))))
-    (catch Exception e
-      (log/warn e)
-      {:request request
-       :type :md-serif
-       :reply (:internal-server-error errors)})))
+            (memory/remember! opts user response)
+            ;; Just return
+            response))
+        (catch Exception e (wrapped-error :internal-server-error e))))))
 
 ;;; Scratch

@@ -14,11 +14,11 @@
     (query-fn tx :see-keyword content)))
 
 (defn remember!
-  [opts user content]
+  [opts user obj]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid secret]} (:vault user)
-        gid (random-base64)
-        {:keys [data iv]} (secrets/encrypt-for-sql content secret)
+        {:keys [:converse/response :local/gid]} obj
+        {:keys [data iv]} (secrets/encrypt-for-sql obj secret)
         memory {:gid gid
                 :uid uid
                 :data data
@@ -27,8 +27,8 @@
       (query-fn tx :push-memory memory)
       (doall
        (map (fn [kw] (see-keyword query-fn tx user kw))
-            (get (:response content) :keywords []))))
-    content))
+            (get response :keywords []))))
+    obj))
 
 (defn construct-memories
   [user contents]
@@ -88,11 +88,11 @@
 
 (defn extract-keywords
   [memories]
-  (into #{} (flatten (map #(get-in % [:response :keywords]) memories))))
+  (into #{} (flatten (map #(get-in % [:converse/response :keywords]) memories))))
 
 (defn first-image
   [memories]
-  (first (keep #(get-in % [:response :imagination]) memories)))
+  (first (keep #(get-in % [:converse/response :imagination]) memories)))
 
 (defn wipe-all!
   [opts user]

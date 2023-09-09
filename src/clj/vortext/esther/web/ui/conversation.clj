@@ -6,6 +6,7 @@
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.util.time :as time]
    [vortext.esther.util.markdown :as markdown]
+   [clojure.tools.logging :as log]
    [clojure.string :as str]))
 
 (def loading
@@ -15,32 +16,37 @@
     [:div.second]
     [:div.third]]])
 
-(defn display-html
+(defn md->html
   [s]
   (if (and (string? s) (not (str/blank? s)))
     (markdown/parse s {"gfm" true "breaks" true})
     "<span></span>"))
 
+(defn error->html
+  [{:keys [content exception]}]
+  [:span.error
+   (md->html content)
+   [:span.exception exception]])
+
 (defn memory-container
   [memory]
-  (let [{:keys [request response]} memory
-        {:keys [energy type reply]} response
-        type (or (keyword type) :default)
-        request-msg (:msg request)]
+  (let [{:keys [:converse/request :converse/response :ui/type]} memory
+        {:keys [energy content]} response
+        type (keyword type)]
     [:div.memory
      {"data-energy" energy}
      [:div.request
-      (display-html request-msg)]
+      (md->html (:content request))]
      [:div.response {:class (name type)}
-      (if (and (string? response) (str/blank? response))
+      (if (and (string? content) (str/blank? content))
         [:span.md-sans "Silence."]
         (case type
-          :htmx reply
-          :ui reply
-          :md-mono (display-html reply)
-          :md-sans (display-html reply)
-          :md-serif (display-html reply)
-          (display-html reply)))]]))
+          :htmx content
+          :ui content
+          :error (error->html response)
+          :md-mono (md->html content)
+          :md-sans (md->html content)
+          :md-serif (md->html content)))]]))
 
 (defn message [opts request]
   (ui (memory-container (converse/answer! opts request))))
@@ -64,7 +70,7 @@
     [:textarea#user-input
      {:autocomplete "off"
       :minlength 1
-      :name "msg"
+      :name "content"
       :maxlength 1024
       :autofocus "true"
       :placeholder "Dear Esther,"

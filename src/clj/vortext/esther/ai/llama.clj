@@ -9,11 +9,12 @@
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
    [vortext.esther.util.json :as json]
-   [vortext.esther.config :refer [errors]]
+   [vortext.esther.config :refer [errors wrapped-error]]
    [clojure.string :as str])
   (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "") ;; <|end_of_turn|>
+(def prefix "User: ")
 
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
@@ -120,7 +121,7 @@
             json-obj (extract-json-parse new-partial-json)]
         (if-not json-obj
           (recur new-partial-json)
-          (if (:reply json-obj)
+          (if (:content json-obj)
             (do
               (>! response-ch json-obj)
               ((:sigint subprocess))
@@ -165,9 +166,11 @@
       (if (alive? (:proc subprocess))
         (when (= (<!! status-ch) :ready) subprocess)
         (do
-          (log/warn "llama:process-dead")
           (close! partial-json-ch)
-          (go (>! response-ch (:internal-server-error errors)))
+          (go (>! response-ch
+                  (wrapped-error
+                   :internal-server-error
+                   (Exception. "llama:process-dead"))))
           {:proc nil
            :response-ch response-ch})))))
 
@@ -196,22 +199,19 @@
         running-proc? (checked-proc cache uid)
         proc (cached-spawn-subprocess options cache uid submission)]
     (if-not proc
-      (:uncaught-exception errors)
-      (try
-        (let [entry (:content (last submission))
-              obj (if-not running-proc?
-                    entry (-> entry (dissoc :context)))
-              line (str "User: " (json/write-value-as-string obj) end-of-turn "\n")]
-          (log/debug "shell-complete-fn::complete" line)
-          (go (>! (:in-ch proc) line)))
+      (wrapped-error :uncaught-exception
+                     (Exception. "internal-shell-complete-fn no proc"))
+      (let [entry (:content (last submission))
+            obj (if-not running-proc? entry (-> entry (dissoc :context)))
+            line (str prefix (json/write-value-as-string obj) end-of-turn "\n")]
+        (log/debug "shell-complete-fn::complete" line)
+        (go (>! (:in-ch proc) line))
         (let [response-ch (:response-ch proc)
               t (timeout wait-for)]
           (<!! (go
                  (let [[v ch] (alts! [response-ch t])]
-               (if (= ch t)
-                 (throw (Exception. "Timeout"))
-                 v)))))
-        (catch Exception _e (:uncaught-exception errors))))))
+                   (if (= ch t)
+                     (throw (Exception. "Timeout")) v)))))))))
 
 
 (defn shell-complete-fn
@@ -223,7 +223,7 @@
       (catch TimeoutExceededException e
         (do (log/warn "shell-complete-fn::timeout" e)
             ((:shutdown-fn (w/lookup cache (get-in user [:vault :uid]))))
-            (:gateway-timeout errors))))))
+            (wrapped-error :gateway-timeout e))))))
 
 (defn shutdown-fn
   ([cache]
