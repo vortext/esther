@@ -56,7 +56,7 @@ function getLocalContext() {
 }
 
 function setLocalContext() {
-  let userContext = document.getElementById("user-context");
+  let userContext = document.getElementById("local-context");
   userContext.value = JSON.stringify(getLocalContext());
 }
 

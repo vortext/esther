@@ -63,7 +63,7 @@
      :hx-trigger "submit"
      "hx-on::before-request" "beforeConverseRequest();"
      "hx-on::after-request" "afterConverseRequest();"}
-    [:input#user-context
+    [:input#local-context
      {:type "hidden"
       :name "context"
       :value "{}"}]
