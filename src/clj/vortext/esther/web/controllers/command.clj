@@ -1,15 +1,22 @@
 (ns vortext.esther.web.controllers.command
   (:require
-   [vortext.esther.config :refer [errors wrapped-error wrapped-response]]
+   [clojure.tools.logging :as log]
+   [vortext.esther.errors :refer [errors wrapped-error]]
    [vortext.esther.common :as common]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.memory :as memory-ui]
    [vortext.esther.web.ui.login :as login-ui]
    [vortext.esther.util.markdown :as markdown]))
 
+(defn ->event
+  [type content]
+  {:event/role :system
+   :event/content {:ui/type type
+                   :content content}})
+
 (defn status
   [_opts user _args _obj]
-  (wrapped-response
+  (->event
    :htmx
    [:div.status
     [:pre
@@ -19,17 +26,16 @@
 
 (defn inspect
   [opts user _args _obj]
-  (wrapped-response
+  (->event
    :md-mono
    (str
     "#### memories"
     (memory-ui/md-memories-table
-     (take 5 (filter :memory/conversation?
-                     (memory/last-memories opts user 10)))))))
+     (memory/recent-conversation opts user)))))
 
 (defn keywords
   [opts user _args _obj]
-  (wrapped-response
+  (->event
    :md-mono
    (str
     "#### keywords"
@@ -38,30 +44,29 @@
 
 (defn imagine
   [opts user _args _obj]
-  (let [memories (filter :memory/conversation?
-                         (memory/last-memories opts user 10))]
-    (wrapped-response
+  (let [memories (memory/recent-conversation opts user)]
+    (->event
      :md-mono
      (markdown/strs-to-markdown-list
-      (keep #(get-in % [:converse/response :imagination])
-            (reverse (take 3 memories)))))))
+      (keep #(-> % :memory/events second :event/content :imagination)
+            memories)))))
 
 (defn logout
   [_opts _user _args _obj]
-  (wrapped-response :ui (login-ui/logout-chat)))
+  (->event :ui (login-ui/logout-chat)))
 
 (defn wipe
   [opts user args _obj]
-  (wrapped-response :ui (memory-ui/wipe-form opts user args)))
+  (->event :ui (memory-ui/wipe-form opts user args)))
 
 (defn archive
   [opts user _args _obj]
-  (wrapped-response :ui (memory-ui/archive-form opts user)))
+  (->event :ui (memory-ui/archive-form opts user)))
 
 
 (defn command!
   [opts user obj]
-  (let [content (get-in obj [:converse/request :content])
+  (let [msg (common/request-msg obj)
         commands {:inspect inspect
                   :keywords keywords
                   :status status
@@ -70,7 +75,7 @@
                   :archive archive
                   :logout logout}
         [cmd args] (common/split-first-word
-                    (apply str (rest content)))]
+                    (apply str (rest msg)))]
     (if-let [impl (get commands (keyword cmd))]
       (impl opts user args obj)
-      (wrapped-error :invalid-command nil))))
+      (wrapped-error :invalid-command (str "Invalid command: " msg)))))

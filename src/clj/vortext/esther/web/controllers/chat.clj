@@ -1,12 +1,13 @@
 (ns vortext.esther.web.controllers.chat
   (:require
-   [vortext.esther.config :refer [errors response-keys wrapped-error]]
+   [vortext.esther.config :refer [response-keys ai-name]]
+   [vortext.esther.errors :refer [errors wrapped-error]]
+   [vortext.esther.common :as common]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.util.time :as time]
+   [vortext.esther.util.emoji :as emoji]
    [malli.core :as m]
    [malli.error :as me]
-   [vortext.esther.util.emoji :as emoji]
-   [vortext.esther.common :as common]
    [clojure.tools.logging :as log]))
 
 (def response-schema
@@ -52,35 +53,35 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
+(defn ->memory-context
+  [{:keys [:memory/events :memory/ts]}]
+  (let [relevant-ks [:content :emoji :imagination]]
+    {:moment (time/human-time-ago ts)
+     :events (map #(merge
+                    {:role (:event/role %)}
+                    (select-keys (:event/content %) relevant-ks))
+                  events)}))
+
 (defn ->user-context
   [opts user obj]
-
   (let [keywords (memory/frecency-keywords opts user :week 10)
         keywords (into #{} (map :value keywords))
-
-        k 3 ;; [FIXME] simply put the conversation? flag in the database
-        memories (filter :memory/conversation? (memory/last-memories opts user))
-        memories
-        (reverse
-         (map (fn [{:keys [:converse/request :converse/response :local/ts]}]
-                {:moment (time/human-time-ago ts)
-                 :request (select-keys request [:content])
-                 :response (select-keys response [:emoji :content :imagination])})
-              (take k memories)))]
+        memories (memory/recent-conversation opts user)]
     (merge obj {:user/keywords keywords
-                :user/memories memories})))
+                :user/memories (map ->memory-context memories)})))
 
+(defn ->event
+  [content]
+  {:event/conversation? true
+   :event/role (keyword ai-name)
+   :event/content (assoc content :ui/type :md-serif)})
 
 (defn converse!
   [opts user obj]
   (let [llm-complete (get-in opts [:ai :llm :complete-fn])
-        validate-response #(validate response-schema %)]
-    (try
-      (-> obj
-          (merge {:memory/conversation? true
-                  :ui/type :md-serif
-                  :converse/response
-                  (-> (llm-complete opts user (->user-context opts user obj))
-                      (clean-response)
-                      (validate-response))}))
-      (catch Exception e (wrapped-error :internal-server-error e)))))
+        validate-response #(validate response-schema %)
+        response
+        (-> (llm-complete opts user (->user-context opts user obj))
+            (clean-response)
+            (validate-response))]
+    (->event response)))

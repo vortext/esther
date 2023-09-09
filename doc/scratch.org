@@ -2,6 +2,8 @@
   delete from memory;
 #+end_src
 
+#+RESULTS:
+
 #+begin_src sqlite :db "../esther_dev.db"
   delete from memory_keyword;
 #+end_src

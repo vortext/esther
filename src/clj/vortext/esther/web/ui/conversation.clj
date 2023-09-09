@@ -17,36 +17,36 @@
     [:div.third]]])
 
 (defn md->html
-  [s]
-  (if (and (string? s) (not (str/blank? s)))
-    (markdown/parse s {"gfm" true "breaks" true})
+  [{:keys [content]}]
+  (if (and (string? content) (not (str/blank? content)))
+    (markdown/parse content {"gfm" true "breaks" true})
     "<span></span>"))
 
 (defn error->html
-  [{:keys [content exception]}]
+  [{:keys [exception] :as event}]
   [:span.error
-   (md->html content)
+   (md->html event)
    [:span.exception exception]])
 
 (defn memory-container
   [memory]
-  (let [{:keys [:converse/request :converse/response :ui/type]} memory
-        {:keys [energy content]} response
-        type (keyword type)]
+  (let [{:keys [:memory/events]} memory
+        [req rep] events
+        [request response] [(:event/content req)
+                            (:event/content rep)]
+        type (keyword (get response :ui/type :default))]
     [:div.memory
-     {"data-energy" energy}
-     [:div.request
-      (md->html (:content request))]
+     {"data-energy" (:energy response)}
+     [:div.request (md->html request)]
      [:div.response {:class (name type)}
-      (if (and (string? content) (str/blank? content))
-        [:span.md-sans "Silence."]
-        (case type
-          :htmx content
-          :ui content
-          :error (error->html response)
-          :md-mono (md->html content)
-          :md-sans (md->html content)
-          :md-serif (md->html content)))]]))
+      (case type
+        :default [:pre.default (:content response)]
+        :htmx (:content response)
+        :ui (:content response)
+        :error (error->html response)
+        :md-mono (md->html response)
+        :md-sans (md->html response)
+        :md-serif (md->html response))]]))
 
 (defn message [opts request]
   (ui (memory-container (converse/answer! opts request))))
@@ -78,7 +78,8 @@
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 
-(defn conversation [opts request]
+(defn conversation
+  [opts request]
   (let [user (get-in request [:session :user])
         memories (memory/todays-non-archived-memories opts user)]
     [:div.container

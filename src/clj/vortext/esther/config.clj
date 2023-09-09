@@ -5,6 +5,8 @@
    [clojure.tools.logging :as log]
    [kit.config :as config]))
 
+(def ai-name "esther")
+
 (def ^:const system-filename "system.edn")
 
 (defn system-config
@@ -14,23 +16,6 @@
 (def examples
   (edn/read-string
    (slurp (io/resource "prompts/examples.edn"))))
-
-(def errors
-  (edn/read-string
-   (slurp (io/resource "prompts/errors.edn"))))
-
-(defn wrapped-response
-  [type content]
-  {:ui/type type
-   :converse/response {:content content}})
-
-(defn wrapped-error
-  [error-kw e]
-  (log/warn e)
-  {:ui/type :error
-   :converse/response
-   (-> (error-kw errors)
-       (assoc :exception (str e)))})
 
 (def introductions
   (edn/read-string

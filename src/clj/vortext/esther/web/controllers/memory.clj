@@ -13,11 +13,16 @@
         content {:uid uid :data data :iv iv :fingerprint fingerprint}]
     (query-fn tx :see-keyword content)))
 
+(defn first-event
+  [obj]
+  (first (:memory/events obj)))
+
 (defn remember!
   [opts user obj]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid secret]} (:vault user)
-        {:keys [:converse/response :local/gid]} obj
+        {:keys [:memory/events :memory/gid]} obj
+        [_ response] events
         {:keys [data iv]} (secrets/encrypt-for-sql obj secret)
         memory {:gid gid
                 :uid uid
@@ -27,7 +32,7 @@
       (query-fn tx :push-memory memory)
       (doall
        (map (fn [kw] (see-keyword query-fn tx user kw))
-            (get response :keywords []))))
+            (get-in response [:event/content :keywords] []))))
     obj))
 
 (defn construct-memories
@@ -46,6 +51,14 @@
      (construct-memories
       user
       (query-fn :last-n-memories {:uid uid :n n})))))
+
+(defn recent-conversation
+  ([opts user]
+   (recent-conversation opts user 5))
+  ([opts user k]
+   (let [memories (last-memories opts user k)
+         conversation? #(-> % :memory/events second :event/conversation?)]
+     (filter conversation? memories))))
 
 (defn todays-non-archived-memories
   [opts user]
@@ -85,14 +98,6 @@
                                  (select-keys kw cols)))
          query-params {:uid uid :n n :lambda (lambda lambdas)}]
      (map decrypt (query-fn :frecency-keywords query-params)))))
-
-(defn extract-keywords
-  [memories]
-  (into #{} (flatten (map #(get-in % [:converse/response :keywords]) memories))))
-
-(defn first-image
-  [memories]
-  (first (keep #(get-in % [:converse/response :imagination]) memories)))
 
 (defn wipe-all!
   [opts user]

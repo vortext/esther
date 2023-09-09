@@ -2,14 +2,15 @@
   (:require
    [diehard.core :as dh]
    [clojure.tools.logging :as log]
-   [clojure.core.async :as async :refer [alts! timeout chan go-loop <! go >! <!! >!! close!]]
+   [clojure.core.async :as async :refer
+    [alts! timeout chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
    [clj-commons.digest :as digest]
    [babashka.process :refer [process destroy-tree alive?]]
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
    [vortext.esther.util.json :as json]
-   [vortext.esther.config :refer [errors wrapped-error]]
+   [vortext.esther.errors :refer [errors wrapped-error]]
    [clojure.string :as str])
   (:import [dev.failsafe TimeoutExceededException]))
 

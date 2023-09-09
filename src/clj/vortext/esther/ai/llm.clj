@@ -13,10 +13,12 @@
   (mustache/render prompt context))
 
 (defn generate-submission
-  [opts {:keys [:local/context :converse/request :user/memories :user/keywords]}]
+  [opts obj]
   (let [promt-str (slurp (io/resource (:prompt opts)))
-        {:keys [content]} request
-        prompt  (generate-prompt promt-str context)]
+        {:keys [:local/context :memory/events :user/memories :user/keywords]} obj
+        prompt  (generate-prompt promt-str context)
+        content (-> events first :event/content :content)]
+    (log/info obj)
     {:llm/prompt prompt
      :llm/submission
      {:content content
@@ -28,18 +30,16 @@
   [llm-complete]
   (fn [opts user obj]
     (let [submission (generate-submission opts obj)]
-      (select-keys
-       ((:complete-fn llm-complete) user submission)
-       response-keys))))
+      ((:complete-fn llm-complete) user submission))))
 
 
 (defmethod ig/init-key :ai.llm/llm-interface
-           [_ {:keys [impl]
-                     :as   opts}]
-           (let [instance (case impl :llama-shell (llama/create-interface opts))]
-             {:impl instance
-                    :shutdown-fn (:shutdown-fn instance)
-                    :complete-fn  (create-complete-fn instance)}))
+  [_ {:keys [impl]
+      :as   opts}]
+  (let [instance (case impl :llama-shell (llama/create-interface opts))]
+    {:impl instance
+     :shutdown-fn (:shutdown-fn instance)
+     :complete-fn  (create-complete-fn instance)}))
 
 
 (defmethod ig/halt-key! :ai.llm/llm-interface [_ {:keys [impl]}]
