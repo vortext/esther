@@ -15,15 +15,13 @@
 (defn generate-submission
   [opts {:keys [:local/context :converse/request :user/memories :user/keywords]}]
   (let [promt-str (slurp (io/resource (:prompt opts)))
-        {:keys [content _context]} request
+        {:keys [content]} request
         prompt  (generate-prompt promt-str context)]
-    (concat
-     [{:role "system"
-       :content prompt}]
-     [{:role "user"
-       :content {:content content
-                 :context {:memories memories
-                           :keywords keywords}}}])))
+    {:llm/prompt prompt
+     :llm/submission
+     {:content content
+      :context {:memories memories
+                :keywords keywords}}}))
 
 
 (defn create-complete-fn

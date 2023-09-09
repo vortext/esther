@@ -19,13 +19,13 @@
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
 (defn generate-prompt-str
-  [submission]
+  [prompt]
   ;; Instructions
-  (str (str/trim (:content (first submission))) end-of-turn "\n\n"))
+  (str (str/trim prompt) end-of-turn "\n\n"))
 
 (defn shell-cmd
-  [bin-dir model-path submission]
-  (let [prompt (generate-prompt-str submission)
+  [bin-dir model-path prompt]
+  (let [prompt (generate-prompt-str prompt)
         cache-file (str "cache/" (digest/md5 prompt) ".bin")
         prompt-cache (fs/delete-on-exit (fs/canonicalize cache-file))
         gbnf (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))
@@ -151,11 +151,11 @@
   subprocess)
 
 (defn start-subprocess!
-  [bin-dir model-path submission]
+  [bin-dir model-path prompt]
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
         status-ch (chan)
-        cmd (shell-cmd bin-dir model-path submission)
+        cmd (shell-cmd bin-dir model-path prompt)
         llama (llama-process status-ch cmd)]
     (when-let [subprocess
                (and llama
@@ -175,11 +175,11 @@
            :response-ch response-ch})))))
 
 (defn cached-spawn-subprocess
-  [options cache uid submission]
+  [options cache uid prompt]
   (let [{:keys [model-path bin-dir]} options]
     (w/lookup-or-miss
      cache uid
-     (fn [_uid] (start-subprocess! bin-dir model-path submission)))))
+     (fn [_uid] (start-subprocess! bin-dir model-path prompt)))))
 
 (defn checked-proc
   [cache uid]
@@ -194,15 +194,14 @@
         nil))))
 
 (defn- internal-shell-complete-fn
-  [options cache user submission]
+  [options cache user {:keys [:llm/submission :llm/prompt]}]
   (let [{:keys [uid]} (:vault user)
         running-proc? (checked-proc cache uid)
-        proc (cached-spawn-subprocess options cache uid submission)]
+        proc (cached-spawn-subprocess options cache uid prompt)]
     (if-not proc
       (wrapped-error :uncaught-exception
                      (Exception. "internal-shell-complete-fn no proc"))
-      (let [entry (:content (last submission))
-            obj (if-not running-proc? entry (-> entry (dissoc :context)))
+      (let [obj (if running-proc? (dissoc submission :context) submission)
             line (str prefix (json/write-value-as-string obj) end-of-turn "\n")]
         (log/debug "shell-complete-fn::complete" line)
         (go (>! (:in-ch proc) line))
