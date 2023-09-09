@@ -23,18 +23,18 @@ _ uid in vault
 _ more user information in session (vault)
 ** DONE use data, iv as columns instead of the json for memory and memory_keywords
 ** DONE better input UI? (textfield, resize, like Signal?)
+** DONE local version of fonts
 ** DONE just slurp the secrets.edn file and get rid of the rest (secrets.clj)
 ** DONE refactor memory to only have contents
 ** DONE error handling
 ** DONE better integrate keywords in narrative
 ** DONE check multi-line markdown
-** DONE local version of fonts
 ** DONE input checking and validation (also converse.clj)
 ** DONE Remember and show for a day, clear page every day (aligns with the prominent date)
 ** DONE /clear command (clear all memory for uid)
+** DONE url handling (it renders)
 ** DONE check logging levels (disable debug outside dev)
 ** DONE llma locally
-** DONE url handling (it renders)
 ** DONE llama tweaks
 - json grammar :D
 - performance tweaks (gpu layers, cores)
@@ -54,20 +54,19 @@ _ more user information in session (vault)
 ** DONE get rid of pty_bridy.py
 ** DONE switch to guff
 - probably needs lots of updating
-** TODO use proper locale for times
+** DONE Try https://huggingface.co/Gryphe/MythoMax-L2-13b
+- MythoMax-L2-13B-GGML-Q6_K with llamacpp, and Mirostat set to Mirostat 2, Tau 5, Eta 0.1
+- https://www.reddit.com/r/LocalLLaMA/comments/167088h/why_are_the_answers_getting_dumber_as_the/
+- different prompt format
+** TODO use proper locale for times?
 ** TODO better handling of location data
 ** TODO clear cache of llama.cpp daily (integrate quartz)
 ** TODO use a single map from the whole req-rep thread with namespaced keywords.
-** TODO return edn instead of JSON from llm?
 ** TODO link parsing?
 ** TODO ui things
 - Discoverability of input bar
 - Button for archive or other commands?
 ** TODO integrate https://github.com/spencermountain/compromise?
-** TODO Try https://huggingface.co/Gryphe/MythoMax-L2-13b
-- MythoMax-L2-13B-GGML-Q6_K with llamacpp, and Mirostat set to Mirostat 2, Tau 5, Eta 0.1
-- https://www.reddit.com/r/LocalLLaMA/comments/167088h/why_are_the_answers_getting_dumber_as_the/
-- different prompt format
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)

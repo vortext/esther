@@ -1,4 +1,4 @@
-(ns vortext.esther.web.ui.signin
+(ns vortext.esther.web.ui.login
   (:require
    [clojure.tools.logging :as log]
    [vortext.esther.web.ui.common :as common]
@@ -19,15 +19,15 @@
     (page
      (common/head
       {}
-      [[:link {:rel "stylesheet" :href "/resources/public/css/signin.css"}]]
-      [[:script {:src "/resources/public/js/signin.js"}]])
+      [[:link {:rel "stylesheet" :href "/resources/public/css/login.css"}]]
+      [[:script {:src "/resources/public/js/login.js"}]])
      [:body
       [:div.container
        [:div.login-box
         [:h1 "Esther"]
         (when error-message
           [:div.error error-message])
-        [:form {:action "/signin" :method "POST"}
+        [:form {:action "/login" :method "POST"}
          [:div.form-group
           [:label "Username"
            [:input {:type "text" :name "username" :class "form-input"}]]]

@@ -6,7 +6,7 @@
    [vortext.esther.web.middleware.formats :as formats]
    [vortext.esther.web.middleware.auth :as auth]
    [vortext.esther.web.ui.conversation :as conversation]
-   [vortext.esther.web.ui.signin :as signin]
+   [vortext.esther.web.ui.login :as login]
    [vortext.esther.web.ui.memory :as memory]
 
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
@@ -22,10 +22,10 @@
          (fn [req]
            (if (auth/authenticated? req)
              (response/redirect (:default-path opts))
-             (signin/render opts req nil)))}]
-   ["/signin"
-    {:post (partial signin/handler opts)
-     :get (fn [req] (signin/render opts req nil))}]
+             (login/render opts req nil)))}]
+   ["/login"
+    {:post (partial login/handler opts)
+     :get (fn [req] (login/render opts req nil))}]
    ["/logout"
     {:post
      (fn [_]
@@ -45,14 +45,14 @@
   (log/warn
    "access-rules on-error" " session:" (:session req))
   {:status 303
-   :headers {"Location" "/signin"}
-   :body "Redirecting to signin"})
+   :headers {"Location" "/login"}
+   :body "Redirecting to login"})
 
 (defn any-access [_] true)
 
 (def access-rules [{:pattern #"/$"
                     :handler any-access}
-                   {:pattern #"^/signin$"
+                   {:pattern #"^/login$"
                     :handler any-access}
                    {:pattern #"^/logout$"
                     :handler auth/authenticated-access}

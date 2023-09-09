@@ -4,7 +4,7 @@
    [vortext.esther.common :as common]
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.ui.memory :as memory-ui]
-   [vortext.esther.web.ui.signin :as signin-ui]
+   [vortext.esther.web.ui.login :as login-ui]
    [vortext.esther.util.markdown :as markdown]))
 
 (defn status
@@ -49,7 +49,7 @@
 (defn logout
   [_opts _user _args {:keys [request]}]
   {:type :ui
-   :reply (signin-ui/logout-chat request)})
+   :reply (login-ui/logout-chat request)})
 
 (defn wipe
   [opts user args {:keys [_request]}]
