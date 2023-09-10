@@ -29,9 +29,8 @@
    [:span.exception exception]])
 
 (defn memory-container
-  [memory]
-  (let [{:keys [:memory/events]} memory
-        [req rep] events
+  [{:keys [:memory/events]}]
+  (let [[req rep] events
         [request response] [(:event/content req)
                             (:event/content rep)]
         type (keyword (get response :ui/type :default))]

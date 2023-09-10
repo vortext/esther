@@ -22,7 +22,7 @@ create table memory_keyword (
     uid                     text not null,
     fingerprint             text primary key,
     data                    text not null,
-    iv                      iv not null,
+    iv                      text not null,
     seen                    integer default 1,
     last_seen               timestamp with time zone default current_timestamp,
     unique(uid,fingerprint)
@@ -39,10 +39,18 @@ create table memory_keyword_lookup (
     gid            text not null,
     fingerprint    text not null,
     primary key (gid, fingerprint),
-    foreign key (gid) references memory(gid),
-    foreign key (fingerprint) references memory_keyword(fingerprint)
+    foreign key (gid) references memory(gid) on delete cascade,
+    foreign key (fingerprint) references memory_keyword(fingerprint) on delete cascade
 )
 --;;
 create index memory_keyword_lookup_gid on memory_keyword_lookup(gid);
 --;;
 create index memory_keyword_lookup_fingerpint on memory_keyword_lookup(fingerprint);
+--;;
+create trigger aftermemorydelete
+after delete on memory
+for each row
+begin
+delete from memory_keyword where fingerprint in (select fingerprint from memory_keyword_lookup where gid = old.gid);
+delete from memory_keyword_lookup where gid = old.gid;
+end;

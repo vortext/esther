@@ -109,7 +109,6 @@
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (jdbc/with-transaction [tx connection]
-      (query-fn tx :wipe-all-memory-keywords {:uid uid})
       (query-fn tx :wipe-all-memory {:uid uid}))))
 
 (defn wipe-today!
