@@ -61,7 +61,7 @@ _ more user information in session (vault)
 ** TODO use proper locale for times?
 ** TODO better handling of location data
 ** TODO clear cache of llama.cpp daily (integrate quartz)
-** TODO use a single map from the whole req-rep thread with namespaced keywords.
+** DONE use a single map from the whole req-rep thread with namespaced keywords.
 ** TODO link parsing?
 ** TODO ui things
 - Discoverability of input bar
@@ -83,13 +83,13 @@ _ more user information in session (vault)
 - bert.cpp / jna?
 - wait for llama.cpp to fix it?
 ** TODO harmonize emoji handling using graalvm?
-** TODO keyword_memory_lookup table and logic
+** DONE keyword_memory_lookup table and logic
 ** TODO dark mode
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
 ** TODO weird bug where login shows in memory.
-** TODO better error handling subprocesses
+** DONE better error handling subprocesses
 ** TODO calendar page (for memories)?
 ** TODO share a page (static gen)
 ** TODO security and hosting
