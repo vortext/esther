@@ -210,7 +210,7 @@ function afterConverseRequest() {
 
 async function fetchTimezones() {
   try {
-    const response = await fetch('/resources/public/misc/timezones.json');
+    const response = await fetch('/resources/public/misc/timezones.min.json');
     if (!response.ok) {
       throw new Error('Network response was not ok ' + response.statusText);
     }
