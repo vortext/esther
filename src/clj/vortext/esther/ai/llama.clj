@@ -215,10 +215,10 @@
 
 (defn shell-complete-fn
   [options cache]
-  (fn [user submission]
+  (fn [user obj]
     (try
       (dh/with-timeout {:timeout-ms wait-for}
-        (internal-shell-complete-fn options cache user submission))
+        (internal-shell-complete-fn options cache user obj))
       (catch TimeoutExceededException e
         (do (log/warn "shell-complete-fn::timeout" e)
             ((:shutdown-fn (w/lookup cache (get-in user [:vault :uid]))))
