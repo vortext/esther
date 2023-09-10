@@ -16,26 +16,16 @@
   (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "") ;; <|end_of_turn|>
+(def end-of-prompt "<#>")
 (def prefix "User: ")
 
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
-(defn generate-prompt-str
-  [prompt]
-  ;; Instructions
-  (str (str/trim prompt) end-of-turn "\n\n"))
-
 (defn shell-cmd
   [bin-dir model-path prompt]
-  (let [prompt (generate-prompt-str prompt)
-        prompt-cache (fs/path
-                      config/tmp-dir
-                      (str (digest/md5 prompt) ".bin"))
-        gbnf (fs/canonicalize (io/resource "grammars/chat.gbnf"))
-
-        tmp (str (fs/create-temp-file {:dir config/tmp-dir}))
+  (let [gbnf (fs/canonicalize (io/resource "grammars/chat.gbnf"))
         model (fs/canonicalize (fs/path model-path))]
-    (spit tmp prompt)
+
     (str/join
      " "
      [(str (fs/real-path (fs/path bin-dir "main")))
@@ -55,12 +45,12 @@
       ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
       ;; Also see https://github.com/belladoreai/llama-tokenizer-js
       "--keep" -1
-      "--prompt-cache" (str prompt-cache)
+      "--prompt-cache" (::cache prompt)
 
       "-i"
       "--simple-io"
       "--interactive-first"
-      "-f" (str tmp)])))
+      "-f" (::path prompt)])))
 
 (defn send-sigint [pid]
   (let [cmd (str "kill -INT " pid)]
@@ -115,7 +105,7 @@
         (do
           (log/debug "line" line)
           (when (and (not @process-ready?)
-                     (str/includes? line end-of-turn))
+                     (str/includes? line end-of-prompt))
             (>! status-ch :ready)
             (reset! process-ready? true))
           (when @process-ready?
@@ -193,11 +183,27 @@
         (w/evict cache uid)
         nil))))
 
+(defn- internal-prompt-obj
+  [prompt]
+  (let [tmp-file (str (fs/create-temp-file {:dir config/tmp-dir}))
+        prompt (str (str/trim prompt)
+                    end-of-prompt
+                    end-of-turn
+                    "\n\n")
+        cache (fs/path
+               config/tmp-dir
+               (str (digest/md5 prompt) ".bin"))]
+    (spit tmp-file prompt)
+    {::prompt prompt
+     ::path tmp-file
+     ::cache cache}))
+
 (defn- internal-shell-complete-fn
   [options cache user {:keys [:llm/submission :llm/prompt]}]
   (let [{:keys [uid]} (:vault user)
         running-proc? (checked-proc cache uid)
-        proc (cached-spawn-subprocess options cache uid prompt)]
+        prompt-obj (internal-prompt-obj prompt)
+        proc (cached-spawn-subprocess options cache uid prompt-obj)]
     (if-not proc
       (throw (Exception. "internal-shell-complete-fn no proc"))
       (let [obj (if running-proc? (dissoc submission :context) submission)
