@@ -66,7 +66,7 @@
   (let [cmd (str "kill -INT " pid)]
     (.exec (Runtime/getRuntime) cmd)))
 
-(defn llama-process
+(defn main-process
   [status-ch cmd]
   (let [_ (log/debug "llama::process-channels:cmd" cmd)
         proc (process {:shutdown destroy-tree
@@ -107,6 +107,26 @@
      :sigint sigint
      :shutdown-fn shutdown-fn}))
 
+(defn handle-output-channel
+  [subprocess partial-json-ch status-ch]
+  (let [process-ready? (atom false)]
+    (go-loop []
+      (if-let [line (<! (:out-ch subprocess))]
+        (do
+          (log/debug "line" line)
+          (when (and (not @process-ready?)
+                     (str/includes? line end-of-turn))
+            (>! status-ch :ready)
+            (reset! process-ready? true))
+          (when @process-ready?
+            (>! partial-json-ch line))
+          (recur))
+        (do
+          ((:shutdown-fn subprocess))
+          (close! partial-json-ch)
+          (go (>! status-ch :stream-closed))))))
+  subprocess)
+
 (defn extract-json-parse
   [output]
   (when (seq output)
@@ -132,38 +152,18 @@
       ((:sigint subprocess))))
   subprocess)
 
-(defn handle-output-channel
-  [subprocess partial-json-ch status-ch]
-  (let [process-ready? (atom false)]
-    (go-loop []
-      (if-let [line (<! (:out-ch subprocess))]
-        (do
-          (log/debug "line" line)
-          (when (and (not @process-ready?)
-                     (str/includes? line end-of-turn))
-            (>! status-ch :ready)
-            (reset! process-ready? true))
-          (when @process-ready?
-            (>! partial-json-ch line))
-          (recur))
-        (do
-          ((:shutdown-fn subprocess))
-          (close! partial-json-ch)
-          (go (>! status-ch :stream-closed))))))
-  subprocess)
-
 (defn start-subprocess!
   [bin-dir model-path prompt]
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
         status-ch (chan)
         cmd (shell-cmd bin-dir model-path prompt)
-        llama (llama-process status-ch cmd)]
+        main (main-process status-ch cmd)]
     (when-let [subprocess
-               (and llama
-                    (-> llama
-                        (handle-json-parsing partial-json-ch response-ch)
+               (and main
+                    (-> main
                         (handle-output-channel partial-json-ch status-ch)
+                        (handle-json-parsing partial-json-ch response-ch)
                         (assoc :response-ch response-ch)))]
       (if (alive? (:proc subprocess))
         (when (= (<!! status-ch) :ready) subprocess)
