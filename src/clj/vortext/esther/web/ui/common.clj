@@ -1,5 +1,6 @@
 (ns vortext.esther.web.ui.common
   (:require
+   [vortext.esther.util :refer [md5sums]]
    [babashka.process :refer [process shell]]
    [clj-commons.digest :as digest]
    [clojure.java.io :as io]
@@ -25,15 +26,6 @@
   [resource]
   (str (fs/canonicalize (io/resource resource))))
 
-(defn md5sum
-  [paths]
-  (into
-   {}
-   (map (comp vec reverse #(str/split % #"  "))
-        (-> (apply (partial shell {:out :string} "md5sum") paths)
-            deref :out
-            (str/split #"\n")))))
-
 (def minify-bin
   (fs/canonicalize (io/resource "scripts/minify/linux_amd64/minify")))
 
@@ -45,7 +37,7 @@
 (defn bundle
   [out-dir resources prefix suffix]
   (let [paths (map ->canonical-path resources)
-        hash (digest/md5 (str (md5sum paths)))
+        hash (digest/md5 (str (md5sums paths)))
         filename (str prefix hash suffix)
         outfile (str (fs/path out-dir filename))]
     (if (fs/exists? outfile) outfile (minify paths outfile))))

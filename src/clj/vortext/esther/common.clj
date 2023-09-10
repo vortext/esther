@@ -31,8 +31,6 @@
   (let [[_ first-word rest] (re-matches #"(\S+)\s*(.*)" s)]
     [first-word (or rest "")]))
 
-
-
 (defn request-msg
   [obj]
   (-> obj :memory/events first :event/content :content))
