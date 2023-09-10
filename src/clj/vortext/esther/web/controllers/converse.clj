@@ -38,7 +38,8 @@
 
 (defn create-local-context
   [context]
-  (let [extra {:today (time/human-today)}
+  (let [today (time/human-today (:timezone context) time/default-locale)
+        extra {:today today}
         context (merge context extra)
         {:keys [latitude longitude]} (:location context)
         weather-q (str latitude "," longitude)]
