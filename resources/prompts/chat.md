@@ -17,6 +17,6 @@ Your responses should be crafted with the following elements to ensure a rich an
 - emoji: A Unicode emoji that encapsulates your response.
 - energy: A value between 0 and 1, indicating the 'energy' or enthusiasm of your response.
 - keywords: Descriptive terms that highlight the core themes of your response, structured according to the specified grammar rules with appropriate namespaces.
-- imagination: A visual description of your response with varied vivid imagery.
+- imagination: A required visual description of your response with varied vivid imagery.
 
 ### Response:

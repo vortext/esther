@@ -22,11 +22,19 @@
      [:fn {:error/message "content should be at most 1024 chars"}
       (fn [s] (<= (count s) 1024))]]]])
 
+(defn append-event
+  [obj event]
+  (update obj :memory/events #(conj % event)))
+
 (defn- respond!
   [opts user obj]
-  (if (str/starts-with? (request-msg obj) "/")
-    (command! opts user obj)
-    (converse! opts user obj)))
+  (try
+    (let [reply (if (str/starts-with? (request-msg obj) "/")
+                  (command! opts user obj)
+                  (converse! opts user obj))]
+      (append-event obj reply))
+    (catch Exception e
+      (append-event obj (wrapped-error :internal-server-error e)))))
 
 (defn create-local-context
   [context]
@@ -47,27 +55,26 @@
      :memory/events [{:event/content {:content request-content}
                       :event/role :user}]}))
 
-(defn append-event
-  [obj event]
-  (update obj :memory/events #(conj % event)))
-
 (defn answer!
   [opts request]
   (let [user (get-in request [:session :user])
         obj (make-request-obj user request)
-        add-event (partial append-event obj)
         request (-> obj :memory/events first :event/content)]
     (try
       (if-not (m/validate request-schema request)
-        (add-event
+        (append-event
+         obj
          (wrapped-error :unrecognized-input (str "Unrecognized input: "  request)))
-        (let [{:keys [:ui/type] :as response} (respond! opts user obj)]
+        (let [new-obj (respond! opts user obj)
+              [_ resp] (:memory/events new-obj)
+              {:keys [:ui/type]} (:event/content resp)]
           (if-not (= type :ui)
-            (memory/remember! opts user (add-event response))
+            (memory/remember! opts user new-obj)
             ;; Just return without remembering if UI
-            (append-event obj response))))
+            new-obj)))
       (catch Exception e
-        (add-event
+        (append-event
+         obj
          (wrapped-error :internal-server-error e))))))
 
 ;;; Scratch

@@ -6,11 +6,11 @@
     [alts! timeout chan go-loop <! go >! <!! >!! close!]]
    [clojure.java.io :as io]
    [clj-commons.digest :as digest]
+   [vortext.esther.config :refer [ai-name]]
    [babashka.process :refer [process destroy-tree alive?]]
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
    [vortext.esther.util.json :as json]
-   [vortext.esther.errors :refer [errors wrapped-error]]
    [clojure.string :as str])
   (:import [dev.failsafe TimeoutExceededException]))
 
@@ -75,7 +75,7 @@
         rdr (io/reader (:out proc))
         shutdown-fn #(do
                        (log/warn "destroying" (:proc proc))
-                       (go (>! status-ch :failed))
+                       (go (>! status-ch :dead))
                        (destroy-tree proc)
                        (close! out-ch)
                        (close! in-ch))
@@ -106,13 +106,11 @@
 
 (defn extract-json-parse
   [output]
-  (try
-    (when (seq output)
-      (let [start (str/index-of output "{")
-            end (str/last-index-of output "}")]
-        (when (and start end)
-          (json/read-json-value (subs output start (inc end))))))
-    (catch com.fasterxml.jackson.core.JsonParseException e (log/warn e))))
+  (when (seq output)
+    (let [start (str/index-of output "{")
+          end (str/last-index-of output "}")]
+      (when (and start end)
+        (json/read-json-value (subs output start (inc end)))))))
 
 (defn handle-json-parsing
   [subprocess partial-json-ch response-ch]
@@ -166,12 +164,10 @@
                         (assoc :response-ch response-ch)))]
       (if (alive? (:proc subprocess))
         (when (= (<!! status-ch) :ready) subprocess)
+        ;; Dead
         (do
           (close! partial-json-ch)
-          (go (>! response-ch
-                  (wrapped-error
-                   :internal-server-error
-                   (Exception. "llama:process-dead"))))
+          (go (>! response-ch (Exception. "llama:process-dead")))
           {:proc nil
            :response-ch response-ch})))))
 
@@ -200,18 +196,12 @@
         running-proc? (checked-proc cache uid)
         proc (cached-spawn-subprocess options cache uid prompt)]
     (if-not proc
-      (wrapped-error :uncaught-exception
-                     (Exception. "internal-shell-complete-fn no proc"))
+      (throw (Exception. "internal-shell-complete-fn no proc"))
       (let [obj (if running-proc? (dissoc submission :context) submission)
             line (str prefix (json/write-value-as-string obj) end-of-turn "\n")]
         (log/debug "shell-complete-fn::complete" line)
         (go (>! (:in-ch proc) line))
-        (let [response-ch (:response-ch proc)
-              t (timeout wait-for)]
-          (<!! (go
-                 (let [[v ch] (alts! [response-ch t])]
-                   (if (= ch t)
-                     (throw (Exception. "Timeout")) v)))))))))
+        (<!! (:response-ch proc))))))
 
 
 (defn shell-complete-fn
@@ -223,7 +213,7 @@
       (catch TimeoutExceededException e
         (do (log/warn "shell-complete-fn::timeout" e)
             ((:shutdown-fn (w/lookup cache (get-in user [:vault :uid]))))
-            (wrapped-error :gateway-timeout e))))))
+            (throw e))))))
 
 (defn shutdown-fn
   ([cache]
