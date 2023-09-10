@@ -38,10 +38,13 @@
 
 (defn create-local-context
   [context]
-  (let [ip (get-in context [:remote-addr :ip])]
-    (merge (dissoc context :remote-addr)
-           {:weather (weather/current-weather ip)
-            :today (time/human-today)})))
+  (let [extra {:today (time/human-today)}
+        context (merge context extra)
+        {:keys [latitude longitude]} (:location context)
+        weather-q (str latitude "," longitude)]
+    (if (:location-allowed context)
+      (merge context {:weather (weather/current-weather weather-q)})
+      context)))
 
 (defn make-request-obj
   [user request]

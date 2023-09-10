@@ -30,35 +30,59 @@ function getTimeOfDay(latitude, longitude) {
   const times = SunCalc.getTimes(date, latitude, longitude);
 
   if (date < times.nauticalDawn) return 'night';
-  if (date < times.dawn) return 'nautical-twilight';
-  if (date < times.sunrise) return 'civil-twilight';
+  if (date < times.dawn) return 'nautical twilight';
+  if (date < times.sunrise) return 'civil twilight';
   if (date < times.sunriseEnd) return 'sunrise';
   if (date < times.goldenHourEnd) return 'morning';
   if (date < times.solarNoon) return 'daytime';
   if (date < times.goldenHour) return 'afternoon';
   if (date < times.sunsetStart) return 'evening';
   if (date < times.sunset) return 'sunset';
-  if (date < times.dusk) return 'civil-twilight';
-  if (date < times.nauticalDusk) return 'nautical-twilight';
+  if (date < times.dusk) return 'civil twilight';
+  if (date < times.nauticalDusk) return 'nautical twilight';
 
   return 'night';
 }
 
-function getLocalContext() {
-  let latitude = window.appConfig.latitude;
-  let longitude = window.appConfig.longitude;
-  return {
-    "season": getCurrentSeason(latitude),
-    "time-of-day": getTimeOfDay(latitude, longitude),
-    "lunar-phase": lunarphase.Moon.lunarPhase(),
-    "remote-addr": window.appConfig.remoteAddr // For weather geo-ip ...
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
   };
-}
+};
 
-function setLocalContext() {
-  let userContext = document.getElementById("local-context");
-  userContext.value = JSON.stringify(getLocalContext());
-}
+
+let setLocalContext = debounce(function () {
+  let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let timezoneLocation;
+  const timezones = window.appConfig.timezones;
+
+  if (timezones && timezones[timezone] && timezones[timezone].coordinates_decimal) {
+    timezoneLocation = timezones[timezone].coordinates_decimal;
+  } else {
+    timezoneLocation = {"latitude": 51.509865, "longitude": -0.118092} // London
+  }
+
+  let locationAllowed = window.appConfig.isLocationAllowed;
+  let location = locationAllowed ? window.appConfig.location : timezoneLocation;
+
+  let context =  {
+    "location-allowed": locationAllowed,
+    "season": getCurrentSeason(location.latitude),
+    "time-of-day": getTimeOfDay(location.latitude, location.longitude),
+    "timezone": timezone,
+    "location": {"latitude": location.latitude,
+                 "longitude": location.longitude},
+    "lunar-phase": lunarphase.Moon.lunarPhase()};
+
+  let localContext = document.getElementById("local-context");
+  localContext.value = JSON.stringify(context);
+}, 500);
 
 function scrollToView(element) {
   const rect = element.getBoundingClientRect();
@@ -81,6 +105,7 @@ function handleTextareaInput(e) {
   // Resize the textarea
   resizeTextarea(e);
   scrollToView(textarea);
+  setLocalContext();
 
   // If the Enter key is pressed with the Shift key
   if (e.key === 'Enter' && e.shiftKey) {
@@ -147,7 +172,6 @@ function getEnergy() {
 
 function beforeConverseRequest() {
   setEnergy(getEnergy());
-  setLocalContext();
 
   // Get the form and input elements
   let textarea = document.getElementById('user-input');
@@ -184,29 +208,31 @@ function afterConverseRequest() {
   }, 250);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  // For geoip weather data
-  fetch('https://api.ipify.org?format=json')
-    .then(response => response.json())
-    .then(data => {
-      window.appConfig.remoteAddr = data;
-      setLocalContext();
-    })
-    .catch(error => {
-      console.error('Error fetching remoteAddr:', error);
-      setLocalContext();
-    });
+async function fetchTimezones() {
+  try {
+    const response = await fetch('/resources/public/misc/timezones.json');
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+    const timezones = await response.json();
+    window.appConfig.timezones = timezones;
+  } catch (error) {
+    console.error('There has been a problem with your fetch operation:', error);
+  }
+}
 
+fetchTimezones();
+
+document.addEventListener('DOMContentLoaded', function() {
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      window.appConfig.latitude = position.coords.latitude;
-      window.appConfig.longitude = position.coords.longitude;
-      setLocalContext();
+      window.appConfig.isLocationAllowed = true;
+      window.appConfig.location = position.coords;
     },
     (error) => {
       console.warn('Geolocation error:', error);
-      // London as default
-      setLocalContext();
+      // London as default set by render
+      window.appConfig.isLocationAllowed = false;
     }
   );
 

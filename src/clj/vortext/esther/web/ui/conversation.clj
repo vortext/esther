@@ -94,10 +94,7 @@
 (defn render [opts request]
   (page
    (common/head
-    {;; London as default
-     ;; [TODO] Don't rely on ip addr for weather info
-     :latitude 51.509865
-     :longitude -0.118092}
+    {} ;; inject appConfig here
     [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
     [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]
      [:script {:src "/resources/public/js/vendor/suncalc.min.js"}]

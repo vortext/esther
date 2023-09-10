@@ -1,0 +1,3546 @@
+{
+  "Europe/Andorra": {
+    "country_codes": [
+      "AD"
+    ],
+    "coordinates_decimal": {
+      "latitude": 42.5,
+      "longitude": 1.5166666666666666
+    },
+    "coordinates_iso6709": "+4230+00131",
+    "timezone": "Europe/Andorra"
+  },
+  "Asia/Dubai": {
+    "country_codes": [
+      "AE",
+      "OM",
+      "RE",
+      "SC",
+      "TF"
+    ],
+    "coordinates_decimal": {
+      "latitude": 25.3,
+      "longitude": 55.3
+    },
+    "coordinates_iso6709": "+2518+05518",
+    "timezone": "Asia/Dubai"
+  },
+  "Asia/Kabul": {
+    "country_codes": [
+      "AF"
+    ],
+    "coordinates_decimal": {
+      "latitude": 34.516666666666666,
+      "longitude": 69.2
+    },
+    "coordinates_iso6709": "+3431+06912",
+    "timezone": "Asia/Kabul"
+  },
+  "Europe/Tirane": {
+    "country_codes": [
+      "AL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.333333333333336,
+      "longitude": 19.833333333333332
+    },
+    "coordinates_iso6709": "+4120+01950",
+    "timezone": "Europe/Tirane"
+  },
+  "Asia/Yerevan": {
+    "country_codes": [
+      "AM"
+    ],
+    "coordinates_decimal": {
+      "latitude": 40.18333333333333,
+      "longitude": 44.5
+    },
+    "coordinates_iso6709": "+4011+04430",
+    "timezone": "Asia/Yerevan"
+  },
+  "Antarctica/Casey": {
+    "country_codes": [
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -66.28333333333333,
+      "longitude": 110.51666666666667
+    },
+    "coordinates_iso6709": "-6617+11031",
+    "timezone": "Antarctica/Casey"
+  },
+  "Antarctica/Davis": {
+    "country_codes": [
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -68.58333333333333,
+      "longitude": 77.96666666666667
+    },
+    "coordinates_iso6709": "-6835+07758",
+    "timezone": "Antarctica/Davis"
+  },
+  "Antarctica/Mawson": {
+    "country_codes": [
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -67.6,
+      "longitude": 62.88333333333333
+    },
+    "coordinates_iso6709": "-6736+06253",
+    "timezone": "Antarctica/Mawson"
+  },
+  "Antarctica/Palmer": {
+    "country_codes": [
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -64.8,
+      "longitude": -64.1
+    },
+    "coordinates_iso6709": "-6448-06406",
+    "timezone": "Antarctica/Palmer"
+  },
+  "Antarctica/Rothera": {
+    "country_codes": [
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -67.56666666666666,
+      "longitude": -68.13333333333334
+    },
+    "coordinates_iso6709": "-6734-06808",
+    "timezone": "Antarctica/Rothera"
+  },
+  "Antarctica/Troll": {
+    "country_codes": [
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -72.01138888888889,
+      "longitude": 2.535
+    },
+    "coordinates_iso6709": "-720041+0023206",
+    "timezone": "Antarctica/Troll"
+  },
+  "America/Argentina/Buenos_Aires": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -34.6,
+      "longitude": -58.45
+    },
+    "coordinates_iso6709": "-3436-05827",
+    "timezone": "America/Argentina/Buenos_Aires"
+  },
+  "America/Argentina/Cordoba": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -31.4,
+      "longitude": -64.18333333333334
+    },
+    "coordinates_iso6709": "-3124-06411",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "America/Argentina/Salta": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -24.783333333333335,
+      "longitude": -65.41666666666667
+    },
+    "coordinates_iso6709": "-2447-06525",
+    "timezone": "America/Argentina/Salta"
+  },
+  "America/Argentina/Jujuy": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -24.183333333333334,
+      "longitude": -65.3
+    },
+    "coordinates_iso6709": "-2411-06518",
+    "timezone": "America/Argentina/Jujuy"
+  },
+  "America/Argentina/Tucuman": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -26.816666666666666,
+      "longitude": -65.21666666666667
+    },
+    "coordinates_iso6709": "-2649-06513",
+    "timezone": "America/Argentina/Tucuman"
+  },
+  "America/Argentina/Catamarca": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -28.466666666666665,
+      "longitude": -65.78333333333333
+    },
+    "coordinates_iso6709": "-2828-06547",
+    "timezone": "America/Argentina/Catamarca"
+  },
+  "America/Argentina/La_Rioja": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -29.433333333333334,
+      "longitude": -66.85
+    },
+    "coordinates_iso6709": "-2926-06651",
+    "timezone": "America/Argentina/La_Rioja"
+  },
+  "America/Argentina/San_Juan": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -31.533333333333335,
+      "longitude": -68.51666666666667
+    },
+    "coordinates_iso6709": "-3132-06831",
+    "timezone": "America/Argentina/San_Juan"
+  },
+  "America/Argentina/Mendoza": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -32.88333333333333,
+      "longitude": -68.81666666666666
+    },
+    "coordinates_iso6709": "-3253-06849",
+    "timezone": "America/Argentina/Mendoza"
+  },
+  "America/Argentina/San_Luis": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -33.31666666666667,
+      "longitude": -66.35
+    },
+    "coordinates_iso6709": "-3319-06621",
+    "timezone": "America/Argentina/San_Luis"
+  },
+  "America/Argentina/Rio_Gallegos": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -51.63333333333333,
+      "longitude": -69.21666666666667
+    },
+    "coordinates_iso6709": "-5138-06913",
+    "timezone": "America/Argentina/Rio_Gallegos"
+  },
+  "America/Argentina/Ushuaia": {
+    "country_codes": [
+      "AR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -54.8,
+      "longitude": -68.3
+    },
+    "coordinates_iso6709": "-5448-06818",
+    "timezone": "America/Argentina/Ushuaia"
+  },
+  "Pacific/Pago_Pago": {
+    "country_codes": [
+      "AS",
+      "UM"
+    ],
+    "coordinates_decimal": {
+      "latitude": -14.266666666666667,
+      "longitude": -170.7
+    },
+    "coordinates_iso6709": "-1416-17042",
+    "timezone": "Pacific/Pago_Pago"
+  },
+  "Europe/Vienna": {
+    "country_codes": [
+      "AT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 48.21666666666667,
+      "longitude": 16.333333333333332
+    },
+    "coordinates_iso6709": "+4813+01620",
+    "timezone": "Europe/Vienna"
+  },
+  "Australia/Lord_Howe": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -31.55,
+      "longitude": 159.08333333333334
+    },
+    "coordinates_iso6709": "-3133+15905",
+    "timezone": "Australia/Lord_Howe"
+  },
+  "Antarctica/Macquarie": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -54.5,
+      "longitude": 158.95
+    },
+    "coordinates_iso6709": "-5430+15857",
+    "timezone": "Antarctica/Macquarie"
+  },
+  "Australia/Hobart": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -42.88333333333333,
+      "longitude": 147.31666666666666
+    },
+    "coordinates_iso6709": "-4253+14719",
+    "timezone": "Australia/Hobart"
+  },
+  "Australia/Melbourne": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -37.81666666666667,
+      "longitude": 144.96666666666667
+    },
+    "coordinates_iso6709": "-3749+14458",
+    "timezone": "Australia/Melbourne"
+  },
+  "Australia/Sydney": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -33.86666666666667,
+      "longitude": 151.21666666666667
+    },
+    "coordinates_iso6709": "-3352+15113",
+    "timezone": "Australia/Sydney"
+  },
+  "Australia/Broken_Hill": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -31.95,
+      "longitude": 141.45
+    },
+    "coordinates_iso6709": "-3157+14127",
+    "timezone": "Australia/Broken_Hill"
+  },
+  "Australia/Brisbane": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -27.466666666666665,
+      "longitude": 153.03333333333333
+    },
+    "coordinates_iso6709": "-2728+15302",
+    "timezone": "Australia/Brisbane"
+  },
+  "Australia/Lindeman": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -20.266666666666666,
+      "longitude": 149.0
+    },
+    "coordinates_iso6709": "-2016+14900",
+    "timezone": "Australia/Lindeman"
+  },
+  "Australia/Adelaide": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -34.916666666666664,
+      "longitude": 138.58333333333334
+    },
+    "coordinates_iso6709": "-3455+13835",
+    "timezone": "Australia/Adelaide"
+  },
+  "Australia/Darwin": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -12.466666666666667,
+      "longitude": 130.83333333333334
+    },
+    "coordinates_iso6709": "-1228+13050",
+    "timezone": "Australia/Darwin"
+  },
+  "Australia/Perth": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -31.95,
+      "longitude": 115.85
+    },
+    "coordinates_iso6709": "-3157+11551",
+    "timezone": "Australia/Perth"
+  },
+  "Australia/Eucla": {
+    "country_codes": [
+      "AU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -31.716666666666665,
+      "longitude": 128.86666666666667
+    },
+    "coordinates_iso6709": "-3143+12852",
+    "timezone": "Australia/Eucla"
+  },
+  "Asia/Baku": {
+    "country_codes": [
+      "AZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 40.38333333333333,
+      "longitude": 49.85
+    },
+    "coordinates_iso6709": "+4023+04951",
+    "timezone": "Asia/Baku"
+  },
+  "America/Barbados": {
+    "country_codes": [
+      "BB"
+    ],
+    "coordinates_decimal": {
+      "latitude": 13.1,
+      "longitude": -59.61666666666667
+    },
+    "coordinates_iso6709": "+1306-05937",
+    "timezone": "America/Barbados"
+  },
+  "Asia/Dhaka": {
+    "country_codes": [
+      "BD"
+    ],
+    "coordinates_decimal": {
+      "latitude": 23.716666666666665,
+      "longitude": 90.41666666666667
+    },
+    "coordinates_iso6709": "+2343+09025",
+    "timezone": "Asia/Dhaka"
+  },
+  "Europe/Brussels": {
+    "country_codes": [
+      "BE",
+      "LU",
+      "NL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.833333333333336,
+      "longitude": 4.333333333333333
+    },
+    "coordinates_iso6709": "+5050+00420",
+    "timezone": "Europe/Brussels"
+  },
+  "Europe/Amsterdam": {
+    "country_codes": [
+      "BE",
+      "LU",
+      "NL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.833333333333336,
+      "longitude": 4.333333333333333
+    },
+    "coordinates_iso6709": "+5050+00420",
+    "timezone": "Europe/Amsterdam"
+  },
+  "Europe/Sofia": {
+    "country_codes": [
+      "BG"
+    ],
+    "coordinates_decimal": {
+      "latitude": 42.68333333333333,
+      "longitude": 23.316666666666666
+    },
+    "coordinates_iso6709": "+4241+02319",
+    "timezone": "Europe/Sofia"
+  },
+  "Atlantic/Bermuda": {
+    "country_codes": [
+      "BM"
+    ],
+    "coordinates_decimal": {
+      "latitude": 32.28333333333333,
+      "longitude": -64.76666666666667
+    },
+    "coordinates_iso6709": "+3217-06446",
+    "timezone": "Atlantic/Bermuda"
+  },
+  "America/La_Paz": {
+    "country_codes": [
+      "BO"
+    ],
+    "coordinates_decimal": {
+      "latitude": -16.5,
+      "longitude": -68.15
+    },
+    "coordinates_iso6709": "-1630-06809",
+    "timezone": "America/La_Paz"
+  },
+  "America/Noronha": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -3.85,
+      "longitude": -32.416666666666664
+    },
+    "coordinates_iso6709": "-0351-03225",
+    "timezone": "America/Noronha"
+  },
+  "America/Belem": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -1.45,
+      "longitude": -48.483333333333334
+    },
+    "coordinates_iso6709": "-0127-04829",
+    "timezone": "America/Belem"
+  },
+  "America/Fortaleza": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -3.716666666666667,
+      "longitude": -38.5
+    },
+    "coordinates_iso6709": "-0343-03830",
+    "timezone": "America/Fortaleza"
+  },
+  "America/Recife": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -8.05,
+      "longitude": -34.9
+    },
+    "coordinates_iso6709": "-0803-03454",
+    "timezone": "America/Recife"
+  },
+  "America/Araguaina": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -7.2,
+      "longitude": -48.2
+    },
+    "coordinates_iso6709": "-0712-04812",
+    "timezone": "America/Araguaina"
+  },
+  "America/Maceio": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -9.666666666666666,
+      "longitude": -35.71666666666667
+    },
+    "coordinates_iso6709": "-0940-03543",
+    "timezone": "America/Maceio"
+  },
+  "America/Bahia": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -12.983333333333333,
+      "longitude": -38.516666666666666
+    },
+    "coordinates_iso6709": "-1259-03831",
+    "timezone": "America/Bahia"
+  },
+  "America/Sao_Paulo": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -23.533333333333335,
+      "longitude": -46.61666666666667
+    },
+    "coordinates_iso6709": "-2332-04637",
+    "timezone": "America/Sao_Paulo"
+  },
+  "America/Campo_Grande": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -20.45,
+      "longitude": -54.61666666666667
+    },
+    "coordinates_iso6709": "-2027-05437",
+    "timezone": "America/Campo_Grande"
+  },
+  "America/Cuiaba": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -15.583333333333334,
+      "longitude": -56.083333333333336
+    },
+    "coordinates_iso6709": "-1535-05605",
+    "timezone": "America/Cuiaba"
+  },
+  "America/Santarem": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -2.433333333333333,
+      "longitude": -54.86666666666667
+    },
+    "coordinates_iso6709": "-0226-05452",
+    "timezone": "America/Santarem"
+  },
+  "America/Porto_Velho": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -8.766666666666667,
+      "longitude": -63.9
+    },
+    "coordinates_iso6709": "-0846-06354",
+    "timezone": "America/Porto_Velho"
+  },
+  "America/Boa_Vista": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 2.816666666666667,
+      "longitude": -60.666666666666664
+    },
+    "coordinates_iso6709": "+0249-06040",
+    "timezone": "America/Boa_Vista"
+  },
+  "America/Manaus": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -3.1333333333333333,
+      "longitude": -60.016666666666666
+    },
+    "coordinates_iso6709": "-0308-06001",
+    "timezone": "America/Manaus"
+  },
+  "America/Eirunepe": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -6.666666666666667,
+      "longitude": -69.86666666666666
+    },
+    "coordinates_iso6709": "-0640-06952",
+    "timezone": "America/Eirunepe"
+  },
+  "America/Rio_Branco": {
+    "country_codes": [
+      "BR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -9.966666666666667,
+      "longitude": -67.8
+    },
+    "coordinates_iso6709": "-0958-06748",
+    "timezone": "America/Rio_Branco"
+  },
+  "Asia/Thimphu": {
+    "country_codes": [
+      "BT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 27.466666666666665,
+      "longitude": 89.65
+    },
+    "coordinates_iso6709": "+2728+08939",
+    "timezone": "Asia/Thimphu"
+  },
+  "Europe/Minsk": {
+    "country_codes": [
+      "BY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.9,
+      "longitude": 27.566666666666666
+    },
+    "coordinates_iso6709": "+5354+02734",
+    "timezone": "Europe/Minsk"
+  },
+  "America/Belize": {
+    "country_codes": [
+      "BZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 17.5,
+      "longitude": -88.2
+    },
+    "coordinates_iso6709": "+1730-08812",
+    "timezone": "America/Belize"
+  },
+  "America/St_Johns": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.56666666666667,
+      "longitude": -52.71666666666667
+    },
+    "coordinates_iso6709": "+4734-05243",
+    "timezone": "America/St_Johns"
+  },
+  "America/Halifax": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 44.65,
+      "longitude": -63.6
+    },
+    "coordinates_iso6709": "+4439-06336",
+    "timezone": "America/Halifax"
+  },
+  "America/Glace_Bay": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 46.2,
+      "longitude": -59.95
+    },
+    "coordinates_iso6709": "+4612-05957",
+    "timezone": "America/Glace_Bay"
+  },
+  "America/Moncton": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 46.1,
+      "longitude": -64.78333333333333
+    },
+    "coordinates_iso6709": "+4606-06447",
+    "timezone": "America/Moncton"
+  },
+  "America/Goose_Bay": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.333333333333336,
+      "longitude": -60.416666666666664
+    },
+    "coordinates_iso6709": "+5320-06025",
+    "timezone": "America/Goose_Bay"
+  },
+  "America/Toronto": {
+    "country_codes": [
+      "CA",
+      "BS"
+    ],
+    "coordinates_decimal": {
+      "latitude": 43.65,
+      "longitude": -79.38333333333334
+    },
+    "coordinates_iso6709": "+4339-07923",
+    "timezone": "America/Toronto"
+  },
+  "America/Iqaluit": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 63.733333333333334,
+      "longitude": -68.46666666666667
+    },
+    "coordinates_iso6709": "+6344-06828",
+    "timezone": "America/Iqaluit"
+  },
+  "America/Winnipeg": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 49.88333333333333,
+      "longitude": -97.15
+    },
+    "coordinates_iso6709": "+4953-09709",
+    "timezone": "America/Winnipeg"
+  },
+  "America/Resolute": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 74.69555555555556,
+      "longitude": -94.82916666666667
+    },
+    "coordinates_iso6709": "+744144-0944945",
+    "timezone": "America/Resolute"
+  },
+  "America/Rankin_Inlet": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 62.81666666666667,
+      "longitude": -92.08305555555556
+    },
+    "coordinates_iso6709": "+624900-0920459",
+    "timezone": "America/Rankin_Inlet"
+  },
+  "America/Regina": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.4,
+      "longitude": -104.65
+    },
+    "coordinates_iso6709": "+5024-10439",
+    "timezone": "America/Regina"
+  },
+  "America/Swift_Current": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.28333333333333,
+      "longitude": -107.83333333333333
+    },
+    "coordinates_iso6709": "+5017-10750",
+    "timezone": "America/Swift_Current"
+  },
+  "America/Edmonton": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.55,
+      "longitude": -113.46666666666667
+    },
+    "coordinates_iso6709": "+5333-11328",
+    "timezone": "America/Edmonton"
+  },
+  "America/Cambridge_Bay": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 69.1138888888889,
+      "longitude": -105.05277777777778
+    },
+    "coordinates_iso6709": "+690650-1050310",
+    "timezone": "America/Cambridge_Bay"
+  },
+  "America/Inuvik": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 68.34972222222223,
+      "longitude": -133.71666666666667
+    },
+    "coordinates_iso6709": "+682059-1334300",
+    "timezone": "America/Inuvik"
+  },
+  "America/Dawson_Creek": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 55.766666666666666,
+      "longitude": -120.23333333333333
+    },
+    "coordinates_iso6709": "+5546-12014",
+    "timezone": "America/Dawson_Creek"
+  },
+  "America/Fort_Nelson": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 58.8,
+      "longitude": -122.7
+    },
+    "coordinates_iso6709": "+5848-12242",
+    "timezone": "America/Fort_Nelson"
+  },
+  "America/Whitehorse": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 60.71666666666667,
+      "longitude": -135.05
+    },
+    "coordinates_iso6709": "+6043-13503",
+    "timezone": "America/Whitehorse"
+  },
+  "America/Dawson": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 64.06666666666666,
+      "longitude": -139.41666666666666
+    },
+    "coordinates_iso6709": "+6404-13925",
+    "timezone": "America/Dawson"
+  },
+  "America/Vancouver": {
+    "country_codes": [
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 49.266666666666666,
+      "longitude": -123.11666666666666
+    },
+    "coordinates_iso6709": "+4916-12307",
+    "timezone": "America/Vancouver"
+  },
+  "Europe/Zurich": {
+    "country_codes": [
+      "CH",
+      "DE",
+      "LI"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.38333333333333,
+      "longitude": 8.533333333333333
+    },
+    "coordinates_iso6709": "+4723+00832",
+    "timezone": "Europe/Zurich"
+  },
+  "Africa/Abidjan": {
+    "country_codes": [
+      "CI",
+      "BF",
+      "GH",
+      "GM",
+      "GN",
+      "IS",
+      "ML",
+      "MR",
+      "SH",
+      "SL",
+      "SN",
+      "TG"
+    ],
+    "coordinates_decimal": {
+      "latitude": 5.316666666666666,
+      "longitude": -4.033333333333333
+    },
+    "coordinates_iso6709": "+0519-00402",
+    "timezone": "Africa/Abidjan"
+  },
+  "Pacific/Rarotonga": {
+    "country_codes": [
+      "CK"
+    ],
+    "coordinates_decimal": {
+      "latitude": -21.233333333333334,
+      "longitude": -159.76666666666668
+    },
+    "coordinates_iso6709": "-2114-15946",
+    "timezone": "Pacific/Rarotonga"
+  },
+  "America/Santiago": {
+    "country_codes": [
+      "CL"
+    ],
+    "coordinates_decimal": {
+      "latitude": -33.45,
+      "longitude": -70.66666666666667
+    },
+    "coordinates_iso6709": "-3327-07040",
+    "timezone": "America/Santiago"
+  },
+  "America/Punta_Arenas": {
+    "country_codes": [
+      "CL"
+    ],
+    "coordinates_decimal": {
+      "latitude": -53.15,
+      "longitude": -70.91666666666667
+    },
+    "coordinates_iso6709": "-5309-07055",
+    "timezone": "America/Punta_Arenas"
+  },
+  "Pacific/Easter": {
+    "country_codes": [
+      "CL"
+    ],
+    "coordinates_decimal": {
+      "latitude": -27.15,
+      "longitude": -109.43333333333334
+    },
+    "coordinates_iso6709": "-2709-10926",
+    "timezone": "Pacific/Easter"
+  },
+  "Asia/Shanghai": {
+    "country_codes": [
+      "CN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 31.233333333333334,
+      "longitude": 121.46666666666667
+    },
+    "coordinates_iso6709": "+3114+12128",
+    "timezone": "Asia/Shanghai"
+  },
+  "Asia/Urumqi": {
+    "country_codes": [
+      "CN",
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 43.8,
+      "longitude": 87.58333333333333
+    },
+    "coordinates_iso6709": "+4348+08735",
+    "timezone": "Asia/Urumqi"
+  },
+  "America/Bogota": {
+    "country_codes": [
+      "CO"
+    ],
+    "coordinates_decimal": {
+      "latitude": 4.6,
+      "longitude": -74.08333333333333
+    },
+    "coordinates_iso6709": "+0436-07405",
+    "timezone": "America/Bogota"
+  },
+  "America/Costa_Rica": {
+    "country_codes": [
+      "CR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 9.933333333333334,
+      "longitude": -84.08333333333333
+    },
+    "coordinates_iso6709": "+0956-08405",
+    "timezone": "America/Costa_Rica"
+  },
+  "America/Havana": {
+    "country_codes": [
+      "CU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 23.133333333333333,
+      "longitude": -82.36666666666666
+    },
+    "coordinates_iso6709": "+2308-08222",
+    "timezone": "America/Havana"
+  },
+  "Atlantic/Cape_Verde": {
+    "country_codes": [
+      "CV"
+    ],
+    "coordinates_decimal": {
+      "latitude": 14.916666666666666,
+      "longitude": -23.516666666666666
+    },
+    "coordinates_iso6709": "+1455-02331",
+    "timezone": "Atlantic/Cape_Verde"
+  },
+  "Asia/Nicosia": {
+    "country_codes": [
+      "CY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 35.166666666666664,
+      "longitude": 33.36666666666667
+    },
+    "coordinates_iso6709": "+3510+03322",
+    "timezone": "Asia/Nicosia"
+  },
+  "Asia/Famagusta": {
+    "country_codes": [
+      "CY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 35.11666666666667,
+      "longitude": 33.95
+    },
+    "coordinates_iso6709": "+3507+03357",
+    "timezone": "Asia/Famagusta"
+  },
+  "Europe/Prague": {
+    "country_codes": [
+      "CZ",
+      "SK"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.083333333333336,
+      "longitude": 14.433333333333334
+    },
+    "coordinates_iso6709": "+5005+01426",
+    "timezone": "Europe/Prague"
+  },
+  "Europe/Berlin": {
+    "country_codes": [
+      "DE",
+      "DK",
+      "NO",
+      "SE",
+      "SJ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 52.5,
+      "longitude": 13.366666666666667
+    },
+    "coordinates_iso6709": "+5230+01322",
+    "timezone": "Europe/Berlin"
+  },
+  "America/Santo_Domingo": {
+    "country_codes": [
+      "DO"
+    ],
+    "coordinates_decimal": {
+      "latitude": 18.466666666666665,
+      "longitude": -69.9
+    },
+    "coordinates_iso6709": "+1828-06954",
+    "timezone": "America/Santo_Domingo"
+  },
+  "Africa/Algiers": {
+    "country_codes": [
+      "DZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 36.78333333333333,
+      "longitude": 3.05
+    },
+    "coordinates_iso6709": "+3647+00303",
+    "timezone": "Africa/Algiers"
+  },
+  "America/Guayaquil": {
+    "country_codes": [
+      "EC"
+    ],
+    "coordinates_decimal": {
+      "latitude": -2.1666666666666665,
+      "longitude": -79.83333333333333
+    },
+    "coordinates_iso6709": "-0210-07950",
+    "timezone": "America/Guayaquil"
+  },
+  "Pacific/Galapagos": {
+    "country_codes": [
+      "EC"
+    ],
+    "coordinates_decimal": {
+      "latitude": -0.9,
+      "longitude": -89.6
+    },
+    "coordinates_iso6709": "-0054-08936",
+    "timezone": "Pacific/Galapagos"
+  },
+  "Europe/Tallinn": {
+    "country_codes": [
+      "EE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 59.416666666666664,
+      "longitude": 24.75
+    },
+    "coordinates_iso6709": "+5925+02445",
+    "timezone": "Europe/Tallinn"
+  },
+  "Africa/Cairo": {
+    "country_codes": [
+      "EG"
+    ],
+    "coordinates_decimal": {
+      "latitude": 30.05,
+      "longitude": 31.25
+    },
+    "coordinates_iso6709": "+3003+03115",
+    "timezone": "Africa/Cairo"
+  },
+  "Africa/El_Aaiun": {
+    "country_codes": [
+      "EH"
+    ],
+    "coordinates_decimal": {
+      "latitude": 27.15,
+      "longitude": -13.2
+    },
+    "coordinates_iso6709": "+2709-01312",
+    "timezone": "Africa/El_Aaiun"
+  },
+  "Europe/Madrid": {
+    "country_codes": [
+      "ES"
+    ],
+    "coordinates_decimal": {
+      "latitude": 40.4,
+      "longitude": -3.683333333333333
+    },
+    "coordinates_iso6709": "+4024-00341",
+    "timezone": "Europe/Madrid"
+  },
+  "Africa/Ceuta": {
+    "country_codes": [
+      "ES"
+    ],
+    "coordinates_decimal": {
+      "latitude": 35.88333333333333,
+      "longitude": -5.316666666666666
+    },
+    "coordinates_iso6709": "+3553-00519",
+    "timezone": "Africa/Ceuta"
+  },
+  "Atlantic/Canary": {
+    "country_codes": [
+      "ES"
+    ],
+    "coordinates_decimal": {
+      "latitude": 28.1,
+      "longitude": -15.4
+    },
+    "coordinates_iso6709": "+2806-01524",
+    "timezone": "Atlantic/Canary"
+  },
+  "Europe/Helsinki": {
+    "country_codes": [
+      "FI",
+      "AX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 60.166666666666664,
+      "longitude": 24.966666666666665
+    },
+    "coordinates_iso6709": "+6010+02458",
+    "timezone": "Europe/Helsinki"
+  },
+  "Pacific/Fiji": {
+    "country_codes": [
+      "FJ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -18.133333333333333,
+      "longitude": 178.41666666666666
+    },
+    "coordinates_iso6709": "-1808+17825",
+    "timezone": "Pacific/Fiji"
+  },
+  "Atlantic/Stanley": {
+    "country_codes": [
+      "FK"
+    ],
+    "coordinates_decimal": {
+      "latitude": -51.7,
+      "longitude": -57.85
+    },
+    "coordinates_iso6709": "-5142-05751",
+    "timezone": "Atlantic/Stanley"
+  },
+  "Pacific/Kosrae": {
+    "country_codes": [
+      "FM"
+    ],
+    "coordinates_decimal": {
+      "latitude": 5.316666666666666,
+      "longitude": 162.98333333333332
+    },
+    "coordinates_iso6709": "+0519+16259",
+    "timezone": "Pacific/Kosrae"
+  },
+  "Atlantic/Faroe": {
+    "country_codes": [
+      "FO"
+    ],
+    "coordinates_decimal": {
+      "latitude": 62.016666666666666,
+      "longitude": -6.766666666666667
+    },
+    "coordinates_iso6709": "+6201-00646",
+    "timezone": "Atlantic/Faroe"
+  },
+  "Europe/Paris": {
+    "country_codes": [
+      "FR",
+      "MC"
+    ],
+    "coordinates_decimal": {
+      "latitude": 48.86666666666667,
+      "longitude": 2.3333333333333335
+    },
+    "coordinates_iso6709": "+4852+00220",
+    "timezone": "Europe/Paris"
+  },
+  "Europe/London": {
+    "country_codes": [
+      "GB",
+      "GG",
+      "IM",
+      "JE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 51.50833333333333,
+      "longitude": -0.12527777777777777
+    },
+    "coordinates_iso6709": "+513030-0000731",
+    "timezone": "Europe/London"
+  },
+  "Asia/Tbilisi": {
+    "country_codes": [
+      "GE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.71666666666667,
+      "longitude": 44.81666666666667
+    },
+    "coordinates_iso6709": "+4143+04449",
+    "timezone": "Asia/Tbilisi"
+  },
+  "America/Cayenne": {
+    "country_codes": [
+      "GF"
+    ],
+    "coordinates_decimal": {
+      "latitude": 4.933333333333334,
+      "longitude": -52.333333333333336
+    },
+    "coordinates_iso6709": "+0456-05220",
+    "timezone": "America/Cayenne"
+  },
+  "Europe/Gibraltar": {
+    "country_codes": [
+      "GI"
+    ],
+    "coordinates_decimal": {
+      "latitude": 36.13333333333333,
+      "longitude": -5.35
+    },
+    "coordinates_iso6709": "+3608-00521",
+    "timezone": "Europe/Gibraltar"
+  },
+  "America/Nuuk": {
+    "country_codes": [
+      "GL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 64.18333333333334,
+      "longitude": -51.733333333333334
+    },
+    "coordinates_iso6709": "+6411-05144",
+    "timezone": "America/Nuuk"
+  },
+  "America/Danmarkshavn": {
+    "country_codes": [
+      "GL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 76.76666666666667,
+      "longitude": -18.666666666666668
+    },
+    "coordinates_iso6709": "+7646-01840",
+    "timezone": "America/Danmarkshavn"
+  },
+  "America/Scoresbysund": {
+    "country_codes": [
+      "GL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 70.48333333333333,
+      "longitude": -21.966666666666665
+    },
+    "coordinates_iso6709": "+7029-02158",
+    "timezone": "America/Scoresbysund"
+  },
+  "America/Thule": {
+    "country_codes": [
+      "GL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 76.56666666666666,
+      "longitude": -68.78333333333333
+    },
+    "coordinates_iso6709": "+7634-06847",
+    "timezone": "America/Thule"
+  },
+  "Europe/Athens": {
+    "country_codes": [
+      "GR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 37.96666666666667,
+      "longitude": 23.716666666666665
+    },
+    "coordinates_iso6709": "+3758+02343",
+    "timezone": "Europe/Athens"
+  },
+  "Atlantic/South_Georgia": {
+    "country_codes": [
+      "GS"
+    ],
+    "coordinates_decimal": {
+      "latitude": -54.266666666666666,
+      "longitude": -36.53333333333333
+    },
+    "coordinates_iso6709": "-5416-03632",
+    "timezone": "Atlantic/South_Georgia"
+  },
+  "America/Guatemala": {
+    "country_codes": [
+      "GT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 14.633333333333333,
+      "longitude": -90.51666666666667
+    },
+    "coordinates_iso6709": "+1438-09031",
+    "timezone": "America/Guatemala"
+  },
+  "Pacific/Guam": {
+    "country_codes": [
+      "GU",
+      "MP"
+    ],
+    "coordinates_decimal": {
+      "latitude": 13.466666666666667,
+      "longitude": 144.75
+    },
+    "coordinates_iso6709": "+1328+14445",
+    "timezone": "Pacific/Guam"
+  },
+  "Africa/Bissau": {
+    "country_codes": [
+      "GW"
+    ],
+    "coordinates_decimal": {
+      "latitude": 11.85,
+      "longitude": -15.583333333333334
+    },
+    "coordinates_iso6709": "+1151-01535",
+    "timezone": "Africa/Bissau"
+  },
+  "America/Guyana": {
+    "country_codes": [
+      "GY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 6.8,
+      "longitude": -58.166666666666664
+    },
+    "coordinates_iso6709": "+0648-05810",
+    "timezone": "America/Guyana"
+  },
+  "Asia/Hong_Kong": {
+    "country_codes": [
+      "HK"
+    ],
+    "coordinates_decimal": {
+      "latitude": 22.283333333333335,
+      "longitude": 114.15
+    },
+    "coordinates_iso6709": "+2217+11409",
+    "timezone": "Asia/Hong_Kong"
+  },
+  "America/Tegucigalpa": {
+    "country_codes": [
+      "HN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 14.1,
+      "longitude": -87.21666666666667
+    },
+    "coordinates_iso6709": "+1406-08713",
+    "timezone": "America/Tegucigalpa"
+  },
+  "America/Port-au-Prince": {
+    "country_codes": [
+      "HT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 18.533333333333335,
+      "longitude": -72.33333333333333
+    },
+    "coordinates_iso6709": "+1832-07220",
+    "timezone": "America/Port-au-Prince"
+  },
+  "Europe/Budapest": {
+    "country_codes": [
+      "HU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.5,
+      "longitude": 19.083333333333332
+    },
+    "coordinates_iso6709": "+4730+01905",
+    "timezone": "Europe/Budapest"
+  },
+  "Asia/Jakarta": {
+    "country_codes": [
+      "ID"
+    ],
+    "coordinates_decimal": {
+      "latitude": -6.166666666666667,
+      "longitude": 106.8
+    },
+    "coordinates_iso6709": "-0610+10648",
+    "timezone": "Asia/Jakarta"
+  },
+  "Asia/Pontianak": {
+    "country_codes": [
+      "ID"
+    ],
+    "coordinates_decimal": {
+      "latitude": -0.03333333333333333,
+      "longitude": 109.33333333333333
+    },
+    "coordinates_iso6709": "-0002+10920",
+    "timezone": "Asia/Pontianak"
+  },
+  "Asia/Makassar": {
+    "country_codes": [
+      "ID"
+    ],
+    "coordinates_decimal": {
+      "latitude": -5.116666666666666,
+      "longitude": 119.4
+    },
+    "coordinates_iso6709": "-0507+11924",
+    "timezone": "Asia/Makassar"
+  },
+  "Asia/Jayapura": {
+    "country_codes": [
+      "ID"
+    ],
+    "coordinates_decimal": {
+      "latitude": -2.533333333333333,
+      "longitude": 140.7
+    },
+    "coordinates_iso6709": "-0232+14042",
+    "timezone": "Asia/Jayapura"
+  },
+  "Europe/Dublin": {
+    "country_codes": [
+      "IE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.333333333333336,
+      "longitude": -6.25
+    },
+    "coordinates_iso6709": "+5320-00615",
+    "timezone": "Europe/Dublin"
+  },
+  "Asia/Jerusalem": {
+    "country_codes": [
+      "IL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 31.780555555555555,
+      "longitude": 35.22388888888889
+    },
+    "coordinates_iso6709": "+314650+0351326",
+    "timezone": "Asia/Jerusalem"
+  },
+  "Asia/Kolkata": {
+    "country_codes": [
+      "IN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 22.533333333333335,
+      "longitude": 88.36666666666666
+    },
+    "coordinates_iso6709": "+2232+08822",
+    "timezone": "Asia/Kolkata"
+  },
+  "Indian/Chagos": {
+    "country_codes": [
+      "IO"
+    ],
+    "coordinates_decimal": {
+      "latitude": -7.333333333333333,
+      "longitude": 72.41666666666667
+    },
+    "coordinates_iso6709": "-0720+07225",
+    "timezone": "Indian/Chagos"
+  },
+  "Asia/Baghdad": {
+    "country_codes": [
+      "IQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 33.35,
+      "longitude": 44.416666666666664
+    },
+    "coordinates_iso6709": "+3321+04425",
+    "timezone": "Asia/Baghdad"
+  },
+  "Asia/Tehran": {
+    "country_codes": [
+      "IR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 35.666666666666664,
+      "longitude": 51.43333333333333
+    },
+    "coordinates_iso6709": "+3540+05126",
+    "timezone": "Asia/Tehran"
+  },
+  "Europe/Rome": {
+    "country_codes": [
+      "IT",
+      "SM",
+      "VA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.9,
+      "longitude": 12.483333333333333
+    },
+    "coordinates_iso6709": "+4154+01229",
+    "timezone": "Europe/Rome"
+  },
+  "America/Jamaica": {
+    "country_codes": [
+      "JM"
+    ],
+    "coordinates_decimal": {
+      "latitude": 17.968055555555555,
+      "longitude": -76.79333333333334
+    },
+    "coordinates_iso6709": "+175805-0764736",
+    "timezone": "America/Jamaica"
+  },
+  "Asia/Amman": {
+    "country_codes": [
+      "JO"
+    ],
+    "coordinates_decimal": {
+      "latitude": 31.95,
+      "longitude": 35.93333333333333
+    },
+    "coordinates_iso6709": "+3157+03556",
+    "timezone": "Asia/Amman"
+  },
+  "Asia/Tokyo": {
+    "country_codes": [
+      "JP"
+    ],
+    "coordinates_decimal": {
+      "latitude": 35.654444444444444,
+      "longitude": 139.7447222222222
+    },
+    "coordinates_iso6709": "+353916+1394441",
+    "timezone": "Asia/Tokyo"
+  },
+  "Africa/Nairobi": {
+    "country_codes": [
+      "KE",
+      "DJ",
+      "ER",
+      "ET",
+      "KM",
+      "MG",
+      "SO",
+      "TZ",
+      "UG",
+      "YT"
+    ],
+    "coordinates_decimal": {
+      "latitude": -1.2833333333333334,
+      "longitude": 36.81666666666667
+    },
+    "coordinates_iso6709": "-0117+03649",
+    "timezone": "Africa/Nairobi"
+  },
+  "Asia/Bishkek": {
+    "country_codes": [
+      "KG"
+    ],
+    "coordinates_decimal": {
+      "latitude": 42.9,
+      "longitude": 74.6
+    },
+    "coordinates_iso6709": "+4254+07436",
+    "timezone": "Asia/Bishkek"
+  },
+  "Pacific/Tarawa": {
+    "country_codes": [
+      "KI",
+      "MH",
+      "TV",
+      "UM",
+      "WF"
+    ],
+    "coordinates_decimal": {
+      "latitude": 1.4166666666666667,
+      "longitude": 173.0
+    },
+    "coordinates_iso6709": "+0125+17300",
+    "timezone": "Pacific/Tarawa"
+  },
+  "Pacific/Kanton": {
+    "country_codes": [
+      "KI"
+    ],
+    "coordinates_decimal": {
+      "latitude": -2.783333333333333,
+      "longitude": -171.71666666666667
+    },
+    "coordinates_iso6709": "-0247-17143",
+    "timezone": "Pacific/Kanton"
+  },
+  "Pacific/Kiritimati": {
+    "country_codes": [
+      "KI"
+    ],
+    "coordinates_decimal": {
+      "latitude": 1.8666666666666667,
+      "longitude": -157.33333333333334
+    },
+    "coordinates_iso6709": "+0152-15720",
+    "timezone": "Pacific/Kiritimati"
+  },
+  "Asia/Pyongyang": {
+    "country_codes": [
+      "KP"
+    ],
+    "coordinates_decimal": {
+      "latitude": 39.016666666666666,
+      "longitude": 125.75
+    },
+    "coordinates_iso6709": "+3901+12545",
+    "timezone": "Asia/Pyongyang"
+  },
+  "Asia/Seoul": {
+    "country_codes": [
+      "KR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 37.55,
+      "longitude": 126.96666666666667
+    },
+    "coordinates_iso6709": "+3733+12658",
+    "timezone": "Asia/Seoul"
+  },
+  "Asia/Almaty": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 43.25,
+      "longitude": 76.95
+    },
+    "coordinates_iso6709": "+4315+07657",
+    "timezone": "Asia/Almaty"
+  },
+  "Asia/Qyzylorda": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 44.8,
+      "longitude": 65.46666666666667
+    },
+    "coordinates_iso6709": "+4448+06528",
+    "timezone": "Asia/Qyzylorda"
+  },
+  "Asia/Qostanay": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.2,
+      "longitude": 63.61666666666667
+    },
+    "coordinates_iso6709": "+5312+06337",
+    "timezone": "Asia/Qostanay"
+  },
+  "Asia/Aqtobe": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.28333333333333,
+      "longitude": 57.166666666666664
+    },
+    "coordinates_iso6709": "+5017+05710",
+    "timezone": "Asia/Aqtobe"
+  },
+  "Asia/Aqtau": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 44.516666666666666,
+      "longitude": 50.266666666666666
+    },
+    "coordinates_iso6709": "+4431+05016",
+    "timezone": "Asia/Aqtau"
+  },
+  "Asia/Atyrau": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.11666666666667,
+      "longitude": 51.93333333333333
+    },
+    "coordinates_iso6709": "+4707+05156",
+    "timezone": "Asia/Atyrau"
+  },
+  "Asia/Oral": {
+    "country_codes": [
+      "KZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 51.21666666666667,
+      "longitude": 51.35
+    },
+    "coordinates_iso6709": "+5113+05121",
+    "timezone": "Asia/Oral"
+  },
+  "Asia/Beirut": {
+    "country_codes": [
+      "LB"
+    ],
+    "coordinates_decimal": {
+      "latitude": 33.88333333333333,
+      "longitude": 35.5
+    },
+    "coordinates_iso6709": "+3353+03530",
+    "timezone": "Asia/Beirut"
+  },
+  "Asia/Colombo": {
+    "country_codes": [
+      "LK"
+    ],
+    "coordinates_decimal": {
+      "latitude": 6.933333333333334,
+      "longitude": 79.85
+    },
+    "coordinates_iso6709": "+0656+07951",
+    "timezone": "Asia/Colombo"
+  },
+  "Africa/Monrovia": {
+    "country_codes": [
+      "LR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 6.3,
+      "longitude": -10.783333333333333
+    },
+    "coordinates_iso6709": "+0618-01047",
+    "timezone": "Africa/Monrovia"
+  },
+  "Europe/Vilnius": {
+    "country_codes": [
+      "LT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 54.68333333333333,
+      "longitude": 25.316666666666666
+    },
+    "coordinates_iso6709": "+5441+02519",
+    "timezone": "Europe/Vilnius"
+  },
+  "Europe/Riga": {
+    "country_codes": [
+      "LV"
+    ],
+    "coordinates_decimal": {
+      "latitude": 56.95,
+      "longitude": 24.1
+    },
+    "coordinates_iso6709": "+5657+02406",
+    "timezone": "Europe/Riga"
+  },
+  "Africa/Tripoli": {
+    "country_codes": [
+      "LY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 32.9,
+      "longitude": 13.183333333333334
+    },
+    "coordinates_iso6709": "+3254+01311",
+    "timezone": "Africa/Tripoli"
+  },
+  "Africa/Casablanca": {
+    "country_codes": [
+      "MA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 33.65,
+      "longitude": -7.583333333333333
+    },
+    "coordinates_iso6709": "+3339-00735",
+    "timezone": "Africa/Casablanca"
+  },
+  "Europe/Chisinau": {
+    "country_codes": [
+      "MD"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.0,
+      "longitude": 28.833333333333332
+    },
+    "coordinates_iso6709": "+4700+02850",
+    "timezone": "Europe/Chisinau"
+  },
+  "Pacific/Kwajalein": {
+    "country_codes": [
+      "MH"
+    ],
+    "coordinates_decimal": {
+      "latitude": 9.083333333333334,
+      "longitude": 167.33333333333334
+    },
+    "coordinates_iso6709": "+0905+16720",
+    "timezone": "Pacific/Kwajalein"
+  },
+  "Asia/Yangon": {
+    "country_codes": [
+      "MM",
+      "CC"
+    ],
+    "coordinates_decimal": {
+      "latitude": 16.783333333333335,
+      "longitude": 96.16666666666667
+    },
+    "coordinates_iso6709": "+1647+09610",
+    "timezone": "Asia/Yangon"
+  },
+  "Asia/Ulaanbaatar": {
+    "country_codes": [
+      "MN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.916666666666664,
+      "longitude": 106.88333333333334
+    },
+    "coordinates_iso6709": "+4755+10653",
+    "timezone": "Asia/Ulaanbaatar"
+  },
+  "Asia/Hovd": {
+    "country_codes": [
+      "MN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 48.016666666666666,
+      "longitude": 91.65
+    },
+    "coordinates_iso6709": "+4801+09139",
+    "timezone": "Asia/Hovd"
+  },
+  "Asia/Choibalsan": {
+    "country_codes": [
+      "MN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 48.06666666666667,
+      "longitude": 114.5
+    },
+    "coordinates_iso6709": "+4804+11430",
+    "timezone": "Asia/Choibalsan"
+  },
+  "Asia/Macau": {
+    "country_codes": [
+      "MO"
+    ],
+    "coordinates_decimal": {
+      "latitude": 22.197222222222223,
+      "longitude": 113.54166666666667
+    },
+    "coordinates_iso6709": "+221150+1133230",
+    "timezone": "Asia/Macau"
+  },
+  "America/Martinique": {
+    "country_codes": [
+      "MQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 14.6,
+      "longitude": -61.083333333333336
+    },
+    "coordinates_iso6709": "+1436-06105",
+    "timezone": "America/Martinique"
+  },
+  "Europe/Malta": {
+    "country_codes": [
+      "MT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 35.9,
+      "longitude": 14.516666666666667
+    },
+    "coordinates_iso6709": "+3554+01431",
+    "timezone": "Europe/Malta"
+  },
+  "Indian/Mauritius": {
+    "country_codes": [
+      "MU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -20.166666666666668,
+      "longitude": 57.5
+    },
+    "coordinates_iso6709": "-2010+05730",
+    "timezone": "Indian/Mauritius"
+  },
+  "Indian/Maldives": {
+    "country_codes": [
+      "MV",
+      "TF"
+    ],
+    "coordinates_decimal": {
+      "latitude": 4.166666666666667,
+      "longitude": 73.5
+    },
+    "coordinates_iso6709": "+0410+07330",
+    "timezone": "Indian/Maldives"
+  },
+  "America/Mexico_City": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 19.4,
+      "longitude": -99.15
+    },
+    "coordinates_iso6709": "+1924-09909",
+    "timezone": "America/Mexico_City"
+  },
+  "America/Cancun": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 21.083333333333332,
+      "longitude": -86.76666666666667
+    },
+    "coordinates_iso6709": "+2105-08646",
+    "timezone": "America/Cancun"
+  },
+  "America/Merida": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 20.966666666666665,
+      "longitude": -89.61666666666666
+    },
+    "coordinates_iso6709": "+2058-08937",
+    "timezone": "America/Merida"
+  },
+  "America/Monterrey": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 25.666666666666668,
+      "longitude": -100.31666666666666
+    },
+    "coordinates_iso6709": "+2540-10019",
+    "timezone": "America/Monterrey"
+  },
+  "America/Matamoros": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 25.833333333333332,
+      "longitude": -97.5
+    },
+    "coordinates_iso6709": "+2550-09730",
+    "timezone": "America/Matamoros"
+  },
+  "America/Chihuahua": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 28.633333333333333,
+      "longitude": -106.08333333333333
+    },
+    "coordinates_iso6709": "+2838-10605",
+    "timezone": "America/Chihuahua"
+  },
+  "America/Ciudad_Juarez": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 31.733333333333334,
+      "longitude": -106.48333333333333
+    },
+    "coordinates_iso6709": "+3144-10629",
+    "timezone": "America/Ciudad_Juarez"
+  },
+  "America/Ojinaga": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 29.566666666666666,
+      "longitude": -104.41666666666667
+    },
+    "coordinates_iso6709": "+2934-10425",
+    "timezone": "America/Ojinaga"
+  },
+  "America/Mazatlan": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 23.216666666666665,
+      "longitude": -106.41666666666667
+    },
+    "coordinates_iso6709": "+2313-10625",
+    "timezone": "America/Mazatlan"
+  },
+  "America/Bahia_Banderas": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 20.8,
+      "longitude": -105.25
+    },
+    "coordinates_iso6709": "+2048-10515",
+    "timezone": "America/Bahia_Banderas"
+  },
+  "America/Hermosillo": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 29.066666666666666,
+      "longitude": -110.96666666666667
+    },
+    "coordinates_iso6709": "+2904-11058",
+    "timezone": "America/Hermosillo"
+  },
+  "America/Tijuana": {
+    "country_codes": [
+      "MX"
+    ],
+    "coordinates_decimal": {
+      "latitude": 32.53333333333333,
+      "longitude": -117.01666666666667
+    },
+    "coordinates_iso6709": "+3232-11701",
+    "timezone": "America/Tijuana"
+  },
+  "Asia/Kuching": {
+    "country_codes": [
+      "MY",
+      "BN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 1.55,
+      "longitude": 110.33333333333333
+    },
+    "coordinates_iso6709": "+0133+11020",
+    "timezone": "Asia/Kuching"
+  },
+  "Africa/Maputo": {
+    "country_codes": [
+      "MZ",
+      "BI",
+      "BW",
+      "CD",
+      "MW",
+      "RW",
+      "ZM",
+      "ZW"
+    ],
+    "coordinates_decimal": {
+      "latitude": -25.966666666666665,
+      "longitude": 32.583333333333336
+    },
+    "coordinates_iso6709": "-2558+03235",
+    "timezone": "Africa/Maputo"
+  },
+  "Africa/Windhoek": {
+    "country_codes": [
+      "NA"
+    ],
+    "coordinates_decimal": {
+      "latitude": -22.566666666666666,
+      "longitude": 17.1
+    },
+    "coordinates_iso6709": "-2234+01706",
+    "timezone": "Africa/Windhoek"
+  },
+  "Pacific/Noumea": {
+    "country_codes": [
+      "NC"
+    ],
+    "coordinates_decimal": {
+      "latitude": -22.266666666666666,
+      "longitude": 166.45
+    },
+    "coordinates_iso6709": "-2216+16627",
+    "timezone": "Pacific/Noumea"
+  },
+  "Pacific/Norfolk": {
+    "country_codes": [
+      "NF"
+    ],
+    "coordinates_decimal": {
+      "latitude": -29.05,
+      "longitude": 167.96666666666667
+    },
+    "coordinates_iso6709": "-2903+16758",
+    "timezone": "Pacific/Norfolk"
+  },
+  "Africa/Lagos": {
+    "country_codes": [
+      "NG",
+      "AO",
+      "BJ",
+      "CD",
+      "CF",
+      "CG",
+      "CM",
+      "GA",
+      "GQ",
+      "NE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 6.45,
+      "longitude": 3.4
+    },
+    "coordinates_iso6709": "+0627+00324",
+    "timezone": "Africa/Lagos"
+  },
+  "America/Managua": {
+    "country_codes": [
+      "NI"
+    ],
+    "coordinates_decimal": {
+      "latitude": 12.15,
+      "longitude": -86.28333333333333
+    },
+    "coordinates_iso6709": "+1209-08617",
+    "timezone": "America/Managua"
+  },
+  "Asia/Kathmandu": {
+    "country_codes": [
+      "NP"
+    ],
+    "coordinates_decimal": {
+      "latitude": 27.716666666666665,
+      "longitude": 85.31666666666666
+    },
+    "coordinates_iso6709": "+2743+08519",
+    "timezone": "Asia/Kathmandu"
+  },
+  "Pacific/Nauru": {
+    "country_codes": [
+      "NR"
+    ],
+    "coordinates_decimal": {
+      "latitude": -0.5166666666666667,
+      "longitude": 166.91666666666666
+    },
+    "coordinates_iso6709": "-0031+16655",
+    "timezone": "Pacific/Nauru"
+  },
+  "Pacific/Niue": {
+    "country_codes": [
+      "NU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -19.016666666666666,
+      "longitude": -169.91666666666666
+    },
+    "coordinates_iso6709": "-1901-16955",
+    "timezone": "Pacific/Niue"
+  },
+  "Pacific/Auckland": {
+    "country_codes": [
+      "NZ",
+      "AQ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -36.86666666666667,
+      "longitude": 174.76666666666668
+    },
+    "coordinates_iso6709": "-3652+17446",
+    "timezone": "Pacific/Auckland"
+  },
+  "Pacific/Chatham": {
+    "country_codes": [
+      "NZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -43.95,
+      "longitude": -176.55
+    },
+    "coordinates_iso6709": "-4357-17633",
+    "timezone": "Pacific/Chatham"
+  },
+  "America/Panama": {
+    "country_codes": [
+      "PA",
+      "CA",
+      "KY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 8.966666666666667,
+      "longitude": -79.53333333333333
+    },
+    "coordinates_iso6709": "+0858-07932",
+    "timezone": "America/Panama"
+  },
+  "America/Lima": {
+    "country_codes": [
+      "PE"
+    ],
+    "coordinates_decimal": {
+      "latitude": -12.05,
+      "longitude": -77.05
+    },
+    "coordinates_iso6709": "-1203-07703",
+    "timezone": "America/Lima"
+  },
+  "Pacific/Tahiti": {
+    "country_codes": [
+      "PF"
+    ],
+    "coordinates_decimal": {
+      "latitude": -17.533333333333335,
+      "longitude": -149.56666666666666
+    },
+    "coordinates_iso6709": "-1732-14934",
+    "timezone": "Pacific/Tahiti"
+  },
+  "Pacific/Marquesas": {
+    "country_codes": [
+      "PF"
+    ],
+    "coordinates_decimal": {
+      "latitude": -9.0,
+      "longitude": -139.5
+    },
+    "coordinates_iso6709": "-0900-13930",
+    "timezone": "Pacific/Marquesas"
+  },
+  "Pacific/Gambier": {
+    "country_codes": [
+      "PF"
+    ],
+    "coordinates_decimal": {
+      "latitude": -23.133333333333333,
+      "longitude": -134.95
+    },
+    "coordinates_iso6709": "-2308-13457",
+    "timezone": "Pacific/Gambier"
+  },
+  "Pacific/Port_Moresby": {
+    "country_codes": [
+      "PG",
+      "AQ",
+      "FM"
+    ],
+    "coordinates_decimal": {
+      "latitude": -9.5,
+      "longitude": 147.16666666666666
+    },
+    "coordinates_iso6709": "-0930+14710",
+    "timezone": "Pacific/Port_Moresby"
+  },
+  "Pacific/Bougainville": {
+    "country_codes": [
+      "PG"
+    ],
+    "coordinates_decimal": {
+      "latitude": -6.216666666666667,
+      "longitude": 155.56666666666666
+    },
+    "coordinates_iso6709": "-0613+15534",
+    "timezone": "Pacific/Bougainville"
+  },
+  "Asia/Manila": {
+    "country_codes": [
+      "PH"
+    ],
+    "coordinates_decimal": {
+      "latitude": 14.583333333333334,
+      "longitude": 121.0
+    },
+    "coordinates_iso6709": "+1435+12100",
+    "timezone": "Asia/Manila"
+  },
+  "Asia/Karachi": {
+    "country_codes": [
+      "PK"
+    ],
+    "coordinates_decimal": {
+      "latitude": 24.866666666666667,
+      "longitude": 67.05
+    },
+    "coordinates_iso6709": "+2452+06703",
+    "timezone": "Asia/Karachi"
+  },
+  "Europe/Warsaw": {
+    "country_codes": [
+      "PL"
+    ],
+    "coordinates_decimal": {
+      "latitude": 52.25,
+      "longitude": 21.0
+    },
+    "coordinates_iso6709": "+5215+02100",
+    "timezone": "Europe/Warsaw"
+  },
+  "America/Miquelon": {
+    "country_codes": [
+      "PM"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.05,
+      "longitude": -56.333333333333336
+    },
+    "coordinates_iso6709": "+4703-05620",
+    "timezone": "America/Miquelon"
+  },
+  "Pacific/Pitcairn": {
+    "country_codes": [
+      "PN"
+    ],
+    "coordinates_decimal": {
+      "latitude": -25.066666666666666,
+      "longitude": -130.08333333333334
+    },
+    "coordinates_iso6709": "-2504-13005",
+    "timezone": "Pacific/Pitcairn"
+  },
+  "America/Puerto_Rico": {
+    "country_codes": [
+      "PR",
+      "AG",
+      "CA",
+      "AI",
+      "AW",
+      "BL",
+      "BQ",
+      "CW",
+      "DM",
+      "GD",
+      "GP",
+      "KN",
+      "LC",
+      "MF",
+      "MS",
+      "SX",
+      "TT",
+      "VC",
+      "VG",
+      "VI"
+    ],
+    "coordinates_decimal": {
+      "latitude": 18.468333333333334,
+      "longitude": -66.1061111111111
+    },
+    "coordinates_iso6709": "+182806-0660622",
+    "timezone": "America/Puerto_Rico"
+  },
+  "Asia/Gaza": {
+    "country_codes": [
+      "PS"
+    ],
+    "coordinates_decimal": {
+      "latitude": 31.5,
+      "longitude": 34.46666666666667
+    },
+    "coordinates_iso6709": "+3130+03428",
+    "timezone": "Asia/Gaza"
+  },
+  "Asia/Hebron": {
+    "country_codes": [
+      "PS"
+    ],
+    "coordinates_decimal": {
+      "latitude": 31.533333333333335,
+      "longitude": 35.095
+    },
+    "coordinates_iso6709": "+313200+0350542",
+    "timezone": "Asia/Hebron"
+  },
+  "Europe/Lisbon": {
+    "country_codes": [
+      "PT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.71666666666667,
+      "longitude": -9.133333333333333
+    },
+    "coordinates_iso6709": "+3843-00908",
+    "timezone": "Europe/Lisbon"
+  },
+  "Atlantic/Madeira": {
+    "country_codes": [
+      "PT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 32.63333333333333,
+      "longitude": -16.9
+    },
+    "coordinates_iso6709": "+3238-01654",
+    "timezone": "Atlantic/Madeira"
+  },
+  "Atlantic/Azores": {
+    "country_codes": [
+      "PT"
+    ],
+    "coordinates_decimal": {
+      "latitude": 37.733333333333334,
+      "longitude": -25.666666666666668
+    },
+    "coordinates_iso6709": "+3744-02540",
+    "timezone": "Atlantic/Azores"
+  },
+  "Pacific/Palau": {
+    "country_codes": [
+      "PW"
+    ],
+    "coordinates_decimal": {
+      "latitude": 7.333333333333333,
+      "longitude": 134.48333333333332
+    },
+    "coordinates_iso6709": "+0720+13429",
+    "timezone": "Pacific/Palau"
+  },
+  "America/Asuncion": {
+    "country_codes": [
+      "PY"
+    ],
+    "coordinates_decimal": {
+      "latitude": -25.266666666666666,
+      "longitude": -57.666666666666664
+    },
+    "coordinates_iso6709": "-2516-05740",
+    "timezone": "America/Asuncion"
+  },
+  "Asia/Qatar": {
+    "country_codes": [
+      "QA",
+      "BH"
+    ],
+    "coordinates_decimal": {
+      "latitude": 25.283333333333335,
+      "longitude": 51.53333333333333
+    },
+    "coordinates_iso6709": "+2517+05132",
+    "timezone": "Asia/Qatar"
+  },
+  "Europe/Bucharest": {
+    "country_codes": [
+      "RO"
+    ],
+    "coordinates_decimal": {
+      "latitude": 44.43333333333333,
+      "longitude": 26.1
+    },
+    "coordinates_iso6709": "+4426+02606",
+    "timezone": "Europe/Bucharest"
+  },
+  "Europe/Belgrade": {
+    "country_codes": [
+      "RS",
+      "BA",
+      "HR",
+      "ME",
+      "MK",
+      "SI"
+    ],
+    "coordinates_decimal": {
+      "latitude": 44.833333333333336,
+      "longitude": 20.5
+    },
+    "coordinates_iso6709": "+4450+02030",
+    "timezone": "Europe/Belgrade"
+  },
+  "Europe/Kaliningrad": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 54.71666666666667,
+      "longitude": 20.5
+    },
+    "coordinates_iso6709": "+5443+02030",
+    "timezone": "Europe/Kaliningrad"
+  },
+  "Europe/Moscow": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 55.755833333333335,
+      "longitude": 37.617777777777775
+    },
+    "coordinates_iso6709": "+554521+0373704",
+    "timezone": "Europe/Moscow"
+  },
+  "Europe/Simferopol": {
+    "country_codes": [
+      "RU",
+      "UA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 44.95,
+      "longitude": 34.1
+    },
+    "coordinates_iso6709": "+4457+03406",
+    "timezone": "Europe/Simferopol"
+  },
+  "Europe/Kirov": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 58.6,
+      "longitude": 49.65
+    },
+    "coordinates_iso6709": "+5836+04939",
+    "timezone": "Europe/Kirov"
+  },
+  "Europe/Volgograd": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 48.733333333333334,
+      "longitude": 44.416666666666664
+    },
+    "coordinates_iso6709": "+4844+04425",
+    "timezone": "Europe/Volgograd"
+  },
+  "Europe/Astrakhan": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 46.35,
+      "longitude": 48.05
+    },
+    "coordinates_iso6709": "+4621+04803",
+    "timezone": "Europe/Astrakhan"
+  },
+  "Europe/Saratov": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 51.56666666666667,
+      "longitude": 46.03333333333333
+    },
+    "coordinates_iso6709": "+5134+04602",
+    "timezone": "Europe/Saratov"
+  },
+  "Europe/Ulyanovsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 54.333333333333336,
+      "longitude": 48.4
+    },
+    "coordinates_iso6709": "+5420+04824",
+    "timezone": "Europe/Ulyanovsk"
+  },
+  "Europe/Samara": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.2,
+      "longitude": 50.15
+    },
+    "coordinates_iso6709": "+5312+05009",
+    "timezone": "Europe/Samara"
+  },
+  "Asia/Yekaterinburg": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 56.85,
+      "longitude": 60.6
+    },
+    "coordinates_iso6709": "+5651+06036",
+    "timezone": "Asia/Yekaterinburg"
+  },
+  "Asia/Omsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 55.0,
+      "longitude": 73.4
+    },
+    "coordinates_iso6709": "+5500+07324",
+    "timezone": "Asia/Omsk"
+  },
+  "Asia/Novosibirsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 55.03333333333333,
+      "longitude": 82.91666666666667
+    },
+    "coordinates_iso6709": "+5502+08255",
+    "timezone": "Asia/Novosibirsk"
+  },
+  "Asia/Barnaul": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.36666666666667,
+      "longitude": 83.75
+    },
+    "coordinates_iso6709": "+5322+08345",
+    "timezone": "Asia/Barnaul"
+  },
+  "Asia/Tomsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 56.5,
+      "longitude": 84.96666666666667
+    },
+    "coordinates_iso6709": "+5630+08458",
+    "timezone": "Asia/Tomsk"
+  },
+  "Asia/Novokuznetsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.75,
+      "longitude": 87.11666666666666
+    },
+    "coordinates_iso6709": "+5345+08707",
+    "timezone": "Asia/Novokuznetsk"
+  },
+  "Asia/Krasnoyarsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 56.016666666666666,
+      "longitude": 92.83333333333333
+    },
+    "coordinates_iso6709": "+5601+09250",
+    "timezone": "Asia/Krasnoyarsk"
+  },
+  "Asia/Irkutsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 52.266666666666666,
+      "longitude": 104.33333333333333
+    },
+    "coordinates_iso6709": "+5216+10420",
+    "timezone": "Asia/Irkutsk"
+  },
+  "Asia/Chita": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 52.05,
+      "longitude": 113.46666666666667
+    },
+    "coordinates_iso6709": "+5203+11328",
+    "timezone": "Asia/Chita"
+  },
+  "Asia/Yakutsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 62.0,
+      "longitude": 129.66666666666666
+    },
+    "coordinates_iso6709": "+6200+12940",
+    "timezone": "Asia/Yakutsk"
+  },
+  "Asia/Khandyga": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 62.65638888888889,
+      "longitude": 135.55388888888888
+    },
+    "coordinates_iso6709": "+623923+1353314",
+    "timezone": "Asia/Khandyga"
+  },
+  "Asia/Vladivostok": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 43.166666666666664,
+      "longitude": 131.93333333333334
+    },
+    "coordinates_iso6709": "+4310+13156",
+    "timezone": "Asia/Vladivostok"
+  },
+  "Asia/Ust-Nera": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 64.56027777777778,
+      "longitude": 143.22666666666666
+    },
+    "coordinates_iso6709": "+643337+1431336",
+    "timezone": "Asia/Ust-Nera"
+  },
+  "Asia/Magadan": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 59.56666666666667,
+      "longitude": 150.8
+    },
+    "coordinates_iso6709": "+5934+15048",
+    "timezone": "Asia/Magadan"
+  },
+  "Asia/Sakhalin": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 46.96666666666667,
+      "longitude": 142.7
+    },
+    "coordinates_iso6709": "+4658+14242",
+    "timezone": "Asia/Sakhalin"
+  },
+  "Asia/Srednekolymsk": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 67.46666666666667,
+      "longitude": 153.71666666666667
+    },
+    "coordinates_iso6709": "+6728+15343",
+    "timezone": "Asia/Srednekolymsk"
+  },
+  "Asia/Kamchatka": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 53.016666666666666,
+      "longitude": 158.65
+    },
+    "coordinates_iso6709": "+5301+15839",
+    "timezone": "Asia/Kamchatka"
+  },
+  "Asia/Anadyr": {
+    "country_codes": [
+      "RU"
+    ],
+    "coordinates_decimal": {
+      "latitude": 64.75,
+      "longitude": 177.48333333333332
+    },
+    "coordinates_iso6709": "+6445+17729",
+    "timezone": "Asia/Anadyr"
+  },
+  "Asia/Riyadh": {
+    "country_codes": [
+      "SA",
+      "AQ",
+      "KW",
+      "YE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 24.633333333333333,
+      "longitude": 46.71666666666667
+    },
+    "coordinates_iso6709": "+2438+04643",
+    "timezone": "Asia/Riyadh"
+  },
+  "Pacific/Guadalcanal": {
+    "country_codes": [
+      "SB",
+      "FM"
+    ],
+    "coordinates_decimal": {
+      "latitude": -9.533333333333333,
+      "longitude": 160.2
+    },
+    "coordinates_iso6709": "-0932+16012",
+    "timezone": "Pacific/Guadalcanal"
+  },
+  "Africa/Khartoum": {
+    "country_codes": [
+      "SD"
+    ],
+    "coordinates_decimal": {
+      "latitude": 15.6,
+      "longitude": 32.53333333333333
+    },
+    "coordinates_iso6709": "+1536+03232",
+    "timezone": "Africa/Khartoum"
+  },
+  "Asia/Singapore": {
+    "country_codes": [
+      "SG",
+      "MY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 1.2833333333333334,
+      "longitude": 103.85
+    },
+    "coordinates_iso6709": "+0117+10351",
+    "timezone": "Asia/Singapore"
+  },
+  "America/Paramaribo": {
+    "country_codes": [
+      "SR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 5.833333333333333,
+      "longitude": -55.166666666666664
+    },
+    "coordinates_iso6709": "+0550-05510",
+    "timezone": "America/Paramaribo"
+  },
+  "Africa/Juba": {
+    "country_codes": [
+      "SS"
+    ],
+    "coordinates_decimal": {
+      "latitude": 4.85,
+      "longitude": 31.616666666666667
+    },
+    "coordinates_iso6709": "+0451+03137",
+    "timezone": "Africa/Juba"
+  },
+  "Africa/Sao_Tome": {
+    "country_codes": [
+      "ST"
+    ],
+    "coordinates_decimal": {
+      "latitude": 0.3333333333333333,
+      "longitude": 6.733333333333333
+    },
+    "coordinates_iso6709": "+0020+00644",
+    "timezone": "Africa/Sao_Tome"
+  },
+  "America/El_Salvador": {
+    "country_codes": [
+      "SV"
+    ],
+    "coordinates_decimal": {
+      "latitude": 13.7,
+      "longitude": -89.2
+    },
+    "coordinates_iso6709": "+1342-08912",
+    "timezone": "America/El_Salvador"
+  },
+  "Asia/Damascus": {
+    "country_codes": [
+      "SY"
+    ],
+    "coordinates_decimal": {
+      "latitude": 33.5,
+      "longitude": 36.3
+    },
+    "coordinates_iso6709": "+3330+03618",
+    "timezone": "Asia/Damascus"
+  },
+  "America/Grand_Turk": {
+    "country_codes": [
+      "TC"
+    ],
+    "coordinates_decimal": {
+      "latitude": 21.466666666666665,
+      "longitude": -71.13333333333334
+    },
+    "coordinates_iso6709": "+2128-07108",
+    "timezone": "America/Grand_Turk"
+  },
+  "Africa/Ndjamena": {
+    "country_codes": [
+      "TD"
+    ],
+    "coordinates_decimal": {
+      "latitude": 12.116666666666667,
+      "longitude": 15.05
+    },
+    "coordinates_iso6709": "+1207+01503",
+    "timezone": "Africa/Ndjamena"
+  },
+  "Asia/Bangkok": {
+    "country_codes": [
+      "TH",
+      "CX",
+      "KH",
+      "LA",
+      "VN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 13.75,
+      "longitude": 100.51666666666667
+    },
+    "coordinates_iso6709": "+1345+10031",
+    "timezone": "Asia/Bangkok"
+  },
+  "Asia/Dushanbe": {
+    "country_codes": [
+      "TJ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.583333333333336,
+      "longitude": 68.8
+    },
+    "coordinates_iso6709": "+3835+06848",
+    "timezone": "Asia/Dushanbe"
+  },
+  "Pacific/Fakaofo": {
+    "country_codes": [
+      "TK"
+    ],
+    "coordinates_decimal": {
+      "latitude": -9.366666666666667,
+      "longitude": -171.23333333333332
+    },
+    "coordinates_iso6709": "-0922-17114",
+    "timezone": "Pacific/Fakaofo"
+  },
+  "Asia/Dili": {
+    "country_codes": [
+      "TL"
+    ],
+    "coordinates_decimal": {
+      "latitude": -8.55,
+      "longitude": 125.58333333333333
+    },
+    "coordinates_iso6709": "-0833+12535",
+    "timezone": "Asia/Dili"
+  },
+  "Asia/Ashgabat": {
+    "country_codes": [
+      "TM"
+    ],
+    "coordinates_decimal": {
+      "latitude": 37.95,
+      "longitude": 58.38333333333333
+    },
+    "coordinates_iso6709": "+3757+05823",
+    "timezone": "Asia/Ashgabat"
+  },
+  "Africa/Tunis": {
+    "country_codes": [
+      "TN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 36.8,
+      "longitude": 10.183333333333334
+    },
+    "coordinates_iso6709": "+3648+01011",
+    "timezone": "Africa/Tunis"
+  },
+  "Pacific/Tongatapu": {
+    "country_codes": [
+      "TO"
+    ],
+    "coordinates_decimal": {
+      "latitude": -21.133333333333333,
+      "longitude": -175.2
+    },
+    "coordinates_iso6709": "-210800-1751200",
+    "timezone": "Pacific/Tongatapu"
+  },
+  "Europe/Istanbul": {
+    "country_codes": [
+      "TR"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.016666666666666,
+      "longitude": 28.966666666666665
+    },
+    "coordinates_iso6709": "+4101+02858",
+    "timezone": "Europe/Istanbul"
+  },
+  "Asia/Taipei": {
+    "country_codes": [
+      "TW"
+    ],
+    "coordinates_decimal": {
+      "latitude": 25.05,
+      "longitude": 121.5
+    },
+    "coordinates_iso6709": "+2503+12130",
+    "timezone": "Asia/Taipei"
+  },
+  "Europe/Kyiv": {
+    "country_codes": [
+      "UA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 50.43333333333333,
+      "longitude": 30.516666666666666
+    },
+    "coordinates_iso6709": "+5026+03031",
+    "timezone": "Europe/Kyiv"
+  },
+  "America/New_York": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 40.714166666666664,
+      "longitude": -74.00638888888889
+    },
+    "coordinates_iso6709": "+404251-0740023",
+    "timezone": "America/New_York"
+  },
+  "America/Detroit": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 42.33138888888889,
+      "longitude": -83.04583333333333
+    },
+    "coordinates_iso6709": "+421953-0830245",
+    "timezone": "America/Detroit"
+  },
+  "America/Kentucky/Louisville": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.25416666666667,
+      "longitude": -85.75944444444444
+    },
+    "coordinates_iso6709": "+381515-0854534",
+    "timezone": "America/Kentucky/Louisville"
+  },
+  "America/Kentucky/Monticello": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 36.82972222222222,
+      "longitude": -84.84916666666666
+    },
+    "coordinates_iso6709": "+364947-0845057",
+    "timezone": "America/Kentucky/Monticello"
+  },
+  "America/Indiana/Indianapolis": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 39.76833333333333,
+      "longitude": -86.15805555555555
+    },
+    "coordinates_iso6709": "+394606-0860929",
+    "timezone": "America/Indiana/Indianapolis"
+  },
+  "America/Indiana/Vincennes": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.67722222222222,
+      "longitude": -87.5286111111111
+    },
+    "coordinates_iso6709": "+384038-0873143",
+    "timezone": "America/Indiana/Vincennes"
+  },
+  "America/Indiana/Winamac": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.05138888888889,
+      "longitude": -86.60305555555556
+    },
+    "coordinates_iso6709": "+410305-0863611",
+    "timezone": "America/Indiana/Winamac"
+  },
+  "America/Indiana/Marengo": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.37555555555556,
+      "longitude": -86.34472222222222
+    },
+    "coordinates_iso6709": "+382232-0862041",
+    "timezone": "America/Indiana/Marengo"
+  },
+  "America/Indiana/Petersburg": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.49194444444444,
+      "longitude": -87.2786111111111
+    },
+    "coordinates_iso6709": "+382931-0871643",
+    "timezone": "America/Indiana/Petersburg"
+  },
+  "America/Indiana/Vevay": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 38.74777777777778,
+      "longitude": -85.06722222222223
+    },
+    "coordinates_iso6709": "+384452-0850402",
+    "timezone": "America/Indiana/Vevay"
+  },
+  "America/Chicago": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.85,
+      "longitude": -87.65
+    },
+    "coordinates_iso6709": "+415100-0873900",
+    "timezone": "America/Chicago"
+  },
+  "America/Indiana/Tell_City": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 37.95305555555556,
+      "longitude": -86.76138888888889
+    },
+    "coordinates_iso6709": "+375711-0864541",
+    "timezone": "America/Indiana/Tell_City"
+  },
+  "America/Indiana/Knox": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.295833333333334,
+      "longitude": -86.625
+    },
+    "coordinates_iso6709": "+411745-0863730",
+    "timezone": "America/Indiana/Knox"
+  },
+  "America/Menominee": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 45.10777777777778,
+      "longitude": -87.61416666666666
+    },
+    "coordinates_iso6709": "+450628-0873651",
+    "timezone": "America/Menominee"
+  },
+  "America/North_Dakota/Center": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.11638888888889,
+      "longitude": -101.29916666666666
+    },
+    "coordinates_iso6709": "+470659-1011757",
+    "timezone": "America/North_Dakota/Center"
+  },
+  "America/North_Dakota/New_Salem": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 46.845,
+      "longitude": -101.41083333333333
+    },
+    "coordinates_iso6709": "+465042-1012439",
+    "timezone": "America/North_Dakota/New_Salem"
+  },
+  "America/North_Dakota/Beulah": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 47.26416666666667,
+      "longitude": -101.77777777777777
+    },
+    "coordinates_iso6709": "+471551-1014640",
+    "timezone": "America/North_Dakota/Beulah"
+  },
+  "America/Denver": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 39.73916666666667,
+      "longitude": -104.98416666666667
+    },
+    "coordinates_iso6709": "+394421-1045903",
+    "timezone": "America/Denver"
+  },
+  "America/Boise": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 43.61361111111111,
+      "longitude": -116.2025
+    },
+    "coordinates_iso6709": "+433649-1161209",
+    "timezone": "America/Boise"
+  },
+  "America/Phoenix": {
+    "country_codes": [
+      "US",
+      "CA"
+    ],
+    "coordinates_decimal": {
+      "latitude": 33.44833333333333,
+      "longitude": -112.07333333333334
+    },
+    "coordinates_iso6709": "+332654-1120424",
+    "timezone": "America/Phoenix"
+  },
+  "America/Los_Angeles": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 34.05222222222222,
+      "longitude": -118.24277777777777
+    },
+    "coordinates_iso6709": "+340308-1181434",
+    "timezone": "America/Los_Angeles"
+  },
+  "America/Anchorage": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 61.21805555555556,
+      "longitude": -149.90027777777777
+    },
+    "coordinates_iso6709": "+611305-1495401",
+    "timezone": "America/Anchorage"
+  },
+  "America/Juneau": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 58.301944444444445,
+      "longitude": -134.41972222222222
+    },
+    "coordinates_iso6709": "+581807-1342511",
+    "timezone": "America/Juneau"
+  },
+  "America/Sitka": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 57.17638888888889,
+      "longitude": -135.30194444444444
+    },
+    "coordinates_iso6709": "+571035-1351807",
+    "timezone": "America/Sitka"
+  },
+  "America/Metlakatla": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 55.12694444444445,
+      "longitude": -131.57638888888889
+    },
+    "coordinates_iso6709": "+550737-1313435",
+    "timezone": "America/Metlakatla"
+  },
+  "America/Yakutat": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 59.54694444444444,
+      "longitude": -139.72722222222222
+    },
+    "coordinates_iso6709": "+593249-1394338",
+    "timezone": "America/Yakutat"
+  },
+  "America/Nome": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 64.50111111111111,
+      "longitude": -165.4063888888889
+    },
+    "coordinates_iso6709": "+643004-1652423",
+    "timezone": "America/Nome"
+  },
+  "America/Adak": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 51.88,
+      "longitude": -176.65805555555556
+    },
+    "coordinates_iso6709": "+515248-1763929",
+    "timezone": "America/Adak"
+  },
+  "Pacific/Honolulu": {
+    "country_codes": [
+      "US"
+    ],
+    "coordinates_decimal": {
+      "latitude": 21.306944444444444,
+      "longitude": -157.85833333333332
+    },
+    "coordinates_iso6709": "+211825-1575130",
+    "timezone": "Pacific/Honolulu"
+  },
+  "America/Montevideo": {
+    "country_codes": [
+      "UY"
+    ],
+    "coordinates_decimal": {
+      "latitude": -34.909166666666664,
+      "longitude": -56.2125
+    },
+    "coordinates_iso6709": "-345433-0561245",
+    "timezone": "America/Montevideo"
+  },
+  "Asia/Samarkand": {
+    "country_codes": [
+      "UZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 39.666666666666664,
+      "longitude": 66.8
+    },
+    "coordinates_iso6709": "+3940+06648",
+    "timezone": "Asia/Samarkand"
+  },
+  "Asia/Tashkent": {
+    "country_codes": [
+      "UZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": 41.333333333333336,
+      "longitude": 69.3
+    },
+    "coordinates_iso6709": "+4120+06918",
+    "timezone": "Asia/Tashkent"
+  },
+  "America/Caracas": {
+    "country_codes": [
+      "VE"
+    ],
+    "coordinates_decimal": {
+      "latitude": 10.5,
+      "longitude": -66.93333333333334
+    },
+    "coordinates_iso6709": "+1030-06656",
+    "timezone": "America/Caracas"
+  },
+  "Asia/Ho_Chi_Minh": {
+    "country_codes": [
+      "VN"
+    ],
+    "coordinates_decimal": {
+      "latitude": 10.75,
+      "longitude": 106.66666666666667
+    },
+    "coordinates_iso6709": "+1045+10640",
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "Pacific/Efate": {
+    "country_codes": [
+      "VU"
+    ],
+    "coordinates_decimal": {
+      "latitude": -17.666666666666668,
+      "longitude": 168.41666666666666
+    },
+    "coordinates_iso6709": "-1740+16825",
+    "timezone": "Pacific/Efate"
+  },
+  "Pacific/Apia": {
+    "country_codes": [
+      "WS"
+    ],
+    "coordinates_decimal": {
+      "latitude": -13.833333333333334,
+      "longitude": -171.73333333333332
+    },
+    "coordinates_iso6709": "-1350-17144",
+    "timezone": "Pacific/Apia"
+  },
+  "Africa/Johannesburg": {
+    "country_codes": [
+      "ZA",
+      "LS",
+      "SZ"
+    ],
+    "coordinates_decimal": {
+      "latitude": -26.25,
+      "longitude": 28.0
+    },
+    "coordinates_iso6709": "-2615+02800",
+    "timezone": "Africa/Johannesburg"
+  }
+}
