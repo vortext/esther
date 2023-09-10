@@ -19,8 +19,8 @@
     (page
      (common/head
       {}
-      [[:link {:rel "stylesheet" :href "/resources/public/css/login.css"}]]
-      [[:script {:src "/resources/public/js/login.js"}]])
+      ["public/css/login.css"]
+      ["public/js/login.js"])
      [:body
       [:div.container
        [:div.login-box

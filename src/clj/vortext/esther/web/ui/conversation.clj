@@ -95,12 +95,12 @@
   (page
    (common/head
     {} ;; inject appConfig here
-    [[:link {:rel "stylesheet" :href "/resources/public/css/conversation.css"}]]
-    [[:script {:src "/resources/public/js/vendor/emoji.min.js"}]
-     [:script {:src "/resources/public/js/vendor/suncalc.min.js"}]
-     [:script {:src "/resources/public/js/vendor/marked.min.js"}]
-     [:script {:src "/resources/public/js/vendor/lunarphase.js"}]
-     [:script {:src "/resources/public/js/conversation.js"}]])
+    ["public/css/conversation.css"]
+    ["public/js/vendor/emoji.js"
+     "public/js/vendor/suncalc.js"
+     "public/js/vendor/marked.js"
+     "public/js/vendor/lunarphase.js"
+     "public/js/conversation.js"])
    [:body
     [:div#container
      [:h1#title "Esther"]

@@ -4,13 +4,12 @@
    [clojure.tools.logging :as log]
    [clojure.core.async :as async :refer
     [alts! timeout chan go-loop <! go >! <!! >!! close!]]
-   [clojure.java.io :as io]
    [clj-commons.digest :as digest]
-   [vortext.esther.config :refer [ai-name]]
+   [vortext.esther.config :refer [ai-name] :as config]
    [babashka.process :refer [process destroy-tree alive?]]
+   [clojure.java.io :as io]
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
-   [vortext.esther.config :as config]
    [vortext.esther.util.json :as json]
    [clojure.string :as str])
   (:import [dev.failsafe TimeoutExceededException]))

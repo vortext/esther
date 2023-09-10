@@ -14,7 +14,7 @@
   (t/table-str obj :style :github-markdown))
 
 (def parse
-  (let [script "public/js/vendor/marked.min.js"
+  (let [script "public/js/vendor/marked.js"
         script (str (fs/canonicalize (io/resource script)))
         marked (polyglot/js-api script "marked" [:parse])]
     (fn [& args]
