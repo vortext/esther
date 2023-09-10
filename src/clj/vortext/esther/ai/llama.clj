@@ -10,6 +10,7 @@
    [babashka.process :refer [process destroy-tree alive?]]
    [babashka.fs :as fs]
    [clojure.core.cache.wrapped :as w]
+   [vortext.esther.config :as config]
    [vortext.esther.util.json :as json]
    [clojure.string :as str])
   (:import [dev.failsafe TimeoutExceededException]))
@@ -27,18 +28,19 @@
 (defn shell-cmd
   [bin-dir model-path prompt]
   (let [prompt (generate-prompt-str prompt)
-        cache-file (str "cache/" (digest/md5 prompt) ".bin")
-        prompt-cache (fs/delete-on-exit (fs/canonicalize cache-file))
-        gbnf (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))
+        prompt-cache (fs/path
+                      config/tmp-dir
+                      (str (digest/md5 prompt) ".bin"))
+        gbnf (fs/canonicalize (io/resource "grammars/chat.gbnf"))
 
-        tmp (str (fs/delete-on-exit (fs/create-temp-file)))
-        model (str (fs/canonicalize (fs/path model-path)))]
+        tmp (str (fs/create-temp-file {:dir config/tmp-dir}))
+        model (fs/canonicalize (fs/path model-path))]
     (spit tmp prompt)
     (str/join
      " "
      [(str (fs/real-path (fs/path bin-dir "main")))
-      "-m" model
-      "--grammar-file" gbnf
+      "-m" (str model)
+      "--grammar-file" (str gbnf)
       ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
       "--n-gpu-layers" 19
       "--threads" 32
@@ -53,7 +55,8 @@
       ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
       ;; Also see https://github.com/belladoreai/llama-tokenizer-js
       "--keep" -1
-      "--prompt-cache" prompt-cache
+      "--prompt-cache" (str prompt-cache)
+
       "-i"
       "--simple-io"
       "--interactive-first"

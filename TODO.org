@@ -88,7 +88,7 @@ _ more user information in session (vault)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** TODO weird bug where login shows in memory.
+** TODO weird bug where login shows in memory (enforce redirect).
 ** DONE better error handling subprocesses
 ** TODO calendar page (for memories)?
 ** TODO share a page (static gen)
@@ -97,6 +97,7 @@ _ more user information in session (vault)
 ** TODO deploy and build shizzle (Github actions?)
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
+** TODO finetune model
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
 ** TODO /imagine command (no solutions for this ATM)

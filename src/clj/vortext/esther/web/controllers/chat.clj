@@ -19,7 +19,7 @@
   [opts user obj]
   (let [keywords (memory/frecency-keywords opts user :week 10)
         keywords (into #{} (map :value keywords))
-        memories (reverse (memory/recent-conversation opts user))]
+        memories (reverse (memory/recent-conversation opts user 5))]
     (merge obj {:user/keywords keywords
                 :user/memories (map ->memory-context memories)})))
 

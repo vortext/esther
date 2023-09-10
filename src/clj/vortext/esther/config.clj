@@ -2,6 +2,7 @@
   (:require
    [clojure.java.io :as io]
    [clojure.edn :as edn]
+   [babashka.fs :as fs]
    [clojure.tools.logging :as log]
    [kit.config :as config]))
 
@@ -27,3 +28,6 @@
 
 (def request-keys
   #{:content :context})
+
+(def tmp-dir
+  (fs/delete-on-exit (fs/create-temp-dir {:prefix ai-name})))
