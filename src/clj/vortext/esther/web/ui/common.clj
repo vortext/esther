@@ -37,7 +37,7 @@
 (defn bundle
   [out-dir resources prefix suffix]
   (let [paths (map ->canonical-path resources)
-        hash (digest/md5 (str (md5sums paths)))
+        hash (digest/md5 (apply str (map second (md5sums paths))))
         filename (str prefix hash suffix)
         outfile (str (fs/path out-dir filename))]
     (if (fs/exists? outfile) outfile (minify paths outfile))))

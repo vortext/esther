@@ -24,7 +24,6 @@
   [bin-dir model-path prompt]
   (let [gbnf (fs/canonicalize (io/resource "grammars/chat.gbnf"))
         model (fs/canonicalize (fs/path model-path))]
-
     (str/join
      " "
      [(str (fs/real-path (fs/path bin-dir "main")))

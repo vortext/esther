@@ -6,7 +6,7 @@
    [clojure.tools.logging :as log]
    [kit.config :as config]))
 
-(def ai-name "esther")
+(def ^:const ai-name "esther")
 
 (def ^:const system-filename "system.edn")
 
@@ -30,4 +30,4 @@
   #{:content :context})
 
 (def tmp-dir
-  (fs/delete-on-exit (fs/create-temp-dir {:prefix ai-name})))
+  (fs/create-dirs (fs/xdg-cache-home ai-name)))

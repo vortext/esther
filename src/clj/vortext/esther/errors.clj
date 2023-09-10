@@ -11,8 +11,9 @@
 
 (defn wrapped-error
   [error-kw e]
-  (log/warn e)
+  (log/error e)
   {:event/role :system
+   :event/conversation? true
    :event/content
    (-> (error-kw errors)
        (assoc :ui/type :error)
