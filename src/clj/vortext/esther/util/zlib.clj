@@ -34,18 +34,17 @@
   [file-path]
   (let [buffer-size 2048
         file-input-stream (io/input-stream file-path)
-        buffer (byte-array buffer-size)
+        buffer (byte-array buffer-size)  ;; Buffer created here
         crc-ref (atom 0)]
     (try
       (loop []
-        (let [read-count (.read file-input-stream buffer)]
+        (let [read-count (.read file-input-stream buffer)]  ;; Buffer reused here
           (when (pos? read-count)
             (swap! crc-ref update-crc32 buffer read-count)
             (recur))))
       (finally
         (.close file-input-stream)))
     @crc-ref))
-
 
 (defn text->crc32
   [text]
@@ -60,7 +59,8 @@
 (defn compress-str
   [source]
   (let [source-bytes (.getBytes source "UTF-8")
-        dest (byte-array (* 2 (count source-bytes)))  ;; Allocate a buffer based on the source length
+        initial-buffer-size (+ 12 (int (* 1.001 (count source-bytes))))
+        dest (byte-array initial-buffer-size)
         dest-size* (doto (LongByReference.)
                      (.setValue (alength dest)))
         ret (compress dest dest-size* source-bytes (count source-bytes))
@@ -68,6 +68,7 @@
     (if (zero? ret)
       (str (codecs/bytes->b64-str data) " " (count source-bytes))
       (throw (Exception. (str "Compression failed with error code: " ret))))))
+
 
 (defn decompress
   [compressed]
