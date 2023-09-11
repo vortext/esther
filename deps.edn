@@ -41,7 +41,6 @@
            metosin/ring-http-response {:mvn/version "0.9.3"}
            ring/ring-core {:mvn/version "1.10.0"}
            ring/ring-defaults {:mvn/version "0.3.3"}
-           amalloy/ring-gzip-middleware {:mvn/version "0.1.4"}
 
            ;; Logging
            ch.qos.logback/logback-classic {:mvn/version "1.4.4"}
