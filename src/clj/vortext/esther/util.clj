@@ -4,14 +4,11 @@
    [clojure.string :as str]
    [babashka.process :refer [shell]]
    [buddy.core.codecs :as codecs]
-   [buddy.core.nonce :as nonce])
-  (:import
-   (java.util Base64)))
+   [buddy.core.nonce :as nonce]))
 
 ;; Base64
-(defn bytes->b64 [^bytes b] (String. (.encode (Base64/getEncoder) b)))
-(defn b64->bytes [^String s]
-  (codecs/b64->bytes s))
+(def bytes->b64 codecs/bytes->b64)
+(def b64->bytes codecs/b64->bytes)
 
 ;; Random
 (defn random-id
