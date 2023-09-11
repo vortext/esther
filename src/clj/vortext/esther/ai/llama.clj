@@ -23,12 +23,17 @@
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
 (defn- internal-config-obj
-  [{:keys [model-path bin-dir]} {:keys [:llm/prompt]}]
-  (let [cache #(fs/path config/cache-dir %)
+  [options uid {:keys [:llm/prompt-template :llm/prompt]}]
+  (let [{:keys [model-path bin-dir]} options
 
+        cache #(fs/path config/cache-dir %)
         prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
-        prompt-checksum (zlib/crc32->base64-str (zlib/text->crc32 prompt))
-        prompt-path (cache (format "prompt_%s_%s.md" ai-name prompt-checksum))
+
+        checksum (-> (str uid prompt-template) ;; <- template instead of rendered
+                     (zlib/text->crc32)
+                     (zlib/crc32->base64-str))
+
+        prompt-path (cache (format "prompt_%s_%s.md" ai-name checksum))
         _ (when-not (fs/exists? prompt-path)
             (spit (str prompt-path) prompt))
 
@@ -39,9 +44,10 @@
                    (slurp (io/resource "grammars/chat.gbnf"))
                    {:role ai-prefix})))
 
-        prompt-cache-path (cache (format "cache_%s.bin" prompt-checksum))]
+        prompt-cache-path (cache (format "cache_%s.bin" checksum))]
     {::prompt-path prompt-path
      ::grammar-path grammar-path
+     ::checksum checksum
      ::model-path (fs/canonicalize (fs/path model-path))
      ::cmd-path (fs/canonicalize (fs/path bin-dir "main"))
      ::prompt-cache-path prompt-cache-path}))
@@ -215,7 +221,7 @@
 (defn start
   [options cache user obj]
   (let [{:keys [uid]} (:vault user)
-        config (internal-config-obj options obj)]
+        config (internal-config-obj options uid obj)]
     (cached-spawn-subprocess cache uid config)))
 
 (defn- internal-shell-complete-fn

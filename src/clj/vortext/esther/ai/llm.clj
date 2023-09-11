@@ -58,11 +58,12 @@
 
 (defn ->submission
   [opts obj]
-  (let [prompt-str (slurp (io/resource (:prompt opts)))
+  (let [template (slurp (io/resource (:prompt opts)))
         {:keys [:local/context :memory/events :user/memories :user/keywords]} obj
-        prompt  (mustache/render prompt-str context)
+        prompt  (mustache/render template context)
         request-content (-> events first :event/content :content)]
-    {:llm/prompt prompt
+    {:llm/prompt-template template
+     :llm/prompt prompt
      :llm/submission
      {:context {:memories memories
                 :keywords keywords}
