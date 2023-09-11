@@ -8,6 +8,13 @@
    [vortext.esther.util.json :refer [read-transit-from-file write-transit-to-file]]
    [com.phronemophobic.clong.clang :as clong]
    [com.phronemophobic.clong.gen.jna :as gen])
+  (:import
+   java.io.PushbackReader
+   com.sun.jna.Memory
+   com.sun.jna.Pointer
+   com.sun.jna.ptr.PointerByReference
+   com.sun.jna.ptr.LongByReference
+   com.sun.jna.Structure)
   (:gen-class))
 
 (def h "zlib.h")
@@ -51,8 +58,33 @@
   (codecs/bytes->b64-str
    (codecs/long->bytes crc32) true))
 
+(defn compress-str
+  [source]
+  (let [source-bytes (.getBytes source "UTF-8")
+        dest (byte-array (* 2 (count source-bytes)))  ;; Allocate a buffer based on the source length
+        dest-size* (doto (LongByReference.)
+                     (.setValue (alength dest)))
+        ret (compress dest dest-size* source-bytes (count source-bytes))
+        data (byte-array (subvec (vec dest) 0 (.getValue dest-size*)))]
+    (if (zero? ret)
+      {:data (codecs/bytes->b64-str data)
+       :uncompressed-length (count source-bytes)}
+      (throw (Exception. (str "Compression failed with error code: " ret))))))
+
+(defn decompress
+  [{:keys [data uncompressed-length]}]
+  (let [dest (byte-array uncompressed-length)
+        dest-size* (doto (LongByReference.)
+                     (.setValue uncompressed-length))
+        ret (uncompress dest dest-size* (codecs/b64->bytes data) (count data))]
+    (if (zero? ret)
+      (String. dest "UTF-8")
+      (throw (Exception. (str "Decompression failed with error code: " ret))))))
+
 ;;; Scratch
 (comment
+  (decompress (compress-str "test"))
+
   (defn write-api ;; I used this to write the API
     [h out]
     (let [h-file (str (fs/canonicalize (io/resource (str "h/" h))))

@@ -64,13 +64,15 @@ _ more user information in session (vault)
 ** DONE use a single map from the whole req-rep thread with namespaced keywords.
 ** TODO link parsing?
 ** DONE minify on the fly with hash check (maybe wontfix because javascript is hell)
-** TODO Gzip
-- done with jvm ring-middleware
-- could speed up clong or llvm for practice?
+** DONE Gzip
+- can done with jvm ring-middleware
+- could speed up with clong or llvm for practice?
+- but really belongs in nginx or wherever
 ** TODO logo + favicon
-** TODO start llama when converse UI is loaded (refactor the whole impl thing)
+** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
+** TODO set context rollover properly (e.g. from day to night) when subproc is running?
 ** TODO export / download data functionality (for me and GDPR!)
-** TODO set context rollover properly (e.g. from day to night) when subproc is running
+** TODO check if there's a distributed deploy strategy that supports mirostat 🙃
 ** TODO ui things
 - Discoverability of input bar
 - Button for archive or other commands?
@@ -93,7 +95,7 @@ _ more user information in session (vault)
 - onnx bert?
 - bert.cpp / jna?
 - wait for llama.cpp to fix it?
-** TODO harmonize emoji handling using graalvm?
+** DONE harmonize emoji handling using graalvm? (did it a better way client side)
 ** DONE keyword_memory_lookup table and logic
 ** TODO dark mode
 ** TODO better intro flow
