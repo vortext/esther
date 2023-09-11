@@ -1,7 +1,6 @@
 (ns vortext.esther.web.handler
   (:require
    [vortext.esther.web.middleware.core :as middleware]
-   [ring.middleware.gzip :as gzip]
    [integrant.core :as ig]
    [ring.util.http-response :as http-response]
    [reitit.ring :as ring]

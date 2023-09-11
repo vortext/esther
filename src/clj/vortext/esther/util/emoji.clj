@@ -2,9 +2,7 @@
   (:require
    [clojure.string :as str])
   (:import
-   [net.fellbaum.jemoji EmojiManager]
-   [org.ahocorasick.trie Trie]))
-
+   [net.fellbaum.jemoji EmojiManager]))
 
 (defonce emojis (map bean (EmojiManager/getAllEmojis)))
 

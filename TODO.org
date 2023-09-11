@@ -76,7 +76,6 @@ _ more user information in session (vault)
 ** TODO ui things
 - Discoverability of input bar
 - Button for archive or other commands?
-** TODO integrate https://github.com/spencermountain/compromise for NER or for the lulz?
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
@@ -85,8 +84,6 @@ _ more user information in session (vault)
 - For converse: most_similar => summarize top-k => context: {kw: summary}
 - Inject similar memories in user request context
 - https://github.com/nmslib/hnswlib (via JNA clong clang?)
-- split out api gen so don't depend on the whole of llvm
-- does it need the stdlib in the api?
 - get it to work simple example
 - get it to work persistence, how to deal with scoping to user?!
 - get it to work with embeddings and real data (find or generate some dataset)
@@ -101,6 +98,7 @@ _ more user information in session (vault)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
+** TODO integrate https://github.com/spencermountain/compromise for NER or for the lulz?
 ** TODO weird bug where login shows in memory (enforce redirect).
 ** DONE better error handling subprocesses
 ** TODO calendar page (for memories)?
