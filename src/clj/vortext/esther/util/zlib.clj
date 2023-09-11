@@ -21,11 +21,9 @@
 (def api-file (str (fs/canonicalize (fs/path (io/resource "api") "zlib.json"))))
 (def api-def (read-transit-from-file api-file))
 
-(def libz (com.sun.jna.NativeLibrary/getInstance "z"))
+(def zlib (com.sun.jna.NativeLibrary/getInstance "z"))
 
-(gen/def-api libz api-def)
-
-(def buffer-size 2048) ; Adjust buffer size as needed
+(gen/def-api zlib api-def)
 
 (defn update-crc32
   [crc buffer read-count]
@@ -34,7 +32,8 @@
 
 (defn calculate-crc32
   [file-path]
-  (let [file-input-stream (io/input-stream file-path)
+  (let [buffer-size 2048
+        file-input-stream (io/input-stream file-path)
         buffer (byte-array buffer-size)
         crc-ref (atom 0)]
     (try
@@ -67,13 +66,14 @@
         ret (compress dest dest-size* source-bytes (count source-bytes))
         data (byte-array (subvec (vec dest) 0 (.getValue dest-size*)))]
     (if (zero? ret)
-      {:data (codecs/bytes->b64-str data)
-       :uncompressed-length (count source-bytes)}
+      (str (codecs/bytes->b64-str data) " " (count source-bytes))
       (throw (Exception. (str "Compression failed with error code: " ret))))))
 
 (defn decompress
-  [{:keys [data uncompressed-length]}]
-  (let [dest (byte-array uncompressed-length)
+  [compressed]
+  (let [[data size] (str/split compressed #" ")
+        uncompressed-length (Long/parseLong size)
+        dest (byte-array uncompressed-length)
         dest-size* (doto (LongByReference.)
                      (.setValue uncompressed-length))
         ret (uncompress dest dest-size* (codecs/b64->bytes data) (count data))]

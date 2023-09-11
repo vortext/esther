@@ -27,8 +27,8 @@
   (let [cache #(fs/path config/cache-dir %)
 
         prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
-        prompt-hash (zlib/crc32->base64-str (zlib/text->crc32 prompt))
-        prompt-path (cache (format "prompt_%s_%s.md" ai-name prompt-hash))
+        prompt-checksum (zlib/crc32->base64-str (zlib/text->crc32 prompt))
+        prompt-path (cache (format "prompt_%s_%s.md" ai-name prompt-checksum))
         _ (when-not (fs/exists? prompt-path)
             (spit (str prompt-path) prompt))
 
@@ -39,7 +39,7 @@
                    (slurp (io/resource "grammars/chat.gbnf"))
                    {:role ai-prefix})))
 
-        prompt-cache-path (cache (format "cache_%s.bin" prompt-hash))]
+        prompt-cache-path (cache (format "cache_%s.bin" prompt-checksum))]
     {::prompt-path prompt-path
      ::grammar-path grammar-path
      ::model-path (fs/canonicalize (fs/path model-path))
