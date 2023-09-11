@@ -8,7 +8,6 @@
    [vortext.esther.web.ui.conversation :as conversation]
    [vortext.esther.web.ui.login :as login]
    [vortext.esther.web.ui.memory :as memory]
-
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.auth.accessrules :refer [wrap-access-rules]]
    [integrant.core :as ig]
@@ -63,7 +62,7 @@
 (def route-data
   {:muuntaja   formats/instance
    :middleware
-   [ ;; Default middleware for ui
+   [;; Default middleware for ui
     ;; query-params & form-params
     parameters/parameters-middleware
     ;; encoding response body
