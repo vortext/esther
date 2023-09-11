@@ -40,7 +40,7 @@
 (defn crc32->base64-str
   [crc32]
   (codecs/bytes->b64-str
-   (codecs/long->bytes crc32) true))
+   (codecs/long->bytes crc32) true)) ;; true = websafe
 
 (defn compress
   [source]
@@ -67,6 +67,9 @@
     (if (zero? ret)
       (String. dest "UTF-8")
       (throw (Exception. (str "Decompression failed with error code: " ret))))))
+
+;; As tempting as it is to implement gzip here, you're better off using shell for that.
+;; Or the jvm impl, I have no why this exists other than out of curiousity.
 
 ;; Scratch
 (comment
