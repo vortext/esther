@@ -23,13 +23,13 @@
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
 (defn- internal-config-obj
-  [options uid {:keys [:llm/prompt-template :llm/prompt]}]
+  [options uid {:keys [:llm/prompt]}]
   (let [{:keys [model-path bin-dir]} options
 
         cache #(fs/path config/cache-dir %)
         prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
 
-        checksum (-> (str uid prompt-template) ;; <- template instead of rendered
+        checksum (-> (str uid prompt)
                      (zlib/text->crc32)
                      (zlib/crc32->base64-str))
 
@@ -44,7 +44,7 @@
                    (slurp (io/resource "grammars/chat.gbnf"))
                    {:role ai-prefix})))
 
-        prompt-cache-path (cache (format "cache_%s.bin" checksum))]
+        prompt-cache-path (cache (format "cache_%s_%s.bin" ai-name checksum))]
     {::prompt-path prompt-path
      ::grammar-path grammar-path
      ::checksum checksum
