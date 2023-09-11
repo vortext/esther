@@ -86,8 +86,8 @@
   (let [instance (case impl :llama-shell (llama/create-instance opts))]
     {:instance instance
      :shutdown-fn (:shutdown-fn instance)
-     :complete-fn  (create-complete-fn instance)}))
+     :complete-fn (create-complete-fn instance)}))
 
 
-(defmethod ig/halt-key! :ai.llm/llm-interface [_ {:keys [impl]}]
-  ((:shutdown-fn impl)))
+(defmethod ig/halt-key! :ai.llm/llm-interface [_ {:keys [instance]}]
+  ((:shutdown-fn instance)))

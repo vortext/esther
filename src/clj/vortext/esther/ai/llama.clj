@@ -85,9 +85,10 @@
         proc (process {:shutdown destroy-tree
                        :err (java.io.OutputStream/nullOutputStream)}
                       cmd)
+
+        sigint #(send-sigint (.pid (:proc proc)))
         out-ch (chan 128)
         in-ch (chan 128)
-        sigint #(send-sigint (.pid (:proc proc)))
         rdr (io/reader (:out proc))
         shutdown-fn #(do
                        (log/warn "destroying" (:proc proc))
@@ -165,7 +166,7 @@
   subprocess)
 
 (defn start-subprocess!
-  [config]
+  [config _uid]
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
         status-ch (chan 1)
@@ -189,7 +190,7 @@
   [cache uid config]
   (w/lookup-or-miss
    cache uid
-   (fn [_uid] (start-subprocess! config))))
+   (fn [uid] (start-subprocess! config uid))))
 
 (defn checked-proc
   [cache uid]
