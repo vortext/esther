@@ -1,6 +1,6 @@
 (ns vortext.esther.web.ui.common
   (:require
-   [vortext.esther.util :refer [md5sums]]
+   [vortext.esther.util.zlib :as zlib]
    [babashka.process :refer [process shell]]
    [clj-commons.digest :as digest]
    [clojure.java.io :as io]
@@ -37,7 +37,7 @@
 (defn bundle
   [out-dir resources prefix suffix]
   (let [paths (map ->canonical-path resources)
-        hash (digest/md5 (apply str (map second (md5sums paths))))
+        hash (digest/md5 (apply str (map zlib/calculate-crc32 paths)))
         filename (str prefix hash suffix)
         outfile (str (fs/path out-dir filename))]
     (if (fs/exists? outfile) outfile (minify paths outfile))))

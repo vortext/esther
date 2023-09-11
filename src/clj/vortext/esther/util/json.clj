@@ -1,6 +1,7 @@
 (ns vortext.esther.util.json
   (:require
    [clojure.string :as str]
+   [cognitect.transit :as transit]
    [jsonista.core :as json]
    [clojure.java.io :as io]
    [babashka.fs :as fs]
@@ -10,7 +11,6 @@
   (json/object-mapper
    {:pretty true}))
 
-;; JSON utils
 (defn pretty-json
   [obj]
   (json/write-value-as-string obj pretty-object-mapper))
@@ -29,7 +29,6 @@
     (fn [args]
       ((:jsonrepair jsonrepair) args))))
 
-
 (defn parse-repair-json
   [maybe-json]
   (try
@@ -38,3 +37,13 @@
       (try
         (parse-repair-json (repair-json maybe-json))
         (catch Exception _ maybe-json)))))
+
+;; Transit json
+
+(defn write-transit-to-file [obj filename]
+  (with-open [out (io/output-stream filename)]
+    (transit/write (transit/writer out :json) obj)))
+
+(defn read-transit-from-file [filename]
+  (with-open [in (io/input-stream filename)]
+    (transit/read (transit/reader in :json))))

@@ -3,13 +3,13 @@
    [diehard.core :as dh]
    [clojure.tools.logging :as log]
    [clojure.string :as str]
+   [clojure.java.io :as io]
    [clojure.core.cache.wrapped :as w]
    [clojure.core.async :as async :refer
     [alts! timeout chan go-loop <! go >! <!! >!! close!]]
-   [clojure.java.io :as io]
-   [clj-commons.digest :as digest]
    [babashka.process :refer [process destroy-tree alive?]]
    [babashka.fs :as fs]
+   [vortext.esther.util.zlib :as zlib]
    [vortext.esther.util.json :as json]
    [vortext.esther.util.mustache :as mustache]
    [vortext.esther.config :refer [ai-name] :as config])
@@ -27,7 +27,7 @@
   (let [cache #(fs/path config/cache-dir %)
 
         prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
-        prompt-hash (digest/md5 prompt)
+        prompt-hash (zlib/crc32->base64-str (zlib/text->crc32 prompt))
         prompt-path (cache (format "prompt_%s_%s.md" ai-name prompt-hash))
         _ (when-not (fs/exists? prompt-path)
             (spit (str prompt-path) prompt))
