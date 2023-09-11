@@ -65,7 +65,6 @@
   [opts request]
   (let [user (get-in request [:session :user])
         obj (make-request-obj user request)
-        _ (log/debug "answer!obj:" obj)
         request (-> obj :memory/events first :event/content)]
     (try
       (if-not (m/validate request-schema request)
