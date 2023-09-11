@@ -54,12 +54,11 @@
   [user request]
   (let [{:keys [params]} request
         {:keys [context content]} params
-        local-context (create-local-context (json/read-json-value context))
-        request-content (emoji/replace-slack-aliasses (str/trim content))]
+        local-context (create-local-context (json/read-json-value context))]
     {:local/context local-context
      :memory/ts (unix-ts)
      :memory/gid (random-base64)
-     :memory/events [{:event/content {:content request-content}
+     :memory/events [{:event/content {:content content}
                       :event/role :user}]}))
 
 (defn answer!

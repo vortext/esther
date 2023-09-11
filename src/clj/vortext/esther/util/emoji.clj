@@ -21,50 +21,8 @@
 (defn emoji-in-str [s]
   (map bean (EmojiManager/extractEmojisInOrder ^String s)))
 
-(defn- alias->unicode
-  [k]
-  (->> emojis
-       (mapcat (fn [emoji]
-                 (map #(vector % (:unicode emoji))
-                      (k emoji))))
-       (into {})))
-
-(defn build-trie
-  [alias-map]
-  (let [builder (Trie/builder)]
-    (doseq [[alias _] alias-map]
-      (.addKeyword builder alias))
-    (.build builder)))
-
-(defn parse-to-unicode
-  ([trie alias->unicode text]
-   (when-not (str/blank? text)
-     (let [emits (.parseText trie text)
-           sorted-emits (sort-by #(.getStart %) emits)]
-       (loop [remaining-emits sorted-emits
-              prev-end 0
-              result ""]
-         (if (empty? remaining-emits)
-           (str result (subs text prev-end))
-           (let [emit (first remaining-emits)
-                 start (.getStart emit)
-                 end (inc (.getEnd emit))
-                 replacement (get alias->unicode (.getKeyword emit))]
-             (recur (rest remaining-emits)
-                    end
-                    (str result (subs text prev-end start) replacement)))))))))
-
-(defn create-replace-fn
-  [key]
-  (let [alias-map (alias->unicode key)
-        trie (build-trie alias-map)]
-    (partial parse-to-unicode trie alias-map)))
-
-(def replace-slack-aliasses (create-replace-fn :slackAliases))
-
-
 (defn extract-first-emoji
   [s]
   (if (unicode-emoji? s) s
-      (if-let [recovered (emoji-in-str (replace-slack-aliasses s))]
+      (if-let [recovered (emoji-in-str s)]
         (:emoji (first recovered)) nil)))

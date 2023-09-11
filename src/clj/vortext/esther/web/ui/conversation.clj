@@ -66,10 +66,14 @@
      {:type "hidden"
       :name "context"
       :value "{}"}]
+    [:input#input-content
+     {:type "hidden"
+      :name "content"
+      :value ""}]
     [:textarea#user-input
      {:autocomplete "off"
       :minlength 1
-      :name "content"
+      :name "_content"
       :maxlength 1024
       :autofocus "true"
       :placeholder "Dear Esther,"

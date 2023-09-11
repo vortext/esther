@@ -58,20 +58,22 @@ function debounce(func, wait) {
 
 
 let setLocalContext = debounce(function () {
-  let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  let timezoneLocation;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const localContext = document.getElementById("local-context");
   const timezones = window.appConfig.timezones;
 
+  let timezoneLocation;
   if (timezones && timezones[timezone] && timezones[timezone].coordinates_decimal) {
     timezoneLocation = timezones[timezone].coordinates_decimal;
   } else {
-    timezoneLocation = {"latitude": 51.509865, "longitude": -0.118092} // London
+    timezoneLocation = {"latitude": 51.509, "longitude": -0.118} // London-ish
   }
 
-  let locationAllowed = window.appConfig.isLocationAllowed;
-  let location = locationAllowed ? window.appConfig.location : timezoneLocation;
+  const locationAllowed = window.appConfig.isLocationAllowed;
+  const location = locationAllowed ? window.appConfig.location : timezoneLocation;
 
-  let context =  {
+  const context =  {
     "location-allowed": locationAllowed,
     "season": getCurrentSeason(location.latitude),
     "time-of-day": getTimeOfDay(location.latitude, location.longitude),
@@ -80,9 +82,8 @@ let setLocalContext = debounce(function () {
                  "longitude": location.longitude},
     "lunar-phase": lunarphase.Moon.lunarPhase()};
 
-  let localContext = document.getElementById("local-context");
   localContext.value = JSON.stringify(context);
-}, 500);
+}, 50);
 
 function scrollToView(element) {
   const rect = element.getBoundingClientRect();
@@ -101,11 +102,14 @@ function resizeTextarea(e) {
 
 function handleTextareaInput(e) {
   const textarea = e.target;
+  const inputContent = document.getElementById("input-content");
 
   // Resize the textarea
   resizeTextarea(e);
   scrollToView(textarea);
   setLocalContext();
+
+  inputContent.value = emoji.replace_colons(textarea.value);
 
   // If the Enter key is pressed with the Shift key
   if (e.key === 'Enter' && e.shiftKey) {
@@ -172,17 +176,16 @@ function getEnergy() {
 
 function beforeConverseRequest() {
   setEnergy(getEnergy());
+  const textarea = document.getElementById('user-input');
+  const inputContent = document.getElementById("input-content");
+  const userValue = document.getElementById("user-value");
 
-  // Get the form and input elements
-  let textarea = document.getElementById('user-input');
-  let userValue = document.getElementById("user-value");
+  userValue.innerHTML = marked.parse(inputContent.value, {"gfm": true, "breaks": true});
 
-  // Update the UI
-  let msg = emoji.replace_colons(textarea.value);
-  userValue.innerHTML = marked.parse(msg, {"gfm": true, "breaks": true});
   textarea.classList.add('hidden');
   textarea.placeholder = '';
   textarea.value = '';
+  inputContent.value = "";
 }
 
 function focusWithoutScrolling(element) {
@@ -193,9 +196,10 @@ function focusWithoutScrolling(element) {
 }
 
 function afterConverseRequest() {
-  let textarea = document.getElementById('user-input');
-  let messagesContainer = document.getElementById('conversation');
-  let bottomElement = document.getElementById('bottom');
+  const textarea = document.getElementById('user-input');
+  const messagesContainer = document.getElementById('conversation');
+  const bottomElement = document.getElementById('bottom');
+
 
   textarea.classList.remove('hidden');
   bottomElement.scrollIntoView({ behavior: 'smooth' });
@@ -221,18 +225,19 @@ async function fetchTimezones() {
   }
 }
 
-fetchTimezones();
 
 document.addEventListener('DOMContentLoaded', function() {
+  fetchTimezones();
   navigator.geolocation.getCurrentPosition(
     (position) => {
       window.appConfig.isLocationAllowed = true;
       window.appConfig.location = position.coords;
+      setLocalContext();
     },
     (error) => {
       console.warn('Geolocation error:', error);
-      // London as default set by render
       window.appConfig.isLocationAllowed = false;
+      setLocalContext();
     }
   );
 

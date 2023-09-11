@@ -32,7 +32,7 @@
 (defn minify
   [paths outfile]
   (let [cmd [(str minify-bin) "-b" "-o" outfile " " (str/join " " paths)]]
-    (shell (str/join " " cmd)) outfile))
+    @(shell (str/join " " cmd)) outfile))
 
 (defn bundle
   [out-dir resources prefix suffix]

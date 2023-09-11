@@ -48,7 +48,8 @@
 
 (defn crc32->base64-str
   [crc32]
-  (codecs/bytes->b64-str (codecs/long->bytes crc32) true))
+  (codecs/bytes->b64-str
+   (codecs/long->bytes crc32) true))
 
 ;;; Scratch
 (comment
