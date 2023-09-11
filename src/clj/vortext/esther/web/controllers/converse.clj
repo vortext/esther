@@ -10,6 +10,7 @@
    [vortext.esther.api.weatherapi :as weather]
    [malli.core :as m]
    [vortext.esther.util.json :as json]
+   [vortext.esther.config :as config]
    [vortext.esther.util.emoji :as emoji]
    [clojure.tools.logging :as log]
    [clojure.string :as str]))
@@ -38,8 +39,10 @@
 
 (defn create-local-context
   [context]
-  (let [today (time/human-today (:timezone context) time/default-locale)
-        extra {:today today}
+  (let [extra {:today (time/human-today
+                       (or (:timezone context)
+                           time/default-zone-id) time/default-locale)
+               :name (str/capitalize config/ai-name)}
         context (merge context extra)
         {:keys [latitude longitude]} (:location context)
         weather-q (str latitude "," longitude)]

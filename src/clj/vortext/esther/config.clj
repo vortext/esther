@@ -29,5 +29,5 @@
 (def request-keys
   #{:content :context})
 
-(def tmp-dir
+(def cache-dir
   (fs/create-dirs (fs/xdg-cache-home ai-name)))

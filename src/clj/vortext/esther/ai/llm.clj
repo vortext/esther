@@ -1,10 +1,10 @@
 (ns vortext.esther.ai.llm
   (:require
-   [vortext.esther.util.mustache :as mustache]
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
    [integrant.core :as ig]
    [vortext.esther.util.emoji :as emoji]
+   [vortext.esther.util.mustache :as mustache]
    [vortext.esther.config :refer [response-keys request-keys]]
    [vortext.esther.common :as common]
    [vortext.esther.ai.llama :as llama]
@@ -56,15 +56,11 @@
       (clean-energy 0.5)
       (clean-emoji "🙃")))
 
-(defn generate-prompt
-  [prompt context]
-  (mustache/render prompt context))
-
 (defn ->submission
   [opts obj]
-  (let [promt-str (slurp (io/resource (:prompt opts)))
+  (let [prompt-str (slurp (io/resource (:prompt opts)))
         {:keys [:local/context :memory/events :user/memories :user/keywords]} obj
-        prompt  (generate-prompt promt-str context)
+        prompt  (mustache/render prompt-str context)
         request-content (-> events first :event/content :content)]
     {:llm/prompt prompt
      :llm/submission

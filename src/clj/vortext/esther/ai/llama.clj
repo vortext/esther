@@ -2,53 +2,78 @@
   (:require
    [diehard.core :as dh]
    [clojure.tools.logging :as log]
+   [clojure.string :as str]
+   [clojure.core.cache.wrapped :as w]
    [clojure.core.async :as async :refer
     [alts! timeout chan go-loop <! go >! <!! >!! close!]]
-   [clj-commons.digest :as digest]
-   [vortext.esther.config :refer [ai-name] :as config]
-   [babashka.process :refer [process destroy-tree alive?]]
    [clojure.java.io :as io]
+   [clj-commons.digest :as digest]
+   [babashka.process :refer [process destroy-tree alive?]]
    [babashka.fs :as fs]
-   [clojure.core.cache.wrapped :as w]
    [vortext.esther.util.json :as json]
-   [clojure.string :as str])
+   [vortext.esther.util.mustache :as mustache]
+   [vortext.esther.config :refer [ai-name] :as config])
   (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "") ;; <|end_of_turn|>
 (def end-of-prompt "</#>")
-(def prefix "User: ")
+(def user-prefix "User: ")
+(def ai-prefix (str (str/capitalize ai-name) ": "))
 
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
+(defn- internal-config-obj
+  [{:keys [model-path bin-dir]} {:keys [:llm/prompt]}]
+  (let [cache #(fs/path config/cache-dir %)
+
+        prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
+        prompt-hash (digest/md5 prompt)
+        prompt-path (cache (format "prompt_%s_%s.md" ai-name prompt-hash))
+        _ (when-not (fs/exists? prompt-path)
+            (spit (str prompt-path) prompt))
+
+        grammar-path (cache (format "grammar_%s.gbnf" ai-name))
+        _ (when-not (fs/exists? grammar-path)
+            (spit (str grammar-path)
+                  (mustache/render
+                   (slurp (io/resource "grammars/chat.gbnf"))
+                   {:role ai-prefix})))
+
+        prompt-cache-path (cache (format "cache_%s.bin" prompt-hash))]
+    {::prompt-path prompt-path
+     ::grammar-path grammar-path
+     ::model-path (fs/canonicalize (fs/path model-path))
+     ::cmd-path (fs/canonicalize (fs/path bin-dir "main"))
+     ::prompt-cache-path prompt-cache-path}))
+
 (defn shell-cmd
-  [bin-dir model-path prompt]
-  (let [gbnf (fs/canonicalize (io/resource "grammars/chat.gbnf"))
-        model (fs/canonicalize (fs/path model-path))]
-    (str/join
-     " "
-     [(str (fs/real-path (fs/path bin-dir "main")))
-      "-m" (str model)
-      "--grammar-file" (str gbnf)
-      ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
-      "--n-gpu-layers" 19
-      "--threads" 32
-      "--ctx-size" (* 2 2048)
+  [config]
+  (str/join
+   " "
+   [(str (::cmd-path config))
+    "-m" (str (::model-path config))
+    "--grammar-file" (str (::grammar-path config))
 
-      ;; Mirostat: A Neural Text Decoding Algorithm that Directly Controls Perplexity
-      ;; https://arxiv.org/abs/2007.14966
-      "--mirostat" 2
-      "--mirostat-ent" 5
-      "--mirostat-lr" 0.1
+    ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
+    "--n-gpu-layers" 19
+    "--threads" 32
+    "--ctx-size" (* 2 2048)
 
-      ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
-      ;; Also see https://github.com/belladoreai/llama-tokenizer-js
-      "--keep" -1
-      "--prompt-cache" (::cache prompt)
+    ;; Mirostat: A Neural Text Decoding Algorithm that Directly Controls Perplexity
+    ;; https://arxiv.org/abs/2007.14966
+    "--mirostat" 2
+    "--mirostat-ent" 5
+    "--mirostat-lr" 0.1
 
-      "-i"
-      "--simple-io"
-      "--interactive-first"
-      "-f" (::path prompt)])))
+    ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
+    ;; Also see https://github.com/belladoreai/llama-tokenizer-js
+    "--keep" -1
+    "--prompt-cache" (str (::prompt-cache-path config))
+
+    "-i"
+    "--simple-io"
+    "--interactive-first"
+    "-f" (str (::prompt-path config))]))
 
 (defn send-sigint [pid]
   (let [cmd (str "kill -INT " pid)]
@@ -141,12 +166,11 @@
   subprocess)
 
 (defn start-subprocess!
-  [bin-dir model-path prompt]
+  [config]
   (let [response-ch (chan 32)
         partial-json-ch (chan 32)
-        status-ch (chan)
-        cmd (shell-cmd bin-dir model-path prompt)
-        main (main-process status-ch cmd)]
+        status-ch (chan 1)
+        main (main-process status-ch (shell-cmd config))]
     (when-let [subprocess
                (and main
                     (-> main
@@ -163,11 +187,10 @@
            :response-ch response-ch})))))
 
 (defn cached-spawn-subprocess
-  [options cache uid prompt]
-  (let [{:keys [model-path bin-dir]} options]
-    (w/lookup-or-miss
-     cache uid
-     (fn [_uid] (start-subprocess! bin-dir model-path prompt)))))
+  [cache uid config]
+  (w/lookup-or-miss
+   cache uid
+   (fn [_uid] (start-subprocess! config))))
 
 (defn checked-proc
   [cache uid]
@@ -181,31 +204,15 @@
         (w/evict cache uid)
         nil))))
 
-(defn- internal-prompt-obj
-  [prompt]
-  (let [tmp-file (str (fs/create-temp-file {:dir config/tmp-dir}))
-        prompt (str (str/trim prompt)
-                    end-of-prompt
-                    end-of-turn
-                    "\n\n")
-        cache (fs/path
-               config/tmp-dir
-               (str (digest/md5 prompt) ".bin"))]
-    (spit tmp-file prompt)
-    {::prompt prompt
-     ::path tmp-file
-     ::cache cache}))
-
 (defn- internal-shell-complete-fn
-  [options cache user {:keys [:llm/submission :llm/prompt]}]
+  [options cache user {:keys [:llm/submission] :as obj}]
   (let [{:keys [uid]} (:vault user)
         running-proc? (checked-proc cache uid)
-        prompt-obj (internal-prompt-obj prompt)
-        proc (cached-spawn-subprocess options cache uid prompt-obj)]
+        proc (cached-spawn-subprocess cache uid (internal-config-obj options obj))]
     (if-not proc
       (throw (Exception. "internal-shell-complete-fn no proc"))
       (let [obj (if running-proc? (dissoc submission :context) submission)
-            line (str prefix (json/write-value-as-string obj) end-of-turn "\n")]
+            line (str user-prefix (json/write-value-as-string obj) end-of-turn "\n")]
         (log/debug "shell-complete-fn::complete" line)
         (go (>! (:in-ch proc) line))
         (<!! (:response-ch proc))))))
@@ -233,7 +240,7 @@
 
 (defn create-interface
   [{:keys [options]}]
-  (let [cache (w/lru-cache-factory {:threshold 1}) ;; yeah GPU mem will be an issue
-        complete-fn (shell-complete-fn options cache)]
+  (let [;; yeah GPU mem will be an issue
+        cache (w/lru-cache-factory {:threshold 1})]
     {:shutdown-fn (partial shutdown-fn cache)
-     :complete-fn complete-fn}))
+     :complete-fn (shell-complete-fn options cache)}))

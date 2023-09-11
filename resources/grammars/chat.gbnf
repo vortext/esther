@@ -1,5 +1,5 @@
 root      ::= role response
-role      ::= "Esther: "
+role      ::= "{{role}}"
 quote     ::= "\""
 eot       ::= "<|end_of_turn|>"
 ws        ::= [\n ]?
