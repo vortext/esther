@@ -68,8 +68,8 @@
       (String. dest "UTF-8")
       (throw (Exception. (str "Decompression failed with error code: " ret))))))
 
-;; As tempting as it is to implement gzip here, you're better off using shell for that.
-;; Or the jvm impl, I have no why this exists other than out of curiousity.
+;; As tempting as it is to implement gzip here, you're better off using the shell for that.
+;; Or the jvm impl, I have no idea why this exists other than out of curiousity.
 
 ;; Scratch
 (comment

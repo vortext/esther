@@ -70,22 +70,21 @@
 
 
 (defn create-complete-fn
-  [llm-complete]
+  [instance]
   (fn [opts user obj]
     (let [obj (->submission opts obj)
-          response ((:complete-fn llm-complete) user obj)]
-      (assoc
-       obj :llm/response
-       (-> response
-           (clean-response)
-           (validate-response))))))
+          response ((:complete-fn instance) user obj)
+          response (-> response
+                       (clean-response)
+                       (validate-response))]
+      (assoc obj :llm/response response))))
 
 
 (defmethod ig/init-key :ai.llm/llm-interface
   [_ {:keys [impl]
       :as   opts}]
-  (let [instance (case impl :llama-shell (llama/create-interface opts))]
-    {:impl instance
+  (let [instance (case impl :llama-shell (llama/create-instance opts))]
+    {:instance instance
      :shutdown-fn (:shutdown-fn instance)
      :complete-fn  (create-complete-fn instance)}))
 

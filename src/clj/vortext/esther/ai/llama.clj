@@ -126,7 +126,6 @@
     (go-loop []
       (if-let [line (<! (:out-ch subprocess))]
         (do
-          (log/debug "line" line)
           (when (and (not @process-ready?)
                      (str/includes? line end-of-prompt))
             (>! status-ch :ready)
@@ -200,23 +199,30 @@
       proc
       (when java-proc
         ((:shutdown-fn proc))
-        (log/debug "process was dead")
+        (log/warn "process was dead")
         (w/evict cache uid)
         nil))))
 
-(defn- internal-shell-complete-fn
-  [options cache user {:keys [:llm/submission] :as obj}]
-  (let [{:keys [uid]} (:vault user)
-        running-proc? (checked-proc cache uid)
-        proc (cached-spawn-subprocess cache uid (internal-config-obj options obj))]
-    (if-not proc
-      (throw (Exception. "internal-shell-complete-fn no proc"))
-      (let [obj (if running-proc? (dissoc submission :context) submission)
-            line (str user-prefix (json/write-value-as-string obj) end-of-turn "\n")]
-        (log/debug "shell-complete-fn::complete" line)
-        (go (>! (:in-ch proc) line))
-        (<!! (:response-ch proc))))))
+(defn complete
+  [proc running? {:keys [:llm/submission]}]
+  (let [submission (if running? (dissoc submission :context) submission)
+        json-line (json/write-value-as-string submission)
+        line (str user-prefix json-line end-of-turn "\n")]
+    (go (>! (:in-ch proc) line))
+    (<!! (:response-ch proc))))
 
+(defn start
+  [options cache user obj]
+  (let [{:keys [uid]} (:vault user)
+        config (internal-config-obj options obj)]
+    (cached-spawn-subprocess cache uid config)))
+
+(defn- internal-shell-complete-fn
+  [options cache user obj]
+  (let [{:keys [uid]} (:vault user)]
+    (if-let [proc (start options cache user obj)]
+      (complete proc (checked-proc cache uid) obj)
+      (throw (Exception. "internal-shell-complete-fn no proc")))))
 
 (defn shell-complete-fn
   [options cache]
@@ -238,7 +244,7 @@
    (when-let [shutdown (:shutdown-fn (checked-proc cache uid))]
      (shutdown))))
 
-(defn create-interface
+(defn create-instance
   [{:keys [options]}]
   (let [;; yeah GPU mem will be an issue
         cache (w/lru-cache-factory {:threshold 1})]
