@@ -1,34 +1,20 @@
 (ns vortext.esther.util.zlib
-  (:refer-clojure :exclude [read sync]) ;; !!!
   (:require
    [clojure.java.io :as io]
    [clojure.string :as str]
    [babashka.fs :as fs]
+   [clojure.tools.logging :as log]
    [buddy.core.codecs :as codecs]
-   [vortext.esther.util.json :refer [read-transit-from-file write-transit-to-file]]
-   [com.phronemophobic.clong.clang :as clong]
-   [com.phronemophobic.clong.gen.jna :as gen])
+   [vortext.esther.util.raw.zlib :as raw])
   (:import
-   java.io.PushbackReader
-   com.sun.jna.Memory
-   com.sun.jna.Pointer
    com.sun.jna.ptr.PointerByReference
    com.sun.jna.ptr.LongByReference
-   com.sun.jna.Structure)
-  (:gen-class))
-
-(def h "zlib.h")
-(def api-file (str (fs/canonicalize (fs/path (io/resource "api") "zlib.json"))))
-(def api-def (read-transit-from-file api-file))
-
-(def zlib (com.sun.jna.NativeLibrary/getInstance "z"))
-
-(gen/def-api zlib api-def)
+   com.sun.jna.Structure))
 
 (defn update-crc32
   [crc buffer read-count]
   ;; Call the crc32 function with the current crc value, buffer, and read-count to get the new crc value
-  (crc32 crc buffer read-count))
+  (raw/crc32 crc buffer read-count))
 
 (defn calculate-crc32
   [file-path]
@@ -49,21 +35,21 @@
 (defn text->crc32
   [text]
   (let [bytes (.getBytes text)]
-    (crc32 0 bytes (count bytes))))
+    (raw/crc32 0 bytes (count bytes))))
 
 (defn crc32->base64-str
   [crc32]
   (codecs/bytes->b64-str
    (codecs/long->bytes crc32) true))
 
-(defn compress-str
+(defn compress
   [source]
   (let [source-bytes (.getBytes source "UTF-8")
         initial-buffer-size (+ 12 (int (* 1.001 (count source-bytes))))
         dest (byte-array initial-buffer-size)
         dest-size* (doto (LongByReference.)
                      (.setValue (alength dest)))
-        ret (compress dest dest-size* source-bytes (count source-bytes))
+        ret (raw/compress dest dest-size* source-bytes (count source-bytes))
         data (byte-array (subvec (vec dest) 0 (.getValue dest-size*)))]
     (if (zero? ret)
       (str (codecs/bytes->b64-str data) " " (count source-bytes))
@@ -77,17 +63,11 @@
         dest (byte-array uncompressed-length)
         dest-size* (doto (LongByReference.)
                      (.setValue uncompressed-length))
-        ret (uncompress dest dest-size* (codecs/b64->bytes data) (count data))]
+        ret (raw/uncompress dest dest-size* (codecs/b64->bytes data) (count data))]
     (if (zero? ret)
       (String. dest "UTF-8")
       (throw (Exception. (str "Decompression failed with error code: " ret))))))
 
-;;; Scratch
+;; Scratch
 (comment
-  (decompress (compress-str "test"))
-
-  (defn write-api ;; I used this to write the API
-    [h out]
-    (let [h-file (str (fs/canonicalize (io/resource (str "h/" h))))
-          api (clong/easy-api h-file)]
-      (write-transit-to-file api (str out)))))
+  (decompress (compress "test")))
