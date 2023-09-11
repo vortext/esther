@@ -8,12 +8,12 @@
 
 (defn ->memory-context
   [{:keys [:memory/events :memory/ts]}]
-  (let [relevant-ks [:content :emoji :imagination]]
+  (let [relevant-ks [:content :emoji :imagination]
+        format-event (fn [{:keys [:event/content :event/role]}]
+                       {:role role
+                        :content (select-keys  content relevant-ks)})]
     {:moment (time/human-time-ago ts)
-     :events (map (fn [e]
-                    {(:event/role e)
-                     (select-keys (:event/content e) relevant-ks)})
-                  events)}))
+     :events (map format-event events)}))
 
 (defn ->user-context
   [opts user obj]

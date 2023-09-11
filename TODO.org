@@ -63,7 +63,11 @@ _ more user information in session (vault)
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** DONE use a single map from the whole req-rep thread with namespaced keywords.
 ** TODO link parsing?
-** TODO minify on the fly with hash check (maybe wontfix because javascript is hell)
+** DONE minify on the fly with hash check (maybe wontfix because javascript is hell)
+** TODO Gzip
+- done with jvm ring-middleware
+- could speed up clong or llvm for practice?
+** TODO logo + favicon
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)
 ** TODO export / download data functionality (for me and GDPR!)
 ** TODO set context rollover properly (e.g. from day to night) when subproc is running

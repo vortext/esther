@@ -80,7 +80,8 @@
     #_(.allowAllAccess true)
     (.allowNativeAccess true)))
 
-(defn create-ctx [lang src]
+(defn create-ctx
+  [lang src]
   (let [context (.build (context-builder lang))
         _result (.eval context (source lang src))]
     context))
@@ -129,21 +130,3 @@
 (defn js-api
   [src api-name api-fns]
   (lang-api "js" src api-name api-fns))
-
-(comment
-  (def x (js-api "/media/array/Sync/Projects/esther/node_modules/llama-tokenizer-js/llama-tokenizer.js"
-                 "llamaTokenizer"
-                 [:encode :decode]))
-
-  ;; Scratch
-  ( def asciichart
-   (js-api
-    "https://cdn.jsdelivr.net/npm/asciichart@1.5.21/asciichart.js"
-    "asciichart"
-    [:plot]))
-
-
-  ((:plot asciichart) (range 10))
-
-  (def test-broken-json "{\"test\" \"test\"}")
-  (def test-json "{\"test\":\"test\"}"))

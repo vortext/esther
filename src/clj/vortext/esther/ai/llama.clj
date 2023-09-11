@@ -15,7 +15,7 @@
   (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "") ;; <|end_of_turn|>
-(def end-of-prompt "<#>")
+(def end-of-prompt "</#>")
 (def prefix "User: ")
 
 (def wait-for (* 1000 60 1)) ;; 1 minute

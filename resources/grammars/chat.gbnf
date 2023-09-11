@@ -6,7 +6,7 @@ ws        ::= [\n ]?
 
 response  ::= "{" (quote "content" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
-                   quote "energy" quote ": " number ","
+                   quote "energy" quote ": " energy ","
                    quote "keywords" quote ": " kwarray ","
                    quote "imagination" quote ": " string "}")
 
@@ -19,7 +19,7 @@ string ::=
 
 emoji     ::= quote ([^"\\:]) quote # Ugly hack
 
-
+energy    ::=  "0." [0-9] [0-9]
 number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
 
 ns        ::= "attribute" | "topic" | "concept" | "person" | "location" | "action" | "event"

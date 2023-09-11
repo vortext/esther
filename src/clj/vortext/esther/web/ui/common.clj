@@ -53,8 +53,8 @@
           (str (fs/path
                 "/resources" out
                 (fs/file-name (apply (partial bundle out-dir) args)))))
-        js-asset (bundle-asset all-scripts "bundle_" ".js")
-        css-asset (bundle-asset all-styles "bundle_" ".css")]
+        js-asset (bundle-asset all-scripts "main_" ".js")
+        css-asset (bundle-asset all-styles "styles_" ".css")]
     [:head
      [:meta {:charset "UTF-8"}]
      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
