@@ -58,32 +58,40 @@ function debounce(func, wait) {
 
 
 let setLocalContext = debounce(function () {
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
   const localContext = document.getElementById("local-context");
-  const timezones = window.appConfig.timezones;
 
-  let timezoneLocation;
-  if (timezones && timezones[timezone] && timezones[timezone].coordinates_decimal) {
-    timezoneLocation = timezones[timezone].coordinates_decimal;
-  } else {
-    timezoneLocation = {"latitude": 51.509, "longitude": -0.118} // London-ish
-  }
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezones = window.appConfig.timezones;
+  let location;
 
   const locationAllowed = window.appConfig.isLocationAllowed;
-  const location = locationAllowed ? window.appConfig.location : timezoneLocation;
+
+  if(!locationAllowed) { // Guess something based on timezone
+    if (timezones[timezone]) {
+      largestCity = timezones[timezone];
+      location = {"latitude": largestCity.latitude,
+                  "longitude": largestCity.longitude};
+    } else {
+      location = {"latitude": 51.509,
+                  "longitude": -0.118} // London-ish
+    }
+  } else { // Location allowed
+    location =  window.appConfig.location;
+  }
 
   const context =  {
     "location-allowed": locationAllowed,
+    "timezone": timezone,
+
+    // [TODO] move to server
+
+    "location": location, // <- the tz guess logic needs to happen server side
     "season": getCurrentSeason(location.latitude),
     "time-of-day": getTimeOfDay(location.latitude, location.longitude),
-    "timezone": timezone,
-    "location": {"latitude": location.latitude,
-                 "longitude": location.longitude},
-    "lunar-phase": lunarphase.Moon.lunarPhase()};
+    "lunar-phase": lunarphase.Moon.lunarPhaseEmoji()};
 
   localContext.value = JSON.stringify(context);
-}, 50);
+}, 250);
 
 function scrollToView(element) {
   const rect = element.getBoundingClientRect();
@@ -214,7 +222,7 @@ function afterConverseRequest() {
 
 async function fetchTimezones() {
   try {
-    const response = await fetch('/resources/public/misc/timezones.min.json');
+    const response = await fetch('/resources/public/data/timezones.min.json');
     if (!response.ok) {
       throw new Error('Network response was not ok ' + response.statusText);
     }
