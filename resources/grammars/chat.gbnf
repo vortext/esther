@@ -1,7 +1,7 @@
-root      ::= role response
-role      ::= "{{role}}"
+root      ::= prefix response eot
+prefix    ::= "{{prefix}}"
 quote     ::= "\""
-eot       ::= "<|end_of_turn|>"
+eot       ::= "{{end-of-turn}}"
 ws        ::= [\n ]?
 
 response  ::= "{" (quote "content" quote ": " string ","

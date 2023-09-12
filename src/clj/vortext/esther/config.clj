@@ -6,7 +6,7 @@
    [clojure.tools.logging :as log]
    [kit.config :as config]))
 
-(def ^:const ai-name "esther")
+(def ^:const app-name "esther")
 
 (def ^:const system-filename "system.edn")
 
@@ -30,4 +30,4 @@
   #{:content :context})
 
 (def cache-dir
-  (fs/create-dirs (fs/xdg-cache-home ai-name)))
+  (fs/create-dirs (fs/xdg-cache-home app-name)))

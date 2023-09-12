@@ -62,9 +62,9 @@
      :hx-trigger "submit"
      "hx-on::before-request" "beforeConverseRequest();"
      "hx-on::after-request" "afterConverseRequest();"}
-    [:input#local-context
+    [:input#client-context
      {:type "hidden"
-      :name "context"
+      :name "client-context"
       :value "{}"}]
     [:input#input-content
      {:type "hidden"
@@ -101,9 +101,7 @@
     {} ;; inject appConfig here
     ["public/css/conversation.css"]
     ["public/js/vendor/emoji.js"
-     "public/js/vendor/suncalc.js"
      "public/js/vendor/marked.js"
-     "public/js/vendor/lunarphase.js"
      "public/js/conversation.js"])
    [:body
     [:div#container

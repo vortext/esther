@@ -8,10 +8,10 @@
    [babashka.fs :as fs]
    [jsonista.core :as json]))
 
-(defn json-config
+(defn client-config
   [config]
   [:script {:type "text/javascript"}
-   (str "window.appConfig = "
+   (str "window.clientConfig = "
         (json/write-value-as-string
          (or config {})) ";")])
 
@@ -32,7 +32,8 @@
 (defn minify
   [paths outfile]
   (let [cmd [(str minify-bin) "-b" "-o" outfile " " (str/join " " paths)]]
-    @(shell (str/join " " cmd)) outfile))
+    (-> (shell {:out :string} (str/join " " cmd))
+        deref :out) outfile))
 
 (defn bundle
   [out-dir resources prefix suffix]
@@ -59,6 +60,6 @@
      [:meta {:charset "UTF-8"}]
      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
      [:title "Esther"]
-     (json-config config)
+     (client-config config)
      [:link {:rel "stylesheet" :href css-asset}]
      [:script {:src js-asset}]]))

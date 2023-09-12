@@ -42,6 +42,13 @@
   (codecs/bytes->b64-str
    (codecs/long->bytes crc32) true)) ;; true = websafe
 
+
+(defn checksum
+  [text]
+  (-> text
+      (text->crc32)
+      (crc32->base64-str)))
+
 (defn compress
   [source]
   (let [source-bytes (.getBytes source "UTF-8")

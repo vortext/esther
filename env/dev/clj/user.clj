@@ -13,7 +13,6 @@
    [lambdaisland.classpath.watch-deps :as watch-deps]      ;; hot loading for deps
    [vortext.esther.core]))
 
-(println "user.clj")
 
 ;; uncomment to enable hot loading for deps
 ;; (watch-deps/start! {:aliases [:dev :test]})
@@ -22,11 +21,9 @@
 
 (add-tap (bound-fn* clojure.pprint/pprint))
 
-(println "user.clj:ig/prep")
 
 (defn dev-prep!
   []
-  (println "user.clj::dev-prep!")
   (integrant.repl/set-prep!
    (fn []
      (-> (vortext.esther.config/system-config {:profile :dev})

@@ -22,7 +22,8 @@
    [:emoji [:fn {:error/message "should contain a valid emoji"}
             (fn [s] (emoji/unicode-emoji? s))]]
    [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
-             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]])
+             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]
+   [:imagination [:string {:min 1, :max 2048}]]])
 
 (defn validate
   [schema obj]
@@ -59,15 +60,21 @@
 (defn ->submission
   [opts obj]
   (let [template (slurp (io/resource (:prompt opts)))
-        {:keys [:local/context :memory/events :user/memories :user/keywords]} obj
+        {:keys [:memory/events :user/memories :user/keywords]} obj
+        ks [:context/today :context/lunar-phase
+            :context/weather :context/time-of-day
+            :context/season :personality/ai-name]
+        context (common/remove-namespaces (select-keys obj ks))
         prompt  (mustache/render template context)
         request-content (-> events first :event/content :content)]
-    {:llm/prompt-template template
-     :llm/prompt prompt
-     :llm/submission
-     {:context {:memories memories
-                :keywords keywords}
-      :content request-content}}))
+    (merge
+     obj
+     {:llm/prompt-template template
+      :llm/prompt prompt
+      :llm/submission
+      {:context {:memories memories
+                 :keywords keywords}
+       :content request-content}})))
 
 
 (defn create-complete-fn

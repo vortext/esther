@@ -53,7 +53,8 @@
  {:impl :llama-shell
   :options
   {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
-   :bin-dir "./native/llama.cpp/build/bin"}}
+   :bin-dir "./native/llama.cpp/build/bin"
+   :grammar-template "grammars/chat.gbnf"}}
 
  :router/core
  {:routes #ig/ref :router/routes}
@@ -63,7 +64,8 @@
                  :prompt "prompts/chat.md"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
-                 :ai {:llm #ig/ref :ai.llm/llm-interface}
+                 :ai {:llm #ig/ref :ai.llm/llm-interface
+                      :name "Esther"}
                  :env #ig/ref :system/env}}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}

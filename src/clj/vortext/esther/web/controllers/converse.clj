@@ -5,6 +5,7 @@
    [vortext.esther.web.controllers.memory :as memory]
    [vortext.esther.web.controllers.command :refer [command!]]
    [vortext.esther.web.controllers.chat :refer [converse!]]
+   [vortext.esther.web.controllers.context :as context]
    [vortext.esther.util :refer [random-base64]]
    [vortext.esther.common :refer [request-msg]]
    [vortext.esther.api.weatherapi :as weather]
@@ -37,34 +38,24 @@
     (catch Exception e
       (append-event obj (wrapped-error :internal-server-error e)))))
 
-(defn create-local-context
-  [context]
-  (let [extra {:today (time/human-today
-                       (or (:timezone context)
-                           time/default-zone-id) time/default-locale)
-               :name (str/capitalize config/ai-name)}
-        context (merge context extra)
-        {:keys [latitude longitude]} (:location context)
-        weather-q (str latitude "," longitude)]
-    (if (:location-allowed context)
-      (merge context {:weather (weather/current-weather weather-q)})
-      context)))
 
-(defn make-request-obj
-  [user request]
+(defn as-obj
+  [opts user request]
   (let [{:keys [params]} request
-        {:keys [context content]} params
-        local-context (create-local-context (json/read-json-value context))]
-    {:local/context local-context
-     :memory/ts (unix-ts)
-     :memory/gid (random-base64)
-     :memory/events [{:event/content {:content content}
-                      :event/role :user}]}))
+        {:keys [client-context content]} params
+        client-context (json/read-json-value client-context)]
+    (merge
+     {:personality/ai-name (get-in opts [:ai :name])
+      :memory/ts (unix-ts)
+      :memory/gid (random-base64)
+      :memory/events [{:event/content {:content content}
+                       :event/role :user}]}
+     (context/from-client-context client-context))))
 
 (defn answer!
   [opts request]
   (let [user (get-in request [:session :user])
-        obj (make-request-obj user request)
+        obj (as-obj opts user request)
         request (-> obj :memory/events first :event/content)]
     (try
       (if-not (m/validate request-schema request)

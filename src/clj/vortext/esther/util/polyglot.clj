@@ -86,7 +86,8 @@
         _result (.eval context (source lang src))]
     context))
 
-(defn print-global-keys [lang context]
+(defn print-global-keys
+  [lang context]
   (let [bindings (.getBindings context lang)]
     (doseq [key (.getMemberKeys bindings)]
       (println key))))

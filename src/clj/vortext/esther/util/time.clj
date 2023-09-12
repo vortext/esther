@@ -1,11 +1,26 @@
 (ns vortext.esther.util.time
   (:require
    [clj-commons.humanize :as h]
+   [vortext.esther.util.polyglot :as polyglot]
+   [clojure.tools.logging :as log]
+   [clojure.java.io :as io]
+   [babashka.fs :as fs]
    [java-time.api :as jt])
   (:import [java.time.format TextStyle]))
 
 (def default-locale (java.util.Locale/getDefault))
 (def default-zone-id (java.time.ZoneId/of "UTC"))
+
+(def ->local-date jt/local-date) ;; Alias
+(def ->local-date-time jt/local-date-time)
+
+(defn ->iso8601
+  [local-date-time]
+  (jt/format java.time.format.DateTimeFormatter/ISO_DATE_TIME local-date-time))
+
+(defn iso8601->offset-date-time
+  [iso8601]
+  (java.time.OffsetDateTime/parse iso8601))
 
 (defn day-name
   [day locale]
@@ -16,10 +31,11 @@
   (.getDisplayName month TextStyle/FULL_STANDALONE locale))
 
 (defn human-today
-  ([] (human-today default-zone-id default-locale))
-  ([zone-id locale]
-   (let [present (jt/local-date (jt/instant) zone-id)
-         day (jt/day-of-week present)
+  ([] (human-today
+       (->local-date (jt/instant) default-zone-id)
+       default-zone-id default-locale))
+  ([present zone-id locale]
+   (let [day (jt/day-of-week present)
          day-month (.getDayOfMonth (jt/month-day present))
          month (jt/month present)
          year (jt/year present)]
@@ -29,9 +45,37 @@
           " of " (month-name month locale) ", "
           year))))
 
-(defn instant-to-local-date-time
+(defn season
+  [date latitude]
+  (let [local-date (jt/local-date date)
+        year (jt/year local-date)
+        march-equinox (jt/local-date year 3 21)
+        june-solstice (jt/local-date year 6 21)
+        september-equinox (jt/local-date year 9 23)
+        december-solstice (jt/local-date year 12 21)]
+    (if (> latitude 0)
+      ;; Northern Hemisphere
+      (cond
+        (and (jt/after? local-date march-equinox)
+             (jt/before? local-date june-solstice)) "spring"
+        (and (jt/after? local-date june-solstice)
+             (jt/before? local-date september-equinox)) "summer"
+        (and (jt/after? local-date september-equinox)
+             (jt/before? local-date december-solstice)) "autumn"
+        :else "winter")
+      ;; Southern Hemisphere
+      (cond
+        (and (jt/after? local-date march-equinox)
+             (jt/before? local-date june-solstice)) "autumn"
+        (and (jt/after? local-date june-solstice)
+             (jt/before? local-date september-equinox)) "winter"
+        (and (jt/after? local-date september-equinox)
+             (jt/before? local-date december-solstice)) "spring"
+        :else "summer"))))
+
+(defn instant->local-date-time
   ([instant]
-   (instant-to-local-date-time instant default-zone-id))
+   (instant->local-date-time instant default-zone-id))
   ([instant zone-id]
    (.toLocalDateTime (.atZone instant zone-id))))
 
@@ -46,5 +90,29 @@
    (human-time-ago (jt/instant epoch-milli) (now)))
   ([inst1 inst2]
    (h/datetime
-    (instant-to-local-date-time inst1)
-    (instant-to-local-date-time inst2))))
+    (instant->local-date-time inst1)
+    (instant->local-date-time inst2))))
+
+
+(def time-of-day
+  (let [script "public/js/vendor/suncalc.js"
+        script (str (fs/canonicalize (io/resource script)))
+        ctx (polyglot/create-ctx "js" script)
+        api (polyglot/js-api script "SunCalc" [:getTimeOfDay])]
+    (fn [local-date-time lat lng]
+      ((:getTimeOfDay api) (->iso8601 local-date-time) lat lng))))
+
+
+(def lunar-phase
+  (let [script "public/js/vendor/lunarphase.js"
+        script (str (fs/canonicalize (io/resource script)))
+        ctx (polyglot/create-ctx "js" script)
+        fs [:lunarPhaseEmoji :lunarPhase]
+        api (polyglot/js-api script "lunarPhase" fs)]
+    (fn [local-date-time emoji?]
+      (let [iso8601 (->iso8601 local-date-time)]
+        (if emoji?
+          ((:lunarPhaseEmoji api) iso8601)
+          ((:lunarPhase api) iso8601))))))
+
+;; Scratch

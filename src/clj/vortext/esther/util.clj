@@ -2,6 +2,7 @@
   (:require
    [clojure.tools.logging :as log]
    [clojure.string :as str]
+   [clojure.walk :as walk]
    [babashka.process :refer [shell]]
    [buddy.core.codecs :as codecs]
    [buddy.core.nonce :as nonce]))

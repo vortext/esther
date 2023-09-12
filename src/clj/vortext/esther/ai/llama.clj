@@ -12,28 +12,25 @@
    [vortext.esther.util.zlib :as zlib]
    [vortext.esther.util.json :as json]
    [vortext.esther.util.mustache :as mustache]
-   [vortext.esther.config :refer [ai-name] :as config])
+   [vortext.esther.config :as config])
   (:import [dev.failsafe TimeoutExceededException]))
 
 (def end-of-turn "") ;; <|end_of_turn|>
-(def end-of-prompt "</#>")
+(def end-of-prompt "<->")
 (def user-prefix "User: ")
-(def ai-prefix (str (str/capitalize ai-name) ": "))
 
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
 (defn- internal-config-obj
-  [options uid {:keys [:llm/prompt]}]
-  (let [{:keys [model-path bin-dir]} options
-
+  [options {:keys [:llm/prompt :personality/ai-name] :as obj}]
+  (let [{:keys [model-path grammar-template bin-dir]} options
         cache #(fs/path config/cache-dir %)
         prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
 
-        checksum (-> (str uid prompt)
-                     (zlib/text->crc32)
-                     (zlib/crc32->base64-str))
+        prompt-checksum (zlib/checksum prompt)
 
-        prompt-path (cache (format "prompt_%s_%s.md" ai-name checksum))
+        prompt-filename (format "prompt_%s.md" prompt-checksum)
+        prompt-path (cache prompt-filename)
         _ (when-not (fs/exists? prompt-path)
             (spit (str prompt-path) prompt))
 
@@ -41,13 +38,13 @@
         _ (when-not (fs/exists? grammar-path)
             (spit (str grammar-path)
                   (mustache/render
-                   (slurp (io/resource "grammars/chat.gbnf"))
-                   {:role ai-prefix})))
+                   (slurp (io/resource grammar-template))
+                   {:ai-prefix (str ai-name ": ")
+                    :end-of-turn end-of-turn})))
 
-        prompt-cache-path (cache (format "cache_%s_%s.bin" ai-name checksum))]
+        prompt-cache-path (cache (format "cache_%s.bin" prompt-checksum))]
     {::prompt-path prompt-path
      ::grammar-path grammar-path
-     ::checksum checksum
      ::model-path (fs/canonicalize (fs/path model-path))
      ::cmd-path (fs/canonicalize (fs/path bin-dir "main"))
      ::prompt-cache-path prompt-cache-path}))
@@ -133,6 +130,7 @@
     (go-loop []
       (if-let [line (<! (:out-ch subprocess))]
         (do
+          (log/debug line)
           (when (and (not @process-ready?)
                      (str/includes? line end-of-prompt))
             (>! status-ch :ready)
@@ -221,7 +219,7 @@
 (defn start
   [options cache user obj]
   (let [{:keys [uid]} (:vault user)
-        config (internal-config-obj options uid obj)]
+        config (internal-config-obj options obj)]
     (cached-spawn-subprocess cache uid config)))
 
 (defn- internal-shell-complete-fn

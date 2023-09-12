@@ -1,6 +1,6 @@
 (ns vortext.esther.common
   (:require
-   [vortext.esther.config :refer [ai-name]]
+   [clojure.walk :as walk]
    [camel-snake-kebab.core :as csk]
    [clojure.string :as str]))
 
@@ -34,3 +34,17 @@
 (defn request-msg
   [obj]
   (-> obj :memory/events first :event/content :content))
+
+(defn remove-namespaces
+  [m]
+  (let [remove-namespace
+        (fn [k]
+          (if (namespace k)
+            (keyword (name k))
+            k))]
+    (walk/postwalk
+     (fn [x]
+       (if (map? x)
+         (into {} (map (fn [[k v]] [(remove-namespace k) v]) x))
+         x))
+     m)))

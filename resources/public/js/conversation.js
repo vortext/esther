@@ -1,97 +1,27 @@
 var emoji = new EmojiConvertor();
 emoji.replace_mode = "unified";
 
-function getCurrentSeason(latitude) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const marchEquinox = new Date(year, 2, 21);
-  const juneSolstice = new Date(year, 5, 21);
-  const septemberEquinox = new Date(year, 8, 23);
-  const decemberSolstice = new Date(year, 11, 21);
-
-  if (latitude > 0) {
-    // Northern Hemisphere
-    if (now >= marchEquinox && now < juneSolstice) return 'spring';
-    if (now >= juneSolstice && now < septemberEquinox) return 'summer';
-    if (now >= septemberEquinox && now < decemberSolstice) return 'autumn';
-    return 'winter';
-  } else {
-    // Southern Hemisphere
-    if (now >= marchEquinox && now < juneSolstice) return 'autumn';
-    if (now >= juneSolstice && now < septemberEquinox) return 'winter';
-    if (now >= septemberEquinox && now < decemberSolstice) return 'spring';
-    return 'summer';
-  }
-}
-
-function getTimeOfDay(latitude, longitude) {
+let setClientContext = function () {
+  const clientContext = document.getElementById("client-context");
   const date = new Date();
-
-  const times = SunCalc.getTimes(date, latitude, longitude);
-
-  if (date < times.nauticalDawn) return 'night';
-  if (date < times.dawn) return 'nautical twilight';
-  if (date < times.sunrise) return 'civil twilight';
-  if (date < times.sunriseEnd) return 'sunrise';
-  if (date < times.goldenHourEnd) return 'morning';
-  if (date < times.solarNoon) return 'daytime';
-  if (date < times.goldenHour) return 'afternoon';
-  if (date < times.sunsetStart) return 'evening';
-  if (date < times.sunset) return 'sunset';
-  if (date < times.dusk) return 'civil twilight';
-  if (date < times.nauticalDusk) return 'nautical twilight';
-
-  return 'night';
-}
-
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
-
-
-let setLocalContext = debounce(function () {
-  const localContext = document.getElementById("local-context");
-
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timezones = window.appConfig.timezones;
-  let location;
+  const timezones = window.clientConfig.timezones;
 
-  const locationAllowed = window.appConfig.isLocationAllowed;
+  let location = null;
 
-  if(!locationAllowed) { // Guess something based on timezone
-    if (timezones[timezone]) {
-      largestCity = timezones[timezone];
-      location = {"latitude": largestCity.latitude,
-                  "longitude": largestCity.longitude};
-    } else {
-      location = {"latitude": 51.509,
-                  "longitude": -0.118} // London-ish
-    }
-  } else { // Location allowed
-    location =  window.appConfig.location;
+  let clientLocation = window.clientConfig.location;
+  if (clientLocation) {
+    location =  {"latitude": window.clientConfig.location.latitude,
+                 "longitude": window.clientConfig.location.longitude};
   }
 
   const context =  {
-    "location-allowed": locationAllowed,
     "timezone": timezone,
+    "location": location,
+    "iso8601": date.toISOString()};
 
-    // [TODO] move to server
-
-    "location": location, // <- the tz guess logic needs to happen server side
-    "season": getCurrentSeason(location.latitude),
-    "time-of-day": getTimeOfDay(location.latitude, location.longitude),
-    "lunar-phase": lunarphase.Moon.lunarPhaseEmoji()};
-
-  localContext.value = JSON.stringify(context);
-}, 250);
+  clientContext.value = JSON.stringify(context);
+};
 
 function scrollToView(element) {
   const rect = element.getBoundingClientRect();
@@ -115,7 +45,7 @@ function handleTextareaInput(e) {
   // Resize the textarea
   resizeTextarea(e);
   scrollToView(textarea);
-  setLocalContext();
+  setClientContext();
 
   inputContent.value = emoji.replace_colons(textarea.value);
 
@@ -220,32 +150,16 @@ function afterConverseRequest() {
   }, 250);
 }
 
-async function fetchTimezones() {
-  try {
-    const response = await fetch('/resources/public/data/timezones.min.json');
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    const timezones = await response.json();
-    window.appConfig.timezones = timezones;
-  } catch (error) {
-    console.error('There has been a problem with your fetch operation:', error);
-  }
-}
-
-
 document.addEventListener('DOMContentLoaded', function() {
-  fetchTimezones();
+  setClientContext();
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      window.appConfig.isLocationAllowed = true;
-      window.appConfig.location = position.coords;
-      setLocalContext();
+      window.clientConfig.location = position.coords;
+      setClientContext();
     },
     (error) => {
       console.warn('Geolocation error:', error);
-      window.appConfig.isLocationAllowed = false;
-      setLocalContext();
     }
   );
 

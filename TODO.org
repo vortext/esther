@@ -70,7 +70,7 @@ _ more user information in session (vault)
 - but really belongs in nginx or wherever
 ** TODO logo + favicon
 ** TODO move all the local context stuff to server side (e.g. moon phase etc) -> create proper context.clj controller
-** TODO use 🌒 emojis in prompt again (they're cute)
+** DONE use 🌒 emojis in prompt again (they're cute)
 ** TODO figure out a more sane TZ to heuristic lat long
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
 ** TODO set context rollover properly (e.g. from day to night) when subproc is running?
@@ -99,6 +99,7 @@ _ more user information in session (vault)
 ** DONE harmonize emoji handling using graalvm? (did it a better way client side)
 ** DONE keyword_memory_lookup table and logic
 ** TODO dark mode
+** TODO a way to serialize "personality"
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
