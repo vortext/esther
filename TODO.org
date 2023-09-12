@@ -72,6 +72,9 @@ _ more user information in session (vault)
 ** DONE move all the local context stuff to server side (e.g. moon phase etc) -> create proper context.clj controller
 ** DONE use 🌒 emojis in prompt again (they're cute)
 ** DONE figure out a more sane TZ to heuristic lat long
+** TODO proper timezone for human-today on initial render (use https://ipgeolocation.io/timezone-api.html)
+** TODO move llama parameters into system.edn
+** TODO set guards around weather and other local context in prompt-template
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
 ** TODO set context rollover properly (e.g. from day to night) when subproc is running?
 ** TODO export / download data functionality (for me and GDPR!)
@@ -107,6 +110,7 @@ _ more user information in session (vault)
 ** TODO weird bug where login shows in memory (enforce redirect).
 ** DONE better error handling subprocesses
 ** TODO calendar page (for memories)?
+** TODO semantic search memories
 ** TODO share a page (static gen)
 ** TODO security and hosting
 ** TODO deploy and build shizzle (Github actions?)
