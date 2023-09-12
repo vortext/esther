@@ -9,7 +9,6 @@
 }(this, function () {
   'use strict';
 
-
   var t = ((e2) => (e2.NORTHERN = "Northern", e2.SOUTHERN = "Southern", e2))(t || {}), n = ((e2) => (e2.NEW = "🌑", e2.WAXING_CRESCENT = "🌒", e2.FIRST_QUARTER = "🌓", e2.WAXING_GIBBOUS = "🌔", e2.FULL = "🌕", e2.WANING_GIBBOUS = "🌖", e2.LAST_QUARTER = "🌗", e2.WANING_CRESCENT = "🌘", e2))(n || {}), r = ((e2) => (e2.NEW = "🌑", e2.WAXING_CRESCENT = "🌘", e2.FIRST_QUARTER = "🌗", e2.WAXING_GIBBOUS = "🌖", e2.FULL = "🌕", e2.WANING_GIBBOUS = "🌔", e2.LAST_QUARTER = "🌓", e2.WANING_CRESCENT = "🌒", e2))(r || {}), a = ((e2) => (e2.ANOMALISTIC = "Anomalistic", e2.DRACONIC = "Draconic", e2.SIDEREAL = "Sidereal", e2.SYNODIC = "Synodic", e2.TROPICAL = "Tropical", e2))(a || {}), s = ((e2) => (e2.NEW = "New", e2.WAXING_CRESCENT = "Waxing Crescent", e2.FIRST_QUARTER = "First Quarter", e2.WAXING_GIBBOUS = "Waxing Gibbous", e2.FULL = "Full", e2.WANING_GIBBOUS = "Waning Gibbous", e2.LAST_QUARTER = "Last Quarter", e2.WANING_CRESCENT = "Waning Crescent", e2))(s || {});
   const N = 24405875e-1, i = 29.53058770576;
   class o {

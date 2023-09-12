@@ -69,9 +69,9 @@ _ more user information in session (vault)
 - could speed up with clong or llvm for practice?
 - but really belongs in nginx or wherever
 ** TODO logo + favicon
-** TODO move all the local context stuff to server side (e.g. moon phase etc) -> create proper context.clj controller
+** DONE move all the local context stuff to server side (e.g. moon phase etc) -> create proper context.clj controller
 ** DONE use 🌒 emojis in prompt again (they're cute)
-** TODO figure out a more sane TZ to heuristic lat long
+** DONE figure out a more sane TZ to heuristic lat long
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
 ** TODO set context rollover properly (e.g. from day to night) when subproc is running?
 ** TODO export / download data functionality (for me and GDPR!)

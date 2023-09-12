@@ -183,8 +183,9 @@
   };
 
 
-  SunCalc.getTimeOfDay = function(iso8601, latitude, longitude) {
-    const date = new Date(iso8601);
+  SunCalc.getTimeOfDay = function(d, latitude, longitude) {
+    const date = (d instanceof Date) ? d : new Date(d);
+
     const times = SunCalc.getTimes(date, latitude, longitude);
 
     if (date < times.nauticalDawn) return 'night';
@@ -203,7 +204,6 @@
   }
 
   // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
-
   function moonCoords(d) { // geocentric ecliptic coordinates of the moon
 
     var L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
@@ -221,7 +221,8 @@
     };
   }
 
-  SunCalc.getMoonPosition = function (date, lat, lng) {
+  SunCalc.getMoonPosition = function (d, lat, lng) {
+    const date = (date instanceof Date) ? d : new Date(d);
 
     var lw  = rad * -lng,
         phi = rad * lat,
@@ -248,7 +249,8 @@
   // based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
   // Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
 
-  SunCalc.getMoonIllumination = function (date) {
+  SunCalc.getMoonIllumination = function (d) {
+    const date = (date instanceof Date) ? d : new Date(d);
 
     var d = toDays(date || new Date()),
         s = sunCoords(d),
@@ -269,13 +271,17 @@
   };
 
 
-  function hoursLater(date, h) {
+  function hoursLater(d, h) {
+    const date = (date instanceof Date) ? d : new Date(d);
+
     return new Date(date.valueOf() + h * dayMs / 24);
   }
 
   // calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
-  SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
+  SunCalc.getMoonTimes = function (d, lat, lng, inUTC) {
+    const date = (date instanceof Date) ? d : new Date(d);
+
     var t = new Date(date);
     if (inUTC) t.setUTCHours(0, 0, 0, 0);
     else t.setHours(0, 0, 0, 0);
