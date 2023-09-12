@@ -15,38 +15,55 @@
    [vortext.esther.config :as config])
   (:import [dev.failsafe TimeoutExceededException]))
 
-(def end-of-turn "") ;; <|end_of_turn|>
-(def end-of-prompt "<->")
-(def user-prefix "User: ")
-
 (def wait-for (* 1000 60 1)) ;; 1 minute
 
-(defn- internal-config-obj
-  [options {:keys [:llm/prompt :personality/ai-name] :as obj}]
-  (let [{:keys [model-path grammar-template bin-dir]} options
-        cache #(fs/path config/cache-dir %)
-        prompt (str (str/trim prompt) end-of-prompt end-of-turn "\n\n")
+(def end-of-prompt "✔") ;; Special char detected for booting
 
-        prompt-checksum (zlib/checksum prompt)
+(def cache #(fs/path config/cache-dir %))
 
+(defn flush-prompt!
+  [{:keys [system-prefix system-suffix end-of-turn]}
+   {:keys [:llm/prompt]}]
+  (let [prompt-checksum (zlib/checksum prompt)
+        prompt (str system-prefix
+                    (str/trim prompt)
+                    system-suffix
+                    end-of-prompt
+                    end-of-turn "\n\n")
         prompt-filename (format "prompt_%s.md" prompt-checksum)
         prompt-path (cache prompt-filename)
         _ (when-not (fs/exists? prompt-path)
-            (spit (str prompt-path) prompt))
+            (spit (str prompt-path) prompt))]
+    [prompt-path prompt-checksum]))
 
-        grammar-path (cache (format "grammar_%s.gbnf" ai-name))
+(defn flush-gbnf!
+  [{:keys [grammar-template assistant-prefix assistant-suffix end-of-turn]}]
+  (let [gbnf-template (str (fs/canonicalize (io/resource grammar-template)))
+        grammar-checksum (zlib/crc32->base64-str
+                          (zlib/calculate-crc32 gbnf-template))
+        grammar-path (cache (format "grammar_%s.gbnf" grammar-checksum))
         _ (when-not (fs/exists? grammar-path)
             (spit (str grammar-path)
                   (mustache/render
-                   (slurp (io/resource grammar-template))
-                   {:ai-prefix (str ai-name ": ")
-                    :end-of-turn end-of-turn})))
+                   (slurp gbnf-template)
+                   {:assistant-prefix assistant-prefix
+                    :assistant-suffix assistant-suffix
+                    :end-of-turn end-of-turn})))]
+    [grammar-path grammar-checksum]))
 
-        prompt-cache-path (cache (format "cache_%s.bin" prompt-checksum))]
+(defn- internal-config-obj
+  [options {:keys [:llm/prompt-template] :as obj}]
+  (let [{:keys [model-path bin-dir]} options
+        [prompt-path _] (flush-prompt! options obj)
+        [grammar-path _] (flush-gbnf! options)
+        model-path (fs/canonicalize (fs/path model-path))
+        cmd-path (fs/canonicalize (fs/path bin-dir "main"))
+        cache-fingerprint (zlib/checksum (str model-path prompt-template))
+        prompt-cache-path (cache (format "cache_%s.bin" cache-fingerprint))]
     {::prompt-path prompt-path
      ::grammar-path grammar-path
-     ::model-path (fs/canonicalize (fs/path model-path))
-     ::cmd-path (fs/canonicalize (fs/path bin-dir "main"))
+     ::model-path model-path
+     ::cmd-path cmd-path
      ::prompt-cache-path prompt-cache-path}))
 
 (defn shell-cmd
@@ -56,6 +73,8 @@
    [(str (::cmd-path config))
     "-m" (str (::model-path config))
     "--grammar-file" (str (::grammar-path config))
+    "--prompt-cache" (str (::prompt-cache-path config))
+    "-f" (str (::prompt-path config))
 
     ;; see https://github.com/ggerganov/llama.cpp/blob/master/docs/token_generation_performance_tips.md
     "--n-gpu-layers" 19
@@ -71,12 +90,10 @@
     ;; https://github.com/ggerganov/llama.cpp/tree/master/examples/main#context-management
     ;; Also see https://github.com/belladoreai/llama-tokenizer-js
     "--keep" -1
-    "--prompt-cache" (str (::prompt-cache-path config))
 
     "-i"
     "--simple-io"
-    "--interactive-first"
-    "-f" (str (::prompt-path config))]))
+    "--interactive-first"]))
 
 (defn send-sigint [pid]
   (let [cmd (str "kill -INT " pid)]
@@ -130,7 +147,7 @@
     (go-loop []
       (if-let [line (<! (:out-ch subprocess))]
         (do
-          (log/debug line)
+          (log/debug "line" line)
           (when (and (not @process-ready?)
                      (str/includes? line end-of-prompt))
             (>! status-ch :ready)
@@ -209,10 +226,12 @@
         nil))))
 
 (defn complete
-  [proc running? {:keys [:llm/submission]}]
+  [options proc running? {:keys [:llm/submission]}]
   (let [submission (if running? (dissoc submission :context) submission)
+        {:keys [user-prefix user-suffix end-of-turn]} options
         json-line (json/write-value-as-string submission)
-        line (str user-prefix json-line end-of-turn "\n")]
+        line (str user-prefix json-line user-suffix end-of-turn "\n")]
+    (log/debug "complete:" submission)
     (go (>! (:in-ch proc) line))
     (<!! (:response-ch proc))))
 
@@ -226,7 +245,7 @@
   [options cache user obj]
   (let [{:keys [uid]} (:vault user)]
     (if-let [proc (start options cache user obj)]
-      (complete proc (checked-proc cache uid) obj)
+      (complete options proc (checked-proc cache uid) obj)
       (throw (Exception. "internal-shell-complete-fn no proc")))))
 
 (defn shell-complete-fn

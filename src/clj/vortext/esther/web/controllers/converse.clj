@@ -61,7 +61,9 @@
       (if-not (m/validate request-schema request)
         (append-event
          obj
-         (wrapped-error :unrecognized-input (str "Unrecognized input: "  request)))
+         (wrapped-error
+          :unrecognized-input
+          (str "Unrecognized input: "  request)))
         (let [new-obj (respond! opts user obj)
               [_ resp] (:memory/events new-obj)
               {:keys [:ui/type]} (:event/content resp)]

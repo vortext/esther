@@ -1,5 +1,6 @@
-root      ::= prefix response eot
-prefix    ::= "{{prefix}}"
+root      ::= prefix response suffix eot
+prefix    ::= "{{assistant-prefix}}"
+suffix    ::= "{{assistant-suffix}}"
 quote     ::= "\""
 eot       ::= "{{end-of-turn}}"
 ws        ::= [\n ]?

@@ -42,7 +42,6 @@
   (codecs/bytes->b64-str
    (codecs/long->bytes crc32) true)) ;; true = websafe
 
-
 (defn checksum
   [text]
   (-> text

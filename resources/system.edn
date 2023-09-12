@@ -54,7 +54,14 @@
   :options
   {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
    :bin-dir "./native/llama.cpp/build/bin"
-   :grammar-template "grammars/chat.gbnf"}}
+   :grammar-template "grammars/chat.gbnf"
+   :end-of-turn ""  ;; <|end_of_turn|>
+   :system-prefix ""
+   :system-suffix ""
+   :user-prefix "User: "
+   :user-suffix ""
+   :assistant-prefix "Esther: "
+   :assistant-suffix ""}}
 
  :router/core
  {:routes #ig/ref :router/routes}
