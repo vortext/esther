@@ -227,11 +227,11 @@
 
 (defn complete
   [options proc running? {:keys [:llm/submission]}]
-  (let [submission (if running? (dissoc submission :context) submission)
-        {:keys [user-prefix user-suffix end-of-turn]} options
-        json-line (json/write-value-as-string submission)
+  (let [{:keys [user-prefix user-suffix end-of-turn]} options
+        write-line (if running? (dissoc submission :context) submission)
+        json-line (json/write-value-as-string write-line)
         line (str user-prefix json-line user-suffix end-of-turn "\n")]
-    (log/debug "complete:" submission)
+    (log/debug "complete:" write-line)
     (go (>! (:in-ch proc) line))
     (<!! (:response-ch proc))))
 
@@ -243,9 +243,10 @@
 
 (defn- internal-shell-complete-fn
   [options cache user obj]
-  (let [{:keys [uid]} (:vault user)]
+  (let [{:keys [uid]} (:vault user)
+        running? (boolean (checked-proc cache uid))]
     (if-let [proc (start options cache user obj)]
-      (complete options proc (checked-proc cache uid) obj)
+      (complete options proc running? obj)
       (throw (Exception. "internal-shell-complete-fn no proc")))))
 
 (defn shell-complete-fn
@@ -261,11 +262,13 @@
 
 (defn shutdown-fn
   ([cache]
-   (doseq [v (vals @cache)]
-     (when-let [shutdown (:shutdown-fn v)]
-       (shutdown))))
+   (doseq [[k v] @cache]
+     (do (w/evict cache k)
+         (when-let [shutdown (:shutdown-fn v)]
+           (shutdown)))))
   ([cache uid]
    (when-let [shutdown (:shutdown-fn (checked-proc cache uid))]
+     (w/evict cache uid)
      (shutdown))))
 
 (defn create-instance
