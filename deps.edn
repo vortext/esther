@@ -18,6 +18,7 @@
            net.fellbaum/jemoji {:mvn/version "1.1.6"}
            metosin/malli {:mvn/version "0.11.0"}
            clj-http/clj-http {:mvn/version "3.12.3"}
+           org.clj-commons/pretty {:mvn/version "2.2"}
 
            ;; JNA
            com.phronemophobic/clong {:mvn/version "1.1"}
