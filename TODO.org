@@ -74,7 +74,7 @@ _ more user information in session (vault)
 - could speed up with clong or llvm for practice?
 - but really belongs in nginx or wherever
 ** TODO move llama parameters into system.edn
-** TODO disable colors in logging when prod
+** DONE disable colors in logging when prod
 ** TODO logo + favicon
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
