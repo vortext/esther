@@ -1,16 +1,15 @@
 (ns vortext.esther.web.routes.api
   (:require
-    [clojure.tools.logging :as log]
-    [integrant.core :as ig]
-    [reitit.coercion.malli :as malli]
-    [reitit.ring.coercion :as coercion]
-    [reitit.ring.middleware.muuntaja :as muuntaja]
-    [reitit.ring.middleware.parameters :as parameters]
-    [reitit.swagger :as swagger]
-    [vortext.esther.web.controllers.converse :as converse]
-    [vortext.esther.web.controllers.health :as health]
-    [vortext.esther.web.middleware.exception :as exception]
-    [vortext.esther.web.middleware.formats :as formats]))
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [reitit.coercion.malli :as malli]
+   [reitit.ring.coercion :as coercion]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.ring.middleware.parameters :as parameters]
+   [reitit.swagger :as swagger]
+   [vortext.esther.web.controllers.health :as health]
+   [vortext.esther.web.middleware.exception :as exception]
+   [vortext.esther.web.middleware.formats :as formats]))
 
 
 (def route-data

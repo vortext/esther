@@ -1,12 +1,12 @@
 (ns vortext.esther.web.controllers.command
   (:require
-    [clojure.tools.logging :as log]
-    [vortext.esther.common :as common]
-    [vortext.esther.errors :refer [errors wrapped-error]]
-    [vortext.esther.util.markdown :as markdown]
-    [vortext.esther.web.controllers.memory :as memory]
-    [vortext.esther.web.ui.login :as login-ui]
-    [vortext.esther.web.ui.memory :as memory-ui]))
+   [clojure.tools.logging :as log]
+   [vortext.esther.common :as common]
+   [vortext.esther.errors :refer [wrapped-error]]
+   [vortext.esther.util.markdown :as markdown]
+   [vortext.esther.web.controllers.memory :as memory]
+   [vortext.esther.web.ui.login :as login-ui]
+   [vortext.esther.web.ui.memory :as memory-ui]))
 
 
 (defn ->event

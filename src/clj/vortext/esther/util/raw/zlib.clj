@@ -1,22 +1,12 @@
 (ns vortext.esther.util.raw.zlib
   (:refer-clojure :exclude [read sync])
   (:gen-class)
-  ; !!!
   (:require
-    [babashka.fs :as fs]
-    [clojure.java.io :as io]
-    [com.phronemophobic.clong.clang :as clong]
-    [com.phronemophobic.clong.gen.jna :as gen]
-    [vortext.esther.util.json :refer [read-transit-from-file write-transit-to-file]])
-  (:import
-    (com.sun.jna
-      Memory
-      Pointer
-      Structure)
-    (com.sun.jna.ptr
-      LongByReference
-      PointerByReference)
-    java.io.PushbackReader))
+   [babashka.fs :as fs]
+   [clojure.java.io :as io]
+   [com.phronemophobic.clong.clang :as clong]
+   [com.phronemophobic.clong.gen.jna :as gen]
+   [vortext.esther.util.json :refer [read-transit-from-file write-transit-to-file]]))
 
 
 (def h "zlib.h")

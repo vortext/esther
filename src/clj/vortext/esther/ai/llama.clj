@@ -1,21 +1,21 @@
 (ns vortext.esther.ai.llama
   (:require
-    [babashka.fs :as fs]
-    [babashka.process :refer [process destroy-tree alive?]]
-    [clojure.core.async :as async :refer
-     [alts! timeout chan go-loop <! go >! <!! >!! close!]]
-    [clojure.core.cache.wrapped :as w]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [diehard.core :as dh]
-    [vortext.esther.config :as config]
-    [vortext.esther.util.json :as json]
-    [vortext.esther.util.mustache :as mustache]
-    [vortext.esther.util.zlib :as zlib])
+   [babashka.fs :as fs]
+   [babashka.process :refer [process destroy-tree alive?]]
+   [clojure.core.async :as async :refer
+    [chan go-loop <! go >! <!! >!! close!]]
+   [clojure.core.cache.wrapped :as w]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [diehard.core :as dh]
+   [vortext.esther.config :as config]
+   [vortext.esther.util.json :as json]
+   [vortext.esther.util.mustache :as mustache]
+   [vortext.esther.util.zlib :as zlib])
   (:import
-    (dev.failsafe
-      TimeoutExceededException)))
+   (dev.failsafe
+    TimeoutExceededException)))
 
 
 (def wait-for (* 1000 60 1)) ; 1 minute
@@ -284,9 +284,9 @@
 (defn shutdown-fn
   ([cache]
    (doseq [[k v] @cache]
-     (do (w/evict cache k)
-         (when-let [shutdown (:shutdown-fn v)]
-           (shutdown)))))
+     (w/evict cache k)
+     (when-let [shutdown (:shutdown-fn v)]
+       (shutdown))))
   ([cache uid]
    (when-let [shutdown (:shutdown-fn (checked-proc cache uid))]
      (w/evict cache uid)

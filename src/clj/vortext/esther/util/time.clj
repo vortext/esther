@@ -40,9 +40,8 @@
 
 (defn human-today
   ([] (human-today
-        (->local-date (jt/instant) default-zone-id)
-        default-zone-id default-locale))
-  ([present zone-id locale]
+       (->local-date (jt/instant) default-zone-id) default-locale))
+  ([present locale]
    (let [day (jt/day-of-week present)
          day-month (.getDayOfMonth (jt/month-day present))
          month (jt/month present)
@@ -112,7 +111,6 @@
 (def time-of-day
   (let [script "public/js/vendor/suncalc.js"
         script (str (fs/canonicalize (io/resource script)))
-        ctx (polyglot/create-ctx "js" script)
         api (polyglot/js-api script "SunCalc" [:getTimeOfDay])]
     (fn [local-date-time lat lng]
       ((:getTimeOfDay api) (->iso8601 local-date-time) lat lng))))
@@ -121,7 +119,6 @@
 (def lunar-phase
   (let [script "public/js/vendor/lunarphase.js"
         script (str (fs/canonicalize (io/resource script)))
-        ctx (polyglot/create-ctx "js" script)
         fs [:lunarPhaseEmoji :lunarPhase]
         api (polyglot/js-api script "lunarPhase" fs)]
     (fn [local-date-time type]

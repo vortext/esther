@@ -1,13 +1,10 @@
 (ns vortext.esther.web.controllers.users
   (:require
-    [buddy.core.codecs :as codecs]
-    [buddy.core.hash :as hash]
-    [buddy.core.nonce :as nonce]
-    [buddy.hashers :as hashers]
-    [clojure.tools.logging :as log]
-    [integrant.core :as ig]
-    [vortext.esther.secrets :as secrets]
-    [vortext.esther.util.json :as json]))
+   [buddy.core.hash :as hash]
+   [buddy.hashers :as hashers]
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [vortext.esther.secrets :as secrets]))
 
 
 (defn build-vault
@@ -55,6 +52,5 @@
   (let [username "test"
         password "test"]
     (when-not (find-by-username opts username)
-      (do
-        (log/warn "creating user " username " with password " password)
-        (insert! opts username password)))))
+      (log/warn "creating user " username " with password " password)
+      (insert! opts username password))))

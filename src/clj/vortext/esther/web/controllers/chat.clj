@@ -1,10 +1,8 @@
 (ns vortext.esther.web.controllers.chat
   (:require
-    [clojure.tools.logging :as log]
-    [vortext.esther.common :as common]
-    [vortext.esther.config :refer [response-keys]]
-    [vortext.esther.util.time :as time]
-    [vortext.esther.web.controllers.memory :as memory]))
+   [clojure.tools.logging :as log]
+   [vortext.esther.util.time :as time]
+   [vortext.esther.web.controllers.memory :as memory]))
 
 
 (defn ->memory-context

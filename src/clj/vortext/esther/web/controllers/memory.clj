@@ -1,17 +1,16 @@
 (ns vortext.esther.web.controllers.memory
   (:require
-    [buddy.core.codecs :as codecs]
-    [buddy.core.hash :as hash]
-    [clojure.tools.logging :as log]
-    [next.jdbc :as jdbc]
-    [vortext.esther.secrets :as secrets])
+   [buddy.core.codecs :as codecs]
+   [buddy.core.hash :as hash]
+   [clojure.tools.logging :as log]
+   [next.jdbc :as jdbc]
+   [vortext.esther.secrets :as secrets])
   (:import
-    (java.util
-      UUID)))
+   (java.util
+    UUID)))
 
 
 (def gid #(str (UUID/randomUUID)))
-
 
 (defn see-keyword
   [query-fn tx user kw]
@@ -123,7 +122,7 @@
 
 (defn wipe-all!
   [opts user]
-  (let [{:keys [connection query-fn]} (:db opts)
+  (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (query-fn :wipe-all-memory {:uid uid})))
 

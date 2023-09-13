@@ -1,11 +1,10 @@
 (ns vortext.esther.util.json
   (:require
-    [babashka.fs :as fs]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [cognitect.transit :as transit]
-    [jsonista.core :as json]
-    [vortext.esther.util.polyglot :as polyglot]))
+   [babashka.fs :as fs]
+   [clojure.java.io :as io]
+   [cognitect.transit :as transit]
+   [jsonista.core :as json]
+   [vortext.esther.util.polyglot :as polyglot]))
 
 
 (def pretty-object-mapper

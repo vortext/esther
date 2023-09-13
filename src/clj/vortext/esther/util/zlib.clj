@@ -1,16 +1,13 @@
 (ns vortext.esther.util.zlib
   (:require
-    [babashka.fs :as fs]
-    [buddy.core.codecs :as codecs]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [vortext.esther.util.raw.zlib :as raw])
+   [buddy.core.codecs :as codecs]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [vortext.esther.util.raw.zlib :as raw])
   (:import
-    com.sun.jna.Structure
-    (com.sun.jna.ptr
-      LongByReference
-      PointerByReference)))
+   (com.sun.jna.ptr
+    LongByReference)))
 
 
 (defn update-crc32

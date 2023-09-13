@@ -9,7 +9,7 @@
     java.util.regex.Matcher))
 
 
-(defn- ^String map-str
+(defn- map-str
   "Apply f to each element of coll, concatenate all results into a
   String."
   [f coll]
@@ -82,47 +82,46 @@
       (let [string (.toString builder)
             custom-delim (not (= "\\{\\{" @open-delim))
             matcher (re-matcher
-                      (re-pattern (str "(" @open-delim ".*?" @close-delim
-                                       (if custom-delim
-                                         (str "|\\{\\{.*?\\}\\}"))
-                                       ")"))
-                      string)]
-        (if (.find matcher offset)
+                     (re-pattern (str "(" @open-delim ".*?" @close-delim
+                                      (when custom-delim
+                                        (str "|\\{\\{.*?\\}\\}"))
+                                      ")"))
+                     string)]
+        (when (.find matcher offset)
           (let [match-result (.toMatchResult matcher)
                 match-start (.start match-result)
                 match-end (.end match-result)
                 match (.substring string match-start match-end)]
             (if (and custom-delim
                      (= "{{" (.substring string match-start (+ match-start 2))))
-              (if-let [tag (re-find #"\{\{(.*?)\}\}" match)]
-                (do
-                  (.replace builder match-start match-end
-                            (str "\\{\\{" (second tag) "\\}\\}"))
-                  (recur match-end)))
+              (when-let [tag (re-find #"\{\{(.*?)\}\}" match)]
+                (.replace builder match-start match-end
+                          (str "\\{\\{" (second tag) "\\}\\}"))
+                (recur match-end))
               (if-let [delim-change (re-find
-                                      (re-pattern (str @open-delim
-                                                       "=\\s*(.*?) (.*?)\\s*="
-                                                       @close-delim))
-                                      match)]
+                                     (re-pattern (str @open-delim
+                                                      "=\\s*(.*?) (.*?)\\s*="
+                                                      @close-delim))
+                                     match)]
                 (do
                   (apply set-delims (rest delim-change))
                   (.delete builder match-start match-end)
                   (recur match-start))
-                (if-let [tag (re-find
-                               (re-pattern (str @open-delim "(.*?)"
-                                                @close-delim))
-                               match)]
+                (when-let [tag (re-find
+                                (re-pattern (str @open-delim "(.*?)"
+                                                 @close-delim))
+                                match)]
                   (let [section-start (re-find (re-pattern
-                                                 (str "^"
-                                                      @open-delim
-                                                      "\\s*#\\s*(.*?)\\s*"
-                                                      @close-delim))
+                                                (str "^"
+                                                     @open-delim
+                                                     "\\s*#\\s*(.*?)\\s*"
+                                                     @close-delim))
                                                (first tag))
                         key (when section-start (keyword (second section-start)))
                         value (when key (key @data))]
-                    (if (and value (fn? value)
-                             (not (and (= @open-delim "\\{\\{")
-                                       (= @close-delim "\\}\\}"))))
+                    (when(and value (fn? value)
+                              (not (and (= @open-delim "\\{\\{")
+                                        (= @close-delim "\\}\\}"))))
                       (swap! data
                              #(update-in % [key]
                                          (fn [old]
@@ -293,17 +292,16 @@
     (if (and (not section-tag) (nil? (path-data elements data)))
       ""
       (let [elements (if section-end-tag (reverse elements) elements)]
-        (do
-          (doseq [element (butlast elements)]
-            (.append builder (str "{{" (if section-end-tag "/"
-                                           (if (= element element-to-invert)
-                                             "^" "#"))
-                                  element "}}"))
-            (if (not (nil? tail-builder))
-              (.insert tail-builder 0 (str "{{/" element "}}"))))
-          (.append builder (str open-delim (last elements) close-delim))
-          (str (.toString builder) (if (not (nil? tail-builder))
-                                     (.toString tail-builder))))))))
+        (doseq [element (butlast elements)]
+          (.append builder (str "{{" (if section-end-tag "/"
+                                         (if (= element element-to-invert)
+                                           "^" "#"))
+                                element "}}"))
+          (when (not (nil? tail-builder))
+            (.insert tail-builder 0 (str "{{/" element "}}"))))
+        (.append builder (str open-delim (last elements) close-delim))
+        (str (.toString builder) (when (not (nil? tail-builder))
+                                   (.toString tail-builder)))))))
 
 
 (defn- convert-paths
@@ -355,10 +353,10 @@
   [section data partials]
   (let [section-data ((keyword (:name section)) data)]
     (if (:inverted section)
-      (if (or (and (seqable? section-data) (empty? section-data))
-              (not section-data))
+      (when (or (and (seqable? section-data) (empty? section-data))
+                (not section-data))
         (:body section))
-      (if section-data
+      (when section-data
         (if (fn? section-data)
           (let [result (section-data (:body section))]
             (if (fn? result)

@@ -1,13 +1,12 @@
 (ns vortext.esther.web.ui.conversation
   (:require
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [vortext.esther.util.markdown :as markdown]
-    [vortext.esther.util.time :as time]
-    [vortext.esther.web.controllers.converse :as converse]
-    [vortext.esther.web.controllers.memory :as memory]
-    [vortext.esther.web.htmx :refer [page ui] :as htmx]
-    [vortext.esther.web.ui.common :as common]))
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [vortext.esther.util.markdown :as markdown]
+   [vortext.esther.web.controllers.converse :as converse]
+   [vortext.esther.web.controllers.memory :as memory]
+   [vortext.esther.web.htmx :refer [page ui] :as htmx]
+   [vortext.esther.web.ui.common :as common]))
 
 
 (def loading

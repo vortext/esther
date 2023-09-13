@@ -1,17 +1,17 @@
 ;; "Inspired" by https://github.com/wavejumper/clj-polyglot
 (ns vortext.esther.util.polyglot
-  (:refer-clojure :exclude [import load-file load-string eval])
+  (:refer-clojure :exclude [import load-file load-string eval eval])
   (:require
-    [clojure.java.io :as io]
-    [clojure.tools.logging :as log])
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log])
   (:import
-    (org.graalvm.polyglot
-      Context
-      Source
-      Value)
-    (org.graalvm.polyglot.proxy
-      ProxyArray
-      ProxyObject)))
+   (org.graalvm.polyglot
+    Context
+    Source
+    Value)
+   (org.graalvm.polyglot.proxy
+    ProxyArray
+    ProxyObject)))
 
 
 (defn deserialize-number
@@ -106,12 +106,6 @@
   (let [bindings (.getBindings context lang)]
     (doseq [key (.getMemberKeys bindings)]
       (println key))))
-
-
-(defn eval
-  [value args]
-  (let [result (.execute value (into-array Object (map serialize-arg args)))]
-    (deserialize result)))
 
 
 (defn from

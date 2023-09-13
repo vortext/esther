@@ -4,7 +4,7 @@ clj -P -Sthreads 1 if `Could not acquire write lock for 'artifact:org.bytedeco:l
 
 Start a [REPL](#repls) in your editor or terminal of choice.
 ```
-clj -M:dev:cider 
+clj -M:dev:cider
 ```
 Start the server with:
 
@@ -67,4 +67,9 @@ mkdir build
 cd build
 cmake -DBUILD_SHARED_LIBS=ON -DLLAMA_CUBLAS=ON ..
 cmake --build . --config Release
+```
+## for kondo
+
+```
+clj-kondo --lint "$(clojure -Spath)" --dependencies --parallel --copy-configs
 ```

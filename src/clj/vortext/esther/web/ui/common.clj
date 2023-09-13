@@ -1,12 +1,12 @@
 (ns vortext.esther.web.ui.common
   (:require
-    [babashka.fs :as fs]
-    [babashka.process :refer [process shell]]
-    [clj-commons.digest :as digest]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [jsonista.core :as json]
-    [vortext.esther.util.zlib :as zlib]))
+   [babashka.fs :as fs]
+   [babashka.process :refer [shell]]
+   [clj-commons.digest :as digest]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [jsonista.core :as json]
+   [vortext.esther.util.zlib :as zlib]))
 
 
 (defn client-config

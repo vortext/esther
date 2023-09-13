@@ -1,15 +1,14 @@
 (ns vortext.esther.ai.llm
   (:require
-    [clojure.java.io :as io]
-    [clojure.tools.logging :as log]
-    [integrant.core :as ig]
-    [malli.core :as m]
-    [malli.error :as me]
-    [vortext.esther.ai.llama :as llama]
-    [vortext.esther.common :as common]
-    [vortext.esther.config :refer [response-keys request-keys]]
-    [vortext.esther.util.emoji :as emoji]
-    [vortext.esther.util.mustache :as mustache]))
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [malli.core :as m]
+   [malli.error :as me]
+   [vortext.esther.ai.llama :as llama]
+   [vortext.esther.common :as common]
+   [vortext.esther.util.emoji :as emoji]
+   [vortext.esther.util.mustache :as mustache]))
 
 
 (def response-schema

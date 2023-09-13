@@ -1,17 +1,16 @@
 (ns vortext.esther.web.controllers.converse
   (:require
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [malli.core :as m]
-    [vortext.esther.common :as common]
-    [vortext.esther.errors :refer [errors wrapped-error]]
-    [vortext.esther.util.emoji :as emoji]
-    [vortext.esther.util.json :as json]
-    [vortext.esther.util.time :refer [unix-ts] :as time]
-    [vortext.esther.web.controllers.chat :refer [converse!]]
-    [vortext.esther.web.controllers.command :refer [command!]]
-    [vortext.esther.web.controllers.context :as context]
-    [vortext.esther.web.controllers.memory :as memory]))
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [malli.core :as m]
+   [vortext.esther.common :as common]
+   [vortext.esther.errors :refer [wrapped-error]]
+   [vortext.esther.util.json :as json]
+   [vortext.esther.util.time :refer [unix-ts] :as time]
+   [vortext.esther.web.controllers.chat :refer [converse!]]
+   [vortext.esther.web.controllers.command :refer [command!]]
+   [vortext.esther.web.controllers.context :as context]
+   [vortext.esther.web.controllers.memory :as memory]))
 
 
 (def request-schema
@@ -37,31 +36,31 @@
 
 
 (defn as-obj
-  [opts user request]
+  [opts request]
   (let [{:keys [params]} request
         {:keys [client-context content]} params
         client-context (json/read-json-value client-context)]
     (merge
-      {:personality/ai-name (get-in opts [:ai :name])
-       :memory/ts (unix-ts)
-       :memory/gid (memory/gid)
-       :memory/events [{:event/content {:content content}
-                        :event/role :user}]}
-      (context/from-client-context client-context))))
+     {:personality/ai-name (get-in opts [:ai :name])
+      :memory/ts (unix-ts)
+      :memory/gid (memory/gid)
+      :memory/events [{:event/content {:content content}
+                       :event/role :user}]}
+     (context/from-client-context client-context))))
 
 
 (defn answer!
   [opts request]
   (let [user (get-in request [:session :user])
-        obj (as-obj opts user request)
+        obj (as-obj opts request)
         request (-> obj :memory/events first :event/content)]
     (try
       (if-not (m/validate request-schema request)
         (append-event
-          obj
-          (wrapped-error
-            :unrecognized-input
-            (str "Unrecognized input: "  request)))
+         obj
+         (wrapped-error
+          :unrecognized-input
+          (str "Unrecognized input: "  request)))
         (let [new-obj (respond! opts user obj)
               [_ resp] (:memory/events new-obj)
               {:keys [:ui/type]} (:event/content resp)]
@@ -71,8 +70,8 @@
             new-obj)))
       (catch Exception e
         (append-event
-          obj
-          (wrapped-error :internal-server-error e))))))
+         obj
+         (wrapped-error :internal-server-error e))))))
 
 
 ;; Scratch
