@@ -1,13 +1,13 @@
 (ns vortext.esther.web.controllers.users
   (:require
-   [clojure.tools.logging :as log]
-   [integrant.core :as ig]
-   [buddy.hashers :as hashers]
-   [buddy.core.nonce :as nonce]
-   [buddy.core.hash :as hash]
-   [buddy.core.codecs :as codecs]
-   [vortext.esther.util.json :as json]
-   [vortext.esther.secrets :as secrets]))
+    [buddy.core.codecs :as codecs]
+    [buddy.core.hash :as hash]
+    [buddy.core.nonce :as nonce]
+    [buddy.hashers :as hashers]
+    [clojure.tools.logging :as log]
+    [integrant.core :as ig]
+    [vortext.esther.secrets :as secrets]
+    [vortext.esther.util.json :as json]))
 
 
 (defn build-vault
@@ -18,21 +18,24 @@
                :secret secret}]
     (secrets/encrypt-for-sql vault secret)))
 
+
 (defn insert!
   [{:keys [db]} username password]
   (let [query-fn (:query-fn db)
         {:keys [data iv]} (build-vault username password)]
     (query-fn
-     :create-user
-     {:username username
-      :password_hash (hashers/encrypt password)
-      :vault_data data
-      :vault_iv iv})))
+      :create-user
+      {:username username
+       :password_hash (hashers/encrypt password)
+       :vault_data data
+       :vault_iv iv})))
+
 
 (defn find-by-username
   [{:keys [db]} username]
   ((:query-fn db)
    :find-user-by-username {:username username}))
+
 
 (defn retrieve
   [opts username password]
@@ -45,6 +48,7 @@
         (-> user
             (assoc :vault vault)
             (dissoc :vault_iv :vault_data))))))
+
 
 (defmethod ig/init-key :users/ensure-test-user
   [_ opts]

@@ -1,11 +1,12 @@
 (ns vortext.esther.web.ui.memory
   (:require
-   [clojure.tools.logging :as log]
-   [vortext.esther.web.htmx :refer [ui] :as htmx]
-   [vortext.esther.util.markdown :as markdown]
-   [clj-commons.humanize :as h]
-   [vortext.esther.web.controllers.memory :as memory]
-   [clojure.string :as str]))
+    [clj-commons.humanize :as h]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [vortext.esther.util.markdown :as markdown]
+    [vortext.esther.web.controllers.memory :as memory]
+    [vortext.esther.web.htmx :refer [ui] :as htmx]))
+
 
 (defn md-keywords-table
   [keywords]
@@ -18,7 +19,8 @@
                    (update :recency #(format "%.2f" %))))
              keywords)]
     (markdown/table
-     (map #(select-keys % ks) formatted-keywords))))
+      (map #(select-keys % ks) formatted-keywords))))
+
 
 (defn md-memories-table
   [memories]
@@ -33,7 +35,8 @@
                    (update :keywords update-kw)))
              responses)]
     (markdown/table
-     (map #(select-keys % ks) formatted-responses))))
+      (map #(select-keys % ks) formatted-responses))))
+
 
 (defn wipe-form
   [_opts _user scope]
@@ -86,6 +89,7 @@
     {:name "action" :value "archive"} "Archive conversation"]
    [:button.button.button-info
     {:name "action" :value "cancel"} "Cancel"]])
+
 
 (defn archive
   [opts {:keys [params] :as request}]

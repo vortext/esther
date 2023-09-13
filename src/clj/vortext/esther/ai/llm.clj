@@ -1,15 +1,15 @@
 (ns vortext.esther.ai.llm
   (:require
-   [clojure.tools.logging :as log]
-   [clojure.java.io :as io]
-   [integrant.core :as ig]
-   [vortext.esther.util.emoji :as emoji]
-   [vortext.esther.util.mustache :as mustache]
-   [vortext.esther.config :refer [response-keys request-keys]]
-   [vortext.esther.common :as common]
-   [vortext.esther.ai.llama :as llama]
-   [malli.core :as m]
-   [malli.error :as me]))
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
+    [integrant.core :as ig]
+    [malli.core :as m]
+    [malli.error :as me]
+    [vortext.esther.ai.llama :as llama]
+    [vortext.esther.common :as common]
+    [vortext.esther.config :refer [response-keys request-keys]]
+    [vortext.esther.util.emoji :as emoji]
+    [vortext.esther.util.mustache :as mustache]))
 
 
 (def response-schema
@@ -25,6 +25,7 @@
              (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]
    [:imagination [:string {:min 1, :max 2048}]]])
 
+
 (defn validate
   [schema obj]
   (if (not (m/validate schema obj))
@@ -37,25 +38,29 @@
 
 (def validate-response (partial validate response-schema))
 
+
 (def clean-energy
   (partial
-   common/update-value :energy
-   #(let [parsed-val
-          (or (when (and (float? %) (<= 0 % 1)) %)
-              (common/parse-number (str %)))]
-      (when (and parsed-val (<= 0 parsed-val 1))
-        (min 0.999 (float parsed-val))))))
+    common/update-value :energy
+    #(let [parsed-val
+           (or (when (and (float? %) (<= 0 % 1)) %)
+               (common/parse-number (str %)))]
+       (when (and parsed-val (<= 0 parsed-val 1))
+         (min 0.999 (float parsed-val))))))
+
 
 (def clean-emoji
   (partial
-   common/update-value :emoji
-   emoji/extract-first-emoji))
+    common/update-value :emoji
+    emoji/extract-first-emoji))
+
 
 (defn clean-response
   [response]
   (-> response
       (clean-energy 0.5)
       (clean-emoji "🙃")))
+
 
 (defn ->submission
   [opts obj]
@@ -68,13 +73,13 @@
         prompt  (mustache/render template context)
         request-content (-> events first :event/content :content)]
     (merge
-     obj
-     {:llm/prompt-template template
-      :llm/prompt prompt
-      :llm/submission
-      {:context {:memories memories
-                 :keywords keywords}
-       :content request-content}})))
+      obj
+      {:llm/prompt-template template
+       :llm/prompt prompt
+       :llm/submission
+       {:context {:memories memories
+                  :keywords keywords}
+        :content request-content}})))
 
 
 (defn create-complete-fn

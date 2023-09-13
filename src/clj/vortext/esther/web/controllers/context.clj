@@ -1,14 +1,14 @@
 (ns vortext.esther.web.controllers.context
   (:require
-   [vortext.esther.util.time :refer [unix-ts] :as time]
-   [vortext.esther.web.controllers.memory :as memory]
-   [vortext.esther.api.weatherapi :as weather]
-   [vortext.esther.util.json :as json]
-   [clojure.java.io :as io]
-   [babashka.fs :as fs]
-   [vortext.esther.config :as config]
-   [clojure.tools.logging :as log]
-   [clojure.string :as str]))
+    [babashka.fs :as fs]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [vortext.esther.api.weatherapi :as weather]
+    [vortext.esther.config :as config]
+    [vortext.esther.util.json :as json]
+    [vortext.esther.util.time :refer [unix-ts] :as time]
+    [vortext.esther.web.controllers.memory :as memory]))
 
 
 (def timezones
@@ -17,11 +17,13 @@
       (slurp)
       (json/read-json-value)))
 
+
 (defn guess-location
   [timezone]
   (if-let [largest-city (get timezones (keyword timezone))]
     largest-city
     {:latitude 51.509 :longitude -0.118 :city "London"}))
+
 
 (defn from-client-context
   [{:keys [location iso8601 timezone] :as context}]

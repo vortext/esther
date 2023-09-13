@@ -3,7 +3,9 @@
     [clojure.tools.logging :as log]
     [reitit.ring.middleware.exception :as exception]))
 
-(defn handler [message status exception request]
+
+(defn handler
+  [message status exception request]
   (when (>= status 500)
     ;; You can optionally use this to report error to an external service
     (log/error exception))
@@ -12,6 +14,7 @@
             :exception (.getClass exception)
             :data      (ex-data exception)
             :uri       (:uri request)}})
+
 
 (def wrap-exception
   (exception/create-exception-middleware

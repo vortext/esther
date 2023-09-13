@@ -1,11 +1,14 @@
 (ns vortext.esther.web.controllers.memory
   (:require
-   [next.jdbc :as jdbc]
-   [vortext.esther.secrets :as secrets]
-   [clojure.tools.logging :as log]
-   [buddy.core.codecs :as codecs]
-   [buddy.core.hash :as hash])
-  (:import [java.util UUID]))
+    [buddy.core.codecs :as codecs]
+    [buddy.core.hash :as hash]
+    [clojure.tools.logging :as log]
+    [next.jdbc :as jdbc]
+    [vortext.esther.secrets :as secrets])
+  (:import
+    (java.util
+      UUID)))
+
 
 (def gid #(str (UUID/randomUUID)))
 
@@ -18,6 +21,7 @@
         content {:uid uid :data data :iv iv :fingerprint fingerprint}]
     (query-fn tx :see-keyword content)
     fingerprint))
+
 
 (defn remember!
   [opts user obj]
@@ -33,15 +37,16 @@
                 :iv iv
                 :conversation conversation?}]
     (jdbc/with-transaction [tx connection]
-      (query-fn tx :push-memory memory)
-      (doall
-       (map (fn [kw]
-              (let [fingerprint (see-keyword query-fn tx user kw)]
-                (query-fn tx :associate-keyword
-                          {:gid gid
-                           :fingerprint fingerprint})))
-            (get-in response [:event/content :keywords] []))))
+                           (query-fn tx :push-memory memory)
+                           (doall
+                             (map (fn [kw]
+                                    (let [fingerprint (see-keyword query-fn tx user kw)]
+                                      (query-fn tx :associate-keyword
+                                                {:gid gid
+                                                 :fingerprint fingerprint})))
+                                  (get-in response [:event/content :keywords] []))))
     obj))
+
 
 (defn construct-memories
   [user contents]
@@ -57,8 +62,9 @@
    (let [{:keys [query-fn]} (:db opts)
          uid (get-in user [:vault :uid])]
      (construct-memories
-      user
-      (query-fn :last-n-memories {:uid uid :n n})))))
+       user
+       (query-fn :last-n-memories {:uid uid :n n})))))
+
 
 (defn recent-conversation
   ([opts user]
@@ -67,16 +73,18 @@
    (let [{:keys [query-fn]} (:db opts)
          uid (get-in user [:vault :uid])]
      (construct-memories
-      user
-      (query-fn :last-n-conversation-memories {:uid uid :n n})))))
+       user
+       (query-fn :last-n-conversation-memories {:uid uid :n n})))))
+
 
 (defn todays-non-archived-memories
   [opts user]
   (let [{:keys [query-fn]} (:db opts)
         uid (get-in user [:vault :uid])]
     (construct-memories
-     user
-     (query-fn :todays-non-archived-memories {:uid uid}))))
+      user
+      (query-fn :todays-non-archived-memories {:uid uid}))))
+
 
 (defn archive-todays-memories
   [opts user]
@@ -84,11 +92,13 @@
         uid (get-in user [:vault :uid])]
     (query-fn :archive-todays-memories {:uid uid})))
 
+
 (def lambdas
   {:week  1.6534e-6
    :day   1.1574e-5
    :hour  2.7701e-4
    :month 5.5181e-7})
+
 
 (defn frecency-keywords
   "λ (lamda) is a decay constant that determines the rate of
@@ -104,16 +114,19 @@
    (let [{:keys [query-fn]} (:db opts)
          {:keys [uid secret]} (:vault user)
          cols [:fingerprint :frecency :recency :frequency]
-         decrypt (fn [kw] (merge {:value (secrets/decrypt-from-sql kw secret)}
-                                 (select-keys kw cols)))
+         decrypt (fn [kw]
+                   (merge {:value (secrets/decrypt-from-sql kw secret)}
+                          (select-keys kw cols)))
          query-params {:uid uid :n n :lambda (lambda lambdas)}]
      (map decrypt (query-fn :frecency-keywords query-params)))))
+
 
 (defn wipe-all!
   [opts user]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (query-fn :wipe-all-memory {:uid uid})))
+
 
 (defn wipe-today!
   [opts user]

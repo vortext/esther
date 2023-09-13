@@ -1,13 +1,14 @@
 (ns vortext.esther.web.ui.conversation
   (:require
-   [vortext.esther.web.controllers.converse :as converse]
-   [vortext.esther.web.controllers.memory :as memory]
-   [vortext.esther.web.ui.common :as common]
-   [vortext.esther.web.htmx :refer [page ui] :as htmx]
-   [vortext.esther.util.time :as time]
-   [vortext.esther.util.markdown :as markdown]
-   [clojure.tools.logging :as log]
-   [clojure.string :as str]))
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [vortext.esther.util.markdown :as markdown]
+    [vortext.esther.util.time :as time]
+    [vortext.esther.web.controllers.converse :as converse]
+    [vortext.esther.web.controllers.memory :as memory]
+    [vortext.esther.web.htmx :refer [page ui] :as htmx]
+    [vortext.esther.web.ui.common :as common]))
+
 
 (def loading
   [:div.esther-typing-loading
@@ -16,17 +17,20 @@
     [:div.second]
     [:div.third]]])
 
+
 (defn md->html
   [{:keys [content]}]
   (if (and (string? content) (not (str/blank? content)))
     (markdown/parse content {"gfm" true "breaks" true})
     "<span></span>"))
 
+
 (defn error->html
   [{:keys [exception] :as event}]
   [:span.error
    (md->html event)
    [:span.exception exception]])
+
 
 (defn memory-container
   [{:keys [:memory/events]}]
@@ -47,10 +51,14 @@
         :md-sans (md->html response)
         :md-serif (md->html response))]]))
 
-(defn message [opts request]
+
+(defn message
+  [opts request]
   (ui (memory-container (converse/answer! opts request))))
 
-(defn msg-input [_request]
+
+(defn msg-input
+  [_request]
   [:div.input-form
    [:form
     {:id "message-form"
@@ -81,6 +89,7 @@
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 
+
 (defn conversation
   [opts request]
   (let [user (get-in request [:session :user])
@@ -95,17 +104,19 @@
       [:div#loading-response.loading-state loading]
       (msg-input request)]]))
 
-(defn render [opts request]
+
+(defn render
+  [opts request]
   (page
-   (common/head
-    {} ;; inject appConfig here
-    ["public/css/conversation.css"]
-    ["public/js/vendor/emoji.js"
-     "public/js/vendor/marked.js"
-     "public/js/conversation.js"])
-   [:body
-    [:div#container
-     [:h1#title "Esther"]
-     [:h2#today]
-     (conversation opts request)]
-    [:div#bottom]]))
+    (common/head
+      {} ; inject appConfig here
+      ["public/css/conversation.css"]
+      ["public/js/vendor/emoji.js"
+       "public/js/vendor/marked.js"
+       "public/js/conversation.js"])
+    [:body
+     [:div#container
+      [:h1#title "Esther"]
+      [:h2#today]
+      (conversation opts request)]
+     [:div#bottom]]))

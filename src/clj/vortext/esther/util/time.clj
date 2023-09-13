@@ -1,39 +1,47 @@
 (ns vortext.esther.util.time
   (:require
-   [clj-commons.humanize :as h]
-   [vortext.esther.util.polyglot :as polyglot]
-   [clojure.tools.logging :as log]
-   [clojure.java.io :as io]
-   [babashka.fs :as fs]
-   [java-time.api :as jt])
-  (:import [java.time.format TextStyle]))
+    [babashka.fs :as fs]
+    [clj-commons.humanize :as h]
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
+    [java-time.api :as jt]
+    [vortext.esther.util.polyglot :as polyglot])
+  (:import
+    (java.time.format
+      TextStyle)))
+
 
 (def default-locale (java.util.Locale/getDefault))
 (def default-zone-id (java.time.ZoneId/of "UTC"))
 
-(def ->local-date jt/local-date) ;; Alias
+(def ->local-date jt/local-date) ; Alias
 (def ->local-date-time jt/local-date-time)
+
 
 (defn ->iso8601
   [local-date-time]
   (jt/format java.time.format.DateTimeFormatter/ISO_DATE_TIME local-date-time))
 
+
 (defn iso8601->offset-date-time
   [iso8601]
   (java.time.OffsetDateTime/parse iso8601))
+
 
 (defn day-name
   [day locale]
   (.getDisplayName day TextStyle/FULL_STANDALONE locale))
 
+
 (defn month-name
   [month locale]
   (.getDisplayName month TextStyle/FULL_STANDALONE locale))
 
+
 (defn human-today
   ([] (human-today
-       (->local-date (jt/instant) default-zone-id)
-       default-zone-id default-locale))
+        (->local-date (jt/instant) default-zone-id)
+        default-zone-id default-locale))
   ([present zone-id locale]
    (let [day (jt/day-of-week present)
          day-month (.getDayOfMonth (jt/month-day present))
@@ -44,6 +52,7 @@
           (h/ordinal day-month)
           " of " (month-name month locale) ", "
           year))))
+
 
 (defn season
   [date latitude]
@@ -73,25 +82,31 @@
              (jt/before? local-date december-solstice)) "spring"
         :else "summer"))))
 
+
 (defn instant->local-date-time
   ([instant]
    (instant->local-date-time instant default-zone-id))
   ([instant zone-id]
    (.toLocalDateTime (.atZone instant zone-id))))
 
+
 (defn now
   ([] (now default-zone-id))
   ([zone-id] (jt/instant zone-id)))
 
-(defn unix-ts [] (inst-ms (now)))
+
+(defn unix-ts
+  []
+  (inst-ms (now)))
+
 
 (defn human-time-ago
   ([epoch-milli]
    (human-time-ago (jt/instant epoch-milli) (now)))
   ([inst1 inst2]
    (h/datetime
-    (instant->local-date-time inst1)
-    (instant->local-date-time inst2))))
+     (instant->local-date-time inst1)
+     (instant->local-date-time inst2))))
 
 
 (def time-of-day
@@ -114,5 +129,6 @@
         (case type
           :emoji ((:lunarPhaseEmoji api) iso8601)
           :string ((:lunarPhase api) iso8601))))))
+
 
 ;; Scratch

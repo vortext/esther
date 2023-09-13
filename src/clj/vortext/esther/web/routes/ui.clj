@@ -1,22 +1,23 @@
 (ns vortext.esther.web.routes.ui
   (:require
-   [clojure.tools.logging :as log]
-   [ring.util.response :as response]
-   [vortext.esther.web.middleware.exception :as exception]
-   [vortext.esther.web.middleware.formats :as formats]
-   [vortext.esther.web.middleware.auth :as auth]
-   [vortext.esther.web.ui.conversation :as conversation]
-   [vortext.esther.web.ui.login :as login]
-   [vortext.esther.web.ui.memory :as memory]
-   [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-   [buddy.auth.accessrules :refer [wrap-access-rules]]
-   [integrant.core :as ig]
-   [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.ring.middleware.parameters :as parameters]))
+    [buddy.auth.accessrules :refer [wrap-access-rules]]
+    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+    [clojure.tools.logging :as log]
+    [integrant.core :as ig]
+    [reitit.ring.middleware.muuntaja :as muuntaja]
+    [reitit.ring.middleware.parameters :as parameters]
+    [ring.util.response :as response]
+    [vortext.esther.web.middleware.auth :as auth]
+    [vortext.esther.web.middleware.exception :as exception]
+    [vortext.esther.web.middleware.formats :as formats]
+    [vortext.esther.web.ui.conversation :as conversation]
+    [vortext.esther.web.ui.login :as login]
+    [vortext.esther.web.ui.memory :as memory]))
 
 
 ;; Routes
-(defn ui-routes [opts]
+(defn ui-routes
+  [opts]
   [["/" {:get
          (fn [req]
            (if (auth/authenticated? req)
@@ -39,24 +40,30 @@
    ["/user/wipe"
     {:post (partial memory/wipe opts)}]])
 
+
 (defn on-error
   [req _]
   (log/warn
-   "access-rules on-error" " session:" (:session req))
+    "access-rules on-error" " session:" (:session req))
   {:status 303
    :headers {"Location" "/login"}
    :body "Redirecting to login"})
 
-(defn any-access [_] true)
 
-(def access-rules [{:pattern #"/$"
-                    :handler any-access}
-                   {:pattern #"^/login$"
-                    :handler any-access}
-                   {:pattern #"^/logout$"
-                    :handler auth/authenticated-access}
-                   {:pattern #"^/user/.*"
-                    :handler auth/authenticated-access}])
+(defn any-access
+  [_]
+  true)
+
+
+(def access-rules
+  [{:pattern #"/$"
+    :handler any-access}
+   {:pattern #"^/login$"
+    :handler any-access}
+   {:pattern #"^/logout$"
+    :handler auth/authenticated-access}
+   {:pattern #"^/user/.*"
+    :handler auth/authenticated-access}])
 
 
 (def route-data
@@ -75,7 +82,9 @@
     [wrap-authorization auth/auth-backend]
     [wrap-authentication auth/auth-backend]]})
 
+
 (derive :reitit.routes/ui :reitit/routes)
+
 
 (defmethod ig/init-key :reitit.routes/ui
   [_ {:keys [base-path]

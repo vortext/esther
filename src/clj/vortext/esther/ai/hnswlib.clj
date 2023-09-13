@@ -1,10 +1,10 @@
 (ns vortext.esther.ai.hnswlib
   (:require
-   [babashka.fs :as fs]
-   [com.phronemophobic.clong.clang :as clong]
-   [com.phronemophobic.clong.gen.jna :as gen]
-   [clojure.tools.logging :as log])
-  )
+    [babashka.fs :as fs]
+    [clojure.tools.logging :as log]
+    [com.phronemophobic.clong.clang :as clong]
+    [com.phronemophobic.clong.gen.jna :as gen]))
+
 
 (comment
   (def header-path

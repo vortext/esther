@@ -1,17 +1,18 @@
 (ns vortext.esther.web.controllers.converse
   (:require
-   [vortext.esther.util.time :refer [unix-ts] :as time]
-   [vortext.esther.errors :refer [errors wrapped-error]]
-   [vortext.esther.web.controllers.memory :as memory]
-   [vortext.esther.web.controllers.command :refer [command!]]
-   [vortext.esther.web.controllers.chat :refer [converse!]]
-   [vortext.esther.web.controllers.context :as context]
-   [vortext.esther.common :as common]
-   [malli.core :as m]
-   [vortext.esther.util.json :as json]
-   [vortext.esther.util.emoji :as emoji]
-   [clojure.tools.logging :as log]
-   [clojure.string :as str]))
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [malli.core :as m]
+    [vortext.esther.common :as common]
+    [vortext.esther.errors :refer [errors wrapped-error]]
+    [vortext.esther.util.emoji :as emoji]
+    [vortext.esther.util.json :as json]
+    [vortext.esther.util.time :refer [unix-ts] :as time]
+    [vortext.esther.web.controllers.chat :refer [converse!]]
+    [vortext.esther.web.controllers.command :refer [command!]]
+    [vortext.esther.web.controllers.context :as context]
+    [vortext.esther.web.controllers.memory :as memory]))
+
 
 (def request-schema
   [:map
@@ -21,9 +22,11 @@
      [:fn {:error/message "content should be at most 1024 chars"}
       (fn [s] (<= (count s) 1024))]]]])
 
+
 (defn append-event
   [obj event]
   (update obj :memory/events #(conj % event)))
+
 
 (defn- respond!
   [opts user obj]
@@ -32,18 +35,20 @@
                 (converse! opts user obj))]
     (append-event obj reply)))
 
+
 (defn as-obj
   [opts user request]
   (let [{:keys [params]} request
         {:keys [client-context content]} params
         client-context (json/read-json-value client-context)]
     (merge
-     {:personality/ai-name (get-in opts [:ai :name])
-      :memory/ts (unix-ts)
-      :memory/gid (memory/gid)
-      :memory/events [{:event/content {:content content}
-                       :event/role :user}]}
-     (context/from-client-context client-context))))
+      {:personality/ai-name (get-in opts [:ai :name])
+       :memory/ts (unix-ts)
+       :memory/gid (memory/gid)
+       :memory/events [{:event/content {:content content}
+                        :event/role :user}]}
+      (context/from-client-context client-context))))
+
 
 (defn answer!
   [opts request]
@@ -53,10 +58,10 @@
     (try
       (if-not (m/validate request-schema request)
         (append-event
-         obj
-         (wrapped-error
-          :unrecognized-input
-          (str "Unrecognized input: "  request)))
+          obj
+          (wrapped-error
+            :unrecognized-input
+            (str "Unrecognized input: "  request)))
         (let [new-obj (respond! opts user obj)
               [_ resp] (:memory/events new-obj)
               {:keys [:ui/type]} (:event/content resp)]
@@ -66,7 +71,8 @@
             new-obj)))
       (catch Exception e
         (append-event
-         obj
-         (wrapped-error :internal-server-error e))))))
+          obj
+          (wrapped-error :internal-server-error e))))))
 
-;;; Scratch
+
+;; Scratch

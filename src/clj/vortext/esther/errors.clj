@@ -1,14 +1,16 @@
 (ns vortext.esther.errors
   (:require
-   [clojure.java.io :as io]
-   [clojure.edn :as edn]
-   [clj-commons.format.exceptions :refer [format-exception *fonts*]]
-   [clojure.tools.logging :as log]
-   [kit.config :as config]))
+    [clj-commons.format.exceptions :refer [format-exception *fonts*]]
+    [clojure.edn :as edn]
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
+    [kit.config :as config]))
+
 
 (def errors
   (edn/read-string
-   (slurp (io/resource "prompts/errors.edn"))))
+    (slurp (io/resource "prompts/errors.edn"))))
+
 
 (defn loggable-exception
   [e]
@@ -24,6 +26,7 @@
          :omitted-frame :faint.black}]
     (binding [*fonts* my-fonts]
       (str (.getMessage e) "\n" (format-exception e)))))
+
 
 (defn wrapped-error
   [error-kw e]

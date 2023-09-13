@@ -1,12 +1,14 @@
 (ns vortext.esther.web.middleware.auth
   (:require
-   [buddy.auth.backends :refer [session]]
-   [buddy.auth.accessrules :refer [error]]
-   [clojure.tools.logging :as log]
-   [vortext.esther.web.controllers.users :as users]))
+    [buddy.auth.accessrules :refer [error]]
+    [buddy.auth.backends :refer [session]]
+    [clojure.tools.logging :as log]
+    [vortext.esther.web.controllers.users :as users]))
+
 
 ;; Create an instance of auth backend.
 (def auth-backend (session))
+
 
 (defn authenticate
   "Checks if request (with username/password :query-params)
@@ -16,8 +18,10 @@
   ([opts username password]
    (users/retrieve opts username password)))
 
+
 ;; Access Level Handlers
-(defn authenticated? [request]
+(defn authenticated?
+  [request]
   (some? (:identity (:session request))))
 
 

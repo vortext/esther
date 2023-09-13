@@ -1,10 +1,11 @@
 (ns vortext.esther.web.controllers.chat
   (:require
-   [vortext.esther.config :refer [response-keys]]
-   [vortext.esther.common :as common]
-   [vortext.esther.web.controllers.memory :as memory]
-   [vortext.esther.util.time :as time]
-   [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [vortext.esther.common :as common]
+    [vortext.esther.config :refer [response-keys]]
+    [vortext.esther.util.time :as time]
+    [vortext.esther.web.controllers.memory :as memory]))
+
 
 (defn ->memory-context
   [{:keys [:memory/events :memory/ts]}]
@@ -15,6 +16,7 @@
     {:moment (time/human-time-ago ts)
      :events (map format-event events)}))
 
+
 (defn ->user-context
   [opts user obj]
   (let [keywords (memory/frecency-keywords opts user :week 10)
@@ -22,6 +24,7 @@
         memories (reverse (memory/recent-conversation opts user 5))]
     (merge obj {:user/keywords keywords
                 :user/memories (map ->memory-context memories)})))
+
 
 (defn converse!
   [opts user {:keys [:personality/ai-name] :as obj}]

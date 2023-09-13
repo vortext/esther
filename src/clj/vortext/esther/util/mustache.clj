@@ -3,9 +3,11 @@
    Lifted from https://raw.githubusercontent.com/fhd/clostache/master/src/clostache/parser.clj
    https://github.com/fhd/clostache "
   (:require
-   [clojure.string :as str]
-   [clojure.java.io :as io])
-  (:import java.util.regex.Matcher))
+    [clojure.java.io :as io]
+    [clojure.string :as str])
+  (:import
+    java.util.regex.Matcher))
+
 
 (defn- ^String map-str
   "Apply f to each element of coll, concatenate all results into a
@@ -14,7 +16,9 @@
   (apply str (map f coll)))
 
 
-(defrecord Section [name body start end inverted])
+(defrecord Section
+  [name body start end inverted])
+
 
 (defn- replace-all
   "Applies all replacements from the replacement list to the string.
@@ -30,6 +34,7 @@
                            (Matcher/quoteReplacement to))))
           string replacements))
 
+
 (defn- escape-html
   "Replaces angle brackets with the respective HTML entities."
   [string]
@@ -39,23 +44,28 @@
                        [">" "&gt;"]
                        ["'","&apos;"]]))
 
+
 (defn- indent-partial
   "Indent all lines of the partial by indent."
   [partial indent]
   (replace-all partial [["(\r\n|[\r\n])(.+)" (str "$1" indent "$2") true]]))
 
+
 (def regex-chars ["\\" "{" "}" "[" "]" "(" ")" "." "?" "^" "+" "-" "|"])
+
 
 (defn- escape-regex
   "Escapes characters that have special meaning in regular expressions."
   [regex]
   (replace-all regex (map #(repeat 2 (str "\\" %)) regex-chars)))
 
+
 (defn- unescape-regex
   "Unescapes characters that have special meaning in regular expressions."
   [regex]
   (replace-all regex (map (fn [char] [(str "\\\\\\" char) char true])
                           regex-chars)))
+
 
 (defn- process-set-delimiters
   "Replaces custom set delimiters with mustaches."
@@ -72,11 +82,11 @@
       (let [string (.toString builder)
             custom-delim (not (= "\\{\\{" @open-delim))
             matcher (re-matcher
-                     (re-pattern (str "(" @open-delim ".*?" @close-delim
-                                      (if custom-delim
-                                        (str "|\\{\\{.*?\\}\\}"))
-                                      ")"))
-                     string)]
+                      (re-pattern (str "(" @open-delim ".*?" @close-delim
+                                       (if custom-delim
+                                         (str "|\\{\\{.*?\\}\\}"))
+                                       ")"))
+                      string)]
         (if (.find matcher offset)
           (let [match-result (.toMatchResult matcher)
                 match-start (.start match-result)
@@ -90,23 +100,23 @@
                             (str "\\{\\{" (second tag) "\\}\\}"))
                   (recur match-end)))
               (if-let [delim-change (re-find
-                                     (re-pattern (str @open-delim
-                                                      "=\\s*(.*?) (.*?)\\s*="
-                                                      @close-delim))
-                                     match)]
+                                      (re-pattern (str @open-delim
+                                                       "=\\s*(.*?) (.*?)\\s*="
+                                                       @close-delim))
+                                      match)]
                 (do
                   (apply set-delims (rest delim-change))
                   (.delete builder match-start match-end)
                   (recur match-start))
                 (if-let [tag (re-find
-                              (re-pattern (str @open-delim "(.*?)"
-                                               @close-delim))
-                              match)]
+                               (re-pattern (str @open-delim "(.*?)"
+                                                @close-delim))
+                               match)]
                   (let [section-start (re-find (re-pattern
-                                                (str "^"
-                                                     @open-delim
-                                                     "\\s*#\\s*(.*?)\\s*"
-                                                     @close-delim))
+                                                 (str "^"
+                                                      @open-delim
+                                                      "\\s*#\\s*(.*?)\\s*"
+                                                      @close-delim))
                                                (first tag))
                         key (when section-start (keyword (second section-start)))
                         value (when key (key @data))]
@@ -128,6 +138,7 @@
                     (recur match-end)))))))))
     [(.toString builder) @data]))
 
+
 (defn- create-partial-replacements
   "Creates pairs of partial replacements."
   [template partials]
@@ -140,10 +151,12 @@
                (first (process-set-delimiters (indent-partial (str (k partials))
                                                               indent) {}))]]))))
 
+
 (defn- include-partials
   "Include partials within the template."
   [template partials]
   (replace-all template (create-partial-replacements template partials)))
+
 
 (defn- remove-comments
   "Removes comments from the template."
@@ -152,6 +165,7 @@
     (replace-all template [[(str "(^|[\n\r])[ \t]*" comment-regex
                                  "(\r\n|[\r\n]|$)") "$1" true]
                            [comment-regex ""]])))
+
 
 (defn- next-index
   "Return the next index of the supplied regex."
@@ -166,10 +180,12 @@
          -1
          (+ index (.start (.toMatchResult matcher))))))))
 
+
 (defn- find-section-start-tag
   "Find the next section start tag, starting to search at index."
   [^String template index]
   (next-index template #"\{\{[#\^]" index))
+
 
 (defn- find-section-end-tag
   "Find the matching end tag for a section at the specified level,
@@ -184,6 +200,7 @@
         (if (= level 1)
           next-end
           (find-section-end-tag template (+ next-end 3) (dec level)))))))
+
 
 (defn- extract-section
   "Extracts the outer section from the template."
@@ -207,12 +224,15 @@
                                                 (.indexOf section "}}")))]
             (Section. section-name body start end inverted)))))))
 
+
 (defn- replace-all-callback
   "Replaces each occurrence of the regex with the return value of the callback."
   [^String string regex callback]
   (str/replace string regex #(callback %)))
 
+
 (declare render-template)
+
 
 (defn replace-variables
   "Replaces variables in the template with their values from the data."
@@ -225,29 +245,32 @@
                                  var-value (var-k data)
                                  var-value (if (fn? var-value)
                                              (render-template
-                                              (var-value)
-                                              (dissoc data var-name)
-                                              partials)
+                                               (var-value)
+                                               (dissoc data var-name)
+                                               partials)
                                              var-value)
                                  var-value (str var-value)]
                              (cond (= var-type "") (escape-html var-value)
                                    (= var-type ">") (render-template (var-k partials) data partials)
                                    :else var-value)))))
 
+
 (defn- join-standalone-delimiter-tags
   "Remove newlines after standalone (i.e. on their own line) delimiter tags."
   [template]
   (replace-all
-   template
-   (let [eol-start "(\r\n|[\r\n]|^)"
-         eol-end "(\r\n|[\r\n]|$)"]
-     [[(str eol-start "[ \t]*(\\{\\{=[^\\}]*\\}\\})" eol-end) "$1$2"
-       true]])))
+    template
+    (let [eol-start "(\r\n|[\r\n]|^)"
+          eol-end "(\r\n|[\r\n]|$)"]
+      [[(str eol-start "[ \t]*(\\{\\{=[^\\}]*\\}\\})" eol-end) "$1$2"
+        true]])))
+
 
 (defn- path-data
   "Extract the data for the supplied path."
   [elements data]
   (get-in data (map keyword elements)))
+
 
 (defn- convert-path
   "Convert a tag with a dotted name to nested sections, using the
@@ -282,6 +305,7 @@
           (str (.toString builder) (if (not (nil? tail-builder))
                                      (.toString tail-builder))))))))
 
+
 (defn- convert-paths
   "Converts tags with dotted tag names to nested sections."
   [^String template data]
@@ -296,22 +320,24 @@
                       (.substring s match-end))))
         s))))
 
+
 (defn- join-standalone-tags
   "Remove newlines after standalone (i.e. on their own line) section/partials
    tags."
   [template]
   (replace-all
-   template
-   (let [eol-start "(\r\n|[\r\n]|^)"
-         eol-end "(\r\n|[\r\n]|$)"]
-     [[(str eol-start
-            "\\{\\{[#\\^][^\\}]*\\}\\}(\r\n|[\r\n])\\{\\{/[^\\}]*\\}\\}"
-            eol-end)
-       "$1" true]
-      [(str eol-start "[ \t]*(\\{\\{[#\\^/][^\\}]*\\}\\})" eol-end) "$1$2"
-       true]
-      [(str eol-start "([ \t]*\\{\\{>\\s*[^\\}]*\\s*\\}\\})" eol-end) "$1$2"
-       true]])))
+    template
+    (let [eol-start "(\r\n|[\r\n]|^)"
+          eol-end "(\r\n|[\r\n]|$)"]
+      [[(str eol-start
+             "\\{\\{[#\\^][^\\}]*\\}\\}(\r\n|[\r\n])\\{\\{/[^\\}]*\\}\\}"
+             eol-end)
+        "$1" true]
+       [(str eol-start "[ \t]*(\\{\\{[#\\^/][^\\}]*\\}\\})" eol-end) "$1$2"
+        true]
+       [(str eol-start "([ \t]*\\{\\{>\\s*[^\\}]*\\s*\\}\\})" eol-end) "$1$2"
+        true]])))
+
 
 (defn- preprocess
   "Preprocesses template and data (e.g. removing comments)."
@@ -323,6 +349,7 @@
         template (include-partials template partials)
         template (convert-paths template data)]
     [template data]))
+
 
 (defn- render-section
   [section data partials]
@@ -350,6 +377,7 @@
                        (render-template (:body section) m partials))
                      section-data)))))))
 
+
 (defn- render-template
   "Renders the template with the data and partials."
   [^String template data partials]
@@ -362,6 +390,7 @@
         (recur (str before (render-section section data partials) after) data
                partials)))))
 
+
 (defn render
   "Renders the template with the data and, if supplied, partials."
   ([template]
@@ -372,6 +401,7 @@
    (replace-all (render-template template data partials)
                 [["\\\\\\{\\\\\\{" "{{"]
                  ["\\\\\\}\\\\\\}" "}}"]])))
+
 
 (defn render-resource
   "Renders a resource located on the classpath"

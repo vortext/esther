@@ -1,30 +1,33 @@
 (ns vortext.esther.util.zlib
   (:require
-   [clojure.java.io :as io]
-   [clojure.string :as str]
-   [babashka.fs :as fs]
-   [clojure.tools.logging :as log]
-   [buddy.core.codecs :as codecs]
-   [vortext.esther.util.raw.zlib :as raw])
+    [babashka.fs :as fs]
+    [buddy.core.codecs :as codecs]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [vortext.esther.util.raw.zlib :as raw])
   (:import
-   com.sun.jna.ptr.PointerByReference
-   com.sun.jna.ptr.LongByReference
-   com.sun.jna.Structure))
+    com.sun.jna.Structure
+    (com.sun.jna.ptr
+      LongByReference
+      PointerByReference)))
+
 
 (defn update-crc32
   [crc buffer read-count]
   ;; Call the crc32 function with the current crc value, buffer, and read-count to get the new crc value
   (raw/crc32 crc buffer read-count))
 
+
 (defn calculate-crc32
   [file-path]
   (let [buffer-size 2048
         file-input-stream (io/input-stream file-path)
-        buffer (byte-array buffer-size)  ;; Buffer created here
+        buffer (byte-array buffer-size)  ; Buffer created here
         crc-ref (atom 0)]
     (try
       (loop []
-        (let [read-count (.read file-input-stream buffer)]  ;; Buffer reused here
+        (let [read-count (.read file-input-stream buffer)]  ; Buffer reused here
           (when (pos? read-count)
             (swap! crc-ref update-crc32 buffer read-count)
             (recur))))
@@ -32,21 +35,24 @@
         (.close file-input-stream)))
     @crc-ref))
 
+
 (defn text->crc32
   [text]
   (let [bytes (.getBytes text)]
     (raw/crc32 0 bytes (count bytes))))
 
+
 (defn crc32->base64-str
   [crc32]
   (codecs/bytes->b64-str
-   (codecs/long->bytes crc32) true)) ;; true = websafe
+    (codecs/long->bytes crc32) true)) ; true = websafe
 
 (defn checksum
   [text]
   (-> text
       (text->crc32)
       (crc32->base64-str)))
+
 
 (defn compress
   [source]
@@ -73,6 +79,7 @@
     (if (zero? ret)
       (String. dest "UTF-8")
       (throw (Exception. (str "Decompression failed with error code: " ret))))))
+
 
 ;; As tempting as it is to implement gzip here, you're better off using the shell for that.
 ;; Or the jvm impl, I have no idea why this exists other than out of curiousity.

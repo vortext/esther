@@ -1,19 +1,23 @@
 (ns vortext.esther.util.raw.zlib
-  (:refer-clojure :exclude [read sync]) ;; !!!
+  (:refer-clojure :exclude [read sync])
+  (:gen-class)
+  ; !!!
   (:require
-   [clojure.java.io :as io]
-   [babashka.fs :as fs]
-   [vortext.esther.util.json :refer [read-transit-from-file write-transit-to-file]]
-   [com.phronemophobic.clong.clang :as clong]
-   [com.phronemophobic.clong.gen.jna :as gen])
+    [babashka.fs :as fs]
+    [clojure.java.io :as io]
+    [com.phronemophobic.clong.clang :as clong]
+    [com.phronemophobic.clong.gen.jna :as gen]
+    [vortext.esther.util.json :refer [read-transit-from-file write-transit-to-file]])
   (:import
-   java.io.PushbackReader
-   com.sun.jna.Memory
-   com.sun.jna.Pointer
-   com.sun.jna.ptr.PointerByReference
-   com.sun.jna.ptr.LongByReference
-   com.sun.jna.Structure)
-  (:gen-class))
+    (com.sun.jna
+      Memory
+      Pointer
+      Structure)
+    (com.sun.jna.ptr
+      LongByReference
+      PointerByReference)
+    java.io.PushbackReader))
+
 
 (def h "zlib.h")
 (def api-file (str (fs/canonicalize (fs/path (io/resource "api") "zlib.json"))))
@@ -24,7 +28,7 @@
 (gen/def-api zlib api-def)
 
 
-;;; Scratch
+;; Scratch
 (comment
   (defn write-api ;; I used this to write the API
     [h out]
