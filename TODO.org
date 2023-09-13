@@ -60,21 +60,23 @@ _ more user information in session (vault)
 - different prompt format
 ** DONE use proper locale for times?
 ** DONE better handling of location data
-** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
-** DONE use a single map from the whole req-rep thread with namespaced keywords.
-** TODO link parsing?
-** DONE minify on the fly with hash check (maybe wontfix because javascript is hell)
-** DONE Gzip
-- can done with jvm ring-middleware
-- could speed up with clong or llvm for practice?
-- but really belongs in nginx or wherever
-** TODO logo + favicon
 ** DONE move all the local context stuff to server side (e.g. moon phase etc) -> create proper context.clj controller
 ** DONE use 🌒 emojis in prompt again (they're cute)
 ** DONE figure out a more sane TZ to heuristic lat long
-** TODO proper timezone for human-today on initial render (use https://ipgeolocation.io/timezone-api.html)
+** DONE proper timezone for human-today on initial render (see also https://ipgeolocation.io/timezone-api.html)
+** DONE set guards around weather in prompt-template
+** DONE use a single map from the whole req-rep thread with namespaced keywords.
+** DONE minify on the fly with hash check (maybe wontfix because javascript is hell)
+** DONE Gzip
+** DONE harmonize emoji handling using graalvm? (did it a better way client side)
+** DONE keyword_memory_lookup table and logic
+- can done with jvm ring-middleware
+- could speed up with clong or llvm for practice?
+- but really belongs in nginx or wherever
 ** TODO move llama parameters into system.edn
-** TODO set guards around weather and other local context in prompt-template
+** TODO disable colors in logging when prod
+** TODO logo + favicon
+** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
 ** TODO set context rollover properly (e.g. from day to night) when subproc is running?
 ** TODO export / download data functionality (for me and GDPR!)
@@ -99,8 +101,6 @@ _ more user information in session (vault)
 - onnx bert?
 - bert.cpp / jna?
 - wait for llama.cpp to fix it?
-** DONE harmonize emoji handling using graalvm? (did it a better way client side)
-** DONE keyword_memory_lookup table and logic
 ** TODO dark mode
 ** TODO a way to serialize "personality"
 ** TODO better intro flow
@@ -117,6 +117,7 @@ _ more user information in session (vault)
 ** TODO app? legal, ethics, billing, subscriptions, etc.
 * Ideas for later
 ** TODO finetune model
+** TODO link parsing in that it downloads the page and adds it as context
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
 ** TODO /imagine command (no solutions for this ATM)
