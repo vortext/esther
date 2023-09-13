@@ -248,7 +248,7 @@
         write-line (if running? (dissoc submission :context) submission)
         json-line (json/write-value-as-string write-line)
         line (str user-prefix json-line user-suffix end-of-turn "\n")]
-    (log/debug "complete:" write-line)
+    (log/debug line)
     (go (>! (:in-ch proc) line))
     (<!! (:response-ch proc))))
 

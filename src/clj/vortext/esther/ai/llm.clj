@@ -62,23 +62,23 @@
 
 
 (defn ->submission
-  [opts obj]
+  [opts {:keys [:memory/events :user/memories :user/keywords] :as obj}]
   (let [template (slurp (io/resource (:prompt opts)))
-        {:keys [:memory/events :user/memories :user/keywords]} obj
         ks [:context/today :context/lunar-phase
+            :context/allow-location?
             :context/weather :context/time-of-day
             :context/season :personality/ai-name]
         context (common/remove-namespaces (select-keys obj ks))
         prompt  (mustache/render template context)
         request-content (-> events first :event/content :content)]
     (merge
-      obj
-      {:llm/prompt-template template
-       :llm/prompt prompt
-       :llm/submission
-       {:context {:memories memories
-                  :keywords keywords}
-        :content request-content}})))
+     obj
+     {:llm/prompt-template template
+      :llm/prompt prompt
+      :llm/submission
+      {:context {:memories memories
+                 :keywords keywords}
+       :content request-content}})))
 
 
 (defn create-complete-fn
