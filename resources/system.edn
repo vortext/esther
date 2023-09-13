@@ -33,22 +33,6 @@
                                      :content-types true
                                      :default-charset "utf-8"}}}
 
- :reitit.routes/api
- {:base-path "/api"
-  :env #ig/ref :system/env
-  :db {:query-fn  #ig/ref :db.sql/query-fn
-       :connection #ig/ref  :db.sql/connection}}
-
- :dev/init-test-user
- {:db {:query-fn  #ig/ref :db.sql/query-fn
-       :connection #ig/ref  :db.sql/connection}
-  :depends-on [:db.sql/migrations]}
-
- :router/routes #profile
- {:dev
-  {:routes #ig/refset :reitit/routes
-   :depends-on [:dev/init-test-user]}}
-
  :ai.llm/llm-interface
  {:impl :llama-shell
   :options
@@ -63,8 +47,10 @@
    :assistant-prefix "Esther: "
    :assistant-suffix ""}}
 
- :router/core
- {:routes #ig/ref :router/routes}
+ :reitit.routes/api
+ {:base-path "/api"
+  :env #ig/ref :system/env}
+
  :reitit.routes/ui
  #profile {:dev {:base-path "",
                  :default-path "/user/conversation"
@@ -84,4 +70,16 @@
                      :migrate-on-init? true}
  :db.sql/connection #profile {:dev {:jdbc-url "jdbc:sqlite:esther_dev.db"},
                               :test {:jdbc-url "jdbc:sqlite:esther_test.db"},
-                              :prod {:jdbc-url #env JDBC_URL}}}
+                              :prod {:jdbc-url #env JDBC_URL}}
+
+ :users/ensure-test-user
+ {:db {:query-fn  #ig/ref :db.sql/query-fn}
+  :depends-on [:db.sql/migrations]}
+
+ :router/routes #profile
+ {:dev
+  {:routes #ig/refset :reitit/routes
+   :depends-on [:users/ensure-test-user]}}
+
+ :router/core
+ {:routes #ig/ref :router/routes}}

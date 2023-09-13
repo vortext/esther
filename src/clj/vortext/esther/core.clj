@@ -4,7 +4,6 @@
    [integrant.core :as ig]
    [vortext.esther.config :as config]
    [vortext.esther.env :refer [defaults]]
-   [vortext.esther.web.middleware.auth :refer [insert-user!]]
 
    ;; Edges
    [kit.edge.server.undertow]
@@ -30,17 +29,6 @@
                  :where (str "Uncaught exception on" (.getName thread))}))))
 
 (defonce system (atom nil))
-
-;; Database
-
-(defmethod ig/init-key :dev/init-test-user
-  [_ {:keys [db] :as opts}]
-  (let [username "test"
-        password "test"]
-    (when (nil? ((:query-fn db) :find-user-by-username {:username username}))
-      (do
-        (log/warn ":db.sql/init creating user " username " with password " password)
-        (insert-user! opts username password)))))
 
 (defn stop-app []
   ((or (:stop defaults) (fn [])))

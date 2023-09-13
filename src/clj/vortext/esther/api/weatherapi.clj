@@ -16,7 +16,7 @@
        {:accept :json
         :as :json
         :query-params {"q" q
-                       "key" (:weatherapi-api-key (secrets))}})))
+                       "key" (:weatherapi-api-key secrets)}})))
    ;; 3 hours
    :ttl/threshold (* 3 60 60 1000)))
 

@@ -2,14 +2,15 @@
   (:require
    [next.jdbc :as jdbc]
    [vortext.esther.secrets :as secrets]
-   [buddy.core.hash :as hash]
-   [vortext.esther.util :refer [random-base64 bytes->b64]]))
+   [clojure.tools.logging :as log]
+   [buddy.core.codecs :as codecs]
+   [buddy.core.hash :as hash]))
 
 (defn see-keyword
   [query-fn tx user kw]
   (let [{:keys [uid secret]} (:vault user)
         {:keys [data iv]} (secrets/encrypt-for-sql kw secret)
-        fingerprint (-> (hash/sha256 (str uid kw)) (bytes->b64))
+        fingerprint (-> (hash/sha256 (str uid kw)) (codecs/bytes->b64))
         content {:uid uid :data data :iv iv :fingerprint fingerprint}]
     (query-fn tx :see-keyword content)
     fingerprint))
@@ -25,8 +26,8 @@
         memory {:gid gid
                 :uid uid
                 :data data
-                :conversation conversation?
-                :iv iv}]
+                :iv iv
+                :conversation conversation?}]
     (jdbc/with-transaction [tx connection]
       (query-fn tx :push-memory memory)
       (doall

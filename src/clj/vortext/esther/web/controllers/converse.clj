@@ -30,14 +30,10 @@
 
 (defn- respond!
   [opts user obj]
-  (try
-    (let [reply (if (str/starts-with? (request-msg obj) "/")
-                  (command! opts user obj)
-                  (converse! opts user obj))]
-      (append-event obj reply))
-    (catch Exception e
-      (append-event obj (wrapped-error :internal-server-error e)))))
-
+  (let [reply (if (str/starts-with? (request-msg obj) "/")
+                (command! opts user obj)
+                (converse! opts user obj))]
+    (append-event obj reply)))
 
 (defn as-obj
   [opts user request]

@@ -275,5 +275,6 @@
   [{:keys [options]}]
   (let [;; yeah GPU mem will be an issue
         cache (w/lru-cache-factory {:threshold 1})]
-    {:shutdown-fn (partial shutdown-fn cache)
+    {:_cache cache
+     :shutdown-fn (partial shutdown-fn cache)
      :complete-fn (shell-complete-fn options cache)}))

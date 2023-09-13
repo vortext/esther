@@ -1,14 +1,14 @@
 pragma foreign_keys = on;
 --;;
 create table memory (
-    gid            text primary key,
-    uid            text not null,
-    data           text not null,
-    iv             text not null,
-    created        timestamp with time zone default current_timestamp,
-    created_date   text default (date('now')),
-    archived       boolean not null default 0,
-    conversation   boolean not null default 0
+gid             text primary key,
+uid             text not null,
+data            blob not null,
+iv              blob not null,
+created         timestamp with time zone default current_timestamp,
+created_date    text default (date('now')),
+archived        boolean not null default 0,
+conversation    boolean not null default 0
 );
 --;;
 create index memory_created on memory(uid, created);
@@ -19,13 +19,13 @@ create index memory_uid on memory(uid);
 --;;
 
 create table memory_keyword (
-    uid                     text not null,
-    fingerprint             text primary key,
-    data                    text not null,
-    iv                      text not null,
-    seen                    integer default 1,
-    last_seen               timestamp with time zone default current_timestamp,
-    unique(uid,fingerprint)
+uid            text not null,
+fingerprint    text primary key,
+data           blob not null,
+iv             blob not null,
+seen           integer default 1,
+last_seen      timestamp with time zone default current_timestamp,
+unique(uid,fingerprint)
 )
 --;;
 create index memory_keyword_access on memory_keyword(uid);
@@ -36,11 +36,11 @@ create index memory_keyword_uid_seen on memory_keyword(uid, seen);
 --;;
 
 create table memory_keyword_lookup (
-    gid            text not null,
-    fingerprint    text not null,
-    primary key (gid, fingerprint),
-    foreign key (gid) references memory(gid) on delete cascade,
-    foreign key (fingerprint) references memory_keyword(fingerprint) on delete cascade
+gid            text not null,
+fingerprint    text not null,
+primary key (gid, fingerprint),
+foreign key (gid) references memory(gid) on delete cascade,
+foreign key (fingerprint) references memory_keyword(fingerprint) on delete cascade
 )
 --;;
 create index memory_keyword_lookup_gid on memory_keyword_lookup(gid);
