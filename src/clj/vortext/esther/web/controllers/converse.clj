@@ -6,12 +6,9 @@
    [vortext.esther.web.controllers.command :refer [command!]]
    [vortext.esther.web.controllers.chat :refer [converse!]]
    [vortext.esther.web.controllers.context :as context]
-   [vortext.esther.util :refer [random-base64]]
-   [vortext.esther.common :refer [request-msg]]
-   [vortext.esther.api.weatherapi :as weather]
+   [vortext.esther.common :as common]
    [malli.core :as m]
    [vortext.esther.util.json :as json]
-   [vortext.esther.config :as config]
    [vortext.esther.util.emoji :as emoji]
    [clojure.tools.logging :as log]
    [clojure.string :as str]))
@@ -30,7 +27,7 @@
 
 (defn- respond!
   [opts user obj]
-  (let [reply (if (str/starts-with? (request-msg obj) "/")
+  (let [reply (if (str/starts-with? (common/request-msg obj) "/")
                 (command! opts user obj)
                 (converse! opts user obj))]
     (append-event obj reply)))
@@ -43,7 +40,7 @@
     (merge
      {:personality/ai-name (get-in opts [:ai :name])
       :memory/ts (unix-ts)
-      :memory/gid (random-base64)
+      :memory/gid (memory/gid)
       :memory/events [{:event/content {:content content}
                        :event/role :user}]}
      (context/from-client-context client-context))))

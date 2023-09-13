@@ -109,10 +109,10 @@
         ctx (polyglot/create-ctx "js" script)
         fs [:lunarPhaseEmoji :lunarPhase]
         api (polyglot/js-api script "lunarPhase" fs)]
-    (fn [local-date-time emoji?]
+    (fn [local-date-time type]
       (let [iso8601 (->iso8601 local-date-time)]
-        (if emoji?
-          ((:lunarPhaseEmoji api) iso8601)
-          ((:lunarPhase api) iso8601))))))
+        (case type
+          :emoji ((:lunarPhaseEmoji api) iso8601)
+          :string ((:lunarPhase api) iso8601))))))
 
 ;; Scratch

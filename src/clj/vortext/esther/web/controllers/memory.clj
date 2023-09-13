@@ -4,7 +4,11 @@
    [vortext.esther.secrets :as secrets]
    [clojure.tools.logging :as log]
    [buddy.core.codecs :as codecs]
-   [buddy.core.hash :as hash]))
+   [buddy.core.hash :as hash])
+  (:import [java.util UUID]))
+
+(def gid #(str (UUID/randomUUID)))
+
 
 (defn see-keyword
   [query-fn tx user kw]
