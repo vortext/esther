@@ -14,11 +14,10 @@ body {
   margin-bottom: 1em;
 }
 
-#subtitle {
+#today {
   font-size: 12pt;
   color: var(--subdued-color); /* More subdued color from the palette */
   font-weight: lighter;
-  margin-bottom: 1em;
 }
 
 .memory .request,

@@ -150,7 +150,21 @@ function afterConverseRequest() {
   }, 250);
 }
 
+function today(date = new Date()) {
+  if (!(date instanceof Date)) {
+    return 'Invalid input. Please provide a Date object.';
+  }
+
+  const day = date.getDate();
+  const daySuffix = [null, 'st', 'nd', 'rd', ...Array(17).fill('th'), 'st', 'nd', 'rd', ...Array(7).fill('th')][day];
+  const month = date.toLocaleString('default', { month: 'long' });
+  const weekday = date.toLocaleString('default', { weekday: 'long' });
+
+  return `${weekday} the ${day}${daySuffix} of ${month}, ${date.getFullYear()}.`;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById("today").innerHTML = today();
   setClientContext();
 
   navigator.geolocation.getCurrentPosition(

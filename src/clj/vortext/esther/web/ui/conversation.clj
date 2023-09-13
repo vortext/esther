@@ -106,6 +106,6 @@
    [:body
     [:div#container
      [:h1#title "Esther"]
-     [:h2#subtitle (time/human-today) "."]
+     [:h2#today]
      (conversation opts request)]
     [:div#bottom]]))
