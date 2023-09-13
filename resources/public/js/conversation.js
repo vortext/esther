@@ -151,10 +151,6 @@ function afterConverseRequest() {
 }
 
 function today(date = new Date()) {
-  if (!(date instanceof Date)) {
-    return 'Invalid input. Please provide a Date object.';
-  }
-
   const day = date.getDate();
   const daySuffix = [null, 'st', 'nd', 'rd', ...Array(17).fill('th'), 'st', 'nd', 'rd', ...Array(7).fill('th')][day];
   const month = date.toLocaleString('default', { month: 'long' });

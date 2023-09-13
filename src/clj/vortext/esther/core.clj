@@ -4,7 +4,7 @@
    [integrant.core :as ig]
    [vortext.esther.config :as config]
    [vortext.esther.env :refer [defaults]]
-
+   [vortext.esther.errors :as errors]
    ;; Edges
    [kit.edge.server.undertow]
    [vortext.esther.web.handler]
@@ -24,9 +24,7 @@
 (Thread/setDefaultUncaughtExceptionHandler
  (reify Thread$UncaughtExceptionHandler
    (uncaughtException [_ thread ex]
-     (log/error {:what :uncaught-exception
-                 :exception ex
-                 :where (str "Uncaught exception on" (.getName thread))}))))
+     (log/error (errors/loggable-exception ex)))))
 
 (defonce system (atom nil))
 
@@ -45,4 +43,5 @@
 
 (defn -main [& _]
   (log/info "starting...")
+  (alter-var-root  #'clj-commons.ansi/*color-enabled* (constantly false))
   (start-app))
