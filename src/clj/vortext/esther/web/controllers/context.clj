@@ -1,7 +1,7 @@
 (ns vortext.esther.web.controllers.context
   (:require
-   [clojure.java.io :as io]
    [clojure.tools.logging :as log]
+   [clojure.java.io :as io]
    [vortext.esther.api.weatherapi :as weather]
    [vortext.esther.util.json :as json]
    [vortext.esther.util.time :as time]))

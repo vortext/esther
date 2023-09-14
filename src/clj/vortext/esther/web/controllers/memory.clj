@@ -1,8 +1,8 @@
 (ns vortext.esther.web.controllers.memory
   (:require
+   [clojure.tools.logging :as log]
    [buddy.core.codecs :as codecs]
    [buddy.core.hash :as hash]
-   [clojure.tools.logging :as log]
    [next.jdbc :as jdbc]
    [vortext.esther.secrets :as secrets])
   (:import (java.util UUID)))
@@ -33,13 +33,13 @@
         {:keys [uid secret]} (:vault user)
         {:keys [:memory/events :memory/gid]} obj
         [_request response] events
-        {:keys [data iv]} (secrets/encrypt-for-sql obj secret)
+        {:keys [data iv]} (secrets/encrypt-for-sql (memorable obj) secret)
         conversation? (:event/conversation? response)
         memory {:gid gid
                 :uid uid
                 :data data
                 :iv iv
-                :conversation conversation?}]
+                :conversation (boolean conversation?)}]
     (jdbc/with-transaction [tx connection]
       (query-fn tx :push-memory memory)
       (doall
