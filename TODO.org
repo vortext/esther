@@ -72,8 +72,8 @@ _ more user information in session (vault)
 ** DONE refactor user management to be slightly saner
 ** DONE Gzip
 ** DONE disable colors in logging when prod
-- can done with jvm ring-middleware
-- could speed up with clong or llvm for practice?
+- can be done with jvm ring-middleware
+- could be sped up with clong or llvm for practice?
 - but really belongs in nginx or wherever
 ** TODO move llama parameters into system.edn
 ** TODO logo + favicon
@@ -89,6 +89,7 @@ _ more user information in session (vault)
 ** TODO ui things
 - Discoverability of input bar
 - Button for archive or other commands?
+- Nicer / intelligent placeholder?
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
