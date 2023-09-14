@@ -67,20 +67,24 @@ _ more user information in session (vault)
 ** DONE set guards around weather in prompt-template
 ** DONE use a single map from the whole req-rep thread with namespaced keywords.
 ** DONE minify on the fly with hash check (maybe wontfix because javascript is hell)
-** DONE Gzip
 ** DONE harmonize emoji handling using graalvm? (did it a better way client side)
 ** DONE keyword_memory_lookup table and logic
+** DONE refactor user management to be slightly saner
+** DONE Gzip
+** DONE disable colors in logging when prod
 - can done with jvm ring-middleware
 - could speed up with clong or llvm for practice?
 - but really belongs in nginx or wherever
 ** TODO move llama parameters into system.edn
-** DONE disable colors in logging when prod
 ** TODO logo + favicon
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
 ** TODO set context rollover properly (e.g. from day to night) when subproc is running?
 ** TODO export / download data functionality (for me and GDPR!)
 ** TODO figure out a sane way to do multi user scalably
+- https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
+- https://github.com/vllm-project/vllm (doesn't support quantization at all)
+- find a saner way to interface with llama.cpp?
 ** TODO check if there's a distributed deploy strategy that supports mirostat 🙃
 ** TODO ui things
 - Discoverability of input bar
