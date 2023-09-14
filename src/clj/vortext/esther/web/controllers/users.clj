@@ -21,11 +21,11 @@
   (let [query-fn (:query-fn db)
         {:keys [data iv]} (build-vault username password)]
     (query-fn
-      :create-user
-      {:username username
-       :password_hash (hashers/encrypt password)
-       :vault_data data
-       :vault_iv iv})))
+     :create-user
+     {:username username
+      :password_hash (hashers/encrypt password)
+      :data data
+      :iv iv})))
 
 
 (defn find-by-username
@@ -38,13 +38,11 @@
   [opts username password]
   (when-let [user (find-by-username opts username)]
     (when (and username password (hashers/check password (:password_hash user)))
-      (let [{:keys [:vault_iv :vault_data]} user
-            encrypted-vault {:iv vault_iv :data vault_data}
-            secret (secrets/stretched-b64-str password)
-            vault (secrets/decrypt-from-sql encrypted-vault secret)]
+      (let [secret (secrets/stretched-b64-str password)
+            vault (secrets/decrypt-from-sql (select-keys user [:data :iv]) secret)]
         (-> user
-            (assoc :vault vault)
-            (dissoc :vault_iv :vault_data))))))
+            (dissoc :data :iv)
+            (assoc :vault vault))))))
 
 
 (defmethod ig/init-key :users/ensure-test-user

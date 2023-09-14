@@ -89,7 +89,9 @@
                   :archive archive
                   :logout logout}
         [cmd args] (common/split-first-word
-                     (apply str (rest msg)))]
+                    (apply str (rest msg)))]
     (if-let [impl (get commands (keyword cmd))]
       (impl opts user args obj)
-      (wrapped-error :invalid-command (str "Invalid command: " msg)))))
+      (wrapped-error
+       :invalid-command
+       (Exception. (str "Invalid command: " msg))))))

@@ -1,8 +1,8 @@
 -- Users
 -- :name create-user :! :1
 -- :doc Creates a new user
-insert into users (username, password_hash, vault_data, vault_iv)
-values (:username, :password_hash, :vault_data, :vault_iv);
+insert into users (username, password_hash, data, iv)
+values (:username, :password_hash, :data, :iv);
 
 -- :name find-user-by-username :? :1
 -- :doc retrieves a user by username
