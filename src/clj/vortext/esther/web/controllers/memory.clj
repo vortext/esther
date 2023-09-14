@@ -5,9 +5,7 @@
    [clojure.tools.logging :as log]
    [next.jdbc :as jdbc]
    [vortext.esther.secrets :as secrets])
-  (:import
-   (java.util
-    UUID)))
+  (:import (java.util UUID)))
 
 
 (def gid #(str (UUID/randomUUID)))
@@ -22,28 +20,35 @@
     fingerprint))
 
 
+(defn memorable
+  [obj]
+  (select-keys
+   obj
+   (filter #(= (namespace %) "memory") (keys obj))))
+
+
 (defn remember!
   [opts user obj]
   (let [{:keys [connection query-fn]} (:db opts)
         {:keys [uid secret]} (:vault user)
         {:keys [:memory/events :memory/gid]} obj
-        [_ response] events
+        [_request response] events
         {:keys [data iv]} (secrets/encrypt-for-sql obj secret)
-        conversation? (boolean (:event/conversation? response))
+        conversation? (:event/conversation? response)
         memory {:gid gid
                 :uid uid
                 :data data
                 :iv iv
                 :conversation conversation?}]
     (jdbc/with-transaction [tx connection]
-                           (query-fn tx :push-memory memory)
-                           (doall
-                             (map (fn [kw]
-                                    (let [fingerprint (see-keyword query-fn tx user kw)]
-                                      (query-fn tx :associate-keyword
-                                                {:gid gid
-                                                 :fingerprint fingerprint})))
-                                  (get-in response [:event/content :keywords] []))))
+      (query-fn tx :push-memory memory)
+      (doall
+       (map (fn [kw]
+              (let [fingerprint (see-keyword query-fn tx user kw)]
+                (query-fn tx :associate-keyword
+                          {:gid gid
+                           :fingerprint fingerprint})))
+            (get-in response [:event/content :keywords] []))))
     obj))
 
 

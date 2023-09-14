@@ -1,14 +1,12 @@
 (ns vortext.esther.util.time
   (:require
-    [babashka.fs :as fs]
-    [clj-commons.humanize :as h]
-    [clojure.java.io :as io]
-    [clojure.tools.logging :as log]
-    [java-time.api :as jt]
-    [vortext.esther.util.polyglot :as polyglot])
-  (:import
-    (java.time.format
-      TextStyle)))
+   [babashka.fs :as fs]
+   [clj-commons.humanize :as h]
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [java-time.api :as jt]
+   [vortext.esther.util.polyglot :as polyglot])
+  (:import (java.time.format TextStyle)))
 
 
 (def default-locale (java.util.Locale/getDefault))
