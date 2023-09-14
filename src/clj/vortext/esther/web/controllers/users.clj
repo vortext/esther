@@ -39,7 +39,8 @@
   (when-let [user (find-by-username opts username)]
     (when (and username password (hashers/check password (:password_hash user)))
       (let [secret (secrets/stretched-b64-str password)
-            vault (secrets/decrypt-from-sql (select-keys user [:data :iv]) secret)]
+            encrypted-vault (select-keys user [:data :iv])
+            vault (secrets/decrypt-from-sql encrypted-vault secret)]
         (-> user
             (dissoc :data :iv)
             (assoc :vault vault))))))
