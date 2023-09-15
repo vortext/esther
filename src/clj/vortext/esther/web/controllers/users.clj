@@ -4,12 +4,14 @@
    [buddy.core.codecs :refer [bytes->hex]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
-   [vortext.esther.secrets :as secrets]))
+   [vortext.esther.secrets :as secrets])
+  (:import (java.util UUID)))
 
+(def uid #(bytes->hex (hash/sha256 (str (UUID/randomUUID)))))
 
 (defn build-vault
-  [username password]
-  (let [vault {:uid (bytes->hex (hash/sha256 username))
+  [password]
+  (let [vault {:uid (uid)
                :secret (secrets/random-base64 32)}]
     (secrets/encrypt-for-sql vault (secrets/derive-key-base64-str password))))
 
@@ -17,7 +19,7 @@
 (defn insert!
   [{:keys [db]} username password]
   (let [query-fn (:query-fn db)
-        {:keys [data iv]} (build-vault username password)]
+        {:keys [data iv]} (build-vault password)]
     (query-fn
      :create-user
      {:username username
@@ -36,9 +38,10 @@
   [opts username password]
   (when-let [user (find-by-username opts username)]
     (when (and username password (secrets/check (:password_hash user) password))
-      (let [secret (secrets/derive-key-base64-str password)
-            encrypted-vault (select-keys user [:data :iv])
-            vault (secrets/decrypt-from-sql encrypted-vault secret)]
+      (let [encrypted-vault (select-keys user [:data :iv])
+            vault (secrets/decrypt-from-sql
+                   encrypted-vault
+                   (secrets/derive-key-base64-str password))]
         (-> user
             (dissoc :data :iv)
             (assoc :vault vault))))))

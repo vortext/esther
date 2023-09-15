@@ -24,6 +24,14 @@
 (def int->salt (partial u/n->bytes pwhash/saltbytes))
 
 
+(defn password-hash
+  [password]
+  (pwhash/pwhash-str
+   password
+   pwhash/opslimit-sensitive
+   pwhash/memlimit-sensitive))
+
+
 (defn derive-key
   [weak-text-key]
   (pwhash/pwhash
@@ -70,11 +78,3 @@
   (-> content
       msg/pack
       (encrypt (codecs/b64->bytes password))))
-
-
-(defn password-hash
-  [password]
-  (pwhash/pwhash-str
-   password
-   pwhash/opslimit-sensitive
-   pwhash/memlimit-sensitive))
