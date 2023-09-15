@@ -6,15 +6,10 @@
   (:require
    [babashka.fs :as fs]
    [buddy.core.codecs :as codecs]
-   [buddy.core.kdf :as kdf]
    [clojure.edn :as edn]
    [caesium.crypto.secretbox :as sb]
    [caesium.crypto.pwhash :as pwhash]
-   [caesium.randombytes :as rb]
-   [caesium.byte-bufs :as bb]
    [caesium.util :as u]
-   [caesium.crypto.secretbox :as sb]
-   [clojure.tools.logging :as log]
    [vortext.esther.util.json :as json]))
 
 
@@ -31,7 +26,7 @@
 (defn derive-key
   [weak-text-key]
   (pwhash/pwhash
-   64 ;; n-bytes
+   sb/keybytes
    weak-text-key
    (codecs/b64->bytes (:salt secrets))
    pwhash/opslimit-sensitive
