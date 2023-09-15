@@ -1,6 +1,7 @@
 (ns vortext.esther.web.controllers.users
   (:require
    [buddy.core.hash :as hash]
+   [buddy.core.codecs :refer [bytes->hex]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [vortext.esther.secrets :as secrets]))
@@ -8,11 +9,9 @@
 
 (defn build-vault
   [username password]
-  (let [uid (hash/sha256 username)
-        secret (secrets/derive-key-base64-str password)
-        vault {:uid uid
-               :secret secret}]
-    (secrets/encrypt-for-sql vault secret)))
+  (let [vault {:uid (bytes->hex (hash/sha256 username))
+               :secret (secrets/random-base64 32)}]
+    (secrets/encrypt-for-sql vault (secrets/derive-key-base64-str password))))
 
 
 (defn insert!

@@ -1,16 +1,17 @@
 (ns vortext.esther.secrets
   "Utilities to for encrypting stuff.
-
-  See https://gist.github.com/matthewdowney/d5d816a0274ea2d1fd5e9eab4a933e57
-  https://matthewdowney.github.io/encrypting-keys-in-clojure-applications.html"
+   https://doc.libsodium.org/
+   https://github.com/lvh/caesium"
   (:require
    [babashka.fs :as fs]
    [buddy.core.codecs :as codecs]
-   [clojure.edn :as edn]
-   [caesium.crypto.secretbox :as sb]
    [caesium.crypto.pwhash :as pwhash]
+   [caesium.crypto.secretbox :as sb]
+   [caesium.randombytes :as rb]
    [caesium.util :as u]
-   [vortext.esther.util.json :as json]))
+   [clojure.edn :as edn]
+   [msgpack.clojure-extensions]
+   [msgpack.core :as msg]))
 
 
 (defonce secrets
@@ -35,16 +36,18 @@
 
 
 (def derive-key-base64-str #(-> % derive-key codecs/bytes->b64-str))
+(def random-base64 #(-> (rb/randombytes %) codecs/bytes->b64-str))
 
+(def check pwhash/pwhash-str-verify)
 
 (defn encrypt
   "Encrypt and return a {:data <b64>, :iv <b64>} that can be decrypted with the
   same `password`."
-  [clear-text password]
+  [clear-bytes password]
   (let [initialization-vector (sb/int->nonce 16)]
     {:data (sb/encrypt
             password initialization-vector
-            (codecs/to-bytes clear-text))
+            clear-bytes)
      :iv initialization-vector}))
 
 
@@ -52,30 +55,26 @@
   "Decrypt and return the clear text for some output of `encrypt` given the
   same `password` used during encryption."
   [{:keys [data iv]} password]
-  (codecs/bytes->str
-   (sb/decrypt password iv data)))
-
+  (sb/decrypt password iv data))
 
 
 (defn decrypt-from-sql
   [content password]
   (-> content
       (decrypt (codecs/b64->bytes password))
-      (json/read-json-value)))
+      msg/unpack))
 
 
 (defn encrypt-for-sql
   [content password]
   (-> content
-      (json/write-value-as-string)
+      msg/pack
       (encrypt (codecs/b64->bytes password))))
 
 
 (defn password-hash
   [password]
-  (pwhash/pwhash-str password
-                     pwhash/opslimit-sensitive
-                     pwhash/memlimit-sensitive))
-
-
-(def check pwhash/pwhash-str-verify)
+  (pwhash/pwhash-str
+   password
+   pwhash/opslimit-sensitive
+   pwhash/memlimit-sensitive))

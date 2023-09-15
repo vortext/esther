@@ -76,6 +76,7 @@ _ more user information in session (vault)
 - could be sped up with clong or llvm for practice?
 - but really belongs in nginx or wherever
 ** DONE better error handling subprocesses
+** DONE switch to libsodium for security
 ** TODO use llama.clj instead of shell
 - [ ] make it work again with master llama.cpp
 - [ ] implement mirostat params
