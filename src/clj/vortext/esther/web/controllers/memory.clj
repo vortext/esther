@@ -14,7 +14,7 @@
   [query-fn tx user kw]
   (let [{:keys [uid secret]} (:vault user)
         {:keys [data iv]} (secrets/encrypt-for-sql kw secret)
-        fingerprint (-> (hash/sha256 (str uid kw)) (codecs/bytes->b64))
+        fingerprint (-> (hash/sha256 (str uid kw)) (codecs/bytes->hex))
         content {:uid uid :data data :iv iv :fingerprint fingerprint}]
     (query-fn tx :see-keyword content)
     fingerprint))
