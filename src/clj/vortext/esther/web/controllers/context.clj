@@ -35,5 +35,6 @@
      :context/today (time/human-today present time/default-locale)
      :context/lunar-phase (time/lunar-phase present :emoji)
      :context/season (time/season now latitude)
-     :context/weather (when has-location?
-                        (weather/current-weather (str latitude "," longitude)))}))
+     :context/weather
+     (when has-location?
+       (weather/current-weather (str latitude "," longitude)))}))

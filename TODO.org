@@ -75,22 +75,29 @@ _ more user information in session (vault)
 - can be done with jvm ring-middleware
 - could be sped up with clong or llvm for practice?
 - but really belongs in nginx or wherever
-** TODO move llama parameters into system.edn
-** TODO logo + favicon
+** DONE better error handling subprocesses
+** TODO use llama.clj instead of shell
+- [ ] make it work again with master llama.cpp
+- [ ] implement mirostat params
+- [ ] implements grammar
+- [ ] get rid of shell impl (generate better "prompt" to complete)
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
-** TODO start llama when converse UI is loaded (refactor the whole impl thing)?
-** TODO set context rollover properly (e.g. from day to night) when subproc is running?
 ** TODO export / download data functionality (for me and GDPR!)
 ** TODO figure out a sane way to do multi user scalably
+- check if there's a distributed deploy strategy that supports mirostat 🙃
 - https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
 - https://github.com/vllm-project/vllm (doesn't support quantization at all)
-- find a saner way to interface with llama.cpp?
-** TODO check if there's a distributed deploy strategy that supports mirostat 🙃
-** TODO ui things
-- Discoverability of input bar
-- Button for archive or other commands?
-- Nicer / intelligent placeholder?
+** TODO UI/UX things
+- [ ] Discoverability of input bar
+- [ ] Button for archive or other commands?
+- [ ] Nicer / intelligent placeholder?
+- [ ] Dark mode
+- [ ] Logo + favicon
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
+** TODO embeddings
+- onnx bert?
+- bert.cpp / jna?
+- wait for llama.cpp to fix it?
 ** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)
@@ -102,18 +109,11 @@ _ more user information in session (vault)
 - get it to work persistence, how to deal with scoping to user?!
 - get it to work with embeddings and real data (find or generate some dataset)
 - how to generate the proper amount of context? (summarization???)
-** TODO embeddings
-- onnx bert?
-- bert.cpp / jna?
-- wait for llama.cpp to fix it?
-** TODO dark mode
 ** TODO a way to serialize "personality"
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** TODO integrate https://github.com/spencermountain/compromise for NER or for the lulz?
 ** TODO weird bug where login shows in memory (enforce redirect).
-** DONE better error handling subprocesses
 ** TODO calendar page (for memories)?
 ** TODO semantic search memories
 ** TODO share a page (static gen)
@@ -132,3 +132,5 @@ _ more user information in session (vault)
 - store description and image in memory contents
 - use image describe as context for converse
 - stablediffusion locally?
+
+** TODO integrate https://github.com/spencermountain/compromise for NER or for the lulz?

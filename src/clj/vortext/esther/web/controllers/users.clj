@@ -1,7 +1,6 @@
 (ns vortext.esther.web.controllers.users
   (:require
    [buddy.core.hash :as hash]
-   [buddy.hashers :as hashers]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [vortext.esther.secrets :as secrets]))
@@ -10,7 +9,7 @@
 (defn build-vault
   [username password]
   (let [uid (hash/sha256 username)
-        secret (secrets/stretched-b64-str password)
+        secret (secrets/derive-key-base64-str password)
         vault {:uid uid
                :secret secret}]
     (secrets/encrypt-for-sql vault secret)))
@@ -23,7 +22,7 @@
     (query-fn
      :create-user
      {:username username
-      :password_hash (hashers/encrypt password)
+      :password_hash (secrets/password-hash password)
       :data data
       :iv iv})))
 
@@ -37,8 +36,8 @@
 (defn retrieve
   [opts username password]
   (when-let [user (find-by-username opts username)]
-    (when (and username password (hashers/check password (:password_hash user)))
-      (let [secret (secrets/stretched-b64-str password)
+    (when (and username password (secrets/check (:password_hash user) password))
+      (let [secret (secrets/derive-key-base64-str password)
             encrypted-vault (select-keys user [:data :iv])
             vault (secrets/decrypt-from-sql encrypted-vault secret)]
         (-> user

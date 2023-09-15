@@ -34,12 +34,11 @@
         {:keys [:memory/events :memory/gid]} obj
         [_request response] events
         {:keys [data iv]} (secrets/encrypt-for-sql (memorable obj) secret)
-        conversation? (:event/conversation? response)
         memory {:gid gid
                 :uid uid
                 :data data
                 :iv iv
-                :conversation (boolean conversation?)}]
+                :conversation (boolean (:event/conversation? response))}]
     (jdbc/with-transaction [tx connection]
       (query-fn tx :push-memory memory)
       (doall
