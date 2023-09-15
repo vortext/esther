@@ -1,13 +1,11 @@
 (ns vortext.esther.web.controllers.users
   (:require
-   [buddy.core.hash :as hash]
-   [buddy.core.codecs :refer [bytes->hex]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [vortext.esther.secrets :as secrets])
   (:import (java.util UUID)))
 
-(def uid #(bytes->hex (hash/sha256 (str (UUID/randomUUID)))))
+(def uid #(str (UUID/randomUUID)))
 
 (defn build-vault
   [password]
