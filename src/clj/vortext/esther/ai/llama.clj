@@ -12,7 +12,7 @@
    [vortext.esther.config :as config]
    [vortext.esther.util.json :as json]
    [vortext.esther.util.mustache :as mustache]
-   [vortext.esther.util.zlib :as zlib])
+   [vortext.esther.util.crc32 :as crc32])
   (:import
    (dev.failsafe
     TimeoutExceededException)))
@@ -26,7 +26,7 @@
 (defn flush-prompt!
   [{:keys [system-prefix system-suffix end-of-turn]}
    {:keys [:llm/prompt]}]
-  (let [prompt-checksum (zlib/checksum prompt)
+  (let [prompt-checksum (crc32/checksum prompt)
         prompt (str system-prefix
                     (str/trim prompt)
                     system-suffix
@@ -41,8 +41,8 @@
 (defn flush-gbnf!
   [{:keys [grammar-template assistant-prefix assistant-suffix end-of-turn]}]
   (let [gbnf-template (str (fs/canonicalize (io/resource grammar-template)))
-        grammar-checksum (zlib/crc32->base64-str
-                          (zlib/calculate-crc32 gbnf-template))
+        grammar-checksum (crc32/crc32->base64-str
+                          (crc32/compute-file-crc32 gbnf-template))
         grammar-path (cache (format "grammar_%s.gbnf" grammar-checksum))
         _ (when-not (fs/exists? grammar-path)
             (spit (str grammar-path)
@@ -60,7 +60,7 @@
         [grammar-path _] (flush-gbnf! options)
         model-path (fs/canonicalize (fs/path model-path))
         cmd-path (fs/canonicalize (fs/path bin-dir "main"))
-        cache-fingerprint (zlib/checksum (str model-path prompt-template))
+        cache-fingerprint (crc32/checksum (str model-path prompt-template))
         prompt-cache-path (cache (format "cache_%s.bin" cache-fingerprint))]
     {::prompt-path prompt-path
      ::grammar-path grammar-path
@@ -274,9 +274,10 @@
      (w/evict cache uid)
      (shutdown))))
 
+
 (defn create-instance
   [{:keys [options]}]
-  (let [;; yeah GPU mem will be an issue
+  (let [ ;; yeah GPU mem will be an issue
         cache (w/lru-cache-factory {:threshold 1})]
     {:_cache cache
      :shutdown-fn (partial shutdown-fn cache)

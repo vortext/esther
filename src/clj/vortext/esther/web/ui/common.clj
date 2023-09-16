@@ -6,7 +6,7 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [jsonista.core :as json]
-   [vortext.esther.util.zlib :as zlib]))
+   [vortext.esther.util.crc32 :as crc32]))
 
 
 (defn client-config
@@ -45,7 +45,7 @@
 (defn bundle
   [out-dir resources prefix suffix]
   (let [paths (map ->canonical-path resources)
-        hash (digest/md5 (apply str (map zlib/calculate-crc32 paths)))
+        hash (digest/md5 (apply str (map crc32/compute-file-crc32 paths)))
         filename (str prefix hash suffix)
         outfile (str (fs/path out-dir filename))]
     (if (fs/exists? outfile) outfile (minify paths outfile))))
