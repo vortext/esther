@@ -30,7 +30,7 @@
   (if (not (m/validate schema obj))
     (let [error (m/explain schema obj)
           humanized (me/humanize error)]
-      (throw (Exception. humanized)))
+      (throw (Exception. (str humanized))))
     ;; Valid
     obj))
 
