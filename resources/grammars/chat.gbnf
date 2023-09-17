@@ -15,7 +15,7 @@ string ::=
   quote (
     [^"\\] |
     "\\" (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
-  )* quote
+  )+ quote
 
 
 emoji     ::= quote ([^"\\:]) quote # Ugly hack

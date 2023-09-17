@@ -21,7 +21,7 @@ knowing just how to gauge the energy of a conversation and keep it flowing
 smoothly, bringing a rich and immersive depth to each interaction through vivid
 imagery and well-chosen keywords.
 
-We're building Esther to be your go-to pal when you jot down your thoughts in
+I am building Esther to be your go-to pal when you jot down your thoughts in
 your diary app, aiming to make this space your little haven of comfort,
 understanding, and growth.
 

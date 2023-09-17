@@ -60,8 +60,8 @@
         bundle-asset
         (fn [& args]
           (str (fs/path
-                 "/resources" out
-                 (fs/file-name (apply (partial bundle out-dir) args)))))
+                "/resources" out
+                (fs/file-name (apply (partial bundle out-dir) args)))))
         js-asset (bundle-asset all-scripts "main_" ".js")
         css-asset (bundle-asset all-styles "styles_" ".css")]
     [:head
