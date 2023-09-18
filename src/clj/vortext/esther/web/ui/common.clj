@@ -52,11 +52,11 @@
 
 
 (defn head
-  [config styles scripts]
+  [{:keys [config styles scripts]}]
   (let [out "public/assets"
         out-dir (fs/canonicalize (io/resource out))
-        all-scripts (concat default-scripts scripts)
-        all-styles (concat default-styles styles)
+        all-scripts (concat default-scripts (or scripts []))
+        all-styles (concat default-styles (or styles []))
         bundle-asset
         (fn [& args]
           (str (fs/path

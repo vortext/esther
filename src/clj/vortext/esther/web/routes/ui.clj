@@ -22,10 +22,10 @@
          (fn [req]
            (if (auth/authenticated? req)
              (response/redirect (:default-path opts))
-             (login/render opts req nil)))}]
+             (login/render opts req)))}]
    ["/login"
     {:post (partial login/handler opts)
-     :get (fn [req] (login/render opts req nil))}]
+     :get (fn [req] (login/render opts req))}]
    ["/logout"
     {:post
      (fn [_]

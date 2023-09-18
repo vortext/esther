@@ -28,9 +28,11 @@ html { /* or html */
 form {
   margin-top: 0.5em;
 }
+
 .form-group {
   margin-bottom: 1em;
 }
+
 h1 {
   font-weight: 300;
   text-align: center;
@@ -60,4 +62,25 @@ h1 {
 
 label, input {
   font-family: var(--font-family-sans);
+}
+
+.action {
+  width: 7em;
+  height: 45.6px;
+}
+
+.sign-in-text {
+  display: inline;
+}
+
+.htmx-indicator {
+  display: none;
+}
+
+.submitting .sign-in-text {
+  display: none;
+}
+
+.submitting .htmx-indicator {
+  display: inline;
 }

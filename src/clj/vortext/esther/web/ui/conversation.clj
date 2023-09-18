@@ -107,12 +107,12 @@
   [opts request]
   (page
    (common/head
-    {} ; inject appConfig here
-    ["public/css/conversation.css"]
-    ["public/js/vendor/emoji.js"
-     "public/js/vendor/marked.js"
-     "public/js/vendor/sentiment.js"
-     "public/js/conversation.js"])
+    {:config {}
+     :styles ["public/css/conversation.css"]
+     :scripts ["public/js/vendor/emoji.js"
+               "public/js/vendor/marked.js"
+               "public/js/vendor/sentiment.js"
+               "public/js/conversation.js"]})
    [:body
     [:div#container
      [:h1#title "Esther"]
