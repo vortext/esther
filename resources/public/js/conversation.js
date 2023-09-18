@@ -6,7 +6,6 @@ let setClientContext = function () {
   const clientContext = document.getElementById("client-context");
   const date = new Date();
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timezones = window.clientConfig.timezones;
 
   let location = null;
 
@@ -110,12 +109,10 @@ function setLoadingAnimation(energyValue) {
 
 function getEnergy(input) {
   let sentiment = SentimentAnalyzer.analyze(input);
-  let energy = sentiment.comparative;
   // Subtract the minimum value (-5) from the original value
   // Divide the result by the range (5 - -5 = 10) to get a value between 0 and 1
   // See https://github.com/thisandagain/sentiment#api-reference
-
-  return (energy + 5) / 10;
+  return (sentiment.comparative + 5) / 10;
 }
 
 function beforeConverseRequest() {
