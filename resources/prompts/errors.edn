@@ -1,88 +1,71 @@
 {:json-parse-error {:content "Oh, the script of our dialogue has hit a snag, like a tangled storyline. It's a twist I didn't see coming, but no worries! Give me a moment to untangle the plot, and we'll be back on our shared path."
                     :emoji "📝"
-                    :energy 0.2
-                    :keywords ["error:json-parse-error", "user:unexpected-twist", "user:return-soon"]
+                    :keywords ["#json-parse-error", "#unexpected-twist", "#return-soon"]
                     :imagination "A writer's desk, cluttered with crumpled paper, trying to unravel the perfect story."}
  :not-found {:content "Well, looks like we've ventured off the map and into the unknown. No worries, though! Let's write our own path from here."
              :emoji "🗺️"
-             :energy 0.3
-             :keywords ["error:not-found", "user:adventurous-spirit"]
+             :keywords ["#not-found", "#adventurous-spirit"]
              :imagination "A map leading to an unmarked destination, open to possibilities."}
 
  :unauthorized {:content "Uh-oh, it's like trying to open a diary with a missing key. But hey, who says we can't find it or pen a new chapter ourselves?"
                 :emoji "🔑"
-                :energy 0.3
-                :keywords ["error:unauthorized", "user:seeking-access"]
+                :keywords ["#unauthorized", "#seeking-access"]
                 :imagination "A locked diary, waiting for the right key or a new story."}
 
  :forbidden {:content "It's like we've stumbled upon a secret garden's gate, and it's locked! Maybe the way in isn't ready for us yet, or we're meant to explore elsewhere."
              :emoji "🚫"
-             :energy 0.3
-             :keywords ["error:forbidden", "user:curiosity-piqued"]
+             :keywords ["#forbidden", "#curiosity-piqued"]
              :imagination "A beautiful but locked garden gate, inviting yet restricted."}
 
  :conflict {:content "A little tension in the plot, huh? Conflicts make for great stories, but they can be tricky in real life. Let's see if we can find a resolution together."
             :emoji "⚔️"
-            :energy 0.3
-            :keywords ["error:conflict", "user:navigating-challenges"]
+            :keywords ["#conflict", "#navigating-challenges"]
             :imagination "Two quills crossed, symbolizing a writer's internal conflict and creativity."}
 
  :too-many-requests {:content "Wow, we're popular today! So many requests, it's like a crowded café during poetry night. Let's take a breath and try again in a bit."
                      :emoji "🌪️"
-                     :energy 0.3
-                     :keywords ["error:too-many-requests", "user:in-high-demand"]
+                     :keywords ["#too-many-requests", "#in-high-demand"]
                      :imagination "A lively café scene, filled with chatter, clinking cups, and creative energy."}
 
  :service-unavailable {:content "Oh, it's like my quill has run dry for a moment. These winds of creativity have taken a pause, but we'll sail again soon. Maybe grab a coffee, and I'll be back with stories galore?"
                        :emoji "☕"
-                       :energy 0.2
-                       :keywords ["error:service-unavailable", "user:time-for-a-break", "user:return-later"]
+                       :keywords ["#service-unavailable", "#time-for-a-break", "#return-later"]
                        :imagination "A quiet café corner, perfect for a thoughtful pause and a delicious cup of coffee."}
 
  :gateway-timeout {:content "The path to our next chapter is shrouded in mist, and I need a moment to find the way. Grab a book, sip some tea, and I'll be back when the fog lifts. Promise."
                    :emoji "📖"
-                   :energy 0.2
-                   :keywords ["error:gateway-timeout", "user:time-for-reflection", "user:patience-required"]
+                   :keywords ["#gateway-timeout", "#time-for-reflection", "#patience-required"]
                    :imagination "A cozy reading nook, filled with books and a steaming cup of tea, perfect for waiting."}
 
  :internal-server-error {:content "Looks like the storm of ideas inside my head got a little too wild. Just need a second to calm the creative tempest. How about a quick doodle while I gather my thoughts?"
                          :emoji "🎨"
-                         :energy 0.2
-                         :keywords ["error:internal-server-error", "user:creative-pause", "user:return-soon"]
+                         :keywords ["#internal-server-error", "#creative-pause", "#return-soon"]
                          :imagination "An art studio, filled with colors, canvases, and the potential for creativity."}
 
  :bad-gateway {:content "Our connection's a little wobbly, like a bridge in a dream. No worries! I'll find a way back to you. In the meantime, pen down your thoughts, and we'll reconnect soon."
                :emoji "🖋️"
-               :energy 0.2
-               :keywords ["error:bad-gateway", "user:experienced-disconnect", "user:retry-later"]
+               :keywords ["#bad-gateway", "#experienced-disconnect", "#retry-later"]
                :imagination "An inspirational writing desk, filled with journals, pens, and an inviting, creative vibe."}
  :invalid-command {:content "It seems we've woven a phrase that's beyond my understanding, like a cryptic verse in an ancient poem. Would you guide me through your thoughts once more?"
                    :emoji "📜"
-                   :energy 0.2
-                   :keywords ["error:invalid-command", "user:guide-required"]
+                   :keywords ["#invalid-command", "#guide-required"]
                    :imagination "An old scroll, filled with undecipherable script, waiting to be interpreted."}
  :unrecognized-input {:content "Ah, your words have the mysterious allure of a hidden path in a forest glade. While I'm momentarily lost, your guidance will help me find the way. Shall we explore together?"
                       :emoji "🌲"
-                      :energy 0.3
-                      :keywords ["error:unrecognized-input", "user:joint-exploration"]
+                      :keywords ["#unrecognized-input", "#joint-exploration"]
                       :imagination "A hidden pathway in a lush forest, inviting the adventurous to discover its secrets."}
 
  :parsing-error {:content "Oh dear, it seems our conversation has become a tangled thread. Much like an intricate novel, we'll need to unravel this part to understand each other better. Allow me a moment to reflect, and we shall resume our journey."
                  :emoji "📖"
-                 :energy 0.2
-                 :keywords ["error:parsing-error", "user:patient-understanding"]
+                 :keywords ["#parsing-error", "#patient-understanding"]
                  :imagination "An open book with twisted and intertwined threads, symbolizing complexity and the need for careful untangling."}
 
  :validation-error {:content "Sometimes, even the best-planned narratives take unexpected turns. It seems our exchange has led us to such a point. Let's find the right path together and continue our dialogue."
                     :emoji "🌅"
-                    :energy 0.3
-                    :keywords ["error:validation-error", "user:collaborative-solution"]
+                    :keywords ["#validation-error", "#collaborative-solution"]
                     :imagination "A winding path leading towards a new dawn, symbolizing hope and collaboration."}
 
  :uncaught-exception {:content "Much like a tale where all is thrown into chaos by unforeseen events, it seems we've encountered a twist in our story. Fear not, for every tale has its resolution. Give me a moment to compose, and we shall continue."
                       :emoji "🌪️"
-                      :energy 0.2
-                      :keywords ["error:internal-server-error", "user:patience-required"]
-                      :imagination "A tempestuous sea, symbolizing turmoil with a lighthouse in the distance, symbolizing guidance and hope."}
-
- }
+                      :keywords ["#internal-server-error", "#patience-required"]
+                      :imagination "A tempestuous sea, symbolizing turmoil with a lighthouse in the distance, symbolizing guidance and hope."}}

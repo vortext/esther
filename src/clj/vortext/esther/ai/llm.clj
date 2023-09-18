@@ -20,8 +20,6 @@
       (fn [s] (<= (count s) 2048))]]]
    [:emoji [:fn {:error/message "should contain a valid emoji"}
             (fn [s] (emoji/unicode-emoji? s))]]
-   [:energy [:fn {:error/message "Energy should be a float between 0 and 1"}
-             (fn [e] (and (float? e) (>= e 0.0) (<= e 1.0)))]]
    [:imagination [:string {:min 1, :max 2048}]]])
 
 
@@ -38,27 +36,15 @@
 (def validate-response (partial validate response-schema))
 
 
-(def clean-energy
-  (partial
-    common/update-value :energy
-    #(let [parsed-val
-           (or (when (and (float? %) (<= 0 % 1)) %)
-               (common/parse-number (str %)))]
-       (when (and parsed-val (<= 0 parsed-val 1))
-         (min 0.999 (float parsed-val))))))
-
-
 (def clean-emoji
   (partial
-    common/update-value :emoji
-    emoji/extract-first-emoji))
+   common/update-value :emoji
+   emoji/extract-first-emoji))
 
 
 (defn clean-response
   [response]
-  (-> response
-      (clean-energy 0.5)
-      (clean-emoji "🙃")))
+  (-> response (clean-emoji "🙃")))
 
 
 (defn ->submission

@@ -29,7 +29,7 @@
 
 (def response-keys
   #{:content :keywords
-    :emoji :energy :imagination})
+    :emoji :imagination})
 
 
 (def request-keys

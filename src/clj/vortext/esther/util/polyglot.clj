@@ -91,7 +91,7 @@
     #_(.out System/out)
     #_(.err System/err)
     #_(.allowAllAccess true)
-    (.allowNativeAccess true)))
+    #_(.allowNativeAccess true)))
 
 
 (defn create-ctx

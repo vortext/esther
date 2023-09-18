@@ -1,5 +1,6 @@
-var emoji = new EmojiConvertor();
+const emoji = new EmojiConvertor();
 emoji.replace_mode = "unified";
+const SentimentAnalyzer = new sentiment();
 
 let setClientContext = function () {
   const clientContext = document.getElementById("client-context");
@@ -95,7 +96,7 @@ function handleTextareaInput(e) {
   }
 }
 
-function setEnergy(energyValue) {
+function setLoadingAnimation(energyValue) {
   energyValue = Math.max(0, Math.min(1, energyValue));
   const duration = 1.2 - energyValue * 0.4;
   const ease = `cubic-bezier(${0.2 + energyValue * 0.3}, 0.5, 0.5, 1)`;
@@ -107,19 +108,24 @@ function setEnergy(energyValue) {
   });
 }
 
-function getEnergy() {
-  const lastMemory = document.querySelector("#history .memory:last-child");
-  return lastMemory ? parseFloat(lastMemory.dataset.energy || 0.5) : 0.5;
+function getEnergy(input) {
+  let sentiment = SentimentAnalyzer.analyze(input);
+  let energy = sentiment.comparative;
+  // Subtract the minimum value (-5) from the original value
+  // Divide the result by the range (5 - -5 = 10) to get a value between 0 and 1
+  // See https://github.com/thisandagain/sentiment#api-reference
+
+  return (energy + 5) / 10;
 }
 
 function beforeConverseRequest() {
-  setEnergy(getEnergy());
   const textarea = document.getElementById('user-input');
   const inputContent = document.getElementById("input-content");
   const userValue = document.getElementById("user-value");
 
   userValue.innerHTML = marked.parse(inputContent.value, {"gfm": true, "breaks": true});
 
+  setLoadingAnimation(getEnergy(inputContent.value));
   textarea.classList.add('hidden');
   textarea.placeholder = '';
   textarea.value = '';

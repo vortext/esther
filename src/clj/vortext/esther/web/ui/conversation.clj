@@ -38,7 +38,6 @@
                             (:event/content rep)]
         type (keyword (get response :ui/type :default))]
     [:div.memory
-     {"data-energy" (:energy response)}
      [:div.request (md->html request)]
      [:div.response {:class (name type)}
       (case type
@@ -107,15 +106,16 @@
 (defn render
   [opts request]
   (page
-    (common/head
-      {} ; inject appConfig here
-      ["public/css/conversation.css"]
-      ["public/js/vendor/emoji.js"
-       "public/js/vendor/marked.js"
-       "public/js/conversation.js"])
-    [:body
-     [:div#container
-      [:h1#title "Esther"]
-      [:h2#today]
-      (conversation opts request)]
-     [:div#bottom]]))
+   (common/head
+    {} ; inject appConfig here
+    ["public/css/conversation.css"]
+    ["public/js/vendor/emoji.js"
+     "public/js/vendor/marked.js"
+     "public/js/vendor/sentiment.js"
+     "public/js/conversation.js"])
+   [:body
+    [:div#container
+     [:h1#title "Esther"]
+     [:h2#today]
+     (conversation opts request)]
+    [:div#bottom]]))

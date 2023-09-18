@@ -70,7 +70,6 @@ _ more user information in session (vault)
 ** DONE harmonize emoji handling using graalvm? (did it a better way client side)
 ** DONE keyword_memory_lookup table and logic
 ** DONE refactor user management to be slightly saner
-** DONE Gzip
 ** DONE disable colors in logging when prod
 - can be done with jvm ring-middleware
 - could be sped up with clong or llvm for practice?
@@ -82,19 +81,6 @@ _ more user information in session (vault)
 - [ ] implement mirostat params
 - [ ] implements grammar
 - [ ] get rid of shell impl (generate better "prompt" to complete)
-** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
-** TODO export / download data functionality (for me and GDPR!)
-** TODO figure out a sane way to do multi user scalably
-- check if there's a distributed deploy strategy that supports mirostat 🙃
-- https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
-- https://github.com/vllm-project/vllm (doesn't support quantization at all)
-** TODO UI/UX things
-- [ ] Discoverability of input bar
-- [ ] Button for archive or other commands?
-- [ ] Nicer / intelligent placeholder?
-- [ ] Dark mode
-- [ ] Logo + favicon
-** TODO test infrastructure and tests => generate training / test data for fine tuning
 ** TODO embeddings
 - onnx bert?
 - bert.cpp / jna?
@@ -111,6 +97,20 @@ _ more user information in session (vault)
 - get it to work with embeddings and real data (find or generate some dataset)
 - how to generate the proper amount of context? (summarization???)
 ** TODO a way to serialize "personality"
+** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
+** TODO export / download data functionality (for me and GDPR!)
+** TODO figure out a sane way to do multi user scalably
+- check if there's a distributed deploy strategy that supports mirostat 🙃
+- https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
+- https://github.com/vllm-project/vllm (doesn't support quantization at all)
+** TODO UI/UX things
+- [ ] Discoverability of input bar
+- [ ] Button for archive or other commands?
+- [ ] Nicer / intelligent placeholder?
+- [ ] Dark mode
+- [ ] Logo + favicon
+** TODO test infrastructure and tests => generate training / test data for fine tuning
+** TODO #keywords (hash tags instead of namespaced concepts?)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page

@@ -24,18 +24,17 @@
 
 (defn md-memories-table
   [memories]
-  (let [ks [:emoji :energy :keywords :imagination]
+  (let [ks [:emoji :keywords :imagination]
         responses (map #(-> % :memory/events second) memories)
         update-kw
         (fn [kw] (str/join ", " kw))
         formatted-responses
         (map (fn [event]
                (-> (:event/content event)
-                   (update :energy #(format "%.2f" %))
                    (update :keywords update-kw)))
              responses)]
     (markdown/table
-      (map #(select-keys % ks) formatted-responses))))
+     (map #(select-keys % ks) formatted-responses))))
 
 
 (defn wipe-form
