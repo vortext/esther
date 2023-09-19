@@ -29,7 +29,7 @@
    ["/logout"
     {:post
      (fn [_]
-       {:status 303
+       {:status 301
         :session {:identity nil}
         :headers {"Location" "/"}})}]
    ["/user/conversation"
@@ -44,9 +44,10 @@
 (defn on-error
   [req _]
   (log/warn
-    "access-rules on-error" " session:" (:session req))
-  {:status 303
-   :headers {"Location" "/login"}
+   "access-rules on-error" " session:" (:session req))
+  {:status 301
+   :headers {"Location" "/login"
+             "HX-Refresh" "true"}
    :body "Redirecting to login"})
 
 

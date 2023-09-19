@@ -50,6 +50,5 @@
     {:status 200
      :session {:identity (get-in user [:vault :uid])
                :user user}
-     :headers {"HX-Redirect" default-path
-               "Location" default-path}}
+     :headers {"HX-Redirect" default-path}}
     (ui [:span.login-failed "Invalid credentials"])))
