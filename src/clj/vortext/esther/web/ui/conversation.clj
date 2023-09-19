@@ -86,7 +86,7 @@
       :maxlength 1024
       :autofocus "true"
       :placeholder placeholder
-      :rows 12
+      :rows 2
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
 
@@ -95,8 +95,7 @@
   [opts request]
   (let [user (get-in request [:session :user])
         memories (memory/todays-non-archived-memories opts user)
-        imagination [:memory/events 1 :event/content :imagination]
-        placeholder (or (first (keep #(get-in % imagination)  memories)) "Dear Esther,")]
+        placeholder (memory/last-imagination opts user)]
     [:div.container
      [:div#conversation.loading-state
       [:div#history

@@ -150,7 +150,7 @@ function removeTextAreaListeners(textarea) {
   const listeners = window.clientConfig.eventListeners[textarea] || {};
 
   Object.entries(listeners).forEach(([key, value]) => {
-    textarea.removeEventListener(key,value);
+    textarea.removeEventListener(key, value);
   });
 
   window.clientConfig.eventListeners[textarea] = {};
@@ -167,6 +167,7 @@ function beforeConverseRequest() {
   setLoadingAnimation(getEnergy(inputContent.value));
   textarea.classList.add('hidden');
   textarea.value = '';
+  textarea.placeholder = '';
   inputContent.value = "";
 }
 

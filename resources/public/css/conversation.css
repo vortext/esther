@@ -107,7 +107,7 @@ body {
   margin-top: 2em;
   font-family: var(--font-family);
   line-height: var(--line-height);
-  padding-bottom: 1px;
+  /* padding-bottom: 1px; */
   border: none;
   color: var(--font-color);
   background: transparent;
@@ -117,7 +117,20 @@ body {
   border-bottom: 1px solid transparent;
   resize: none; /* Disables user resizing */
   overflow: hidden; /* Prevents scrollbars */
+  margin-bottom: 15em;
 }
+
+#user-input::placeholder {
+  color: var(--desaturated-color3);
+  text-shadow: 1px 1px 2px rgba(255,255,250,0.25);
+  opacity: 0.333;
+}
+
+
+#user-input:hover::placeholder {
+  opacity: 0.75;
+}
+
 
 
 /* Loading animation */

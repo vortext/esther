@@ -58,17 +58,6 @@
     (map decrypt contents)))
 
 
-(defn last-memories
-  ([opts user]
-   (last-memories opts user 10))
-  ([opts user n]
-   (let [{:keys [query-fn]} (:db opts)
-         uid (get-in user [:vault :uid])]
-     (construct-memories
-       user
-       (query-fn :last-n-memories {:uid uid :n n})))))
-
-
 (defn recent-conversation
   ([opts user]
    (recent-conversation opts user 5))
@@ -76,8 +65,14 @@
    (let [{:keys [query-fn]} (:db opts)
          uid (get-in user [:vault :uid])]
      (construct-memories
-       user
-       (query-fn :last-n-conversation-memories {:uid uid :n n})))))
+      user
+      (query-fn :last-n-conversation-memories {:uid uid :n n})))))
+
+(defn last-imagination
+  [opts user]
+  (let [imagination-path [:memory/events 1 :event/content :imagination]
+        last-memory (first (recent-conversation opts user 1))]
+    (get-in last-memory imagination-path)))
 
 
 (defn todays-non-archived-memories
@@ -85,8 +80,8 @@
   (let [{:keys [query-fn]} (:db opts)
         uid (get-in user [:vault :uid])]
     (construct-memories
-      user
-      (query-fn :todays-non-archived-memories {:uid uid}))))
+     user
+     (query-fn :todays-non-archived-memories {:uid uid}))))
 
 
 (defn archive-todays-memories
