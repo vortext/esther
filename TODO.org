@@ -76,11 +76,13 @@ _ more user information in session (vault)
 - but really belongs in nginx or wherever
 ** DONE better error handling subprocesses
 ** DONE switch to libsodium for security
+** DONE simple sentiment analysis for energy
 ** TODO use llama.clj instead of shell
 - [ ] make it work again with master llama.cpp
 - [ ] implement mirostat params
-- [ ] implements grammar
+- [ ] implement grammar
 - [ ] get rid of shell impl (generate better "prompt" to complete)
+- [ ] Try https://huggingface.co/PygmalionAI/mythalion-13b
 ** TODO embeddings
 - onnx bert?
 - bert.cpp / jna?
@@ -95,6 +97,7 @@ _ more user information in session (vault)
 - get it to work simple example
 - get it to work persistence, how to deal with scoping to user?!
 - get it to work with embeddings and real data (find or generate some dataset)
+- summarize using simple lexrank?
 - how to generate the proper amount of context? (summarization???)
 ** TODO a way to serialize "personality"
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
@@ -104,18 +107,21 @@ _ more user information in session (vault)
 - https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
 - https://github.com/vllm-project/vllm (doesn't support quantization at all)
 ** TODO UI/UX things
-- [ ] Discoverability of input bar
+- [X] Discoverability of input bar --- Maybe show imagination?
+- [X] Nicer / intelligent placeholder?
 - [ ] Button for archive or other commands?
-- [ ] Nicer / intelligent placeholder?
 - [ ] Dark mode
 - [ ] Logo + favicon
+- [X] Loading indicator login
+- [ ] Accessibility and ARIA
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
-** TODO #keywords (hash tags instead of namespaced concepts?)
+** DONE #keywords (hash tags instead of namespaced concepts?)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** TODO weird bug where login shows in memory (enforce redirect).
+** TODO weird bug where login shows in memory (enforce redirect). Maybe fixed?
 ** TODO calendar page (for memories)?
+** TODO #keyword search
 ** TODO semantic search memories
 ** TODO share a page (static gen)
 ** TODO security and hosting
