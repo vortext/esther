@@ -45,6 +45,10 @@ body {
   padding-bottom: 1em;
 }
 
+.memory .response .imagination {
+  display: none;
+}
+
 .memory table {
   margin-top: 1em;
   margin-bottom: 1em;

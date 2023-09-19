@@ -39,7 +39,10 @@
         type (keyword (get response :ui/type :default))]
     [:div.memory
      [:div.request (md->html request)]
-     [:div.response {:class (name type)}
+     [:div.response
+      {:class (name type)}
+      (when-let [imagination (:imagination response)]
+        [:span.imagination imagination])
       (case type
         :default [:pre.default (:content response)]
         :htmx (:content response)
@@ -56,7 +59,7 @@
 
 
 (defn msg-input
-  [_request]
+  [placeholder]
   [:div.input-form
    [:form
     {:id "message-form"
@@ -82,7 +85,7 @@
       :name "_content"
       :maxlength 1024
       :autofocus "true"
-      :placeholder "Dear Esther,"
+      :placeholder placeholder
       :rows 12
       :oninput "resizeTextarea(event)"
       :onkeydown "handleTextareaInput(event);"}]]])
@@ -91,16 +94,18 @@
 (defn conversation
   [opts request]
   (let [user (get-in request [:session :user])
-        memories (reverse (memory/todays-non-archived-memories opts user))]
+        memories (memory/todays-non-archived-memories opts user)
+        imagination [:memory/events 1 :event/content :imagination]
+        placeholder (or (first (keep #(get-in % imagination)  memories)) "Dear Esther,")]
     [:div.container
      [:div#conversation.loading-state
       [:div#history
-       (for [m memories]
+       (for [m (reverse memories)]
          (memory-container m))]
       [:div#user-echo
        [:div#user-value {:class "user-message"}]]
       [:div#loading-response.loading-state loading]
-      (msg-input request)]]))
+      (msg-input placeholder)]]))
 
 
 (defn render

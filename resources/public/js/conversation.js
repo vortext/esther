@@ -2,6 +2,8 @@ const emoji = new EmojiConvertor();
 emoji.replace_mode = "unified";
 const SentimentAnalyzer = new sentiment();
 
+window.clientConfig.eventListeners = {};
+
 let setClientContext = function () {
   const clientContext = document.getElementById("client-context");
   const date = new Date();
@@ -115,16 +117,55 @@ function getEnergy(input) {
   return (sentiment.comparative + 5) / 10;
 }
 
+
+function clearPlaceholder(textarea) {
+  textarea.placeholder = '';
+}
+
+function imaginePlaceholder(textarea) {
+
+  const lastImaginationSelector = "#history .memory > .response > .imagination";
+  const lastImagination = [...document.querySelectorAll(lastImaginationSelector)].pop();
+
+  textarea.placeholder = lastImagination.textContent || "";
+}
+
+
+function addTextAreaListeners(textarea) {
+  textarea.placeholder = '';
+  const listeners = window.clientConfig.eventListeners[textarea] || {};
+
+  if(Object.entries(listeners).length === 0) {
+    // Add event listeners for focus and blur
+    const focus = () => clearPlaceholder(textarea);
+    const blur = () => imaginePlaceholder(textarea);
+    textarea.addEventListener('focus', focus);
+    textarea.addEventListener('blur', blur);
+
+    window.clientConfig.eventListeners[textarea] = {"focus": focus, "blur": blur};
+  }
+}
+
+function removeTextAreaListeners(textarea) {
+  const listeners = window.clientConfig.eventListeners[textarea] || {};
+
+  Object.entries(listeners).forEach(([key, value]) => {
+    textarea.removeEventListener(key,value);
+  });
+
+  window.clientConfig.eventListeners[textarea] = {};
+}
+
 function beforeConverseRequest() {
   const textarea = document.getElementById('user-input');
   const inputContent = document.getElementById("input-content");
   const userValue = document.getElementById("user-value");
 
+  removeTextAreaListeners(textarea);
   userValue.innerHTML = marked.parse(inputContent.value, {"gfm": true, "breaks": true});
 
   setLoadingAnimation(getEnergy(inputContent.value));
   textarea.classList.add('hidden');
-  textarea.placeholder = '';
   textarea.value = '';
   inputContent.value = "";
 }
@@ -141,7 +182,6 @@ function afterConverseRequest() {
   const messagesContainer = document.getElementById('conversation');
   const bottomElement = document.getElementById('bottom');
 
-
   textarea.classList.remove('hidden');
   bottomElement.scrollIntoView({ behavior: 'smooth' });
 
@@ -150,6 +190,7 @@ function afterConverseRequest() {
     focusWithoutScrolling(textarea);
     const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
     textarea.dispatchEvent(event);
+    addTextAreaListeners(textarea);
   }, 250);
 }
 
@@ -164,6 +205,7 @@ function today(date = new Date()) {
 
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("today").innerHTML = today();
+
   setClientContext();
 
   navigator.geolocation.getCurrentPosition(
