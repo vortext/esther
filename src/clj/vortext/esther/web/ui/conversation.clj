@@ -10,7 +10,7 @@
 
 
 (def loading
-  [:div.esther-typing-loading
+  [:div.response-loading
    [:div.loading
     [:div.first]
     [:div.second]
@@ -60,35 +60,34 @@
 
 (defn msg-input
   [placeholder]
-  [:div.input-form
-   [:form
-    {:id "message-form"
-     :hx-post "/user/conversation"
-     :hx-swap "beforeend settle:0.25s"
-     :hx-boost "true"
-     :hx-indicator ".loading-state"
-     :hx-target "#history"
-     :hx-trigger "submit"
-     "hx-on::before-request" "beforeConverseRequest();"
-     "hx-on::after-request" "afterConverseRequest();"}
-    [:input#client-context
-     {:type "hidden"
-      :name "client-context"
-      :value "{}"}]
-    [:input#input-content
-     {:type "hidden"
-      :name "content"
-      :value ""}]
-    [:textarea#user-input
-     {:autocomplete "off"
-      :minlength 1
-      :name "_content"
-      :maxlength 1024
-      :autofocus "true"
-      :placeholder placeholder
-      :rows 2
-      :oninput "resizeTextarea(event)"
-      :onkeydown "handleTextareaInput(event);"}]]])
+  [:form.input-form
+   {:id "message-form"
+    :hx-post "/user/conversation"
+    :hx-swap "beforeend settle:0.25s"
+    :hx-boost "true"
+    :hx-indicator ".loading-state"
+    :hx-target "#history"
+    :hx-trigger "submit"
+    "hx-on::before-request" "beforeConverseRequest();"
+    "hx-on::after-request" "afterConverseRequest();"}
+   [:input#client-context
+    {:type "hidden"
+     :name "client-context"
+     :value "{}"}]
+   [:input#input-content
+    {:type "hidden"
+     :name "content"
+     :value ""}]
+   [:textarea#user-input
+    {:autocomplete "off"
+     :minlength 1
+     :name "_content"
+     :maxlength 1024
+     :autofocus "true"
+     :placeholder placeholder
+     :rows 2
+     :oninput "resizeTextarea(event)"
+     :onkeydown "handleTextareaInput(event);"}]])
 
 
 (defn conversation
@@ -108,7 +107,7 @@
 
 
 (defn render
-  [opts request]
+  [{:keys [ai] :as opts} request]
   (page
    (common/head
     {:config {}
@@ -117,9 +116,9 @@
                "public/js/vendor/marked.js"
                "public/js/vendor/sentiment.js"
                "public/js/conversation.js"]})
-   [:body
+   [:main
     [:div#container
-     [:h1#title "Esther"]
+     [:h1#title (:name ai)]
      [:h2#today]
      (conversation opts request)]
     [:div#bottom]]))

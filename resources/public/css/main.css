@@ -3,11 +3,11 @@
   --font-family-mono: "IBM Plex Mono", monospace;
   --font-family-sans: "IBM Plex Sans", sans;
   --line-height: 1.6;
+  --font-size-base: 12pt;
   --accent: #6F6E6C; /* Replaced with one of the dominant colors */
   --font-color: #242323; /* Darker color for text from the dominant palette */
   --background-color: #EEEEEC; /* Lighter background from the dominant palette */
   --secondary-color: #6B6A69; /* Secondary color for various elements */
-  --font-size-base: 12pt;
   --subdued-color: #B1B0AE; /* Subdued color from the dominant palette */
   --desaturated-color1: #E4E4E2;
   --desaturated-color2: #2D2D2C;

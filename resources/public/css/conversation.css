@@ -1,5 +1,5 @@
 body {
-  margin: 3em; /* Adding some space around the body */
+  margin: 3em;
 }
 
 #container {
@@ -10,14 +10,14 @@ body {
 #title {
   font-weight: lighter;
   text-align: center;
-  color: var(--secondary-color); /* Subtle secondary color for title */
+  color: var(--secondary-color);
   margin-bottom: 1em;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.125);
 }
 
 #today {
   font-size: 12pt;
-  color: var(--subdued-color); /* More subdued color from the palette */
+  color: var(--subdued-color);
   font-weight: lighter;
   margin-bottom: 1em;
 }
@@ -55,7 +55,7 @@ body {
 }
 
 .memory pre, #user-echo pre {
-  white-space: pre-wrap;       /* Since CSS 2.1 */
+  white-space: pre-wrap; /* Since CSS 2.1 */
   font-family: var(--font-family-mono);
 }
 
@@ -113,7 +113,6 @@ body {
   background: transparent;
   font-size: var(--font-size-base) !important;
   outline: none;
-  transition: border-bottom 0.125s ease-in-out;
   border-bottom: 1px solid transparent;
   resize: none; /* Disables user resizing */
   overflow: hidden; /* Prevents scrollbars */
@@ -121,59 +120,56 @@ body {
 }
 
 #user-input::placeholder {
-  color: var(--desaturated-color3);
-  text-shadow: 1px 1px 2px rgba(255,255,250,0.25);
-  opacity: 0.333;
+  color: transparent;
+  text-shadow: 0 0 5px rgba(0,0,0,0.35);
 }
-
 
 #user-input:hover::placeholder {
-  opacity: 0.75;
+  color: var(--desaturated-color4);
+  opacity: 0.5;
 }
-
-
 
 /* Loading animation */
-.esther-typing-loading {
+.response-loading {
   margin-top: 2em;
 }
-.esther-typing-loading .loading .first {
+.response-loading .loading .first {
   background-color: rgba(0,0,0,0.125);
 }
 
-.esther-typing-loading .loading .second {
+.response-loading .loading .second {
   background-color: rgba(0,0,0,0.250);
 }
 
-.esther-typing-loading .loading .third {
+.response-loading .loading .third {
   background-color: rgba(0,0,0,0.375);
 }
 
-.esther-typing-loading .loading {
+.response-loading .loading {
   position: relative;
   width: 60px;
   height: 40px;
 }
 
-.esther-typing-loading .loading div {
+.response-loading .loading div {
   position: absolute;
   border-radius: 50%;
   width: 8px;
   height: 8px;
-  animation: loading 1.2s ease-in-out infinite; /* Increased duration and added ease-in-out for a gentle bounce */
+  animation: loading 1.2s ease-in-out infinite;
 }
 
-.esther-typing-loading .loading .first {
+.response-loading .loading .first {
   left: 0px;
   animation-delay: -0.3s;
 }
 
-.esther-typing-loading .loading .second {
+.response-loading .loading .second {
   left: 20px;
   animation-delay: -0.2s;
 }
 
-.esther-typing-loading .loading .third {
+.response-loading .loading .third {
   left: 40px;
   animation-delay: -0.1s;
 }
