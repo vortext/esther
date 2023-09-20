@@ -61,17 +61,15 @@
          (wrapped-error
           :unrecognized-input
           (str "Unrecognized input: "  request)))
-        (let [new-obj (respond! opts user obj)
-              [_ resp] (:memory/events new-obj)
-              {:keys [:ui/type]} (:event/content resp)]
-          (if-not (= type :ui)
-            (memory/remember! opts user new-obj)
-            ;; Just return without remembering if UI
-            new-obj)))
+        (let [{:keys [:memory/events] :as obj} (respond! opts user obj)
+              [_ response] events]
+          (if-not (= (:ui/type response) :htmx)
+            (memory/remember! opts user obj)
+            ;; Just return without remembering if not conversation?
+            obj)))
       (catch Exception e
         (append-event
          obj
          (wrapped-error :internal-server-error e))))))
-
 
 ;; Scratch

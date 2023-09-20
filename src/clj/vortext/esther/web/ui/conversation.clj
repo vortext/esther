@@ -48,7 +48,6 @@
       (case type
         :default [:pre.default (:content response)]
         :htmx (:content response)
-        :ui (:content response)
         :error (error->html response)
         :md-mono (md->html response)
         :md-sans (md->html response)
@@ -61,7 +60,7 @@
 
 
 (defn msg-input
-  [placeholder]
+  [config placeholder]
   [:form.input-form
    {:id "message-form"
     :hx-post "/user/conversation"
@@ -86,14 +85,16 @@
      :name "_content"
      :maxlength 1024
      :autofocus "true"
-     :placeholder (h/truncate placeholder 200)
-     :rows 2
+     :placeholder (h/truncate
+                   placeholder
+                   (get config "maxPlaceholderLength"))
+     :rows 3
      :oninput "resizeTextarea(event)"
      :onkeydown "handleTextareaInput(event);"}]])
 
 
 (defn conversation
-  [opts request]
+  [opts config request]
   (let [user (get-in request [:session :user])
         memories (memory/todays-non-archived-memories opts user)
         placeholder (memory/last-imagination opts user)]
@@ -101,24 +102,24 @@
      [:article#history
       (for [m (reverse memories)]
         (memory-container m))]
-     [:div#user-echo
-      [:div#user-value {:class "user-message"}]]
+     [:div#user-echo [:div#user-value]]
      [:div#loading-response.loading-state loading]
-     (msg-input placeholder)]))
+     (msg-input config placeholder)]))
 
 
 (defn render
   [{:keys [ai] :as opts} request]
-  (page
-   (common/head
-    {:config {}
-     :styles ["public/css/conversation.css"]
-     :scripts ["public/js/vendor/emoji.js"
-               "public/js/vendor/marked.js"
-               "public/js/vendor/sentiment.js"
-               "public/js/conversation.js"]})
-   [:main#container
-    [:h1#title (:name ai)]
-    [:h2#today]
-    (conversation opts request)
-    [:div#bottom]]))
+  (let [config {"maxPlaceholderLength" 300}]
+    (page
+     (common/head
+      {:config config
+       :styles ["public/css/conversation.css"]
+       :scripts ["public/js/vendor/emoji.js"
+                 "public/js/vendor/marked.js"
+                 "public/js/vendor/sentiment.js"
+                 "public/js/conversation.js"]})
+     [:main#container
+      [:h1#title (:name ai)]
+      [:h2#today]
+      (conversation opts config request)
+      [:div#bottom]])))

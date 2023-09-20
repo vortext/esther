@@ -133,7 +133,8 @@ function imaginePlaceholder(textarea) {
   const lastImaginationSelector = "#history .memory > .response > .imagination";
   const lastImagination = [...document.querySelectorAll(lastImaginationSelector)].pop();
 
-  textarea.placeholder = truncateWithEllipsis(lastImagination.textContent, 200) || "";
+  textarea.placeholder = truncateWithEllipsis(lastImagination.textContent,
+                                              window.clientConfig.maxPlaceholderLength) || "";
 }
 
 

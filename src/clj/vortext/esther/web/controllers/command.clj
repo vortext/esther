@@ -65,17 +65,17 @@
 
 (defn logout
   [_opts _user _args _obj]
-  (->event :ui (login-ui/logout-chat)))
+  (->event :htmx (login-ui/logout-chat)))
 
 
 (defn wipe
   [opts user args _obj]
-  (->event :ui (memory-ui/wipe-form opts user args)))
+  (->event :htmx (memory-ui/wipe-form opts user args)))
 
 
 (defn archive
   [opts user _args _obj]
-  (->event :ui (memory-ui/archive-form opts user)))
+  (->event :htmx (memory-ui/archive-form opts user)))
 
 
 (defn command!
