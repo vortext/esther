@@ -229,3 +229,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   },0);
 });
+
+function refreshAtMidnight() {
+  var now = new Date();
+  var midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+
+  var timeUntilMidnight = midnight - now;
+
+  setTimeout(function() {
+    location.reload();
+  }, timeUntilMidnight);
+}
+
+refreshAtMidnight();
