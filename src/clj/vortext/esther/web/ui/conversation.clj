@@ -5,6 +5,7 @@
    [vortext.esther.util.markdown :as markdown]
    [vortext.esther.web.controllers.converse :as converse]
    [vortext.esther.web.controllers.memory :as memory]
+   [clj-commons.humanize :as h]
    [vortext.esther.web.htmx :refer [page ui] :as htmx]
    [vortext.esther.web.ui.common :as common]))
 
@@ -42,7 +43,8 @@
      [:div.response
       {:class (name type)}
       (when-let [imagination (:imagination response)]
-        [:span.imagination imagination])
+        [:span.imagination
+         {:style "display:none"} imagination])
       (case type
         :default [:pre.default (:content response)]
         :htmx (:content response)
@@ -84,7 +86,7 @@
      :name "_content"
      :maxlength 1024
      :autofocus "true"
-     :placeholder placeholder
+     :placeholder (h/truncate placeholder 200)
      :rows 2
      :oninput "resizeTextarea(event)"
      :onkeydown "handleTextareaInput(event);"}]])
@@ -95,15 +97,14 @@
   (let [user (get-in request [:session :user])
         memories (memory/todays-non-archived-memories opts user)
         placeholder (memory/last-imagination opts user)]
-    [:div.container
-     [:div#conversation.loading-state
-      [:div#history
-       (for [m (reverse memories)]
-         (memory-container m))]
-      [:div#user-echo
-       [:div#user-value {:class "user-message"}]]
-      [:div#loading-response.loading-state loading]
-      (msg-input placeholder)]]))
+    [:section#conversation.loading-state
+     [:article#history
+      (for [m (reverse memories)]
+        (memory-container m))]
+     [:div#user-echo
+      [:div#user-value {:class "user-message"}]]
+     [:div#loading-response.loading-state loading]
+     (msg-input placeholder)]))
 
 
 (defn render
@@ -116,9 +117,8 @@
                "public/js/vendor/marked.js"
                "public/js/vendor/sentiment.js"
                "public/js/conversation.js"]})
-   [:main
-    [:div#container
-     [:h1#title (:name ai)]
-     [:h2#today]
-     (conversation opts request)]
+   [:main#container
+    [:h1#title (:name ai)]
+    [:h2#today]
+    (conversation opts request)
     [:div#bottom]]))

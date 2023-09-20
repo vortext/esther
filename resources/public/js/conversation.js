@@ -117,6 +117,12 @@ function getEnergy(input) {
   return (sentiment.comparative + 5) / 10;
 }
 
+function truncateWithEllipsis(str, maxLength) {
+  if (str.length > maxLength) {
+    return str.substring(0, maxLength - 1) + '…';
+  }
+  return str;
+}
 
 function clearPlaceholder(textarea) {
   textarea.placeholder = '';
@@ -127,7 +133,7 @@ function imaginePlaceholder(textarea) {
   const lastImaginationSelector = "#history .memory > .response > .imagination";
   const lastImagination = [...document.querySelectorAll(lastImaginationSelector)].pop();
 
-  textarea.placeholder = lastImagination.textContent || "";
+  textarea.placeholder = truncateWithEllipsis(lastImagination.textContent, 200) || "";
 }
 
 
