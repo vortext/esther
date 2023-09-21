@@ -31,24 +31,20 @@
   [opts user _args _obj]
   (let [memories (memory/recent-conversation opts user)]
     (->event
-      :md-mono
-      (if (seq memories)
-        (str
-          "#### memories"
-          (memory-ui/md-memories-table memories))
-        "**void**"))))
+     :md-mono
+     (if (seq memories)
+       (memory-ui/md-memories-table memories)
+       "**void**"))))
 
 
 (defn keywords
   [opts user _args _obj]
   (let [keywords (memory/frecency-keywords opts user :week 10)]
     (->event
-      :md-mono
-      (if-not (seq keywords)
-        "**empty**"
-        (str
-          "#### keywords"
-          (memory-ui/md-keywords-table keywords))))))
+     :md-mono
+     (if-not (seq keywords)
+       "**empty**"
+       (memory-ui/md-keywords-table keywords)))))
 
 
 (defn imagine
@@ -57,10 +53,10 @@
         image #(-> % :memory/events second :event/content :imagination)
         fantasies (keep image memories)]
     (->event
-      :md-mono
-      (if (seq fantasies)
-        (markdown/strs-to-markdown-list fantasies)
-        "**nothing**"))))
+     :md-mono
+     (if (seq fantasies)
+       (markdown/strs-to-markdown-list fantasies)
+       "**nothing**"))))
 
 
 (defn logout
