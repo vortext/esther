@@ -20,6 +20,7 @@
 (ns vortext.esther.ai.llama-jna
   (:require [vortext.esther.raw.llama :as raw]
             [clojure.tools.logging :as log]
+            [clojure.core.cache.wrapped :refer [soft-cache-factory]]
             [clojure.string :as str])
   (:import java.lang.ref.Cleaner
            java.nio.charset.CodingErrorAction
@@ -176,10 +177,9 @@
 
      context)))
 
-;; todo use a soft cache
 (defonce ^:private
   token-bufs
-  (atom {}))
+  (soft-cache-factory {}))
 
 (defn ^:private get-token-buf [ctx n]
   (get
@@ -555,18 +555,12 @@
 
 ;; Scratch
 (comment
-  (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-
-  (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
-
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
 
   (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
+
+  (def result (generate-string ctx "Write a haiku about documentation."))
 
   (def result (generate-string ctx "What is the emoji for :smile:?"))
-
-  (with-open [ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12})]
-    (generate-string ctx "Write a haiku about documentation."))
-
-  (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12})))
+  )
