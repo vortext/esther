@@ -66,7 +66,7 @@
 
 (defn ^:private map->llama-params [m]
   (reduce-kv
-   (fn [params k v]
+   (fn [^llama_context_params params k v]
      (case k
        :seed (.writeField params "seed" (int v))
        :n-ctx (.writeField params "n_ctx" (int v))
@@ -124,7 +124,7 @@
    (create-context model-path nil))
   ([model-path params]
    @llm-init
-   (let [llama-params (map->llama-params params)
+   (let [^llama_context_params llama-params (map->llama-params params)
          model (raw/llama_load_model_from_file model-path llama-params)
          _ (when (nil? model)
              (throw (ex-info "Error creating model"
@@ -196,7 +196,7 @@
 (defn ^:private tokenize [ctx s add-bos?]
   (let [add-bos (if add-bos? 1 0)
         s (if add-bos? (str " " s) s)
-        max-tokens (+ add-bos (alength (.getBytes s "utf-8")))
+        max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
         token-buf (get-token-buf ctx max-tokens)
         num-tokens (raw/llama_tokenize ctx s (count s) token-buf max-tokens add-bos)]
     [num-tokens token-buf]))
@@ -228,15 +228,15 @@
              "Context size exceeded")
 
      (let [batch-size (:n-batch ctx)]
-       (loop [offset 0
-              n-past n-past]
+       (loop [offset (int 0)
+              n-past (int n-past)]
          (let [batch-buf (.share token-buf (* offset 4))
                num-batch-tokens (min batch-size (- total-tokens offset))]
            (raw/llama_eval ctx batch-buf num-batch-tokens n-past num-threads)
            (let [next-offset (+ offset num-batch-tokens)]
              (when (< next-offset total-tokens)
-               (recur next-offset
-                      (+ n-past num-batch-tokens)))))))
+               (recur (int next-offset)
+                      (int (+ n-past num-batch-tokens))))))))
 
      ctx)))
 
@@ -359,7 +359,7 @@
         result (ByteBuffer/allocate initial-size)
         n-tokens (raw/llama_token_to_piece ctx token (.array result) initial-size)]
     (if (< n-tokens 0)
-      (let [actual-size (Math/abs n-tokens)
+      (let [actual-size (Math/abs (int n-tokens))
             resized-result (ByteBuffer/allocate actual-size)
             check (raw/llama_token_to_piece ctx token (.array resized-result) actual-size)]
         (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
@@ -406,8 +406,8 @@
                     (throw (Exception. "Unexpected decoder state."))))]
             (rf result)))
          ([result token]
-          (let [[len result-buf] (llama-token-to-str ctx token)]
-            (.put input-buffer (.slice result-buf 0 len))
+          (let [[len  result-buf] (llama-token-to-str ctx token)]
+            (.put input-buffer (.slice ^ByteBuffer result-buf (int 0) (int len)))
             (.flip input-buffer)
 
             ;; Invoke the decode method zero or more times, as long as additional input may be available, passing false
@@ -520,7 +520,7 @@
   "Tokenize the string s into a collection of int tokens."
   [ctx s]
   (let [ ;; tokens are int32s
-        max-tokens (alength (.getBytes s "utf-8"))
+        max-tokens (alength (.getBytes ^String s "utf-8"))
         buf-size (* 4 max-tokens)
         token-buf (Memory. buf-size)
         num-tokens (raw/llama_tokenize ctx s token-buf max-tokens 0)]
@@ -555,12 +555,10 @@
 
 ;; Scratch
 (comment
-
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
 
   (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
 
   (def result (generate-string ctx "Write a haiku about documentation."))
 
-  (def result (generate-string ctx "What is the emoji for :smile:?"))
-  )
+  (def result (generate-string ctx "What is the emoji for :smile:?")))
