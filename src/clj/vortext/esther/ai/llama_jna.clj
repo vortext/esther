@@ -363,8 +363,8 @@
             resized-result (ByteBuffer/allocate actual-size)
             check (raw/llama_token_to_piece ctx token (.array resized-result) actual-size)]
         (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
-        resized-result)
-      result)))
+        [actual-size resized-result])
+      [n-tokens result])))
 
 
 
@@ -406,11 +406,7 @@
                     (throw (Exception. "Unexpected decoder state."))))]
             (rf result)))
          ([result token]
-          (let [result-buf (llama-token-to-str ctx token)
-                len (loop [i 0]
-                      (if (zero? (.get result-buf i))
-                        i
-                        (recur (inc i))))]
+          (let [[len result-buf] (llama-token-to-str ctx token)]
             (.put input-buffer (.slice result-buf 0 len))
             (.flip input-buffer)
 
@@ -557,19 +553,18 @@
     (generate ctx prompt opts))))
 
 
-(def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-
-
-(def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
-
-
-(def result (generate-string ctx "😄?"))
-
-
-
 ;; Scratch
 (comment
+  (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
 
+  (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
+
+
+  (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
+
+  (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
+
+  (def result (generate-string ctx "What is the emoji for :smile:?"))
 
   (with-open [ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12})]
     (generate-string ctx "Write a haiku about documentation."))
