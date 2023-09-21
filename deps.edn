@@ -27,6 +27,7 @@
 
            ;; JNA
            com.phronemophobic/clong {:mvn/version "1.1"}
+           net.java.dev.jna/jna {:mvn/version "5.13.0"}
 
            ;; Routing
            metosin/reitit {:mvn/version "0.6.0"}
@@ -54,9 +55,7 @@
            io.github.kit-clj/kit-undertow {:mvn/version "1.0.5"}
            io.github.kit-clj/kit-nrepl {:mvn/version "1.0.1"}
            io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.5"}
-           io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}
-
-           }
+           io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}}
  :aliases {:build {:deps {io.github.clojure/tools.build
                           {:git/sha "e3e3532"
                            :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
@@ -73,6 +72,7 @@
                                 org.clojure/tools.namespace     {:mvn/version "1.2.0"}
                                 ;; For generating native APIs
                                 org.bytedeco/llvm-platform      {:mvn/version "16.0.4-1.5.9"}}
+                  :jvm-opts ["-Djna.library.path=/home/joelkuiper/Projects/esther/native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}
