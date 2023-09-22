@@ -131,10 +131,15 @@ function clearPlaceholder(textarea) {
 function imaginePlaceholder(textarea) {
 
   const lastImaginationSelector = "#history .memory > .response > .imagination";
-  const lastImagination = [...document.querySelectorAll(lastImaginationSelector)].pop();
-
-  textarea.placeholder = truncateWithEllipsis(lastImagination.textContent,
-                                              window.clientConfig.maxPlaceholderLength) || "";
+  const imaginationSeq = [...document.querySelectorAll(lastImaginationSelector)];
+  let lastImagination;
+  if (imaginationSeq.length) {
+    lastImagination = imaginationSeq.pop().textContent;
+  } else {
+    lastImagination = document.getElementById("placeholder").textContent;
+  }
+  textarea.placeholder = truncateWithEllipsis(lastImagination,
+                                              window.clientConfig.maxPlaceholderLength);
 }
 
 

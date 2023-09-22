@@ -97,13 +97,14 @@
   [opts config request]
   (let [user (get-in request [:session :user])
         memories (memory/todays-non-archived-memories opts user)
-        placeholder (memory/last-imagination opts user)]
+        placeholder (or (memory/last-imagination opts user) "Dear Esther,")]
     [:section#conversation.loading-state
      [:article#history
       (for [m (reverse memories)]
         (memory-container m))]
      [:div#user-echo [:div#user-value]]
      [:div#loading-response.loading-state loading]
+     [:span#placeholder {:style "display:none"} placeholder]
      (msg-input config placeholder)]))
 
 
