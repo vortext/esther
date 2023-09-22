@@ -96,7 +96,8 @@
 
   `model-path` should be an absolute or relative path to a F16, Q4_0, Q4_1, Q5_0, Q5_1, or Q8_0 ggml model.
 
-  An optional map of parameters may be passed for parameterizing the model. The following keys map to their corresponding llama.cpp equivalents:
+  An optional map of parameters may be passed for parameterizing the model.
+  The following keys map to their corresponding llama.cpp equivalents:
   - `:seed`: RNG seed, -1 for random
   - `:n-ctx`: text context
   - `:n-batch`: prompt processing batch size
@@ -237,7 +238,6 @@
              (when (< next-offset total-tokens)
                (recur (int next-offset)
                       (int (+ n-past num-batch-tokens))))))))
-
      ctx)))
 
 (defn sample-logits-greedy
@@ -290,7 +290,8 @@
 
 ;; tau default 5.0
 ;; eta default 0.1
-(defn ^:private sample-mirostat-v2 [ctx candidates-buf* mu* tau eta]
+(defn ^:private sample-mirostat-v2
+  [ctx candidates-buf* mu* tau eta]
   (let [mu (FloatByReference. @mu*)
         candidates (ctx->candidates ctx candidates-buf*)
         next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
@@ -352,7 +353,6 @@
        ret)))
 
 
-
 (defn llama-token-to-str
   [ctx token]
   (let [initial-size 8
@@ -365,7 +365,6 @@
         (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
         [actual-size resized-result])
       [n-tokens result])))
-
 
 
 (defn decode-token-to-char
@@ -457,7 +456,9 @@
                 :as opts}]
    (let [eos (raw/llama_token_eos ctx)
          samplef (or samplef
-                     (init-mirostat-v2-sampler ctx))]
+                     (init-mirostat-v2-sampler ctx))
+         kv-cache-token-count #(raw/llama_get_kv_cache_token_count ctx)
+         llama-update-fn (fn [token token-count] (llama-update ctx token token-count num-threads))]
      (reify
        clojure.lang.Seqable
        (seq [_]
@@ -466,22 +467,23 @@
          ((fn next [ctx]
             (let [next-token (samplef (get-logits ctx))]
               (when (not= eos next-token)
-                (cons next-token
-                      (lazy-seq (next (llama-update ctx next-token (raw/llama_get_kv_cache_token_count ctx) num-threads)))))))
-          (llama-update ctx prompt 0 num-threads)))
+                (cons
+                 next-token
+                 (lazy-seq (next (llama-update-fn next-token (kv-cache-token-count))))))))
+          (llama-update-fn prompt 0)))
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
            (raw/llama_set_rng_seed ctx seed))
          (loop [acc init
-                ret (llama-update ctx prompt 0 num-threads)]
+                ret (llama-update-fn prompt 0)]
            (let [next-token (samplef (get-logits ctx))]
              (if (= eos next-token)
                acc
                (let [acc (rf acc next-token)]
                  (if (reduced? acc)
                    @acc
-                   (recur acc (llama-update ctx next-token (raw/llama_get_kv_cache_token_count ctx) num-threads))))))))))))
+                   (recur acc (llama-update-fn next-token (kv-cache-token-count)))))))))))))
 
 (defn generate
   "Returns a seqable/reducible sequence of strings generated from ctx with prompt."
