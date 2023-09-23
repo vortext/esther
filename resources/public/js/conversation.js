@@ -129,13 +129,12 @@ function clearPlaceholder(textarea) {
 }
 
 function imaginePlaceholder(textarea) {
-
   const lastImaginationSelector = "#history .memory > .response > .imagination";
   const imaginationSeq = [...document.querySelectorAll(lastImaginationSelector)];
   let lastImagination;
   if (imaginationSeq.length) {
     lastImagination = imaginationSeq.pop().textContent;
-  } else {
+  } else { // Default when the page loaded
     lastImagination = document.getElementById("placeholder").textContent;
   }
   textarea.placeholder = truncateWithEllipsis(lastImagination,

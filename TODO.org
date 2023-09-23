@@ -77,6 +77,7 @@ _ more user information in session (vault)
 ** DONE better error handling subprocesses
 ** DONE switch to libsodium for security
 ** DONE simple sentiment analysis for energy
+** DONE #keywords (hash tags instead of namespaced concepts?)
 ** TODO use llama.clj instead of shell
 - [ ] make it work again with master llama.cpp
 - [ ] implement mirostat params
@@ -115,7 +116,6 @@ _ more user information in session (vault)
 - [X] Loading indicator login
 - [ ] Accessibility and ARIA
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
-** DONE #keywords (hash tags instead of namespaced concepts?)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page

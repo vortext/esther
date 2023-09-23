@@ -17,6 +17,8 @@
 ;; uncomment to enable hot loading for deps
 ;; (watch-deps/start! {:aliases [:dev :test]})
 
+(set! *warn-on-reflection* true)
+
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 
 (add-tap (bound-fn* clojure.pprint/pprint))

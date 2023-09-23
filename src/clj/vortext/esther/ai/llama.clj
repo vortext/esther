@@ -11,7 +11,7 @@
    [diehard.core :as dh]
    [vortext.esther.config :as config]
    [vortext.esther.util.json :as json]
-   [vortext.esther.util.mustache :as mustache]
+   [vortext.esther.util.handlebars :as handlebars]
    [vortext.esther.util.crc32 :as crc32])
   (:import
    (dev.failsafe
@@ -46,7 +46,7 @@
         grammar-path (cache (format "grammar_%s.gbnf" grammar-checksum))
         _ (when-not (fs/exists? grammar-path)
             (spit (str grammar-path)
-                  (mustache/render
+                  (handlebars/render
                    (slurp gbnf-template)
                    {:assistant-prefix assistant-prefix
                     :assistant-suffix assistant-suffix

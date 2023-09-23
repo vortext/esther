@@ -8,7 +8,7 @@
    [vortext.esther.ai.llama :as llama]
    [vortext.esther.common :as common]
    [vortext.esther.util.emoji :as emoji]
-   [vortext.esther.util.mustache :as mustache]))
+   [vortext.esther.util.handlebars :as handlebars]))
 
 
 (def response-schema
@@ -55,7 +55,7 @@
             :context/weather :context/time-of-day
             :context/season :personality/ai-name]
         context (common/remove-namespaces (select-keys obj ks))
-        prompt  (mustache/render template context)
+        prompt  (handlebars/render template context)
         request-content (-> events first :event/content :content)]
     (merge
      obj
