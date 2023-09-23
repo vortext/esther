@@ -8,7 +8,7 @@
 
 
 (def timezones
-  (-> "public/data/largest_city_by_timezones.json"
+  (-> "data/largest_city_by_timezones.json"
       (io/resource)
       (slurp)
       (json/read-json-value)))
@@ -30,7 +30,7 @@
         now (time/iso8601->offset-date-time iso8601)
         present (time/->local-date-time now timezone)]
     {:context/present present
-     :context/allow-location? has-location?
+     :context/allow-location has-location?
      :context/time-of-day (time/time-of-day present latitude longitude)
      :context/today (time/human-today present time/default-locale)
      :context/lunar-phase (time/lunar-phase present :emoji)

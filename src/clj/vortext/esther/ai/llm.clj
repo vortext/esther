@@ -51,7 +51,7 @@
   [opts {:keys [:memory/events :user/memories :user/keywords] :as obj}]
   (let [template (slurp (io/resource (:prompt opts)))
         ks [:context/today :context/lunar-phase
-            :context/allow-location?
+            :context/allow-location
             :context/weather :context/time-of-day
             :context/season :personality/ai-name]
         context (common/remove-namespaces (select-keys obj ks))

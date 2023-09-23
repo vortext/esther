@@ -12,11 +12,13 @@
   [^String template-str]
   (.compileInline handlebars template-str))
 
+
 (defn- apply-template
   [^Template template ^Object obj]
-  (.apply template (stringify-keys obj)))
+  (.apply template obj))
+
 
 (defn render
   [template-str obj]
   (-> (compile-inline template-str)
-      (apply-template obj)))
+      (apply-template (stringify-keys obj))))
