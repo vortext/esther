@@ -69,5 +69,4 @@
 
 (comment
   (dump-api (fs/canonicalize "native/llama.cpp/llama.h")
-            (fs/canonicalize (io/resource "api/llama.edn"))
-            ))
+            (fs/canonicalize (io/resource "api/llama.edn"))))
