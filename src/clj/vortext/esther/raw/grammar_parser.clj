@@ -1,5 +1,4 @@
-(ns vortext.esther.raw.llama
-  (:refer-clojure :exclude [remove printf]) ;; [WARNING]
+(ns vortext.esther.raw.grammar-parser
   (:require [com.phronemophobic.clong.gen.jna :as gen]
             [clojure.edn :as edn]
             [babashka.fs :as fs]
@@ -9,18 +8,18 @@
   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})
 
 (def shared-lib
-  (str (fs/canonicalize "native/llama.cpp/build/libllama.so")))
+  (str (fs/canonicalize "native/llama.cpp/build/examples/grammar/libgrammar.so")))
 
-(def ^:no-doc libllama
+(def ^:no-doc library
   (com.sun.jna.NativeLibrary/getInstance
    shared-lib library-options))
 
 (def api
-  (with-open [rdr (io/reader (io/resource "api/llama.edn"))
+  (with-open [rdr (io/reader (io/resource "api/grammar.edn"))
               rdr (java.io.PushbackReader. rdr)]
     (edn/read rdr)))
 
-(gen/def-api libllama api)
+(gen/def-api library api)
 
 (let [struct-prefix (gen/ns-struct-prefix *ns*)]
   (defmacro import-structs! []
