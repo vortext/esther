@@ -1,11 +1,12 @@
-root      ::= prefix response suffix eot
+root      ::= response
+response  ::= prefix obj suffix
 prefix    ::= "{{assistant-prefix}}"
 suffix    ::= "{{assistant-suffix}}"
 quote     ::= "\""
 eot       ::= "{{end-of-turn}}"
 ws        ::= [\n ]?
 
-response  ::= "{" (quote "content" quote ": " string ","
+obj       ::= ("{" quote "content" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
                    quote "keywords" quote ": " kwarray ","
                    quote "imagination" quote ": " string "}")

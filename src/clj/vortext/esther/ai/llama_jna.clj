@@ -608,12 +608,13 @@
   (def ctx (create-context llama7b-path {:n-ctx 512 :n-gpu-layers 32}))
 
 
-  #_(def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
-  (def grammar-str (slurp (str (fs/canonicalize "native/llama.cpp/grammars/json.gbnf"))))
+  (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/esther_example.gbnf")))))
 
-  (def samplef (init-grammar-mirostat-v2-sampler ctx grammar-str))
+  #_(def grammar-str (slurp (str (fs/canonicalize "native/llama.cpp/grammars/json.gbnf"))))
 
-  (def result (generate-string ctx "A json object about Clojure" {:samplef samplef}))
+  (def sampler (init-grammar-mirostat-v2-sampler ctx grammar-str))
+
+  (def result (generate-string ctx "A json object about Clojure" {:sampler sampler}))
 
 
   )
