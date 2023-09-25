@@ -1,8 +1,8 @@
 (ns vortext.esther.raw.grammar-parser
-  (:require [com.phronemophobic.clong.gen.jna :as gen]
-            [clojure.edn :as edn]
-            [babashka.fs :as fs]
-            [clojure.java.io :as io]))
+  (:require
+   [babashka.fs :as fs])
+  (:import
+   com.sun.jna.Pointer))
 
 (def library-options
   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})
@@ -14,13 +14,13 @@
   (com.sun.jna.NativeLibrary/getInstance
    shared-lib library-options))
 
-(def api
-  (with-open [rdr (io/reader (io/resource "api/grammar.edn"))
-              rdr (java.io.PushbackReader. rdr)]
-    (edn/read rdr)))
 
-(gen/def-api library api)
+(def ^:private llama-parse-grammar
+  (.getFunction ^com.sun.jna.NativeLibrary library
+                "llama_parse_grammar"))
 
-(let [struct-prefix (gen/ns-struct-prefix *ns*)]
-  (defmacro import-structs! []
-    `(gen/import-structs! api ~struct-prefix)))
+(defn ^Pointer parse-grammar
+  [grammar-str]
+  (.invoke
+   ^com.sun.jna.Function llama-parse-grammar
+   Pointer (to-array [grammar-str])))

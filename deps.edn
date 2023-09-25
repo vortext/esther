@@ -23,6 +23,8 @@
            hiccup/hiccup {:mvn/version "1.0.5"}
            com.github.jknack/handlebars {:mvn/version "4.3.1"}
 
+           instaparse/instaparse {:mvn/version "1.4.12"}
+
            ;; Database
            org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
 
