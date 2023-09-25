@@ -296,7 +296,7 @@
                         (.writeField "data" candidates-array-head)
                         (.writeField "size" (long n-vocab))
                         (.writeField "sorted" (byte 0)))]
-      [logits candidates*])))
+      candidates*)))
 
 
 ;; tau default 5.0
@@ -304,7 +304,7 @@
 (defn ^:private sample-mirostat-v2
   [ctx candidates-buf* mu* tau eta]
   (let [mu (FloatByReference. @mu*)
-        [_logits candidates] (ctx->candidates ctx candidates-buf*)
+        candidates (ctx->candidates ctx candidates-buf*)
         next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
     (vreset! mu* (.getValue mu))
     next-token))
@@ -317,11 +317,11 @@
      (init-mirostat-v2-sampler ctx tau eta)))
   ([ctx tau eta]
    (fn [logits]
-     (sample-mirostat-v2 ctx
-                         (volatile! nil)
-                         (volatile! (* 2 tau))
-                         tau
-                         eta))))
+     {:sample (sample-mirostat-v2 ctx
+                                  (volatile! nil)
+                                  (volatile! (* 2 tau))
+                                  tau
+                                  eta)})))
 
 (defn apply-penalties
   [ctx candidates last-tokens-ptr]
@@ -331,8 +331,9 @@
         alpha-frequency (float 0.0)
         alpha-presence (float 0.0)
         repeat-last-n (int 64)]
-    (when (seq last-tokens)
-      (let [last-n-repeat (Math/min (Math/min (count last-tokens) repeat-last-n) n-ctx)
+    (when (every? zero? last-tokens)
+      (let [non-zero-last-tokens (apply + (map #(min 1 %) last-tokens))
+            last-n-repeat (Math/min (Math/min non-zero-last-tokens repeat-last-n) n-ctx)
             num-bytes (* (count last-tokens) 4)
             mem (doto (Memory. num-bytes)
                   (.write 0 last-tokens 0 (count last-tokens)))]
@@ -371,31 +372,36 @@
         (.setInt last-tokens-ptr (* i 4) (modified-array i))))))
 
 
-
-
 (defn init-grammar-mirostat-v2-sampler
   ([ctx grammar-str]
    (let [tau (float 5.0)
-         eta (float 0.1)]
-     (init-grammar-mirostat-v2-sampler ctx grammar-str tau eta)))
-  ([ctx grammar-str tau eta]
-   (let [grammar-ptr (grammar/parse-grammar grammar-str)]
-     (fn [logits]
-       (let [candidates-buf* (volatile! nil)
-             mu* (volatile! (* 2 tau))
-             mu (FloatByReference. @mu*)
-             temperature (float 0.8)
-             last-tokens-size (raw/llama_n_ctx ctx)
-             [logits candidates] (ctx->candidates ctx candidates-buf*)
-             last-tokens-ptr (.getPointer (->int-array-by-reference last-tokens-size))
-             ;; _ (apply-penalties ctx candidates last-tokens-ptr)
-             _ (raw/llama_sample_grammar ctx candidates grammar-ptr)
-             ;; _ (raw/llama_sample_temperature ctx candidates temperature)
-             next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
-         (raw/llama_grammar_accept_token ctx grammar-ptr next-token)
-         (vreset! mu* (.getValue mu))
-         ;; (reset-last-tokens last-tokens-ptr next-token last-tokens-size)
-         next-token)))))
+         eta (float 0.1)
+         temperature (float 0.8)]
+     (init-grammar-mirostat-v2-sampler ctx grammar-str tau eta temperature)))
+  ([ctx grammar-str tau eta temperature]
+   (let [grammar-ptr (atom (grammar/parse-grammar grammar-str))
+         n-ctx (get-in ctx [:params :n-ctx])
+         last-tokens (.getPointer (->int-array-by-reference n-ctx))
+         candidates-buf* (volatile! nil)
+         mu* (volatile! (* 2 tau))]
+     {:grammar grammar-ptr
+      :last-tokens last-tokens
+      :reset #(do (.clear last-tokens)
+                  (reset! grammar-ptr (grammar/parse-grammar grammar-str))
+                  nil)
+      :free #(do (raw/llama_grammar_free grammar-ptr))
+      :sample (fn [logits]
+                (let [mu (FloatByReference. @mu*)
+                      candidates (ctx->candidates ctx candidates-buf*)
+                      _ (apply-penalties ctx candidates last-tokens)
+                      _ (raw/llama_sample_grammar ctx candidates @grammar-ptr)
+                      _ (raw/llama_sample_temperature ctx candidates temperature)
+                      next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
+                  (raw/llama_grammar_accept_token ctx @grammar-ptr next-token)
+                  (vreset! mu* (.getValue mu))
+                  (reset-last-tokens last-tokens next-token n-ctx)
+                  (log/debug "x" (into [] (.getIntArray last-tokens 0 n-ctx)))
+                  next-token))})))
 
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
@@ -531,44 +537,43 @@
     (decode-token-to-char ctx charset)
     (char->str))))
 
+
 (defn generate-tokens
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
   ([ctx prompt]
    (generate-tokens ctx prompt nil))
-  ([ctx prompt {:keys [samplef
+  ([ctx prompt {:keys [sampler
                        num-threads
                        seed]
                 :as opts}]
    (let [eos (raw/llama_token_eos ctx)
-         samplef (or samplef
-                     (init-mirostat-v2-sampler ctx))
-         kv-cache-token-count #(raw/llama_get_kv_cache_token_count ctx)
-         llama-update-fn (fn [token token-count] (llama-update ctx token token-count num-threads))]
+         {:keys [reset sample]} (or sampler (init-mirostat-v2-sampler ctx))
+         kv-cache-token-count #(raw/llama_get_kv_cache_token_count ctx)]
      (reify
        clojure.lang.Seqable
        (seq [_]
          (when seed
            (raw/llama_set_rng_seed ctx seed))
          ((fn next [ctx]
-            (let [next-token (samplef (get-logits ctx))]
-              (when (not= eos next-token)
-                (cons
-                 next-token
-                 (lazy-seq (next (llama-update-fn next-token (kv-cache-token-count))))))))
-          (llama-update-fn prompt 0)))
+            (let [next-token (sample (get-logits ctx))]
+              (if (not= eos next-token)
+                (cons next-token
+                      (lazy-seq (next (llama-update ctx next-token (kv-cache-token-count) num-threads))))
+                (reset))))
+          (llama-update ctx prompt 0 num-threads)))
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
            (raw/llama_set_rng_seed ctx seed))
          (loop [acc init
-                ret (llama-update-fn prompt 0)]
-           (let [next-token (samplef (get-logits ctx))]
+                ret (llama-update ctx prompt 0 num-threads)]
+           (let [next-token (sample (get-logits ctx))]
              (if (= eos next-token)
-               acc
+               (do (reset) acc)
                (let [acc (rf acc next-token)]
                  (if (reduced? acc)
                    @acc
-                   (recur acc (llama-update-fn next-token (kv-cache-token-count)))))))))))))
+                   (recur acc (llama-update ctx next-token (kv-cache-token-count) num-threads))))))))))))
 
 (defn generate
   "Returns a seqable/reducible sequence of strings generated from ctx with prompt."
@@ -593,20 +598,6 @@
        (decode-token-to-char ctx)
        (generate-tokens ctx prompt opts))))))
 
-(defn generate-line
-  "Returns a string with all tokens generated from prompt up until the first \newline."
-  ([ctx prompt]
-   (generate-line ctx prompt nil))
-  ([ctx prompt opts]
-   (let  [[prompt-token-count _] (tokenize ctx prompt true)]
-     (str/join
-      (eduction
-       (take-while #(not= % "\n"))
-       (decode-token-to-char ctx)
-       (generate-tokens ctx prompt opts))))))
-
-
-
 
 ;; Scratch
 (comment
@@ -614,16 +605,15 @@
   (require '[clojure.java.io :as io])
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def ctx (create-context llama7b-path {:n-ctx 1024 :n-gpu-layers 12}))
+  (def ctx (create-context llama7b-path {:n-ctx 512 :n-gpu-layers 32}))
 
 
-  (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
+  #_(def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
+  (def grammar-str (slurp (str (fs/canonicalize "native/llama.cpp/grammars/json.gbnf"))))
 
   (def samplef (init-grammar-mirostat-v2-sampler ctx grammar-str))
 
-  (def result (generate-string ctx "Write a haiku about documentation."
-                               {:samplef samplef}
-                               ))
+  (def result (generate-string ctx "A json object about Clojure" {:samplef samplef}))
 
 
   )
