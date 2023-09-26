@@ -356,7 +356,7 @@
         ))))
 
 
-(defn reset-last-tokens
+(defn reset-last-tokens!
   [last-tokens-ptr token-id num-tokens]
   (let [size-bytes (* num-tokens 4)
         offset-bytes 4
@@ -399,8 +399,7 @@
                       next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
                   (raw/llama_grammar_accept_token ctx @grammar-ptr next-token)
                   (vreset! mu* (.getValue mu))
-                  (reset-last-tokens last-tokens next-token n-ctx)
-                  (log/debug "x" (into [] (.getIntArray last-tokens 0 n-ctx)))
+                  (reset-last-tokens! last-tokens next-token n-ctx)
                   next-token))})))
 
 (defn get-logits
@@ -465,62 +464,72 @@
   The transducer will buffer intermediate results until enough
   bytes to decode a character are available."
   ([ctx]
-   (decode-token-to-char ctx (Charset/forName "UTF-8")))
-  ([ctx ^Charset charset]
-   (fn [rf]
-     (let [decoder (doto (.newDecoder charset)
-                     (.onMalformedInput CodingErrorAction/REPLACE)
-                     (.onUnmappableCharacter CodingErrorAction/REPLACE))
+   (decode-token-to-char ctx nil))
+  ([ctx opts]
+   (let [^Charset charset
+         (cond
+           (nil? opts) (Charset/forName "UTF-8")
+           (map? opts) (or (:charset opts)
+                           (Charset/forName "UTF-8"))
+           ;; for backwards compatibility
+           :else opts)
+         flush? (:flush? opts)]
+     (fn [rf]
+       (let [decoder (doto (.newDecoder charset)
+                       (.onMalformedInput CodingErrorAction/REPLACE)
+                       (.onUnmappableCharacter CodingErrorAction/REPLACE))
 
-           input-buffer (ByteBuffer/allocate 256)
-           output-buffer (CharBuffer/allocate 256)
+             input-buffer (ByteBuffer/allocate 256)
+             output-buffer (CharBuffer/allocate 256)
 
-           rrf (preserving-reduced rf)]
-       (fn
-         ([] (rf))
-         ([result]
-          (.flip input-buffer)
-          (let [result
-                (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
-                      decoder-result1 (.decode decoder input-buffer output-buffer true)
-                      ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
-                      decoder-result2 (.flush decoder output-buffer)]
-                  (if (and (.isUnderflow decoder-result1)
-                           (.isUnderflow decoder-result2))
-                    (do
-                      (.flip output-buffer)
-                      (let [result (reduce rrf result output-buffer)]
-                        (.clear output-buffer)
-                        result))
-                    ;; else
-                    (throw (Exception. "Unexpected decoder state."))))]
-            (rf result)))
-         ([result token]
-          (let [[len result-buf] (llama-token-to-str ctx token)]
-            (.put input-buffer (.slice ^ByteBuffer result-buf (int 0) (int len)))
-            (.flip input-buffer)
+             rrf (preserving-reduced rf)]
+         (fn
+           ([] (rf))
+           ([result]
+            (if flush?
+              (do
+                (.flip input-buffer)
+                (let [result
+                      (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
+                            decoder-result1 (.decode decoder input-buffer output-buffer true)
+                            ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
+                            decoder-result2 (.flush decoder output-buffer)]
+                        (if (and (.isUnderflow decoder-result1)
+                                 (.isUnderflow decoder-result2))
+                          (do
+                            (.flip output-buffer)
+                            (let [result (reduce rrf result output-buffer)]
+                              (.clear output-buffer)
+                              result))
+                          ;; else
+                          (throw (Exception. "Unexpected decoder state."))))]
+                  (rf result)))
+              ;; else no flush
+              (rf result)))
+           ([result token]
+            (let [[len result-buf] (llama-token-to-str ctx token)]
+              (.put input-buffer (.slice ^ByteBuffer result-buf (int 0) (int len)))
+              (.flip input-buffer)
 
-            ;; Invoke the decode method zero or more times, as long as additional input may be available, passing false
-            ;; for the endOfInput argument and filling the input buffer and flushing the output buffer between
-            ;; invocations;
-            (let [decoder-result (.decode decoder input-buffer output-buffer false)]
-              (cond
-                (.isUnderflow decoder-result)
-                (do
-                  (.compact input-buffer)
-                  (.flip output-buffer)
-                  (let [result (reduce rrf result output-buffer)]
-                    (.clear output-buffer)
-                    result))
+              ;; Invoke the decode method zero or more times, as long as additional input may be available, passing false for the endOfInput argument and filling the input buffer and flushing the output buffer between invocations;
+              (let [decoder-result (.decode decoder input-buffer output-buffer false)]
+                (cond
+                  (.isUnderflow decoder-result)
+                  (do
+                    (.compact input-buffer)
+                    (.flip output-buffer)
+                    (let [result (reduce rrf result output-buffer)]
+                      (.clear output-buffer)
+                      result))
 
-                (.isOverflow decoder-result)
-                (throw (ex-info "Decoder buffer too small" {}))
+                  (.isOverflow decoder-result)
+                  (throw (ex-info "Decoder buffer too small" {}))
 
-                (.isError decoder-result)
-                (throw (ex-info "Decoder Error" {:decoder decoder}))
+                  (.isError decoder-result)
+                  (throw (ex-info "Decoder Error" {:decoder decoder}))
 
-                :else
-                (throw (Exception. "Unexpected decoder state.")))))))))))
+                  :else
+                  (throw (Exception. "Unexpected decoder state."))))))))))))
 
 
 (defn decode-token
@@ -608,13 +617,13 @@
   (def ctx (create-context llama7b-path {:n-ctx 512 :n-gpu-layers 32}))
 
 
-  (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/esther_example.gbnf")))))
+  (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
   #_(def grammar-str (slurp (str (fs/canonicalize "native/llama.cpp/grammars/json.gbnf"))))
 
   (def sampler (init-grammar-mirostat-v2-sampler ctx grammar-str))
 
-  (def result (generate-string ctx "A json object about Clojure" {:sampler sampler}))
+  (def result (generate-string ctx "Hi there!" {:sampler sampler}))
 
 
   )
