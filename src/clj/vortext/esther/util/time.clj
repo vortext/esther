@@ -80,30 +80,8 @@
         :else "summer"))))
 
 
-(defn instant->local-date-time
-  ([instant]
-   (instant->local-date-time instant default-zone-id))
-  ([instant zone-id]
-   (.toLocalDateTime (.atZone instant zone-id))))
 
-
-(defn now
-  ([] (now default-zone-id))
-  ([zone-id] (jt/instant zone-id)))
-
-
-(defn unix-ts
-  []
-  (inst-ms (now)))
-
-
-(defn human-time-ago
-  ([epoch-milli]
-   (human-time-ago (jt/instant epoch-milli) (now)))
-  ([inst1 inst2]
-   (h/datetime
-     (instant->local-date-time inst1)
-     (instant->local-date-time inst2))))
+(def human-time-ago h/datetime)
 
 
 (def time-of-day

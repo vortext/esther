@@ -64,13 +64,11 @@
   (let [action (keyword (:action params))
         user (get-in request [:session :user])
         {:keys [uid]} (:vault user)
-        shutdown (get-in opts [:ai :llm :shutdown-fn])
         scope (keyword (:scope params))
         scopes {:today memory/wipe-today!
                 :all memory/wipe-all!}]
     (if (= action :wipe)
       (-> (ui (do ((scopes scope) opts user)
-                  (shutdown uid)
                   [:span "Wiped memories: " (name scope)]))
           (assoc :headers {"HX-Redirect" "/"}))
       (ui [:span "Let us continue."]))))

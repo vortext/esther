@@ -6,7 +6,6 @@
    [vortext.esther.common :as common]
    [vortext.esther.errors :refer [wrapped-error]]
    [vortext.esther.util.json :as json]
-   [vortext.esther.util.time :refer [unix-ts] :as time]
    [vortext.esther.web.controllers.chat :refer [converse!]]
    [vortext.esther.web.controllers.command :refer [command!]]
    [vortext.esther.web.controllers.context :as context]
@@ -42,7 +41,6 @@
         client-context (json/read-json-value client-context)]
     (merge
      {:personality/ai-name (get-in opts [:ai :name])
-      :memory/ts (unix-ts)
       :memory/gid (memory/gid)
       :memory/events [{:event/content {:content content}
                        :event/role :user}]}

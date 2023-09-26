@@ -1,7 +1,7 @@
 root      ::= response
 response  ::= prefix obj suffix
-prefix    ::= "{{assistant-prefix}}"
-suffix    ::= "{{assistant-suffix}}"
+prefix    ::= "{{model-prefix}}"
+suffix    ::= "{{model-suffix}}"
 quote     ::= "\""
 eot       ::= "{{end-of-turn}}"
 

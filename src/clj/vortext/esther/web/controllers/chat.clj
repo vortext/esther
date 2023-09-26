@@ -9,10 +9,13 @@
   [{:keys [:memory/events :memory/ts]}]
   (let [relevant-ks [:content :emoji :imagination]
         format-event (fn [{:keys [:event/content :event/role]}]
-                       {:role role
-                        :content (select-keys  content relevant-ks)})]
-    {:moment (time/human-time-ago ts)
-     :events (map format-event events)}))
+                       (merge
+                        {:role role
+                         :content (select-keys  content relevant-ks)}
+                        (when (= role :user)
+                          {:moment (time/human-time-ago
+                                    (time/->local-date-time ts))})))]
+    (map format-event events)))
 
 
 (defn ->user-context
@@ -21,14 +24,14 @@
         keywords (into #{} (map :value keywords))
         memories (reverse (memory/recent-conversation opts user 5))]
     (merge obj {:user/keywords keywords
-                :user/memories (map ->memory-context memories)})))
+                :user/memories (mapcat ->memory-context memories)})))
 
 
 (defn converse!
-  [opts user {:keys [:personality/ai-name] :as obj}]
+  [opts user obj]
   (let [obj (->user-context opts user obj)
         complete (get-in opts [:ai :llm :complete-fn])
-        response (:llm/response (complete opts user obj))]
+        response (:llm/response (complete obj))]
     {:event/content (-> response (assoc :ui/type :md-serif))
-     :event/role (keyword ai-name)
+     :event/role :model
      :event/conversation? true}))

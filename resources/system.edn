@@ -37,15 +37,15 @@
  {:impl :llama-shell
   :options
   {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
-   :bin-dir "./native/llama.cpp/build/bin"
+   :prompt "prompts/chat.md"
    :grammar-template "grammars/chat.gbnf"
    :end-of-turn ""  ;; <|end_of_turn|>
    :system-prefix ""
    :system-suffix ""
    :user-prefix "User: "
    :user-suffix ""
-   :assistant-prefix "Esther: "
-   :assistant-suffix ""}}
+   :model-prefix "Esther: "
+   :model-suffix ""}}
 
  :reitit.routes/api
  {:base-path "/api"
@@ -54,7 +54,6 @@
  :reitit.routes/ui
  #profile {:dev {:base-path "",
                  :default-path "/user/conversation"
-                 :prompt "prompts/chat.md"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
                  :ai {:llm #ig/ref :ai.llm/llm-interface

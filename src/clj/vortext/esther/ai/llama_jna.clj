@@ -364,9 +364,9 @@
   (raw/llama_sample_temperature ctx candidates temperature)
   (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu))
 
-(defn init-grammar-mirostat-v2-sampler
+(defn init-llama-sampler
   ([ctx grammar-str]
-   (init-grammar-mirostat-v2-sampler ctx grammar-str {}))
+   (init-llama-sampler ctx grammar-str {}))
   ([ctx grammar-str opts]
    (let [defaults {:tau (float 5.0)
                    :eta (float 0.1)
@@ -623,7 +623,7 @@
 
   #_(def grammar-str (slurp (str (fs/canonicalize "native/llama.cpp/grammars/json.gbnf"))))
 
-  (def sampler (init-grammar-mirostat-v2-sampler ctx grammar-str))
+  (def sampler (init-llama-sampler ctx grammar-str))
 
   (def result (generate-string ctx "Hi there!" {:sampler sampler}))
 

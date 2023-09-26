@@ -21,10 +21,12 @@
 
 
 (defn memorable
-  [obj]
-  (select-keys
-   obj
-   (filter #(= (namespace %) "memory") (keys obj))))
+  [{:keys [context/present] :as obj}]
+  (->
+   (select-keys
+    obj
+    (filter #(= (namespace %) "memory") (keys obj)))
+   (assoc :memory/ts (str present))))
 
 
 (defn remember!
