@@ -353,7 +353,7 @@
         alpha-frequency (float 0.0)
         alpha-presence (float 0.0)
         repeat-last-n (int 64)]
-    (when-not (empty? last-tokens)
+    (when (some #(> % 0) last-tokens)
       (let [last-n-repeat (Math/min (Math/min (count last-tokens) repeat-last-n) n-ctx)
             num-bytes (* (count last-tokens) Integer/BYTES)
             mem (doto (Memory. num-bytes)
@@ -362,7 +362,7 @@
         (doseq [i (range (count last-tokens))]
           (.setInt mem (* i Integer/BYTES) (nth last-tokens i)))
 
-        (let [offset (calculate-offset (count last-tokens) last-n-repeat)
+        (let [offset (calculate-offset (count (filter #(not (zero? %)) last-tokens)) last-n-repeat)
               offset-ptr (.share mem offset)]
 
           (apply-single-penalty raw/llama_sample_repetition_penalty
