@@ -11,7 +11,6 @@
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.common :as common]
-   [vortext.esther.util.emoji :as emoji]
    [vortext.esther.util.handlebars :as handlebars]))
 
 
@@ -21,10 +20,7 @@
     [:and
      [:string {:min 1, :max 2048}]
      [:fn {:error/message "response should be at most 2048 chars"}
-      (fn [s] (<= (count s) 2048))]]]
-   [:emoji [:fn {:error/message "should contain a valid emoji"}
-            (fn [s] (emoji/unicode-emoji? s))]]
-   [:imagination [:string {:min 1, :max 2048}]]])
+      (fn [s] (<= (count s) 2048))]]]])
 
 
 (defn validate
@@ -39,46 +35,20 @@
 
 (def validate-response (partial validate response-schema))
 
-
-(def clean-emoji
-  (partial
-   common/update-value :emoji
-   emoji/extract-first-emoji))
-
-
-(defn clean-response
-  [response]
-  (-> response (clean-emoji "🙃")))
-
-
 (defn memory-line
   [{:keys [model-prefix user-prefix]} {:keys [role content moment]}]
   (let [prefix (case role
                  :model model-prefix
-                 :user user-prefix)]
-    (str prefix (when moment (str moment ": "))
-         (json/write-value-as-string content))))
+                 :user user-prefix)
+        user? (= :user role)]
+    (str prefix (when moment (str "(" moment ") "))
+         (if user?
+           (:content content)
+           (json/write-value-as-string content)))))
 
 
-(defn submission-str
-  [{:keys [system-prefix] :as opts} prompt {:keys [:memory/events :user/memories]}]
-  (let [request-content (-> events first :event/content :content)
-        conversation (str/join "\n" (map (partial memory-line opts) memories))]
-    (str/join
-     "\n"
-     [system-prefix
-      prompt
-      conversation
-      (str (:user-prefix opts)
-           "Now: "
-           (json/write-value-as-string {:content request-content}))])))
-
-
-(def steal (atom nil))
-
-(defn ->submission
-  [opts obj]
-  (log/debug opts)
+(defn create-submission
+  [{:keys [system-prefix] :as opts} {:keys [:memory/events :user/memories] :as obj}]
   (let [template (slurp (io/resource (:prompt opts)))
         ks [:context/today :context/lunar-phase
             :context/allow-location
@@ -86,12 +56,15 @@
             :context/season :personality/ai-name]
         context (common/remove-namespaces (select-keys obj ks))
         prompt  (handlebars/render template context)
-        submission (submission-str opts prompt obj)]
-    (reset! steal obj)
-    (log/debug submission)
-    (merge
-     obj
-     {:llm/submission submission})))
+        request-content (-> events first :event/content :content)
+        conversation (str/join "\n" (map (partial memory-line opts) memories))
+        ]
+    (str/join
+     "\n"
+     [system-prefix
+      prompt
+      conversation
+      (str (:user-prefix opts) request-content)])))
 
 
 (defn extract-json-parse
@@ -102,12 +75,6 @@
       (when (and start end)
         (json/read-json-value (subs output start (inc end)))))))
 
-
-(defn complete
-  [ctx cfg {:keys [:llm/submission]}]
-  (let [generated (generate-string ctx submission cfg)]
-    (log/debug generated)
-    (extract-json-parse generated)))
 
 
 (defn create-instance
@@ -133,13 +100,13 @@
        ((:deletef sampler)))
      :complete-fn
      (fn [obj]
-       (let [response (complete
-                       ctx
-                       {:sampler sampler}
-                       (->submission options obj))]
+       (let [submission (create-submission options obj)
+             _ (log/debug "submission::" submission)
+             generated (generate-string ctx submission {:sampler sampler})
+             _ (log/debug "generated::" generated)]
          (assoc obj :llm/response
-                (-> response
-                    (clean-response)
+                (-> generated
+                    (extract-json-parse)
                     (validate-response)))))}))
 
 
