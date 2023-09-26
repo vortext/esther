@@ -79,9 +79,9 @@ _ more user information in session (vault)
 ** DONE simple sentiment analysis for energy
 ** DONE #keywords (hash tags instead of namespaced concepts?)
 ** TODO use llama.clj instead of shell
-- [ ] make it work again with master llama.cpp
-- [ ] implement mirostat params
-- [ ] implement grammar
+- [X] make it work again with master llama.cpp
+- [X] implement mirostat params
+- [X] implement grammar
 - [ ] get rid of shell impl (generate better "prompt" to complete)
 - [ ] Try https://huggingface.co/PygmalionAI/mythalion-13b
 ** TODO embeddings

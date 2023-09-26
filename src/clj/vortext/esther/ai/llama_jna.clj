@@ -387,7 +387,6 @@
         (log/error e "Error shifting and inserting in last-tokens-ptr")))))
 
 
-
 (defn initialize-grammar
   "Initializes grammar-ptr with parsed grammar from the provided grammar string."
   [grammar-str]
