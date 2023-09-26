@@ -323,10 +323,13 @@
                                   tau
                                   eta)})))
 
+
+
 (defn calculate-offset
   "Calculates the memory offset based on the given count and last-n-repeat."
   [count last-n-repeat]
   (* (- count last-n-repeat) Integer/BYTES))
+
 
 (defn apply-single-penalty
   "Applies a single penalty using the provided raw llama function, context, candidates, offset-pointer, and other params."
@@ -335,6 +338,7 @@
     (apply llama-function ctx candidates offset-ptr params)
     (catch Exception e
       (log/error e (str "Error calling " (name llama-function))))))
+
 
 (defn apply-penalties
   "Applies penalties based on the given context, candidates, and last-tokens pointer.
@@ -349,9 +353,8 @@
         alpha-frequency (float 0.0)
         alpha-presence (float 0.0)
         repeat-last-n (int 64)]
-    (when (every? zero? last-tokens)
-      (let [non-zero-last-tokens (apply + (map #(min 1 %) last-tokens))
-            last-n-repeat (Math/min (Math/min non-zero-last-tokens repeat-last-n) n-ctx)
+    (when-not (empty? last-tokens)
+      (let [last-n-repeat (Math/min (Math/min (count last-tokens) repeat-last-n) n-ctx)
             num-bytes (* (count last-tokens) Integer/BYTES)
             mem (doto (Memory. num-bytes)
                   (.write 0 last-tokens 0 (count last-tokens)))]
@@ -362,8 +365,13 @@
         (let [offset (calculate-offset (count last-tokens) last-n-repeat)
               offset-ptr (.share mem offset)]
 
-          (apply-single-penalty raw/llama_sample_repetition_penalty ctx candidates offset-ptr last-n-repeat repeat-penalty)
-          (apply-single-penalty raw/llama_sample_frequency_and_presence_penalties ctx candidates offset-ptr last-n-repeat alpha-frequency alpha-presence))))))
+          (apply-single-penalty raw/llama_sample_repetition_penalty
+                                ctx candidates offset-ptr last-n-repeat
+                                repeat-penalty)
+          (apply-single-penalty raw/llama_sample_frequency_and_presence_penalties
+                                ctx candidates offset-ptr last-n-repeat
+                                alpha-frequency alpha-presence))))))
+
 
 
 (defn reset-last-tokens!
