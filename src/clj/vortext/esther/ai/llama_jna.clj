@@ -381,7 +381,7 @@
          last-tokens-cursor (atom 0)
          candidates-buf* (volatile! nil)
          mu* (volatile! (* 2 tau))]
-     {:grammar grammar-ptr
+     {:grammar @grammar-ptr
       :last-tokens last-tokens
       :resetf #(do
                  (.clear last-tokens)
@@ -616,7 +616,7 @@
   (require '[clojure.java.io :as io])
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def ctx (create-context llama7b-path {:n-ctx 512 :n-gpu-layers 32}))
+  (def ctx (create-context llama7b-path {:n-ctx 512 :n-gpu-layers 35}))
 
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
