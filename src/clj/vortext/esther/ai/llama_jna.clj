@@ -324,53 +324,31 @@
                                   eta)})))
 
 
-
-(defn calculate-offset
-  "Calculates the memory offset based on the given count and last-n-repeat."
-  [count last-n-repeat]
-  (* (- count last-n-repeat) Integer/BYTES))
-
-
-(defn apply-single-penalty
-  "Applies a single penalty using the provided raw llama function, context, candidates, offset-pointer, and other params."
-  [llama-function ctx candidates offset-ptr & params]
-  (try
-    (apply llama-function ctx candidates offset-ptr params)
-    (catch Exception e
-      (log/error e (str "Error calling " (name llama-function))))))
-
-
 (defn apply-penalties
-  "Applies penalties based on the given context, candidates, and last-tokens pointer.
-  Args:
-  - ctx: The context in which to apply penalties.
-  - candidates: The candidates to consider for penalties.
-  - last-tokens-ptr: Pointer to the last tokens considered for penalties."
+  "Applies penalties based on the given context, candidates, and last-tokens pointer."
   [ctx candidates last-tokens-ptr]
   (let [n-ctx (raw/llama_n_ctx ctx)
         last-tokens (.getIntArray last-tokens-ptr 0 n-ctx)
-        repeat-penalty (float 1.1)
-        alpha-frequency (float 0.0)
-        alpha-presence (float 0.0)
-        repeat-last-n (int 64)]
-    (when (some #(> % 0) last-tokens)
-      (let [last-n-repeat (Math/min (Math/min (count last-tokens) repeat-last-n) n-ctx)
-            num-bytes (* (count last-tokens) Integer/BYTES)
-            mem (doto (Memory. num-bytes)
-                  (.write 0 last-tokens 0 (count last-tokens)))]
-
-        (doseq [i (range (count last-tokens))]
-          (.setInt mem (* i Integer/BYTES) (nth last-tokens i)))
-
-        (let [offset (calculate-offset (count (filter #(not (zero? %)) last-tokens)) last-n-repeat)
+        non-zero-last-tokens (filter pos? last-tokens)
+        repeat-penalty 1.1
+        alpha-frequency 0.0
+        alpha-presence 0.0
+        repeat-last-n 64
+        n-last-tokens (count non-zero-last-tokens)]
+    (when (pos? n-last-tokens)
+      (let [last-n-repeat (min n-last-tokens repeat-last-n n-ctx)
+            num-bytes (* n-last-tokens Integer/BYTES)
+            mem (Memory. num-bytes)]
+        (doseq [i (range n-last-tokens)]
+          (.setInt mem (* i Integer/BYTES) (nth non-zero-last-tokens i)))
+        (let [offset (* (- n-last-tokens last-n-repeat) Integer/BYTES)
               offset-ptr (.share mem offset)]
-
-          (apply-single-penalty raw/llama_sample_repetition_penalty
-                                ctx candidates offset-ptr last-n-repeat
-                                repeat-penalty)
-          (apply-single-penalty raw/llama_sample_frequency_and_presence_penalties
-                                ctx candidates offset-ptr last-n-repeat
-                                alpha-frequency alpha-presence))))))
+          (raw/llama_sample_repetition_penalty
+           ctx candidates offset-ptr last-n-repeat
+           repeat-penalty)
+          (raw/llama_sample_frequency_and_presence_penalties
+           ctx candidates offset-ptr last-n-repeat
+           alpha-frequency alpha-presence))))))
 
 
 
@@ -394,19 +372,6 @@
       (catch Exception e
         (log/error e "Error shifting and inserting in last-tokens-ptr")))))
 
-
-(defn initialize-grammar
-  "Initializes grammar-ptr with parsed grammar from the provided grammar string."
-  [grammar-str]
-  (grammar/parse-grammar grammar-str))
-
-
-(defn initialize-last-tokens
-  "Initializes last tokens pointer from the provided n-ctx."
-  [n-ctx]
-  (.getPointer (->int-array-by-reference n-ctx)))
-
-
 (defn apply-sample-functions
   "Applies various sample functions in sequence, returning the next token."
   [ctx candidates grammar-ptr temperature tau eta mu]
@@ -423,9 +388,9 @@
          temperature (float 0.8)]
      (init-grammar-mirostat-v2-sampler ctx grammar-str tau eta temperature)))
   ([ctx grammar-str tau eta temperature]
-   (let [grammar-ptr (atom (initialize-grammar grammar-str))
+   (let [grammar-ptr (atom (grammar/parse-grammar grammar-str))
          n-ctx (get-in ctx [:params :n-ctx])
-         last-tokens (initialize-last-tokens n-ctx)
+         last-tokens (.getPointer (->int-array-by-reference n-ctx))
          candidates-buf* (volatile! nil)
          mu* (volatile! (* 2 tau))]
      {:grammar grammar-ptr
