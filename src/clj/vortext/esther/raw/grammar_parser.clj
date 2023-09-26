@@ -19,7 +19,7 @@
   (.getFunction ^com.sun.jna.NativeLibrary library
                 "llama_cached_parse_grammar"))
 
-(defn ^Pointer parse-grammar
+(defn ^Pointer init-grammar
   [grammar-str]
   (.invoke
    ^com.sun.jna.Function llama-cached-parse-grammar

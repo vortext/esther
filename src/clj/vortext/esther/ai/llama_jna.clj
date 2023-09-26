@@ -326,9 +326,8 @@
 
 (defn apply-penalties
   "Applies penalties based on the given context, candidates, and last-tokens pointer."
-  [ctx candidates last-tokens-ptr]
-  (let [n-ctx (raw/llama_n_ctx ctx)
-        last-tokens (.getIntArray last-tokens-ptr 0 n-ctx)
+  [ctx candidates last-tokens-ptr repeat-last-n]
+  (let [last-tokens (.getIntArray last-tokens-ptr 0 repeat-last-n)
         non-zero-last-tokens (filter pos? last-tokens)
         repeat-penalty 1.1
         alpha-frequency 0.0
@@ -336,49 +335,21 @@
         repeat-last-n 64
         n-last-tokens (count non-zero-last-tokens)]
     (when (pos? n-last-tokens)
-      (let [last-n-repeat (min n-last-tokens repeat-last-n n-ctx)
-            num-bytes (* n-last-tokens Integer/BYTES)
-            mem (Memory. num-bytes)]
-        (doseq [i (range n-last-tokens)]
-          (.setInt mem (* i Integer/BYTES) (nth non-zero-last-tokens i)))
-        (let [offset (* (- n-last-tokens last-n-repeat) Integer/BYTES)
-              offset-ptr (.share mem offset)]
-          (raw/llama_sample_repetition_penalty
-           ctx candidates offset-ptr last-n-repeat
-           repeat-penalty)
-          (raw/llama_sample_frequency_and_presence_penalties
-           ctx candidates offset-ptr last-n-repeat
-           alpha-frequency alpha-presence))))))
+      (let [last-n-repeat (min n-last-tokens repeat-last-n)]
+        (raw/llama_sample_repetition_penalty
+         ctx candidates last-tokens-ptr last-n-repeat
+         repeat-penalty)
+        (raw/llama_sample_frequency_and_presence_penalties
+         ctx candidates last-tokens-ptr last-n-repeat
+         alpha-frequency alpha-presence)))))
 
 
-
-(defn reset-last-tokens!
-  "Shifts the elements in the last-tokens-ptr and inserts a new token-id at the last position.
-  Args:
-  - last-tokens-ptr: Pointer to the last tokens array.
-  - token-id: The new token id to be added.
-  - num-tokens: The number of tokens."
-  [last-tokens-ptr token-id num-tokens]
-  (when (> num-tokens 0)
-    (try
-      ;; Shift elements one position to the left
-      (dotimes [i (dec num-tokens)]
-        (let [next-value (.getInt last-tokens-ptr (+ i 1))]
-          (.setInt last-tokens-ptr i next-value)))
-
-      ;; Insert new element at the last position
-      (.setInt last-tokens-ptr (dec num-tokens) token-id)
-
-      (catch Exception e
-        (log/error e "Error shifting and inserting in last-tokens-ptr")))))
-
-(defn apply-sample-functions
-  "Applies various sample functions in sequence, returning the next token."
-  [ctx candidates grammar-ptr temperature tau eta mu]
-  (apply-penalties ctx candidates grammar-ptr)
-  (raw/llama_sample_grammar ctx candidates grammar-ptr)
-  (raw/llama_sample_temperature ctx candidates temperature)
-  (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu))
+(defn write-to-buffer!
+  [buffer-ptr write-pos size elem]
+  ;; Write the element to the current write position.
+  (.setInt buffer-ptr (* write-pos Integer/BYTES) elem)
+  ;; Increment the write position and wrap it around if it reaches the buffer size.
+  (mod (inc write-pos) size))
 
 
 (defn init-grammar-mirostat-v2-sampler
@@ -388,29 +359,38 @@
          temperature (float 0.8)]
      (init-grammar-mirostat-v2-sampler ctx grammar-str tau eta temperature)))
   ([ctx grammar-str tau eta temperature]
-   (let [grammar-ptr (atom (grammar/parse-grammar grammar-str))
+   (let [grammar-ptr (atom nil)
          n-ctx (get-in ctx [:params :n-ctx])
          last-tokens (.getPointer (->int-array-by-reference n-ctx))
+         last-tokens-cursor (atom 0)
+         repeat-last-n 64
          candidates-buf* (volatile! nil)
          mu* (volatile! (* 2 tau))]
      {:grammar grammar-ptr
       :last-tokens last-tokens
-      :reset #(do (.clear last-tokens)
-                  (swap! grammar-ptr
-                         (fn [old]
-                           (when old
-                             (raw/llama_grammar_free old))
-                           (grammar/parse-grammar grammar-str)))
-                  nil)
+      :reset #(do
+                (.clear last-tokens)
+                (reset! last-tokens-cursor 0)
+                (swap! grammar-ptr
+                       (fn [old]
+                         (when old
+                           (raw/llama_grammar_free old))
+                         (grammar/init-grammar grammar-str)))
+                nil)
       :delete #(do (raw/llama_grammar_free grammar-ptr))
       :sample (fn [logits]
                 (let [mu (FloatByReference. @mu*)
-                      candidates (ctx->candidates ctx candidates-buf*)
-                      next-token (apply-sample-functions ctx candidates @grammar-ptr temperature tau eta mu)]
-                  (raw/llama_grammar_accept_token ctx @grammar-ptr next-token)
-                  (vreset! mu* (.getValue mu))
-                  (reset-last-tokens! last-tokens next-token n-ctx)
-                  next-token))})))
+                      candidates (ctx->candidates ctx candidates-buf*)]
+                  (apply-penalties ctx candidates last-tokens repeat-last-n)
+                  (raw/llama_sample_grammar ctx candidates @grammar-ptr)
+                  (raw/llama_sample_temperature ctx candidates temperature)
+                  (let [next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
+
+                    (raw/llama_grammar_accept_token ctx @grammar-ptr next-token)
+                    (vreset! mu* (.getValue mu))
+                    (reset! last-tokens-cursor
+                            (write-to-buffer! last-tokens @last-tokens-cursor n-ctx next-token))
+                    next-token)))})))
 
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
@@ -521,7 +501,10 @@
               (.put input-buffer (.slice ^ByteBuffer result-buf (int 0) (int len)))
               (.flip input-buffer)
 
-              ;; Invoke the decode method zero or more times, as long as additional input may be available, passing false for the endOfInput argument and filling the input buffer and flushing the output buffer between invocations;
+              ;; Invoke the decode method zero or more times, as long as
+              ;; additional input may be available, passing false for the
+              ;; endOfInput argument and filling the input buffer and flushing
+              ;; the output buffer between invocations;
               (let [decoder-result (.decode decoder input-buffer output-buffer false)]
                 (cond
                   (.isUnderflow decoder-result)
@@ -568,6 +551,7 @@
    (let [eos (raw/llama_token_eos ctx)
          {:keys [reset sample]} (or sampler (init-mirostat-v2-sampler ctx))
          kv-cache-token-count #(raw/llama_get_kv_cache_token_count ctx)]
+     (reset)
      (reify
        clojure.lang.Seqable
        (seq [_]
