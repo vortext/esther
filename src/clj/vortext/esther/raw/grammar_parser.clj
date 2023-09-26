@@ -15,12 +15,12 @@
    shared-lib library-options))
 
 
-(def ^:private llama-parse-grammar
+(def ^:private llama-cached-parse-grammar
   (.getFunction ^com.sun.jna.NativeLibrary library
-                "llama_parse_grammar"))
+                "llama_cached_parse_grammar"))
 
 (defn ^Pointer parse-grammar
   [grammar-str]
   (.invoke
-   ^com.sun.jna.Function llama-parse-grammar
+   ^com.sun.jna.Function llama-cached-parse-grammar
    Pointer (to-array [grammar-str])))
