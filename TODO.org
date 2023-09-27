@@ -119,7 +119,7 @@ _ more user information in session (vault)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** TODO weird bug where login shows in memory (enforce redirect). Maybe fixed?
+** TODO weird bug where login shows in memory (enforce redirect). Not fixed ...
 ** TODO calendar page (for memories)?
 ** TODO #keyword search
 ** TODO semantic search memories

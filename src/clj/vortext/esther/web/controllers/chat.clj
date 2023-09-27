@@ -11,7 +11,7 @@
 
 (defn ->memory-context
   [{:keys [:memory/events :memory/ts]}]
-  (let [relevant-ks [:message :emoji :imagination]
+  (let [relevant-ks [:message :emoji :keywords :imagination]
         format-event (fn [{:keys [:event/content :event/role]}]
                        {:role role
                         :content
@@ -25,6 +25,7 @@
   [opts user obj]
   (let [keywords (memory/frecency-keywords opts user :week 10)
         keywords (into #{} (map :value keywords))
+        ;; TODO calculate tokens so we don't overflow the context ...
         memories (reverse (memory/recent-conversation opts user 5))]
     (merge obj {:user/keywords keywords
                 :user/memories (mapcat ->memory-context memories)})))
