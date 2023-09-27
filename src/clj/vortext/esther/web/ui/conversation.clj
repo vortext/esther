@@ -46,8 +46,8 @@
         [:span.imagination
          {:style "display:none"} imagination])
       (case type
-        :default [:pre.default (:content response)]
-        :htmx (:content response)
+        :default [:pre.default (:message response)]
+        :htmx (:message response)
         :error (error->html response)
         :md-mono (md->html response)
         :md-sans (md->html response)

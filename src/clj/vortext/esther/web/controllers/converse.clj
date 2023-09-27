@@ -42,7 +42,7 @@
     (merge
      {:personality/ai-name (get-in opts [:ai :name])
       :memory/gid (memory/gid)
-      :memory/events [{:event/content {:message content}
+      :memory/events [{:event/content {:message (str/trim content)}
                        :event/role :user}]}
      (context/from-client-context client-context))))
 
