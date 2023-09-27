@@ -3,9 +3,10 @@
    [babashka.fs :as fs]
    [clojure.java.io :as io]
    [clojure.string :as str]
+   [clojure.core.async :refer [chan go go-loop >! <! <!!]]
    [vortext.esther.util.json :as json]
    [vortext.esther.ai.llama-jna :refer
-    [create-context init-llama-sampler generate-string]]
+    [create-context init-llama-sampler generate-string *num-threads*]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [malli.core :as m]
@@ -49,7 +50,7 @@
          (if user?
            (:content content)
            (json/write-value-as-string content))
-         (when moment (str " (" moment ") ")))))
+         (when moment (format " (%s)" moment)))))
 
 
 (defn create-submission
@@ -79,14 +80,26 @@
         (json/read-json-value (subs output start (inc end)))))))
 
 
+(defn buffered-function [f]
+  (let [channel (chan 128)
+        buffer (chan 128)]
+    (go-loop []
+      (let [args (<! buffer)]
+        (let [result (apply f args)]
+          (>! channel result)
+          (recur))))
+    (fn [& args]
+      (go (>! buffer args))
+      (<!! channel))))
 
-(defn create-instance
-  [{:keys [options]}]
+(defmethod ig/init-key :ai.llm/llm-interface
+  [_ {:keys [options]}]
   (let [{:keys [model-path]} options
-
-        ctx (create-context
-             (str (fs/canonicalize model-path))
-             {:n-ctx (* 4 1024) :n-gpu-layers 25})
+        _       (log/debug options)
+        ctx (binding [*num-threads* 32]
+              (create-context
+               (str (fs/canonicalize model-path))
+               {:n-ctx (* 4 1024) :n-gpu-layers 26}))
 
         {:keys [grammar-template model-prefix model-suffix end-of-turn]} options
         gbnf-template-path (str (fs/canonicalize (io/resource grammar-template)))
@@ -100,12 +113,14 @@
     {:shutdown-fn
      (fn []
        (.close ctx)
-       ((:deletef sampler)))
+       ((:deletef sampler))
+       nil)
      :complete-fn
      (fn [obj]
        (let [submission (create-submission options obj)
              _ (log/debug "submission::" submission)
-             generated (generate-string ctx submission {:sampler sampler})
+             generated ((buffered-function generate-string)
+                        ctx submission {:sampler sampler})
              _ (log/debug "generated::" generated)]
          (assoc obj :llm/response
                 (-> generated
@@ -113,14 +128,5 @@
                     (validate-response)))))}))
 
 
-(defmethod ig/init-key :ai.llm/llm-interface
-  [_ {:keys [impl]
-      :as   opts}]
-  (let [instance (create-instance opts)]
-    {:instance instance
-     :shutdown-fn (:shutdown-fn instance)
-     :complete-fn (:complete-fn instance)}))
-
-
-(defmethod ig/halt-key! :ai.llm/llm-interface [_ {:keys [instance]}]
-  ((:shutdown-fn instance)))
+(defmethod ig/halt-key! :ai.llm/llm-interface [_ opts]
+  ((:shutdown-fn opts)))

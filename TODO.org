@@ -82,8 +82,8 @@ _ more user information in session (vault)
 - [X] make it work again with master llama.cpp
 - [X] implement mirostat params
 - [X] implement grammar
-- [ ] get rid of shell impl (generate better "prompt" to complete)
-- [ ] Try https://huggingface.co/PygmalionAI/mythalion-13b
+- [X] get rid of shell impl (generate better "prompt" to complete)
+- [X] Try https://huggingface.co/PygmalionAI/mythalion-13b (not better?)
 ** TODO embeddings
 - onnx bert?
 - bert.cpp / jna?
