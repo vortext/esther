@@ -19,9 +19,9 @@
 
 
 (defn md->html
-  [{:keys [content]}]
-  (if (and (string? content) (not (str/blank? content)))
-    (markdown/parse content {"gfm" true "breaks" true})
+  [{:keys [message]}]
+  (if (and (string? message) (not (str/blank? message)))
+    (markdown/parse message {"gfm" true "breaks" true})
     "<span></span>"))
 
 

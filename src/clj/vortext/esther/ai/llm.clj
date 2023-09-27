@@ -3,7 +3,6 @@
    [babashka.fs :as fs]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [clojure.core.async :refer [chan go go-loop >! <! <!!]]
    [vortext.esther.util.json :as json]
    [vortext.esther.ai.llama-jna :refer
     [create-context init-llama-sampler generate-string *num-threads*]]
@@ -18,11 +17,8 @@
 
 (def response-schema
   [:map
-   [:content
-    [:and
-     [:string {:min 1, :max 2048}]
-     [:fn {:error/message "response should be at most 2048 chars"}
-      (fn [s] (<= (count s) 2048))]]]
+   [:message
+    [:string {:min 1, :max 2048}]]
    [:emoji [:fn {:error/message "should contain a valid emoji"}
             (fn [s] (emoji/unicode-emoji? s))]]
    [:imagination [:string {:min 1, :max 2048}]]])

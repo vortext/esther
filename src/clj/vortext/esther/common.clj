@@ -38,7 +38,7 @@
 
 (defn request-msg
   [obj]
-  (-> obj :memory/events first :event/content :content))
+  (-> obj :memory/events first :event/content :message))
 
 
 (defn remove-namespaces

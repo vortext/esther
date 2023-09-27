@@ -5,7 +5,7 @@ suffix    ::= "{{model-suffix}}"
 quote     ::= "\""
 eot       ::= "{{end-of-turn}}"
 
-obj       ::= ("{" quote "content" quote ": " string ","
+obj       ::= ("{" quote "message" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
                    quote "keywords" quote ": " kwarray ","
                    quote "imagination" quote ": " string "}")

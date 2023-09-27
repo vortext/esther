@@ -11,7 +11,7 @@
 
 (defn ->memory-context
   [{:keys [:memory/events :memory/ts]}]
-  (let [relevant-ks [:content :emoji :imagination]
+  (let [relevant-ks [:message :emoji :imagination]
         format-event (fn [{:keys [:event/content :event/role]}]
                        {:role role
                         :content
@@ -30,7 +30,7 @@
                 :user/memories (mapcat ->memory-context memories)})))
 
 
-(defn converse!
+(defn chat!
   [opts user obj]
   (let [obj (->user-context opts user obj)
         complete (get-in opts [:ai :llm :complete-fn])

@@ -6,7 +6,7 @@
    [vortext.esther.common :as common]
    [vortext.esther.errors :refer [wrapped-error]]
    [vortext.esther.util.json :as json]
-   [vortext.esther.web.controllers.chat :refer [converse!]]
+   [vortext.esther.web.controllers.chat :refer [chat!]]
    [vortext.esther.web.controllers.command :refer [command!]]
    [vortext.esther.web.controllers.context :as context]
    [vortext.esther.web.controllers.memory :as memory]))
@@ -14,10 +14,10 @@
 
 (def request-schema
   [:map
-   [:content
+   [:message
     [:and
      [:string {:min 1, :max 1024}]
-     [:fn {:error/message "content should be at most 1024 chars"}
+     [:fn {:error/message "message should be at most 1024 chars"}
       (fn [s] (<= (count s) 1024))]]]])
 
 
@@ -30,7 +30,7 @@
   [opts user obj]
   (let [reply (if (str/starts-with? (common/request-msg obj) "/")
                 (command! opts user obj)
-                (converse! opts user obj))]
+                (chat! opts user obj))]
     (append-event obj reply)))
 
 
@@ -42,7 +42,7 @@
     (merge
      {:personality/ai-name (get-in opts [:ai :name])
       :memory/gid (memory/gid)
-      :memory/events [{:event/content {:content content}
+      :memory/events [{:event/content {:message content}
                        :event/role :user}]}
      (context/from-client-context client-context))))
 
