@@ -11,6 +11,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.common :as common]
+   [vortext.esther.util.emoji :as emoji]
    [vortext.esther.util.handlebars :as handlebars]))
 
 
@@ -20,7 +21,10 @@
     [:and
      [:string {:min 1, :max 2048}]
      [:fn {:error/message "response should be at most 2048 chars"}
-      (fn [s] (<= (count s) 2048))]]]])
+      (fn [s] (<= (count s) 2048))]]]
+   [:emoji [:fn {:error/message "should contain a valid emoji"}
+            (fn [s] (emoji/unicode-emoji? s))]]
+   [:imagination [:string {:min 1, :max 2048}]]])
 
 
 (defn validate
@@ -48,7 +52,8 @@
 
 
 (defn create-submission
-  [{:keys [system-prefix] :as opts} {:keys [:memory/events :user/memories] :as obj}]
+  [{:keys [system-prefix user-prefix] :as opts}
+   {:keys [:memory/events :user/memories] :as obj}]
   (let [template (slurp (io/resource (:prompt opts)))
         ks [:context/today :context/lunar-phase
             :context/allow-location
@@ -57,14 +62,11 @@
         context (common/remove-namespaces (select-keys obj ks))
         prompt  (handlebars/render template context)
         request-content (-> events first :event/content :content)
-        conversation (str/join "\n" (map (partial memory-line opts) memories))
-        ]
+        conversation (str/join "\n" (map (partial memory-line opts) memories))]
     (str/join
-     "\n"
-     [system-prefix
-      prompt
-      conversation
-      (str (:user-prefix opts) request-content)])))
+     [(str system-prefix prompt)
+      (str conversation "\n")
+      (str user-prefix request-content)])))
 
 
 (defn extract-json-parse
