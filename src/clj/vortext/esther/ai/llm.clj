@@ -45,10 +45,11 @@
                  :model model-prefix
                  :user user-prefix)
         user? (= :user role)]
-    (str prefix (when moment (str "(" moment ") "))
+    (str prefix
          (if user?
            (:content content)
-           (json/write-value-as-string content)))))
+           (json/write-value-as-string content))
+         (when moment (str " (" moment ") ")))))
 
 
 (defn create-submission
