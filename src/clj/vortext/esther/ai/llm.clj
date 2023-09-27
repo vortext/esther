@@ -41,16 +41,11 @@
 (def validate-response (partial validate response-schema))
 
 (defn memory-line
-  [{:keys [model-prefix user-prefix]} {:keys [role content moment]}]
+  [{:keys [model-prefix user-prefix]} {:keys [role content]}]
   (let [prefix (case role
                  :model model-prefix
-                 :user user-prefix)
-        user? (= :user role)]
-    (str prefix
-         (if user?
-           (:content content)
-           (json/write-value-as-string content))
-         (when moment (format " (%s)" moment)))))
+                 :user user-prefix)]
+    (str prefix (json/write-value-as-string content))))
 
 
 (defn create-submission
@@ -63,12 +58,12 @@
             :context/season :personality/ai-name]
         context (common/remove-namespaces (select-keys obj ks))
         prompt  (handlebars/render template context)
-        request-content (-> events first :event/content :content)
+        request-content (-> events first :event/content)
         conversation (str/join "\n" (map (partial memory-line opts) memories))]
     (str/join
      [(str system-prefix prompt)
       (str conversation "\n")
-      (str user-prefix request-content)])))
+      (str user-prefix (json/write-value-as-string request-content))])))
 
 
 (defn extract-json-parse
@@ -80,17 +75,7 @@
         (json/read-json-value (subs output start (inc end)))))))
 
 
-(defn buffered-function [f]
-  (let [channel (chan 128)
-        buffer (chan 128)]
-    (go-loop []
-      (let [args (<! buffer)]
-        (let [result (apply f args)]
-          (>! channel result)
-          (recur))))
-    (fn [& args]
-      (go (>! buffer args))
-      (<!! channel))))
+
 
 (defmethod ig/init-key :ai.llm/llm-interface
   [_ {:keys [options]}]
@@ -119,7 +104,7 @@
      (fn [obj]
        (let [submission (create-submission options obj)
              _ (log/debug "submission::" submission)
-             generated ((buffered-function generate-string)
+             generated (generate-string
                         ctx submission {:sampler sampler})
              _ (log/debug "generated::" generated)]
          (assoc obj :llm/response

@@ -5,16 +5,19 @@
    [vortext.esther.web.controllers.memory :as memory]))
 
 
+(defn as-moment [ts]
+  (time/human-time-ago
+   (time/->local-date-time ts)))
+
 (defn ->memory-context
   [{:keys [:memory/events :memory/ts]}]
   (let [relevant-ks [:content :emoji :imagination]
         format-event (fn [{:keys [:event/content :event/role]}]
-                       (merge
-                        {:role role
-                         :content (select-keys  content relevant-ks)}
-                        (when (= role :user)
-                          {:moment (time/human-time-ago
-                                    (time/->local-date-time ts))})))]
+                       {:role role
+                        :content
+                        (merge (select-keys content relevant-ks)
+                               (when (= role :user)
+                                 {:moment (as-moment ts)}))})]
     (map format-event events)))
 
 
