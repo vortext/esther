@@ -324,14 +324,16 @@
                 tau
                 eta)})))
 
+
+
 (defn count-non-zero-elements
   [^Pointer ptr ^Integer size]
-  (loop [i 0
+  (loop [i (dec size)  ; start from the end of the array
          count 0]
-    (if (or (= i size) (zero? (.getInt ptr (* i Integer/BYTES))))
+    (if (or (< i 0)  ; check the condition to be less than 0, as we are decrementing
+            (zero? (.getInt ptr (* i Integer/BYTES))))
       count
-      (recur (inc i) (inc count)))))
-
+      (recur (dec i) (inc count)))))
 
 
 (defn apply-penalties
@@ -348,10 +350,13 @@
 
 (defn write-to-buffer!
   [^Pointer buffer-ptr write-pos size elem]
-  ;; Write the element to the current write position.
-  (.setInt buffer-ptr (* (int write-pos) Integer/BYTES) (int elem))
+  ;; Calculate the position to write in the buffer, starting from the end.
+  (let [write-index (mod (- size (inc write-pos)) size)]
+    ;; Write the element to the calculated write position.
+    (.setInt buffer-ptr (* write-index Integer/BYTES) (int elem)))
   ;; Increment the write position and wrap it around if it reaches the buffer size.
   (mod (inc write-pos) size))
+
 
 
 (defn free-grammar
