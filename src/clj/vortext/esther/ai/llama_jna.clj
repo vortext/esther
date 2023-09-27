@@ -358,12 +358,12 @@
   (mod (inc write-pos) size))
 
 
-
 (defn free-grammar
   [grammar-ptr]
   (when grammar-ptr
     (raw/llama_grammar_free grammar-ptr))
   nil)
+
 
 (defn init-llama-sampler
   ([ctx grammar-str]
@@ -375,17 +375,16 @@
                   :alpha-frequency (float 0.0)
                   :alpha-presence (float 0.0)
                   :temperature (float 0.8)
-                  :repeat-last-n (int 5)}
+                  :repeat-last-n (int 64)}
          {:keys [eta tau temperature repeat-last-n] :as opts} (merge _opts default)
          grammar-ptr (atom nil)
-         last-tokens-ptr (atom nil)
-         last-tokens-cursor (atom 0)
+         last-tokens-state (atom nil)
          candidates-buf* (volatile! nil)
          mu* (volatile! (* 2 tau))]
      {:resetf #(do
-                 (reset! last-tokens-ptr
-                         (.getPointer ^IntByReference (->int-array-by-reference repeat-last-n)))
-                 (reset! last-tokens-cursor 0)
+                 (reset! last-tokens-state
+                         {:ptr (.getPointer ^IntByReference (->int-array-by-reference repeat-last-n))
+                          :cursor 0})
 
                  (free-grammar @grammar-ptr)
                  (reset! grammar-ptr (grammar/init-grammar grammar-str))
@@ -393,17 +392,19 @@
       :deletef #(free-grammar @grammar-ptr)
       :samplef (fn [logits]
                  (let [mu (FloatByReference. @mu*)
-                       candidates (ctx->candidates ctx candidates-buf*)]
-                   (apply-penalties ctx candidates @last-tokens-ptr opts)
+                       candidates (ctx->candidates ctx candidates-buf*)
+                       {:keys [ptr cursor]} @last-tokens-state]
+                   (apply-penalties ctx candidates ptr opts)
                    (let [_ (raw/llama_sample_grammar ctx candidates @grammar-ptr)
                          _ (raw/llama_sample_temperature ctx candidates temperature)
                          next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
                      (raw/llama_grammar_accept_token ctx @grammar-ptr next-token)
                      (vreset! mu* (.getValue mu))
-                     (reset! last-tokens-cursor
-                             (write-to-buffer! @last-tokens-ptr
-                                               @last-tokens-cursor
-                                               repeat-last-n next-token))
+                     (swap!
+                      last-tokens-state
+                      (fn [old]
+                        (let [new (write-to-buffer! ptr cursor repeat-last-n next-token)]
+                          (assoc old :cursor new))))
                      next-token)))})))
 
 (defn get-logits

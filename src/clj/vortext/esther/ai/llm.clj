@@ -85,7 +85,7 @@
 
         ctx (create-context
              (str (fs/canonicalize model-path))
-             {:n-ctx (* 4 1024) :n-gpu-layers 23})
+             {:n-ctx (* 4 1024) :n-gpu-layers 25})
 
         {:keys [grammar-template model-prefix model-suffix end-of-turn]} options
         gbnf-template-path (str (fs/canonicalize (io/resource grammar-template)))
