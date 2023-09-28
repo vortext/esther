@@ -36,12 +36,12 @@
  :ai.llm/llm-interface
  {:impl :llama-shell
   :options
-  {:model-path #or [#env GGML_MODEL_PATH "./models/guff/Mistral-7B-Instruct-v0.1-q6_K.guff"]
+  {:model-path #or [#env GGML_MODEL_PATH "./models/guff/Mistral-7B-Instruct-v0.1-q8_0.guff"]
    :n-ctx 4096
-   :n-gpu-layers 35
+   :n-gpu-layers 25
 
    :prompt-template  "templates/prompt"
-   :grammar-template "templates/grammar"
+   :grammar-file "grammars/chat.gbnf"
    :bos "<s>"
    :eos "</s>"
    :system-prefix "<<SYS>>"

@@ -1,7 +1,4 @@
-root      ::= response
-response  ::= prefix obj suffix
-prefix    ::= "{{model-prefix}}"
-suffix    ::= "{{model-suffix}}"
+root      ::= obj
 quote     ::= "\""
 
 obj       ::= ("{" quote "imagination" quote ": " string ","

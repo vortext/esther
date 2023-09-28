@@ -1,3 +1,0 @@
-{{bos}}{{user-prefix}}{{system-prefix}}{{prompt}}{{system-suffix}}
-{{#each history}}{{#if (eq role 'user')}}{{#unless @first}}{{bos}}{{/unless}}{{user-prefix}}{{json content}}{{user-suffix}} {{else}}{{model-prefix}}{{json content}}{{model-suffix}}{{eos}}{{/if}}{{/each}}
-{{bos}}{{json new-message}}{{user-suffix}}

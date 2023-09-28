@@ -1,11 +1,11 @@
 (ns vortext.esther.ai.llm
   (:require
    [babashka.fs :as fs]
-   [clojure.java.io :as io]
    [clojure.string :as str]
+   [clojure.java.io :as io]
    [vortext.esther.util.json :as json]
    [vortext.esther.ai.llama-jna :refer
-    [create-context init-llama-sampler generate-string *num-threads*]]
+    [create-context init-llama-sampler generate-string]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [malli.core :as m]
@@ -44,21 +44,16 @@
     (filter #(#{"context" "personality"} (namespace %)) (keys obj)))))
 
 
-(defn render-prompt
-  [{:keys [prompt-template]} obj]
-  (let [template prompt-template]
-    (handlebars/render-template template (context-map obj))))
-
 
 (defn create-submission
   [opts {:keys [:memory/events :user/memories] :as obj}]
-  (let [prompt (render-prompt opts obj)
-        new-message (:event/content (first events))]
-    (handlebars/render-template
-     "templates/submission"
-     (merge opts {:history memories,
-                  :prompt prompt,
-                  :new-message new-message}))))
+  (handlebars/render-template
+   "templates/prompt"
+   (merge
+    opts
+    (context-map obj)
+    {:history memories,
+     :new-message (:event/content (first events))})))
 
 
 (defn extract-json-parse
@@ -74,20 +69,11 @@
 (defmethod ig/init-key :ai.llm/llm-interface
   [_ {:keys [options]}]
   (let [{:keys [model-path]} options
-        _       (log/debug options)
-        ctx (binding [*num-threads* 32]
-              (create-context
-               (str (fs/canonicalize model-path))
-               options))
-
-        {:keys [grammar-template model-prefix model-suffix]} options
-        _ (log/debug grammar-template)
-        gbnf-grammar (handlebars/render-template
-                      grammar-template
-                      {:model-prefix model-prefix
-                       :model-suffix model-suffix})
-
-        sampler (init-llama-sampler ctx gbnf-grammar)]
+        ctx (create-context
+             (str (fs/canonicalize model-path)) options)
+        {:keys [grammar-file]} options
+        gbnf (slurp (str (fs/canonicalize (io/resource grammar-file))))
+        sampler (init-llama-sampler ctx gbnf)]
     {:shutdown-fn
      (fn []
        (.close ctx)
