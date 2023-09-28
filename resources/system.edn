@@ -36,15 +36,19 @@
  :ai.llm/llm-interface
  {:impl :llama-shell
   :options
-  {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
-   :prompt "prompts/chat.md"
-   :grammar-template "grammars/chat.gbnf"
-   :end-of-turn ""  ;; <|end_of_turn|>
-   :system-prefix ""
-   :system-suffix ""
-   :user-prefix "User: "
-   :user-suffix ""
-   :model-prefix "Esther: "
+  {:model-path #or [#env GGML_MODEL_PATH "./models/guff/Mistral-7B-Instruct-v0.1-q6_K.guff"]
+   :n-ctx 4096
+   :n-gpu-layers 35
+
+   :prompt-template  "templates/prompt"
+   :grammar-template "templates/grammar"
+   :bos "<s>"
+   :eos "</s>"
+   :system-prefix "<<SYS>>"
+   :system-suffix "<</SYS>>"
+   :user-prefix "[INST]"
+   :user-suffix "[/INST]"
+   :model-prefix ""
    :model-suffix ""}}
 
  :reitit.routes/api

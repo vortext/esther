@@ -96,7 +96,9 @@
        :vocab-only (.writeField params "vocab_only" (->bool v))
        :use-mmap (.writeField params "use_mmap" (->bool v))
        :use-mlock (.writeField params "use_mlock" (->bool v))
-       :embedding (.writeField params "embedding" (->bool v)))
+       :embedding (.writeField params "embedding" (->bool v))
+       ;;default
+       nil)
      ;; return params
      params)
    (raw/llama_context_default_params)

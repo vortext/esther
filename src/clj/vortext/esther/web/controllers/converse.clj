@@ -61,10 +61,11 @@
           (str "Unrecognized input: "  request)))
         (let [{:keys [:memory/events] :as obj} (respond! opts user obj)
               [_ response] events]
-          (if-not (= (:ui/type response) :htmx)
-            (memory/remember! opts user obj)
+          (if (= (-> response :event/content :ui/type) :htmx)
             ;; Just return without remembering if not conversation?
-            obj)))
+            obj
+            ;; Otherwise remember
+            (memory/remember! opts user obj))))
       (catch Exception e
         (append-event
          obj

@@ -11,11 +11,10 @@
 
 (defn ->memory-context
   [{:keys [:memory/events :memory/ts]}]
-  (let [relevant-ks [:message :emoji :keywords :imagination]
-        format-event (fn [{:keys [:event/content :event/role]}]
+  (let [format-event (fn [{:keys [:event/content :event/role]}]
                        {:role role
                         :content
-                        (merge (select-keys content relevant-ks)
+                        (merge (dissoc content :ui/type)
                                (when (= role :user)
                                  {:moment (as-moment ts)}))})]
     (map format-event events)))

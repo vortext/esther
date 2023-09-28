@@ -9,7 +9,7 @@
 
 (def errors
   (edn/read-string
-    (slurp (io/resource "prompts/errors.edn"))))
+    (slurp (io/resource "data/errors.edn"))))
 
 
 (defn loggable-exception

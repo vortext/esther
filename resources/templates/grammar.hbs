@@ -3,12 +3,11 @@ response  ::= prefix obj suffix
 prefix    ::= "{{model-prefix}}"
 suffix    ::= "{{model-suffix}}"
 quote     ::= "\""
-eot       ::= "{{end-of-turn}}"
 
-obj       ::= ("{" quote "message" quote ": " string ","
+obj       ::= ("{" quote "imagination" quote ": " string ","
                    quote "emoji" quote ": " emoji ","
                    quote "keywords" quote ": " kwarray ","
-                   quote "imagination" quote ": " string "}")
+                   quote "message" quote ": " string "}")
 
 string ::=
   quote (
@@ -21,5 +20,3 @@ emoji     ::= quote ([😀-🙏] | [😀-😶] | [🚀-🛀] | [🌀-🗿]) quot
 
 keyword   ::= quote "#" [a-zA-Z0-9-]+ quote
 kwarray   ::= "[" (keyword ",")*  keyword "]"
-
-# number    ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)?
