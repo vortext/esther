@@ -32,21 +32,22 @@
        {:status 301
         :session {:identity nil}
         :headers {"Location" "/"}})}]
-   ["/user/conversation"
-    {:get (partial conversation/render opts)
-     :post (partial conversation/message opts)}]
-   ["/user/archive"
-    {:post (partial memory/archive opts)}]
-   ["/user/wipe"
-    {:post (partial memory/wipe opts)}]])
+   ["/user"
+    ["/conversation"
+     {:get (partial conversation/render opts)
+      :post (partial conversation/message opts)}]
+    ["/archive"
+     {:post (partial memory/archive opts)}]
+    ["/wipe"
+     {:post (partial memory/wipe opts)}]]])
 
 
 (defn on-error
   [req _]
-  (log/warn
-   "access-rules on-error" " session:" (:session req))
-  {:status 301
-   :headers {"Location" "/login"
+  (log/warn "access-rules on-error session:" (:session req))
+  {:status 200 ;; HTMX does not recognize it if you send 301 ...
+   :headers {"location" "/login"
+             "HX-Redirect" "/login"
              "HX-Refresh" "true"}
    :body "Redirecting to login"})
 

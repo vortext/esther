@@ -84,6 +84,8 @@ _ more user information in session (vault)
 - [X] implement grammar
 - [X] get rid of shell impl (generate better "prompt" to complete)
 - [X] Try https://huggingface.co/PygmalionAI/mythalion-13b (not better?)
+** TODO move handlebars in system, better Helper in llm.clj
+** TODO Try websockets
 ** TODO embeddings
 - onnx bert?
 - bert.cpp / jna?
@@ -95,6 +97,7 @@ _ more user information in session (vault)
 - For converse: most_similar => summarize top-k => context: {kw: summary}
 - Inject similar memories in user request context
 - https://github.com/nmslib/hnswlib (via JNA clong clang?)
+- https://github.com/vioshyvo/mrpt (no persistence)
 - get it to work simple example
 - get it to work persistence, how to deal with scoping to user?!
 - get it to work with embeddings and real data (find or generate some dataset)
@@ -119,7 +122,8 @@ _ more user information in session (vault)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** TODO weird bug where login shows in memory (enforce redirect). Not fixed ...
+** DONE weird bug where login shows in memory (enforce redirect). Not fixed ...
+- Steps to reproduce: clear cookies, send message.
 ** TODO calendar page (for memories)?
 ** TODO #keyword search
 ** TODO semantic search memories
@@ -133,6 +137,7 @@ _ more user information in session (vault)
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
 ** TODO /imagine command (no solutions for this ATM)
+- maybe stablediffusion v0.9 (new version)
 - hook up image generation (StableDiffusionAPI is too crappy)
 - integrate image describe into memory
 - https://github.com/deep-floyd/IF maybe?
