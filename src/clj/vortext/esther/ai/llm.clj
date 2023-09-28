@@ -58,12 +58,9 @@
 
 (defn extract-json-parse
   [output]
-  (when (seq output)
-    (let [start (str/index-of output "{")
-          end (str/last-index-of output "}")]
-      (when (and start end)
-        (json/read-json-value (subs output start (inc end)))))))
-
+  (json/read-json-value
+   (common/escape-newlines
+    output)))
 
 
 (defmethod ig/init-key :ai.llm/llm-interface

@@ -1,22 +1,15 @@
 (ns vortext.esther.web.controllers.chat
   (:require
    [clojure.tools.logging :as log]
-   [vortext.esther.util.time :as time]
    [vortext.esther.web.controllers.memory :as memory]))
 
 
-(defn as-moment [ts]
-  (time/human-time-ago
-   (time/->local-date-time ts)))
+
 
 (defn ->memory-context
-  [{:keys [:memory/events :memory/ts]}]
+  [{:keys [:memory/events]}]
   (let [format-event (fn [{:keys [:event/content :event/role]}]
-                       {:role (name role)
-                        :content
-                        (merge (dissoc content :ui/type)
-                               (when (= role :user)
-                                 {:moment (as-moment ts)}))})]
+                       {:role (name role) :content content})]
     (map format-event events)))
 
 

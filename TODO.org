@@ -78,6 +78,8 @@ _ more user information in session (vault)
 ** DONE switch to libsodium for security
 ** DONE simple sentiment analysis for energy
 ** DONE #keywords (hash tags instead of namespaced concepts?)
+** DONE weird bug where login shows in memory (enforce redirect). Not fixed ...
+- Steps to reproduce: clear cookies, send message.
 ** TODO use llama.clj instead of shell
 - [X] make it work again with master llama.cpp
 - [X] implement mirostat params
@@ -122,8 +124,6 @@ _ more user information in session (vault)
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** DONE weird bug where login shows in memory (enforce redirect). Not fixed ...
-- Steps to reproduce: clear cookies, send message.
 ** TODO calendar page (for memories)?
 ** TODO #keyword search
 ** TODO semantic search memories

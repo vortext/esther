@@ -83,6 +83,9 @@
 
 (def human-time-ago h/datetime)
 
+(defn as-moment [ts]
+  (human-time-ago
+   (->local-date-time ts)))
 
 (def time-of-day
   (let [script "public/js/vendor/suncalc.js"
@@ -102,6 +105,7 @@
         (case type
           :emoji ((:lunarPhaseEmoji api) iso8601)
           :string ((:lunarPhase api) iso8601))))))
+
 
 
 ;; Scratch

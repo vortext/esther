@@ -1,8 +1,7 @@
 (ns vortext.esther.common
   (:require
-    [camel-snake-kebab.core :as csk]
-    [clojure.string :as str]
-    [clojure.walk :as walk]))
+   [clojure.string :as str]
+   [clojure.walk :as walk]))
 
 
 (defn parse-number
@@ -21,13 +20,6 @@
                    (or (transform-fn (str value))
                        default-value)))))
 
-
-(defn namespace-keywordize-map
-  [obj]
-  (let [f (fn [[k v]]
-            (csk/->kebab-case
-              (str (name k) ":" (str/trim (str/lower-case  (str v))))))]
-    (into #{} (keep f obj))))
 
 
 (defn split-first-word
@@ -49,8 +41,15 @@
             (keyword (name k))
             k))]
     (walk/postwalk
-      (fn [x]
-        (if (map? x)
-          (into {} (map (fn [[k v]] [(remove-namespace k) v]) x))
-          x))
-      m)))
+     (fn [x]
+       (if (map? x)
+         (into {} (map (fn [[k v]] [(remove-namespace k) v]) x))
+         x))
+     m)))
+
+
+(defn unescape-newlines [s]
+  (str/replace s "\\n" "\n"))
+
+(defn escape-newlines [s]
+  (clojure.string/replace s "\n" "\\\\n"))
