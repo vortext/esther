@@ -56,8 +56,7 @@
         new-message (:event/content (first events))]
     (handlebars/render-template
      "templates/submission"
-     (merge opts {:memories memories,
-                  :conversation (boolean (seq memories))
+     (merge opts {:history memories,
                   :prompt prompt,
                   :new-message new-message}))))
 
