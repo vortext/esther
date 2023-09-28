@@ -12,7 +12,6 @@ string ::=
     "\\" (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
   )+ quote
 
-
 emoji     ::= quote ([😀-🙏] | [😀-😶] | [🚀-🛀] | [🌀-🗿]) quote
 
 keyword   ::= quote "#" [a-zA-Z0-9-]+ quote

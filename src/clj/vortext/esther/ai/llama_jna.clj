@@ -378,7 +378,7 @@
                   :alpha-presence (float 0.0)
                   :temperature (float 0.8)
                   :repeat-last-n (int 64)}
-         {:keys [eta tau temperature repeat-last-n] :as opts} (merge _opts default)
+         {:keys [eta tau temperature repeat-last-n] :as opts} (merge default _opts)
          grammar-ptr (atom nil)
          last-tokens-state (atom nil)
          candidates-buf* (volatile! nil)
@@ -609,6 +609,7 @@
    (generate-string ctx prompt nil))
   ([ctx prompt opts]
    (let [[prompt-token-count _] (tokenize ctx prompt true)]
+     (log/debug "prompt-token-count" prompt-token-count)
      (str/join
       (eduction
        (take (- (raw/llama_n_ctx ctx)

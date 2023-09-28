@@ -68,12 +68,11 @@
 
 (defmethod ig/init-key :ai.llm/llm-interface
   [_ {:keys [options]}]
-  (let [{:keys [model-path]} options
-        ctx (create-context
-             (str (fs/canonicalize model-path)) options)
+  (let [ctx (create-context
+             (str (fs/canonicalize (:model-path options))) options)
         {:keys [grammar-file]} options
         gbnf (slurp (str (fs/canonicalize (io/resource grammar-file))))
-        sampler (init-llama-sampler ctx gbnf)]
+        sampler (init-llama-sampler ctx gbnf options)]
     {:shutdown-fn
      (fn []
        (.close ctx)

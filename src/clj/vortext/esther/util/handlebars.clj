@@ -7,29 +7,37 @@
             Handlebars$SafeString EscapingStrategy
             Handlebars Template Helper Options]))
 
-(defonce ^Handlebars handlebars (Handlebars.))
+(def ^Handlebars handlebars
+  (doto (Handlebars.)
+    (.with EscapingStrategy/NOOP) ;; ⚠
+    (.registerHelper
+     "eq"
+     (proxy [Helper] []
+       (apply [context ^Options options]
+         (= (name context) (name (first (.params options)))))))
 
-(.with handlebars EscapingStrategy/NOOP) ;; ⚠
+    (.registerHelper
+     "json"
+     (proxy [Helper] []
+       (apply [context ^Options options]
+         (json/write-value-as-string context))))
+
+    (.registerHelper
+     "suffix"
+     (proxy [Helper] []
+       (apply [context ^Options options]
+         (get-in context [(first (.params options)) "suffix"]))))
+    (.registerHelper
+     "prefix"
+     (proxy [Helper] []
+       (apply [context ^Options options]
+         (get-in context [(first (.params options)) "prefix"]))))))
+
+
 
 (defn safe-str
   [content]
   (Handlebars$SafeString. content))
-
-;; Register the eq helper
-(.registerHelper
- handlebars "eq"
- (proxy [Helper] []
-   (apply [context ^Options options]
-     (= (name context) (name (first (.params options)))))))
-
-;; Register the json helper
-
-
-(.registerHelper
- handlebars "json"
- (proxy [Helper] []
-   (apply [context ^Options options]
-     (json/write-value-as-string context))))
 
 
 (defn compile-template
