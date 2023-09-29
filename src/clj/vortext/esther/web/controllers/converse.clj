@@ -35,13 +35,12 @@
 
 
 (defn as-obj
-  [opts request]
+  [request]
   (let [{:keys [params]} request
         {:keys [client-context content]} params
         client-context (json/read-json-value client-context)]
     (merge
-     {:personality/ai-name (get-in opts [:ai :name])
-      :memory/gid (memory/gid)
+     {:memory/gid (memory/gid)
       :memory/events [{:event/content {:message (str/trim content)}
                        :event/role :user}]}
      (context/from-client-context client-context))))
@@ -50,7 +49,7 @@
 (defn answer!
   [opts request]
   (let [user (get-in request [:session :user])
-        obj (as-obj opts request)
+        obj (as-obj request)
         request (-> obj :memory/events first :event/content)]
     (try
       (if-not (m/validate request-schema request)

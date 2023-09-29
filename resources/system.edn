@@ -33,23 +33,24 @@
                                      :content-types true
                                      :default-charset "utf-8"}}}
 
- :ai.llm/llm-interface
- {:impl :llama-shell
-  :options
-  {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythalion-13b.Q5_K_M.gguf"]
-   :n-ctx 4096
-   :n-gpu-layers 25
-   :tau 4
-   :eta 0.2
-   :prompt-template  "templates/prompt"
-   :grammar-file "grammars/chat.gbnf"
-   :template
-   {:system {:prefix  "<|system|>"
-             :suffix  ""}
-    :user {:prefix "<|user|>"
-           :suffix ""}
-    :model {:prefix "<|model|>"
-            :suffix ""}}}}
+ :util.handlebars/instance {}
+
+ :ai.llm/instance
+ {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythalion-13b.Q5_K_M.gguf"]
+               :n-ctx 4096
+               :n-gpu-layers 25
+               :tau 4
+               :eta 0.2
+               :prompt-template  "templates/prompt"
+               :grammar-file "grammars/chat.gbnf"}
+  :template/renderer #ig/ref :util.handlebars/instance
+  :template/vars {:system {:prefix "<|system|>"
+                           :suffix ""}
+                  :user {:prefix "<|user|>"
+                         :suffix ""}
+                  :model {:prefix "<|model|>"
+                          :suffix ""}}}
+
 
  :reitit.routes/api
  {:base-path "/api"
@@ -60,9 +61,9 @@
                  :default-path "/user/conversation"
                  :db {:query-fn  #ig/ref :db.sql/query-fn
                       :connection #ig/ref  :db.sql/connection}
-                 :ai {:llm #ig/ref :ai.llm/llm-interface
-                      :name "Esther"}
-                 :env #ig/ref :system/env}}
+                 :env #ig/ref :system/env
+
+                 :ai/llm #ig/ref :ai.llm/instance}}
  :nrepl/server {:port #long #or [#env NREPL_PORT 7001],
                 :bind #or [#env NREPL_HOST "127.0.0.1"]}
  :db.sql/query-fn {:conn #ig/ref :db.sql/connection,

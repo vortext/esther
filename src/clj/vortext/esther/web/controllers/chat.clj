@@ -26,7 +26,7 @@
 (defn chat!
   [opts user obj]
   (let [obj (->user-context opts user obj)
-        complete (get-in opts [:ai :llm :complete-fn])
+        complete (get-in opts [:ai/llm :llm/complete])
         response (:llm/response (complete obj))]
     {:event/content (-> response (assoc :ui/type :md-serif))
      :event/role :model

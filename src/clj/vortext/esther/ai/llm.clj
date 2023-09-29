@@ -11,8 +11,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [vortext.esther.common :as common]
-   [vortext.esther.util.emoji :as emoji]
-   [vortext.esther.util.handlebars :as handlebars]))
+   [vortext.esther.util.emoji :as emoji]))
 
 
 (def response-schema
@@ -44,49 +43,53 @@
     (filter #(#{"context" "personality"} (namespace %)) (keys obj)))))
 
 
-
-(defn create-submission
-  [opts {:keys [:memory/events :user/memories] :as obj}]
-  (handlebars/render-template
-   "templates/prompt"
-   (merge
-    opts
-    (context-map obj)
-    {:history memories,
-     :new-message (:event/content (first events))})))
-
-
 (defn extract-json-parse
   [output]
-  (json/read-json-value
-   (common/escape-newlines
-    output)))
+  (json/read-json-value (common/escape-newlines output)))
+
+(defn complete-submission
+  [ctx renderer sampler obj]
+  (let [{:keys [:memory/events :user/memories]} obj
+        template-vars (merge
+                       (context-map obj)
+                       {:history memories,
+                        :new-message (:event/content (first events))})
+        submission ((:handlebars/render-template renderer)
+                    "templates/prompt" template-vars)
+        _ (log/debug "submission::" submission)
+        generated (generate-string
+                   ctx submission {:sampler sampler})
+        _ (log/debug "generated::" generated)]
+    (assoc obj :llm/response
+           (-> generated
+               (extract-json-parse)
+               (validate-response)))))
 
 
-(defmethod ig/init-key :ai.llm/llm-interface
-  [_ {:keys [options]}]
+(defmethod ig/init-key :ai.llm/instance
+  [_ {:keys [:llm/params :template/renderer] :as opts}]
   (let [ctx (create-context
-             (str (fs/canonicalize (:model-path options))) options)
-        {:keys [grammar-file]} options
-        gbnf (slurp (str (fs/canonicalize (io/resource grammar-file))))
-        sampler (init-llama-sampler ctx gbnf options)]
-    {:shutdown-fn
+             (str (fs/canonicalize (:model-path params))) params)
+        gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
+        sampler (init-llama-sampler ctx gbnf params)
+        template-vars (:template/vars opts)]
+
+    ((:handlebars/register-helper renderer)
+     "prefix" (fn [role _]
+                (get-in template-vars [(keyword role) :prefix])))
+
+    ((:handlebars/register-helper renderer)
+     "suffix" (fn [role _] (get-in template-vars [(keyword role) :suffix])))
+
+    {:llm/ctx ctx
+     :llm/sampler sampler
+     :llm/shutdown
      (fn []
        (.close ctx)
        ((:deletef sampler))
        nil)
-     :complete-fn
-     (fn [obj]
-       (let [submission (create-submission options obj)
-             _ (log/debug "submission::" submission)
-             generated (generate-string
-                        ctx submission {:sampler sampler})
-             _ (log/debug "generated::" generated)]
-         (assoc obj :llm/response
-                (-> generated
-                    (extract-json-parse)
-                    (validate-response)))))}))
+     :llm/complete (partial complete-submission ctx renderer sampler)}))
 
 
-(defmethod ig/halt-key! :ai.llm/llm-interface [_ opts]
-  ((:shutdown-fn opts)))
+(defmethod ig/halt-key! :ai.llm/instance [_ opts]
+  ((:llm/shutdown opts)))

@@ -2,12 +2,15 @@
   (:require
    [vortext.esther.util.json :as json]
    [clojure.tools.logging :as log]
-   [clojure.walk :refer [stringify-keys postwalk]])
+   [integrant.core :as ig]
+   [clojure.walk :refer [stringify-keys]])
   (:import [com.github.jknack.handlebars
             Handlebars$SafeString EscapingStrategy
             Handlebars Template Helper Options]))
 
-(def ^Handlebars handlebars
+
+(defn create-instance
+  []
   (doto (Handlebars.)
     (.with EscapingStrategy/NOOP) ;; ⚠
     (.registerHelper
@@ -20,60 +23,44 @@
      "json"
      (proxy [Helper] []
        (apply [context ^Options options]
-         (json/write-value-as-string context))))
-
-    (.registerHelper
-     "suffix"
-     (proxy [Helper] []
-       (apply [context ^Options options]
-         (get-in context [(first (.params options)) "suffix"]))))
-    (.registerHelper
-     "prefix"
-     (proxy [Helper] []
-       (apply [context ^Options options]
-         (get-in context [(first (.params options)) "prefix"]))))))
+         (json/write-value-as-string context))))))
 
 
-
-(defn safe-str
-  [content]
-  (Handlebars$SafeString. content))
-
-
-(defn compile-template
-  [^String location]
-  (.compile handlebars location))
-
-
-(defn- compile-inline
-  [^String template-str]
-  (.compileInline handlebars template-str))
-
-
-(defn- apply-template
+(defn apply-template
   [^Template template ^Object obj]
   (.apply template obj))
 
 
 (defn render-str
-  [template-str obj]
-  (-> (compile-inline template-str)
+  [^Handlebars handlebars ^String template-str obj]
+  (-> (.compileInline handlebars template-str)
       (apply-template (stringify-keys obj))))
+
 
 (defn render-template
-  [location obj]
-  (-> (compile-template location)
-      (apply-template (stringify-keys obj))))
+  [^Handlebars handlebars ^String location obj]
+  (->
+   (.compile handlebars location)
+   (apply-template (stringify-keys obj))))
 
-(defn mark-vals-as-safe
-  [obj]
-  (postwalk
-   (fn [x]
-     (if (map? x)
-       (into {} (map (fn [[k v]]
-                       [k (if (string? v)
-                            (safe-str v)
-                            v)])
-                     x))
-       x))
-   obj))
+
+(defn register-helper
+  [handlebars name f]
+  (.registerHelper
+   handlebars
+   name
+   (proxy [Helper] []
+     (apply [context ^Options options]
+       (f context options)))))
+
+
+(defmethod ig/init-key :util.handlebars/instance
+  [_ _options]
+  (let [instance (create-instance)]
+    {:handlebars/instance instance
+     :handlebars/register-helper (partial register-helper instance)
+     :handlebars/render-str (partial render-str instance)
+     :handlebars/render-template (partial render-template instance)}))
+
+
+(defmethod ig/halt-key! :util.handlebars [_ opts] nil)
