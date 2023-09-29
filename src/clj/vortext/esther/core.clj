@@ -11,6 +11,10 @@
    [kit.edge.utils.nrepl]
    ;; AI
    [vortext.esther.ai.llm]
+
+   ;; Util
+   [vortext.esther.util.handlebars]
+
    [vortext.esther.config :as config]
    [vortext.esther.env :refer [defaults]]
    [vortext.esther.errors :as errors]
