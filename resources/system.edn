@@ -38,14 +38,14 @@
  :ai.llm/instance
  {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
                :n-ctx 4096
-               :n-gpu-layers 25
+               :n-gpu-layers 28
                ;; :rope-freq-base 10000
                :tau 5
                :eta 0.1
                :prompt-template  "templates/prompt"
                :grammar-file "grammars/chat.gbnf"}
   :template/renderer #ig/ref :util.handlebars/instance
-  :template/vars {:system {:prefix "<System prompt/Character Card>" ;; "<|system|>"
+  :template/vars {:system {:prefix "" ;; "<|system|>"
                            :suffix ""}
                   :user {:prefix "User: " ;; "<|user|>"
                          :suffix ""}
