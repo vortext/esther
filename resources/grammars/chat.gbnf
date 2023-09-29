@@ -1,11 +1,6 @@
 root      ::= obj
 quote     ::= "\""
 
-obj       ::= ("{" quote "imagination" quote ": " string ","
-                   quote "emoji" quote ": " emoji ","
-                   quote "keywords" quote ": " kwarray ","
-                   quote "message" quote ": " string "}")
-
 string ::=
   quote (
     [^"\\] |
@@ -15,4 +10,9 @@ string ::=
 emoji     ::= quote ([😀-🙏] | [😀-😶] | [🚀-🛀] | [🌀-🗿]) quote
 
 keyword   ::= quote "#" [a-zA-Z0-9-]+ quote
-kwarray   ::= "[" (keyword ",")*  keyword "]"
+kwarray     ::= "[" (keyword (", " keyword)*)? "]"
+
+obj       ::= ("{" quote "message" quote ": " string ","
+                   quote "emoji" quote ": " emoji ","
+                   quote "keywords" quote ": " kwarray ","
+                   quote "imagination" quote ": " string "}")

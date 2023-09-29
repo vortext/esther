@@ -80,13 +80,14 @@ _ more user information in session (vault)
 ** DONE #keywords (hash tags instead of namespaced concepts?)
 ** DONE weird bug where login shows in memory (enforce redirect). Not fixed ...
 - Steps to reproduce: clear cookies, send message.
-** TODO use llama.clj instead of shell
+** DONE use llama.clj instead of shell
 - [X] make it work again with master llama.cpp
 - [X] implement mirostat params
 - [X] implement grammar
 - [X] get rid of shell impl (generate better "prompt" to complete)
 - [X] Try https://huggingface.co/PygmalionAI/mythalion-13b (not better?)
-** TODO move handlebars in system, better Helper in llm.clj
+** DONE move handlebars in system, better Helper in llm.clj
+** TODO play with models
 ** TODO Try websockets
 ** TODO embeddings
 - onnx bert?
@@ -120,6 +121,7 @@ _ more user information in session (vault)
 - [ ] Logo + favicon
 - [X] Loading indicator login
 - [ ] Accessibility and ARIA
+- [ ] Disable text input while in modal confirm
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
 ** TODO better intro flow
 ** TODO /help command

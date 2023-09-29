@@ -109,7 +109,7 @@
 
 
 (defn render
-  [{:keys [ai] :as opts} request]
+  [opts request]
   (let [config {"maxPlaceholderLength" 300}]
     (page
      (common/head
@@ -120,7 +120,7 @@
                  "public/js/vendor/sentiment.js"
                  "public/js/conversation.js"]})
      [:main#container
-      [:h1#title (:name ai)]
+      [:h1#title "Esther"]
       [:h2#today]
       (conversation opts config request)
       [:div#bottom]])))

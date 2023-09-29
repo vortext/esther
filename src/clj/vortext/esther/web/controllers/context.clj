@@ -2,12 +2,11 @@
   (:require
    [clojure.tools.logging :as log]
    [clojure.java.io :as io]
-   [vortext.esther.api.weatherapi :as weather]
    [vortext.esther.util.json :as json]
    [vortext.esther.util.time :as time]))
 
 
-(def timezones
+(defonce timezones
   (-> "data/largest_city_by_timezones.json"
       (io/resource)
       (slurp)
@@ -30,11 +29,7 @@
         now (time/iso8601->offset-date-time iso8601)
         present (time/->local-date-time now timezone)]
     {:context/present present
-     :context/allow-location has-location?
      :context/time-of-day (time/time-of-day present latitude longitude)
      :context/today (time/human-today present time/default-locale)
      :context/lunar-phase (time/lunar-phase present :emoji)
-     :context/season (time/season now latitude)
-     :context/weather
-     (when has-location?
-       (weather/current-weather (str latitude "," longitude)))}))
+     :context/season (time/season now latitude)}))
