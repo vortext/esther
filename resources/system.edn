@@ -36,22 +36,21 @@
  :util.handlebars/instance {}
 
  :ai.llm/instance
- {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mythomax-l2-13b-q5_K_M.guff"]
-               :n-ctx 4096
+ {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/pygmalion-2-13b-q5_K_M.guff"]
+               :n-ctx 2084
                :n-gpu-layers 26
-               ;; :rope-freq-base 10000
-               :tau 5
-               :eta 0.1
                :prompt-template  "templates/prompt"
-               :grammar-file "grammars/chat.gbnf"}
+               :grammar-file "grammars/chat.gbnf"
+               :mirostat 2
+               :mirostat-tau 5.0
+               :mirostat-eta 0.1}
   :template/renderer #ig/ref :util.handlebars/instance
-  :template/vars {:system {:prefix "" ;; "<|system|>"
+  :template/vars {:system {:prefix "<|system|> "
                            :suffix ""}
-                  :user {:prefix "User: " ;; "<|user|>"
+                  :user {:prefix "<|user|> "
                          :suffix ""}
-                  :model {:prefix "Esther: " ;; "<|model|>"
+                  :model {:prefix "<|model|> "
                           :suffix ""}}}
-
 
  :reitit.routes/api
  {:base-path "/api"

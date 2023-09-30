@@ -18,24 +18,29 @@
 ;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns vortext.esther.ai.llama-jna
-  (:require [vortext.esther.raw.llama :as raw]
-            [vortext.esther.raw.grammar-parser :as grammar]
-            [clojure.tools.logging :as log]
-            [clojure.core.cache.wrapped :refer [soft-cache-factory]]
-            [clojure.string :as str])
-  (:import java.lang.ref.Cleaner
-           java.nio.charset.CodingErrorAction
-           java.nio.charset.CharsetDecoder
-           java.nio.charset.Charset
-           java.nio.ByteBuffer
-           java.nio.CharBuffer
-           com.sun.jna.Memory
-           com.sun.jna.Pointer
-           com.sun.jna.ptr.IntByReference
-           com.sun.jna.ptr.FloatByReference
-           com.sun.jna.Structure))
+  (:require
+   [clojure.string :as str]
+   [vortext.esther.jna.llama :as llama]
+   [vortext.esther.jna.grammar :as grammar]
+   [clojure.tools.logging :as log]
+   [clojure.core.cache.wrapped
+    :refer [soft-cache-factory]]
+   [vortext.esther.util.native
+    :refer [->bool ->float-array-by-reference]])
+  (:import
+   java.lang.ref.Cleaner
+   java.nio.charset.CodingErrorAction
+   java.nio.charset.CharsetDecoder
+   java.nio.charset.Charset
+   java.nio.ByteBuffer
+   java.nio.CharBuffer
+   com.sun.jna.Memory
+   com.sun.jna.Pointer
+   com.sun.jna.ptr.FloatByReference
+   com.sun.jna.Structure))
 
-(raw/import-structs!)
+(llama/import-structs!)
+
 
 (defonce cleaner (delay (Cleaner/create)))
 
@@ -48,32 +53,7 @@
 
 (defonce ^:private llm-init
   (delay
-    (raw/llama_backend_init 0)))
-
-(defn ^:private ->bool [b]
-  (if b
-    (byte 1)
-    (byte 0)))
-
-(defn ^:private ->float-array-by-reference [v]
-  (let [arr (float-array v)
-        arrlen (alength arr)
-        num-bytes (* arrlen 4)
-        mem (doto (Memory. num-bytes)
-              (.write 0 arr 0 arrlen))
-        fbr (doto (FloatByReference.)
-              (.setPointer mem))]
-    fbr))
-
-(defn ^:private ->int-array-by-reference [v]
-  (let [arr (int-array v)
-        arrlen (alength arr)
-        num-bytes (* arrlen 4)
-        mem (doto (Memory. num-bytes)
-              (.write 0 arr 0 arrlen))
-        ibr (doto (IntByReference.)
-              (.setPointer mem))]
-    ibr))
+    (llama/llama_backend_init 0)))
 
 (defn ^:private map->llama-params [m]
   (reduce-kv
@@ -101,7 +81,7 @@
        nil)
      ;; return params
      params)
-   (raw/llama_context_default_params)
+   (llama/llama_context_default_params)
    m))
 
 (defn create-context
@@ -139,12 +119,12 @@
   ([model-path params]
    @llm-init
    (let [^llama_context_params llama-params (map->llama-params params)
-         model (raw/llama_load_model_from_file model-path llama-params)
+         model (llama/llama_load_model_from_file model-path llama-params)
          _ (when (nil? model)
              (throw (ex-info "Error creating model"
                              {:params params
                               :model-path model-path})))
-         context (raw/llama_new_context_with_model model llama-params)
+         context (llama/llama_new_context_with_model model llama-params)
 
          ctx-ptr (atom (Pointer/nativeValue context))
          model-ptr (atom (Pointer/nativeValue model))
@@ -155,7 +135,7 @@
          delete-context (fn []
                           (let [[old new] (swap-vals! ctx-ptr (constantly nil))]
                             (when old
-                              (raw/llama_free (Pointer. old))
+                              (llama/llama_free (Pointer. old))
                               ;; make sure model doesn't lose
                               ;; all references and get garbage
                               ;; collected until context is freed.
@@ -165,7 +145,7 @@
          delete-model (fn []
                         (let [[old new] (swap-vals! model-ptr (constantly nil))]
                           (when old
-                            (raw/llama_free_model (Pointer. old)))))
+                            (llama/llama_free_model (Pointer. old)))))
 
          n-batch (.readField llama-params "n_batch")
          ;; make context autocloseable and implement
@@ -212,7 +192,7 @@
         s (if add-bos? (str " " s) s)
         max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
         token-buf (get-token-buf ctx max-tokens)
-        num-tokens (raw/llama_tokenize ctx s (count s) token-buf max-tokens add-bos)]
+        num-tokens (llama/llama_tokenize ctx s (count s) token-buf max-tokens add-bos)]
     [num-tokens token-buf]))
 
 (defn llama-update
@@ -224,7 +204,7 @@
                  If not provided, or `nil`, defaults to `*num-threads*`.
   "
   ([ctx s]
-   (llama-update ctx s (raw/llama_get_kv_cache_token_count ctx) *num-threads*))
+   (llama-update ctx s (llama/llama_get_kv_cache_token_count ctx) *num-threads*))
   ([ctx s n-past]
    (llama-update ctx s n-past *num-threads*))
   ([ctx s n-past num-threads]
@@ -238,7 +218,7 @@
            (let [^Memory buf (get-token-buf ctx 1)]
              [1 (doto buf
                   (.setInt 0 s))]))]
-     (assert (< n-past (raw/llama_n_ctx ctx))
+     (assert (< n-past (llama/llama_n_ctx ctx))
              "Context size exceeded")
 
      (let [batch-size (:n-batch ctx)]
@@ -246,30 +226,17 @@
               n-past (int n-past)]
          (let [batch-buf (.share token-buf (* offset 4))
                num-batch-tokens (min batch-size (- total-tokens offset))]
-           (raw/llama_eval ctx batch-buf num-batch-tokens n-past num-threads)
+           (llama/llama_eval ctx batch-buf num-batch-tokens n-past num-threads)
            (let [next-offset (+ offset num-batch-tokens)]
              (when (< next-offset total-tokens)
                (recur (int next-offset)
                       (int (+ n-past num-batch-tokens))))))))
      ctx)))
 
-(defn sample-logits-greedy
-  "Returns the token with the highest value.
 
-  `logits`: a collection of floats representing the logits (see `get-logits`)."
-  [logits]
-  (transduce (map-indexed vector)
-             (completing
-              (fn [[idx1 f1 :as r1] [idx2 f2 :as r2]]
-                (if (> f1 f2)
-                  r1
-                  r2))
-              first)
-             [nil Float/MIN_VALUE]
-             logits))
-
-(defn ^:private ctx->candidates [ctx candidates-buf*]
-  (let [n-vocab (raw/llama_n_vocab ctx)
+(defn ctx->candidates
+  [ctx candidates-buf*]
+  (let [n-vocab (llama/llama_n_vocab ctx)
         buf-size (* token-data-size n-vocab)
         candidates-buf @candidates-buf*
         ^Memory
@@ -279,7 +246,7 @@
                          candidates-buf
                          (vreset! candidates-buf* (Memory. buf-size)))
 
-        logits (-> ^FloatByReference (raw/llama_get_logits ctx)
+        logits (-> ^FloatByReference (llama/llama_get_logits ctx)
                    .getPointer
                    (.getFloatArray 0 n-vocab))]
     (doseq [i (range n-vocab)]
@@ -301,119 +268,11 @@
       candidates*)))
 
 
-;; tau default 5.0
-;; eta default 0.1
-(defn ^:private sample-mirostat-v2
-  [ctx candidates-buf* mu* tau eta]
-  (let [mu (FloatByReference. @mu*)
-        candidates (ctx->candidates ctx candidates-buf*)
-        next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
-    (vreset! mu* (.getValue mu))
-    next-token))
-
-(defn init-mirostat-v2-sampler
-  "Given a context, returns a sampling function that uses the llama.cpp mirostat_v2 implementation."
-  ([ctx]
-   (let [tau (float 5.0)
-         eta (float 0.1)]
-     (init-mirostat-v2-sampler ctx tau eta)))
-  ([ctx tau eta]
-   (fn [logits]
-     {:samplef (sample-mirostat-v2
-                ctx
-                (volatile! nil)
-                (volatile! (* 2 tau))
-                tau
-                eta)})))
-
-
-
-(defn count-non-zero-elements
-  [^Pointer ptr ^Integer size]
-  (loop [i (dec size)  ; start from the end of the array
-         count 0]
-    (if (or (< i 0)  ; check the condition to be less than 0, as we are decrementing
-            (zero? (.getInt ptr (* i Integer/BYTES))))
-      count
-      (recur (dec i) (inc count)))))
-
-
-(defn apply-penalties
-  "Applies penalties based on the given context, candidates, and last-tokens pointer."
-  [ctx candidates last-tokens-ptr opts]
-  (let [{:keys [repeat-last-n repeat-penalty alpha-frequency alpha-presence]} opts
-        n-last-tokens (count-non-zero-elements last-tokens-ptr repeat-last-n)]
-    (when n-last-tokens
-      (raw/llama_sample_repetition_penalty
-       ctx candidates last-tokens-ptr n-last-tokens repeat-penalty)
-      (raw/llama_sample_frequency_and_presence_penalties
-       ctx candidates last-tokens-ptr n-last-tokens alpha-frequency alpha-presence))))
-
-
-(defn write-to-buffer!
-  [^Pointer buffer-ptr write-pos size elem]
-  ;; Calculate the position to write in the buffer, starting from the end.
-  (let [write-index (mod (- size (inc write-pos)) size)]
-    ;; Write the element to the calculated write position.
-    (.setInt buffer-ptr (* write-index Integer/BYTES) (int elem)))
-  ;; Increment the write position and wrap it around if it reaches the buffer size.
-  (mod (inc write-pos) size))
-
-
-(defn free-grammar
-  [grammar-ptr]
-  (when grammar-ptr
-    (raw/llama_grammar_free grammar-ptr))
-  nil)
-
-
-(defn init-llama-sampler
-  ([ctx grammar-str]
-   (init-llama-sampler ctx grammar-str {}))
-  ([ctx grammar-str _opts]
-   (let [default {:tau (float 5.0)
-                  :eta (float 0.1)
-                  :repeat-penalty (float 1.1)
-                  :alpha-frequency (float 0.0)
-                  :alpha-presence (float 0.0)
-                  :temperature (float 0.8)
-                  :repeat-last-n (int 64)}
-         {:keys [eta tau temperature repeat-last-n] :as opts} (merge default _opts)
-         grammar-ptr (atom nil)
-         last-tokens-state (atom nil)
-         candidates-buf* (volatile! nil)
-         mu* (volatile! (* 2 tau))]
-     {:resetf #(do
-                 (reset! last-tokens-state
-                         {:ptr (.getPointer ^IntByReference (->int-array-by-reference repeat-last-n))
-                          :cursor 0})
-
-                 (free-grammar @grammar-ptr)
-                 (reset! grammar-ptr (grammar/init-grammar grammar-str))
-                 nil)
-      :deletef #(free-grammar @grammar-ptr)
-      :samplef (fn [logits]
-                 (let [mu (FloatByReference. @mu*)
-                       candidates (ctx->candidates ctx candidates-buf*)
-                       {:keys [ptr cursor]} @last-tokens-state]
-                   (apply-penalties ctx candidates ptr opts)
-                   (let [_ (raw/llama_sample_grammar ctx candidates @grammar-ptr)
-                         _ (raw/llama_sample_temperature ctx candidates temperature)
-                         next-token (raw/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
-                     (raw/llama_grammar_accept_token ctx @grammar-ptr next-token)
-                     (vreset! mu* (.getValue mu))
-                     (swap!
-                      last-tokens-state
-                      (fn [old]
-                        (let [new (write-to-buffer! ptr cursor repeat-last-n next-token)]
-                          (assoc old :cursor new))))
-                     next-token)))})))
-
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
   [ctx]
-  (let [n-vocab (raw/llama_n_vocab ctx)]
-    (-> ^FloatByReference (raw/llama_get_logits ctx)
+  (let [n-vocab (llama/llama_n_vocab ctx)]
+    (-> ^FloatByReference (llama/llama_get_logits ctx)
         .getPointer
         (.getFloatArray 0 n-vocab))))
 
@@ -454,11 +313,11 @@
   [ctx token]
   (let [initial-size 8
         result (ByteBuffer/allocate initial-size)
-        n-tokens (raw/llama_token_to_piece ctx token (.array result) initial-size)]
+        n-tokens (llama/llama_token_to_piece ctx token (.array result) initial-size)]
     (if (< n-tokens 0)
       (let [actual-size (Math/abs (int n-tokens))
             resized-result (ByteBuffer/allocate actual-size)
-            check (raw/llama_token_to_piece ctx token (.array resized-result) actual-size)]
+            check (llama/llama_token_to_piece ctx token (.array resized-result) actual-size)]
         (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
         [actual-size resized-result])
       [n-tokens result])))
@@ -561,33 +420,34 @@
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
   ([ctx prompt]
    (generate-tokens ctx prompt nil))
-  ([ctx prompt {:keys [sampler
+  ([ctx prompt {:keys [samplef
                        num-threads
                        seed]
                 :as opts}]
-   (let [eos (raw/llama_token_eos ctx)
-         {:keys [resetf samplef]} (or sampler (init-mirostat-v2-sampler ctx))
-         kv-cache-token-count #(raw/llama_get_kv_cache_token_count ctx)]
-     (resetf)
+   (let [eos (llama/llama_token_eos ctx)
+         kv-cache-token-count #(llama/llama_get_kv_cache_token_count ctx)
+         reset? (volatile! true)]
      (reify
        clojure.lang.Seqable
        (seq [_]
          (when seed
-           (raw/llama_set_rng_seed ctx seed))
+           (llama/llama_set_rng_seed ctx seed))
          ((fn next [ctx]
-            (let [next-token (samplef (get-logits ctx))]
+            (let [next-token (samplef (get-logits ctx) @reset?)]
               (when (not= eos next-token)
+                (vreset! reset? false)
                 (cons next-token
                       (lazy-seq (next (llama-update ctx next-token (kv-cache-token-count) num-threads)))))))
           (llama-update ctx prompt 0 num-threads)))
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
-           (raw/llama_set_rng_seed ctx seed))
+           (llama/llama_set_rng_seed ctx seed))
          (loop [acc init
                 ret (llama-update ctx prompt 0 num-threads)]
-           (let [next-token (samplef (get-logits ctx))]
-             (when (= eos next-token)
+           (let [next-token (samplef (get-logits ctx) @reset?)]
+             (when (not= eos next-token)
+               (vreset! reset? false)
                (let [acc (rf acc next-token)]
                  (if (reduced? acc)
                    @acc
@@ -612,7 +472,7 @@
      (log/debug "prompt-token-count" prompt-token-count)
      (str/join
       (eduction
-       (take (- (raw/llama_n_ctx ctx)
+       (take (- (llama/llama_n_ctx ctx)
                 prompt-token-count))
        (decode-token-to-char ctx)
        (generate-tokens ctx prompt opts))))))
@@ -629,11 +489,9 @@
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
-  #_(def grammar-str (slurp (str (fs/canonicalize "native/llama.cpp/grammars/json.gbnf"))))
+  (def sampler (grammar/init-llama-sampler ctx ctx->candidates grammar-str {}))
 
-  (def sampler (init-llama-sampler ctx grammar-str))
-
-  (def result (generate-string ctx "Hi there!" {:sampler sampler}))
+  (generate-string ctx "Hi there!" {:samplef sampler})
 
 
   )

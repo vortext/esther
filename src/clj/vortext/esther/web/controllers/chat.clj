@@ -9,7 +9,8 @@
 (defn ->memory-context
   [{:keys [:memory/events]}]
   (let [format-event (fn [{:keys [:event/content :event/role]}]
-                       {:role (name role) :content content})]
+                       {:role (name role)
+                        :content (dissoc content :ui/type)})]
     (map format-event events)))
 
 

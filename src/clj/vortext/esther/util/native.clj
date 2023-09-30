@@ -4,9 +4,41 @@
    [clojure.string :as str]
    [babashka.process :refer [shell]]
    [babashka.fs :as fs]
-   [clojure.java.io :as io]))
+   [clojure.java.io :as io])
+  (:import
+   com.sun.jna.Memory
+   com.sun.jna.Pointer
+   com.sun.jna.ptr.IntByReference
+   com.sun.jna.ptr.FloatByReference
+   com.sun.jna.Structure))
+
+(defn ->bool [b]
+  (if b
+    (byte 1)
+    (byte 0)))
+
+(defn ->float-array-by-reference [v]
+  (let [arr (float-array v)
+        arrlen (alength arr)
+        num-bytes (* arrlen 4)
+        mem (doto (Memory. num-bytes)
+              (.write 0 arr 0 arrlen))
+        fbr (doto (FloatByReference.)
+              (.setPointer mem))]
+    fbr))
+
+(defn ->int-array-by-reference [v]
+  (let [arr (int-array v)
+        arrlen (alength arr)
+        num-bytes (* arrlen 4)
+        mem (doto (Memory. num-bytes)
+              (.write 0 arr 0 arrlen))
+        ibr (doto (IntByReference.)
+              (.setPointer mem))]
+    ibr))
 
 
+;; API generation
 (defn ^:private write-edn [w obj]
   (binding [*print-length* nil
             *print-level* nil
@@ -67,6 +99,10 @@
                   (get-clang-args))))))
 
 
+
 (comment
+  (dump-api (fs/canonicalize "native/llama.cpp/examples/grammar/grammar.h")
+            (fs/canonicalize "resources/api/grammar.edn"))
+
   (dump-api (fs/canonicalize "native/llama.cpp/llama.h")
             (fs/canonicalize "resources/api/llama.edn")))

@@ -30,7 +30,6 @@
 (defn inspect
   [opts user _args _obj]
   (let [memories (memory/recent-conversation opts user)]
-    (log/debug memories)
     (->event
      :md-mono
      (if (seq memories)
@@ -78,7 +77,6 @@
 (defn command!
   [opts user obj]
   (let [msg (common/request-msg obj)
-        _ (log/debug msg)
         commands {:inspect inspect
                   :keywords keywords
                   :status status
