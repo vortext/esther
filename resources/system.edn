@@ -37,7 +37,9 @@
 
  :ai.llm/instance
  {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/pygmalion-2-13b-q5_K_M.guff"]
-               :n-ctx 2084
+               :n-ctx 512 ;; => from model
+               :rope-freq-base 0 ; => from model
+               :rope-freq-scale 0 ; => from model
                :n-gpu-layers 26
                :prompt-template  "templates/prompt"
                :grammar-file "grammars/chat.gbnf"

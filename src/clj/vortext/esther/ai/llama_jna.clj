@@ -24,9 +24,11 @@
    [vortext.esther.jna.grammar :as grammar]
    [clojure.tools.logging :as log]
    [clojure.core.cache.wrapped
-    :refer [soft-cache-factory]]
+    :refer [soft-cache-factory lookup-or-miss]]
    [vortext.esther.util.native
-    :refer [->bool ->float-array-by-reference]])
+    :refer [->bool
+            ->float-array-by-reference
+            ->int-array-by-reference]])
   (:import
    java.lang.ref.Cleaner
    java.nio.charset.CodingErrorAction
@@ -44,38 +46,31 @@
 
 (defonce cleaner (delay (Cleaner/create)))
 
-(def ^:dynamic
-  *num-threads*
-  "Number of threads used when generating tokens."
-  (.. Runtime getRuntime availableProcessors))
 
 (def ^:private token-data-size (.size (llama_token_data.)))
+
+(def ->model (fn [ctx] (llama/llama_get_model ctx)))
 
 (defonce ^:private llm-init
   (delay
     (llama/llama_backend_init 0)))
 
-(defn ^:private map->llama-params [m]
+(defn ^:private map->llama-context-params [m]
   (reduce-kv
    (fn [^llama_context_params params k v]
      (case k
        :seed (.writeField params "seed" (int v))
        :n-ctx (.writeField params "n_ctx" (int v))
        :n-batch (.writeField params "n_batch" (int v))
-       :n-gpu-layers (.writeField params "n_gpu_layers" (int v))
-       :main-gpu (.writeField params "main_gpu" (int v))
-       :tensor-split (.writeField params "tensor_split" (->float-array-by-reference  v))
+       :n-threads (.writeField params "n_threads" (int v))
+       :n-threads-batch (.writeField params "n_threads_batch" (int v))
+
        :rope-freq-base (.writeField params "rope_freq_base" (float v))
        :rope-freq-scale (.writeField params "rope_freq_scale" (float v))
-       ;; :progress-callback (.writeField params "progress_callback" v)
-       ;; :progress-callback-user-data (.writeField params "progress_callback_user_data" v)
-       :low-vram (.writeField params "low_vram" (->bool v))
+
        :mul_mat_q (.writeField params "mul_mat_q" (->bool v))
        :f16-kv (.writeField params "f16_kv" (->bool v))
        :logits-all (.writeField params "logits_all" (->bool v))
-       :vocab-only (.writeField params "vocab_only" (->bool v))
-       :use-mmap (.writeField params "use_mmap" (->bool v))
-       :use-mlock (.writeField params "use_mlock" (->bool v))
        :embedding (.writeField params "embedding" (->bool v))
        ;;default
        nil)
@@ -84,29 +79,29 @@
    (llama/llama_context_default_params)
    m))
 
+(defn ^:private map->llama-model-params [m]
+  (reduce-kv
+   (fn [^llama_model_params params k v]
+     (case k
+       :n-gpu-layers (.writeField params "n_gpu_layers" (int v))
+       :main-gpu (.writeField params "main_gpu" (int v))
+       :tensor-split (.writeField params "tensor_split" (->float-array-by-reference  v))
+       ;; :progress-callback (.writeField params "progress_callback" v)
+       ;; :progress-callback-user-data (.writeField params "progress_callback_user_data" v)
+       :vocab-only (.writeField params "vocab_only" (->bool v))
+       :use-mmap (.writeField params "use_mmap" (->bool v))
+       :use-mlock (.writeField params "use_mlock" (->bool v))
+       ;;default
+       nil)
+     ;; return params
+     params)
+   (llama/llama_model_default_params)
+   m))
+
 (defn create-context
   "Create and return an opaque llama context.
 
   `model-path` should be an absolute or relative path to a F16, Q4_0, Q4_1, Q5_0, Q5_1, or Q8_0 ggml model.
-
-  An optional map of parameters may be passed for parameterizing the model.
-  The following keys map to their corresponding llama.cpp equivalents:
-  - `:seed`: RNG seed, -1 for random
-  - `:n-ctx`: text context
-  - `:n-batch`: prompt processing batch size
-  - `:n-gpu-layers`: number of layers to store in VRAM
-  - `:main-gpu`: the GPU that is used for scratch and small tensors
-  - `:tensor-split`: how to split layers across multiple GPUs
-  - `:rope-freq-base`: RoPE base frequency
-  - `:rope-freq-scale`: RoPE frequency scaling factor
-  - `:low-vram`: if true, reduce VRAM usage at the cost of performance
-  - `:mul_mat_q`: if true, use experimental mul_mat_q kernels
-  - `:f16-kv`: use fp16 for KV cache
-  - `:logits-all`: the llama_eval() call computes all logits, not just the last one
-  - `:vocab-only`: only load the vocabulary, no weights
-  - `:use-mmap`: use mmap if possible
-  - `:use-mlock`: force system to keep model in RAM
-  - `:embedding`: embedding mode only
 
   Resources can be freed by calling .close on the returned context.
   Using a closed context is undefined and will probably crash the JVM.
@@ -118,13 +113,15 @@
    (create-context model-path nil))
   ([model-path params]
    @llm-init
-   (let [^llama_context_params llama-params (map->llama-params params)
-         model (llama/llama_load_model_from_file model-path llama-params)
+   (let [^llama_context_params llama-context-params (map->llama-context-params params)
+         ^llama_model_params llama-model-params (map->llama-model-params params)
+
+         model (llama/llama_load_model_from_file model-path llama-model-params)
          _ (when (nil? model)
              (throw (ex-info "Error creating model"
                              {:params params
                               :model-path model-path})))
-         context (llama/llama_new_context_with_model model llama-params)
+         context (llama/llama_new_context_with_model model llama-context-params)
 
          ctx-ptr (atom (Pointer/nativeValue context))
          model-ptr (atom (Pointer/nativeValue model))
@@ -147,7 +144,9 @@
                           (when old
                             (llama/llama_free_model (Pointer. old)))))
 
-         n-batch (.readField llama-params "n_batch")
+         n-batch (.readField llama-context-params "n_batch")
+         n-ctx (.readField llama-context-params "n_ctx")
+
          ;; make context autocloseable and implement
          ;; some map lookup interfaces
          context (proxy [Pointer
@@ -157,7 +156,7 @@
                    (valAt [k]
                      (case k
                        :n-batch n-batch
-                       :params params
+                       :n-ctx n-ctx
                        :model @model-ref
                        ;; else
                        nil))
@@ -171,92 +170,60 @@
 
      context)))
 
-(defonce ^:private
+(def ^:private
   token-bufs
   (soft-cache-factory {}))
 
 (defn ^:private get-token-buf [ctx n]
-  (get
-   (swap! token-bufs
-          (fn [m]
-            (let [buf (get m ctx)]
-              (if (and buf
-                       (>= (.size ^Memory buf)
-                           (* 4 n)))
-                m
-                (assoc m ctx (Memory. (* 4 n)))))))
-   ctx))
+  (lookup-or-miss token-bufs ctx (fn [_] (.getPointer (->int-array-by-reference n)))))
 
-(defn ^:private tokenize [ctx s add-bos?]
-  (let [add-bos (if add-bos? 1 0)
-        s (if add-bos? (str " " s) s)
-        max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
-        token-buf (get-token-buf ctx max-tokens)
-        num-tokens (llama/llama_tokenize ctx s (count s) token-buf max-tokens add-bos)]
+(defn tokenize
+  [ctx text add-bos?]
+  (let [add-bos (->bool add-bos?)
+        s (if add-bos? (str " " text) text)
+        n-max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
+        token-buf (get-token-buf ctx n-max-tokens)
+        num-tokens (llama/llama_tokenize
+                    (->model ctx) s
+                    (count s) token-buf n-max-tokens add-bos)]
     [num-tokens token-buf]))
 
 (defn llama-update
-  "Adds `s` to the current context and updates the context's logits (see `get-logits`).
+  [ctx s]
+  (let [[num-tokens token-buf] (tokenize ctx s true)
+        batch-size (:n-batch ctx)
+        _ (llama/llama_kv_cache_seq_rm ctx 0 num-tokens (:n-ctx ctx))]
+    (loop [current-past 0]
+      (if (< current-past num-tokens)
+        (let [n-eval (min (- num-tokens current-past) batch-size)
+              batch (llama/llama_batch_get_one token-buf n-eval current-past 0)]
+          (if (neg? (llama/llama_decode ctx batch))
+            (do
+              (log/error "failed to eval" {"n_eval" n-eval, "n_past" current-past})
+              ctx) ; potentially halt if ctx cannot be updated
+            (recur (+ current-past n-eval))))
+        ctx)))) ; ensure that updated ctx is returned
 
-  `s`: either be a string or an integer token.
-  `n-past`: number of previous tokens to include when updating logits.
-  `num-threads`: number of threads to use when updating the logits.
-                 If not provided, or `nil`, defaults to `*num-threads*`.
-  "
-  ([ctx s]
-   (llama-update ctx s (llama/llama_get_kv_cache_token_count ctx) *num-threads*))
-  ([ctx s n-past]
-   (llama-update ctx s n-past *num-threads*))
-  ([ctx s n-past num-threads]
-   (let [num-threads (or num-threads *num-threads*)
-         [total-tokens ^Memory token-buf]
-         (cond
-           (string? s)
-           (tokenize ctx s (zero? n-past))
-
-           (integer? s)
-           (let [^Memory buf (get-token-buf ctx 1)]
-             [1 (doto buf
-                  (.setInt 0 s))]))]
-     (assert (< n-past (llama/llama_n_ctx ctx))
-             "Context size exceeded")
-
-     (let [batch-size (:n-batch ctx)]
-       (loop [offset (int 0)
-              n-past (int n-past)]
-         (let [batch-buf (.share token-buf (* offset 4))
-               num-batch-tokens (min batch-size (- total-tokens offset))]
-           (llama/llama_eval ctx batch-buf num-batch-tokens n-past num-threads)
-           (let [next-offset (+ offset num-batch-tokens)]
-             (when (< next-offset total-tokens)
-               (recur (int next-offset)
-                      (int (+ n-past num-batch-tokens))))))))
-     ctx)))
 
 
 (defn ctx->candidates
   [ctx candidates-buf*]
-  (let [n-vocab (llama/llama_n_vocab ctx)
+  (let [n-vocab (llama/llama_n_vocab (->model ctx))
         buf-size (* token-data-size n-vocab)
         candidates-buf @candidates-buf*
-        ^Memory
         candidates-buf (if (and candidates-buf
-                                (>= (.size ^Memory candidates-buf)
-                                    buf-size))
+                                (>= (.size ^Memory candidates-buf) buf-size))
                          candidates-buf
                          (vreset! candidates-buf* (Memory. buf-size)))
-
         logits (-> ^FloatByReference (llama/llama_get_logits ctx)
                    .getPointer
                    (.getFloatArray 0 n-vocab))]
-    (doseq [i (range n-vocab)]
-      (let [base-addr (* i token-data-size)
-            id i
-            logit (aget logits id)
-            p 0]
-        (.setInt candidates-buf base-addr id)
-        (.setFloat candidates-buf (+ base-addr 4) logit)
-        (.setFloat candidates-buf (+ base-addr 8) 0)))
+    (doseq [token-id (range n-vocab)]
+      (let [base-addr (* token-id token-data-size)
+            logit (aget logits token-id)]
+        (.setInt    candidates-buf base-addr token-id)
+        (.setFloat  candidates-buf (+ base-addr 4) logit)
+        (.setFloat  candidates-buf (+ base-addr 8) 0.0)))
     (let [candidates-array-head (doto (Structure/newInstance
                                        llama_token_dataByReference
                                        candidates-buf)
@@ -266,15 +233,6 @@
                         (.writeField "size" (long n-vocab))
                         (.writeField "sorted" (byte 0)))]
       candidates*)))
-
-
-(defn get-logits
-  "Returns a copy of the current context's logits as a float array."
-  [ctx]
-  (let [n-vocab (llama/llama_n_vocab ctx)]
-    (-> ^FloatByReference (llama/llama_get_logits ctx)
-        .getPointer
-        (.getFloatArray 0 n-vocab))))
 
 
 (defn ^:private char->str
@@ -313,11 +271,11 @@
   [ctx token]
   (let [initial-size 8
         result (ByteBuffer/allocate initial-size)
-        n-tokens (llama/llama_token_to_piece ctx token (.array result) initial-size)]
+        n-tokens (llama/llama_token_to_piece (->model ctx) token (.array result) initial-size)]
     (if (< n-tokens 0)
       (let [actual-size (Math/abs (int n-tokens))
             resized-result (ByteBuffer/allocate actual-size)
-            check (llama/llama_token_to_piece ctx token (.array resized-result) actual-size)]
+            check (llama/llama_token_to_piece (->model ctx) token (.array resized-result) actual-size)]
         (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
         [actual-size resized-result])
       [n-tokens result])))
@@ -420,12 +378,8 @@
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
   ([ctx prompt]
    (generate-tokens ctx prompt nil))
-  ([ctx prompt {:keys [samplef
-                       num-threads
-                       seed]
-                :as opts}]
+  ([ctx prompt {:keys [samplef seed]}]
    (let [eos (llama/llama_token_eos ctx)
-         kv-cache-token-count #(llama/llama_get_kv_cache_token_count ctx)
          reset? (volatile! true)]
      (reify
        clojure.lang.Seqable
@@ -433,25 +387,26 @@
          (when seed
            (llama/llama_set_rng_seed ctx seed))
          ((fn next [ctx]
-            (let [next-token (samplef (get-logits ctx) @reset?)]
+            (let [next-token (samplef @reset?)]
+              (log/debug "tok" next-token)
               (when (not= eos next-token)
                 (vreset! reset? false)
                 (cons next-token
-                      (lazy-seq (next (llama-update ctx next-token (kv-cache-token-count) num-threads)))))))
-          (llama-update ctx prompt 0 num-threads)))
+                      (lazy-seq (next (llama-update ctx next-token)))))))
+          (llama-update ctx prompt)))
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
            (llama/llama_set_rng_seed ctx seed))
          (loop [acc init
-                ret (llama-update ctx prompt 0 num-threads)]
-           (let [next-token (samplef (get-logits ctx) @reset?)]
+                ret (llama-update ctx prompt)]
+           (let [next-token (samplef @reset?)]
              (when (not= eos next-token)
                (vreset! reset? false)
                (let [acc (rf acc next-token)]
                  (if (reduced? acc)
                    @acc
-                   (recur acc (llama-update ctx next-token (kv-cache-token-count) num-threads))))))))))))
+                   (recur acc (llama-update ctx next-token))))))))))))
 
 (defn generate
   "Returns a seqable/reducible sequence of strings generated from ctx with prompt."
@@ -472,7 +427,7 @@
      (log/debug "prompt-token-count" prompt-token-count)
      (str/join
       (eduction
-       (take (- (llama/llama_n_ctx ctx)
+       (take (- (llama/llama_n_ctx (->model ctx))
                 prompt-token-count))
        (decode-token-to-char ctx)
        (generate-tokens ctx prompt opts))))))

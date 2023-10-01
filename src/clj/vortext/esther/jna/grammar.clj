@@ -48,7 +48,6 @@
        :mirostat-tau (.writeField params "mirostat_tau" (float v))
        :mirostat-eta (.writeField params "mirostat_eta" (float v))
 
-       :penalize-nl (.writeField params "penalize_nl" (->bool v))
        ;;default
        nil)
      ;; return params
@@ -62,7 +61,7 @@
   (let [^llama_sampler_params params (map->llama-sampler-params params)
         candidates-buf* (volatile! nil)
         grammar* (volatile! nil)]
-    (fn [_logits reset?]
+    (fn [reset?]
       (when reset?
         (vreset! grammar* (llama_cached_parse_grammar grammar-str)))
       (let [candidates (gen-candidatesf ctx candidates-buf*)
