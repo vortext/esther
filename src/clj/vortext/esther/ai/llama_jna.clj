@@ -23,6 +23,7 @@
    [vortext.esther.jna.llama :as llama]
    [vortext.esther.jna.grammar :as grammar]
    [clojure.tools.logging :as log]
+   [clj-commons.format.binary :refer [format-binary]]
    [vortext.esther.util.native
     :refer [->bool
             ->float-array-by-reference
@@ -32,14 +33,13 @@
             ptr->int-array]])
   (:import
    java.lang.ref.Cleaner
-   java.nio.charset.CodingErrorAction
-   java.nio.charset.CharsetDecoder
    java.nio.charset.Charset
    java.nio.ByteBuffer
    java.nio.CharBuffer
    com.sun.jna.Memory
    com.sun.jna.Pointer
    com.sun.jna.ptr.FloatByReference
+   com.sun.jna.ptr.IntByReference
    com.sun.jna.Structure)
   (:gen-class))
 
@@ -49,6 +49,22 @@
   *num-threads*
   "Number of threads used when generating tokens."
   (.. Runtime getRuntime availableProcessors))
+
+(defn dump-memory
+  [mem]
+  (log/debug
+   (str "\n" (format-binary (.getByteBuffer mem 0 (.size mem))))))
+
+
+(defn write-to-buffer!
+  [^Pointer buffer-ptr write-pos size elem]
+  ;; Calculate the position to write in the buffer, starting from the end.
+  (let [write-index (mod (- size (inc write-pos)) size)]
+    ;; Write the element to the calculated write position.
+    (.setInt buffer-ptr (* write-index Integer/BYTES) (int elem)))
+  ;; Increment the write position and wrap it around if it reaches the buffer size.
+  (mod (inc write-pos) size))
+
 
 (defonce cleaner (delay (Cleaner/create)))
 
@@ -192,53 +208,58 @@
 
 
 (defn decode-token-to-char
-  [ctx]
-  (fn [rf]
-    (let [charset (Charset/forName "UTF-8")
-          decoder (.newDecoder charset)
-          input-buffer (ByteBuffer/allocate 256)
-          output-buffer (CharBuffer/allocate 256)]
-      (fn
-        ([] (rf))
-        ([result] (rf result))
-        ([result token]
-         (let [[len result-buf] (llama-token-to-str ctx token)]
-           (.put input-buffer (.array result-buf) 0 len) ;; Pay attention to how the input is fed to the buffer
-           (.flip input-buffer) ;; Preparing buffer for read
-           (let [decoder-result (.decode decoder input-buffer output-buffer false)]
-             (cond
-               (.isUnderflow decoder-result)
-               (do
-                 (.compact input-buffer) ;; Preparing buffer for write
-                 (.flip output-buffer)   ;; Preparing buffer for read
-                 (let [result (reduce rf result output-buffer)]
-                   (.clear output-buffer)
-                   result))
-               (.isOverflow decoder-result)
-               (throw (ex-info "Decoder buffer too small" {}))
-               (.isError decoder-result)
-               (throw (ex-info "Decoder Error" {:decoder decoder}))
-               :else
-               (throw (Exception. "Unexpected decoder state."))))))))))
+  ([ctx]
+   (decode-token-to-char ctx (Charset/forName "UTF-8")))
+  ([ctx charset]
+   (fn [rf]
+     (let [decoder (.newDecoder charset)
+           input-buffer (ByteBuffer/allocate 256)
+           output-buffer (CharBuffer/allocate 256)]
+       (fn
+         ([] (rf))
+         ([result] (rf result))
+         ([result token]
+          (let [[len result-buf] (llama-token-to-str ctx token)]
+            (.put input-buffer (.array result-buf) 0 len) ;; Pay attention to how the input is fed to the buffer
+            (.flip input-buffer) ;; Preparing buffer for read
+            (let [decoder-result (.decode decoder input-buffer output-buffer false)]
+              (cond
+                (.isUnderflow decoder-result)
+                (do
+                  (.compact input-buffer) ;; Preparing buffer for write
+                  (.flip output-buffer)   ;; Preparing buffer for read
+                  (let [result (reduce rf result output-buffer)]
+                    (.clear output-buffer)
+                    result))
+                (.isOverflow decoder-result)
+                (throw (ex-info "Decoder buffer too small" {}))
+                (.isError decoder-result)
+                (throw (ex-info "Decoder Error" {:decoder decoder}))
+                :else
+                (throw (Exception. "Unexpected decoder state.")))))))))))
+
+
 
 
 
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
-  [ctx seq-id]
-  (-> ^FloatByReference (llama/llama_get_logits_ith ctx seq-id)
-      .getPointer))
+  [ctx]
+  (let [n-vocab (llama/llama_n_vocab (->model ctx))]
+    (-> ^FloatByReference (llama/llama_get_logits ctx)
+        .getPointer
+        (.getFloatArray 0 n-vocab))))
 
 
 (defn ctx->candidates
-  [ctx seq-id]
+  [ctx]
   (let [n-vocab (llama/llama_n_vocab (->model ctx))
         buf-size (* token-data-size n-vocab)
         ^Memory candidates-buf (doto (Memory. buf-size) (.clear))
-        logits (get-logits ctx seq-id)]
+        logits (get-logits ctx)]
     (doseq [id (range n-vocab)]
       (let [base-addr (* id token-data-size)
-            logit (.getFloat logits (* id Float/BYTES))]
+            logit (aget logits id)]
         (.setInt candidates-buf base-addr id)
         (.setFloat candidates-buf (+ base-addr 4) logit)
         (.setFloat candidates-buf (+ base-addr 8) 0)))
@@ -262,53 +283,38 @@
                     (->model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
     (log/debug "tokenize::tokenized" num-tokens)
-    (into [] (take-while pos? (ptr->int-array token-buf*)))))
+    (int-array (take num-tokens (ptr->int-array token-buf*)))))
 
 
 (defn create-batch
-  [seq-id tokens n-past]
-  (let [n-tokens (count tokens)
-        logits (-> (conj (into [] (repeat (dec n-tokens) (->bool false))) (->bool true))
-                   byte-array)
-        token (-> tokens int-array)
-        seq-id (-> (repeat n-tokens seq-id) int-array)
-        pos (-> (map #(+ n-past %) (range n-tokens)) int-array)]
-    (doto (llama_batch.)
-      (.writeField "n_tokens" n-tokens)
-      (.writeField "token" (int-array->int-array-by-reference token))
-      (.writeField "embd" nil)
-      (.writeField "logits" (boolean-array->byte-array-by-reference logits))
-      (.writeField "seq_id" (int-array->int-array-by-reference seq-id))
-      (.writeField "pos" (int-array->int-array-by-reference pos)))))
-
+  [seq-id tokens* n-past n-eval]
+  (llama/llama_batch_get_one tokens* n-eval n-past seq-id))
 
 
 (defn batched-decode
-  [ctx seq-id tokens n-past]
+  [ctx seq-id n-past tokens]
   (assert (< @n-past (:n-ctx ctx))
           "Context size exceeded")
-  (loop [offset 0]
-    (let [n-tokens (count tokens)
-          n-eval (min (:n-batch ctx) n-tokens)
-          eval-tokens (subvec tokens offset (+ offset n-eval))
-          batch (create-batch seq-id eval-tokens @n-past)]
-      (llama/llama_kv_cache_tokens_rm ctx @n-past -1)
-      (if-let [_ (neg? (llama/llama_decode ctx batch))]
-        (throw (Exception. (str "failed to decode n-tokens" n-tokens " n-past " @n-past)))
-        (let [next-offset (+ offset n-eval)]
-          (vreset! n-past (+ @n-past n-eval))
-          (when (< next-offset n-tokens) (recur next-offset))))))
+  (let [n-past @n-past
+        n-tokens (count tokens)
+        tokens* (.getPointer (int-array->int-array-by-reference tokens))]
+    (loop [offset 0]
+      (let [n-eval (min (:n-batch ctx) n-tokens)
+            to-eval* (.share tokens* (* Integer/BYTES offset) (* Integer/BYTES n-eval))
+            batch (create-batch seq-id to-eval* n-past n-eval)]
+        (if-let [_ (neg? (llama/llama_decode ctx batch))]
+          (throw (Exception. (str "failed to decode n-tokens" n-tokens " n-past " n-past)))
+          (let [next-offset (+ offset n-eval)]
+            (when (< next-offset n-tokens) (recur next-offset)))))))
   ctx)
 
-(def ^:dynamic
-  *num-threads*
-  "Number of threads used when generating tokens."
-  (.. Runtime getRuntime availableProcessors))
 
-(defn generate-tokens
-  [ctx seq-id {:keys [samplef seed]} n-past]
+(defn ^:private generate-tokens
+  [ctx seq-id n-past {:keys [samplef seed]}]
   (let [eos (llama/llama_token_eos ctx)
-        reset? (volatile! true)]
+        reset? (volatile! true)
+        eval (partial batched-decode ctx seq-id n-past)]
+    (log/debug n-past)
     (reify
       clojure.lang.IReduceInit
       (reduce [_ rf init]
@@ -316,24 +322,27 @@
           (llama/llama_set_rng_seed ctx seed))
         (loop [acc init
                ret nil]
-          (let [next-token (samplef (ctx->candidates ctx seq-id) @reset?)]
+          (let [next-token (samplef (ctx->candidates ctx) @reset?)]
+            (vswap! n-past inc)
+            (vreset! reset? false)
             (if (= eos next-token)
               acc
               (let [acc (rf acc next-token)]
                 (if (reduced? acc)
                   @acc
-                  (recur acc (batched-decode ctx seq-id [next-token] n-past))))))))
+                  (recur acc (eval (int-array [next-token])))))))))
 
       clojure.lang.Seqable
       (seq [_]
         (when seed
           (llama/llama_set_rng_seed ctx seed))
         ((fn next [ctx]
-           (let [next-token (samplef (ctx->candidates ctx seq-id) @reset?)]
+           (let [next-token (int (samplef (ctx->candidates ctx) @reset?))]
+             (vswap! n-past inc)
              (when (not= eos next-token)
                (vreset! reset? false)
                (cons next-token
-                     (lazy-seq (next (batched-decode ctx seq-id [next-token] n-past)))))))
+                     (lazy-seq (next (eval (int-array [next-token]))))))))
          ctx)))))
 
 
@@ -346,13 +355,15 @@
    (let [n-ctx (:n-ctx ctx)
          _ (llama/llama_kv_cache_seq_rm ctx seq-id 0 (:n-ctx ctx))
          prompt-tokens (tokenize ctx prompt true)
-         n-past (volatile! 0)
-         _ (batched-decode ctx seq-id prompt-tokens n-past)]
+         n-prompt-tokens (count prompt-tokens)
+         n-past (volatile! 0)]
+     (batched-decode ctx seq-id n-past prompt-tokens)
+     (vreset! n-past n-prompt-tokens)
      (str/join
       (eduction
        (take (- n-ctx (count prompt-tokens)))
        (decode-token-to-char ctx)
-       (generate-tokens ctx seq-id opts n-past))))))
+       (generate-tokens ctx seq-id n-past opts))))))
 
 
 ;; Scratch
@@ -361,7 +372,7 @@
   (require '[clojure.java.io :as io])
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def ctx (create-context llama7b-path {:n-ctx 4096 :n-gpu-layers 35}))
+  (def ctx (create-context llama7b-path {:n-ctx 128 :n-gpu-layers 35}))
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
