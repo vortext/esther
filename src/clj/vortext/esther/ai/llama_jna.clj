@@ -23,12 +23,14 @@
    [vortext.esther.jna.llama :as llama]
    [vortext.esther.jna.grammar :as grammar]
    [clojure.tools.logging :as log]
-   [clojure.core.cache.wrapped
-    :refer [soft-cache-factory lookup-or-miss]]
+   [clj-commons.format.binary :refer [format-binary]]
    [vortext.esther.util.native
     :refer [->bool
             ->float-array-by-reference
-            ->int-array-by-reference]])
+            ->int-array-by-reference
+            int-array->int-array-by-reference
+            boolean-array->byte-array-by-reference
+            ptr->int-array]])
   (:import
    java.lang.ref.Cleaner
    java.nio.charset.CodingErrorAction
@@ -47,7 +49,14 @@
 
 (def ^:private token-data-size (.size (llama_token_data.)))
 
+(defn dump-memory
+  [prefix mem]
+  (log/debug
+   (str prefix "\n" (format-binary (.getByteBuffer mem 0 (.size mem))))))
+
+
 (def ->model (fn [ctx] (llama/llama_get_model ctx)))
+
 
 (defonce ^:private llm-init
   (delay
@@ -167,94 +176,9 @@
      (.register ^Cleaner @cleaner model delete-model)
      context)))
 
-(def ^:private
-  token-bufs
-  (soft-cache-factory {}))
-
-(defn ^:private get-token-buf [ctx n]
-  (lookup-or-miss token-bufs ctx (fn [_] (.getPointer (->int-array-by-reference n)))))
-
-(defn ^:private tokenize [ctx s add-bos?]
-  (let [add-bos (->bool add-bos?)
-        s (if add-bos? (str " " s) s)
-        n-max-tokens (+ add-bos (alength (.getBytes s "utf-8")))
-        token-buf (get-token-buf ctx n-max-tokens)
-        num-tokens  (llama/llama_tokenize
-                     (->model ctx) s
-                     (count s) token-buf n-max-tokens add-bos)]
-    [num-tokens token-buf]))
-
-(defn llama-update
-  "Adds `s` to the current context and updates the context's logits (see `get-logits`).
-
-  `s`: either be a string or an integer token.
-  `n-past`: number of previous tokens to include when updating logits.
-  `num-threads`: number of threads to use when updating the logits.
-                 If not provided, or `nil`, defaults to `*num-threads*`.
-  "
-  ([ctx s n-past]
-   (let [[total-tokens ^Memory token-buf]
-         (cond
-           (string? s)
-           (tokenize ctx s (zero? n-past))
-
-           (integer? s)
-           (let [^Memory buf (get-token-buf ctx 1)]
-             [1 (doto buf
-                  (.setInt 0 s))]))]
-     (assert (< n-past (:n-ctx ctx))
-             "Context size exceeded")
-     (let [batch-size (:n-batch ctx)]
-       (loop [offset 0
-              n-past n-past]
-         (let [num-batch-tokens (min batch-size (- total-tokens offset))
-               _ (llama/llama_kv_cache_tokens_rm ctx n-past -1)
-               batch (llama/llama_batch_get_one token-buf num-batch-tokens n-past 0)]
-           (when (zero? (llama/llama_decode ctx batch))
-             (let [next-offset (+ offset num-batch-tokens)]
-               (when (< next-offset total-tokens)
-                 (recur next-offset
-                        (+ n-past num-batch-tokens))))))))
-     ctx)))
-
-(defn ctx->candidates
-  [ctx candidates-buf*]
-  (let [n-vocab (llama/llama_n_vocab (->model ctx))
-        buf-size (* token-data-size n-vocab)
-        candidates-buf @candidates-buf*
-        candidates-buf (if (and candidates-buf
-                                (>= (.size ^Memory candidates-buf) buf-size))
-                         candidates-buf
-                         (vreset! candidates-buf* (Memory. buf-size)))
-        logits  (-> ^FloatByReference (llama/llama_get_logits ctx)
-                    .getPointer
-                    (.getFloatArray 0 n-vocab))]
-    (doseq [token-id (range n-vocab)]
-      (let [base-addr (* token-id token-data-size)
-            logit (aget logits token-id)]
-        (.setInt    candidates-buf base-addr token-id)
-        (.setFloat  candidates-buf (+ base-addr 4) logit)
-        (.setFloat  candidates-buf (+ base-addr 8) 0.0)))
-    (let [candidates-array-head (doto (Structure/newInstance
-                                       llama_token_dataByReference
-                                       candidates-buf)
-                                  (.read))
-          candidates* (doto (llama_token_data_arrayByReference.)
-                        (.writeField "data" candidates-array-head)
-                        (.writeField "size" (long n-vocab))
-                        (.writeField "sorted" (byte 0)))]
-      candidates*)))
-
-(defn ^:private preserving-reduced
-  [rf]
-  #(let [ret (rf %1 %2)]
-     (if (reduced? ret)
-       (reduced ret)
-       ret)))
-
 (defn llama-token-to-str
   [ctx token]
-  (let [initial-size 8
+  (let [initial-size (* Integer/BYTES 2)
         result (ByteBuffer/allocate initial-size)
         n-tokens (llama/llama_token_to_piece (->model ctx) token (.array result) initial-size)]
     (if (< n-tokens 0)
@@ -264,6 +188,13 @@
         (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
         [actual-size resized-result])
       [n-tokens result])))
+
+(defn ^:private preserving-reduced
+  [rf]
+  #(let [ret (rf %1 %2)]
+     (if (reduced? ret)
+       (reduced ret)
+       ret)))
 
 (defn decode-token-to-char
   "Returns a transducer that expects a stream of llama tokens
@@ -298,7 +229,7 @@
               (do
                 (.flip input-buffer)
                 (let [result
-                      (let [;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
+                      (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
                             decoder-result1 (.decode decoder input-buffer output-buffer true)
                             ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
                             decoder-result2 (.flush decoder output-buffer)]
@@ -343,57 +274,125 @@
                   (throw (Exception. "Unexpected decoder state."))))))))))))
 
 
+
+
+(defn get-logits
+  "Returns a copy of the current context's logits as a float array."
+  [ctx]
+  (let [n-vocab (llama/llama_n_vocab (->model ctx))]
+    (-> ^FloatByReference (llama/llama_get_logits ctx)
+        .getPointer
+        (.getFloatArray 0 n-vocab))))
+
+
+(defn ctx->candidates
+  [ctx]
+  (let [n-vocab (llama/llama_n_vocab (->model ctx))
+        buf-size (* token-data-size n-vocab)
+        ^Memory candidates-buf (doto (Memory. buf-size) (.clear))
+        logits (get-logits ctx)]
+    (doseq [i (range n-vocab)]
+      (let [base-addr (* i token-data-size)
+            id i
+            logit (aget logits id)]
+        (.setInt candidates-buf base-addr id)
+        (.setFloat candidates-buf (+ base-addr 4) logit)
+        (.setFloat candidates-buf (+ base-addr 8) 0)))
+    (let [candidates-array-head (doto (Structure/newInstance llama_token_dataByReference
+                                                             candidates-buf)
+                                  (.read))
+          candidates* (doto (llama_token_data_arrayByReference.)
+                        (.writeField "data" candidates-array-head)
+                        (.writeField "size" (long n-vocab))
+                        (.writeField "sorted" (byte 0)))]
+      candidates*)))
+
+
+(defn tokenize
+  [ctx s add-bos?]
+  (let [add-bos (->bool add-bos?)
+        s (if add-bos? (str " " s) s)
+        max-tokens (+ add-bos (alength (.getBytes s "utf-8")))
+        token-buf* (.getPointer (->int-array-by-reference max-tokens))
+        num-tokens (llama/llama_tokenize
+                    (->model ctx) s
+                    (count s) token-buf* max-tokens add-bos)]
+    (log/debug "tokenize::tokenized" num-tokens)
+    (into [] (take-while pos? (ptr->int-array token-buf*)))))
+
+
+(defn create-batch
+  [seq-id tokens n-past]
+  (let [n-tokens (count tokens)
+        logits (-> (conj (into [] (repeat (dec n-tokens) (->bool false))) (->bool true))
+                   byte-array)
+        token (-> tokens int-array)
+        seq-id (-> (repeat n-tokens seq-id) int-array)
+        pos (-> (map #(+ n-past %) (range n-tokens)) int-array)
+        ]
+    (doto (llama_batch.)
+      (.writeField "n_tokens" n-tokens)
+      (.writeField "token" (int-array->int-array-by-reference token))
+      (.writeField "embd" nil)
+      (.writeField "logits" (boolean-array->byte-array-by-reference logits))
+      (.writeField "seq_id" (int-array->int-array-by-reference seq-id))
+      (.writeField "pos" (int-array->int-array-by-reference pos)))))
+
+
+
+(defn batched-decode
+  [ctx seq-id tokens n-past]
+  (assert (< @n-past (:n-ctx ctx))
+          "Context size exceeded")
+  (loop [offset 0]
+    (let [n-tokens (count tokens)
+          n-eval (min (:n-batch ctx) n-tokens)
+          eval-tokens (subvec tokens offset (+ offset n-eval))
+          batch (create-batch seq-id eval-tokens @n-past) ; Create a batch
+          ]
+      (llama/llama_kv_cache_seq_rm ctx seq-id @n-past (:n-ctx ctx))
+      (if-let [_ (neg? (llama/llama_decode ctx batch))]
+        (log/warn "failed to decode n-tokens" n-tokens " n-past " @n-past)
+        (let [next-offset (+ offset n-eval)]
+          (vreset! n-past (+ @n-past n-eval))
+          (when (< next-offset n-tokens) (recur next-offset))))))
+  ctx)
+
+
 (defn generate-tokens
-  "Returns a seqable/reducible sequence of tokens from ctx with prompt."
-  ([ctx prompt]
-   (generate-tokens ctx prompt nil))
-  ([ctx prompt {:keys [samplef seed]}]
-   (let [eos (llama/llama_token_eos ctx)
-         n-tokens (volatile! 0)
-         reset? (volatile! true)]
-     (reify
-       clojure.lang.Seqable
-       (seq [_]
-         (when seed
-           (llama/llama_set_rng_seed ctx seed))
-         ((fn next [ctx]
-            (let [next-token (samplef @reset?)]
-              (when (not= eos next-token)
-                (vreset! reset? false)
-                (vswap!  n-tokens inc)
-                (cons next-token
-                      (lazy-seq (next (llama-update ctx next-token @n-tokens)))))))
-          (llama-update ctx prompt @n-tokens)))
-       clojure.lang.IReduceInit
-       (reduce [_ rf init]
-         (when seed
-           (llama/llama_set_rng_seed ctx seed))
-         (loop [acc init
-                ret (llama-update ctx prompt @n-tokens)]
-           (let [next-token (samplef @reset?)]
+  [ctx seq-id {:keys [samplef seed]} n-past]
+  (let [eos (llama/llama_token_eos ctx)
+        reset? (volatile! true)]
+
+    (reify
+      clojure.lang.Seqable
+      (seq [_]
+        (when seed
+          (llama/llama_set_rng_seed ctx seed))
+        ((fn next [ctx]
+           (let [next-token (samplef (ctx->candidates ctx)  @reset?)]
              (when (not= eos next-token)
                (vreset! reset? false)
-               (vswap!  n-tokens inc)
-               (let [acc (rf acc next-token)]
-                 (if (reduced? acc)
-                   @acc
-                   (recur acc (llama-update ctx next-token @n-tokens))))))))))))
+               (cons next-token
+                     (lazy-seq (next (batched-decode ctx seq-id [next-token] n-past)))))))
+         ctx)))))
 
 
 (defn generate-string
   "Returns a string with all tokens generated from prompt up until end of sentence or max context size."
-  ([ctx prompt]
-   (generate-string ctx prompt nil))
-  ([ctx prompt opts]
-   (let [[n-past embd] (tokenize ctx prompt true)]
-     ;; [TODO] deal with prompt-token-count > n-ctx
-     (llama/llama_kv_cache_seq_rm ctx 0 n-past (:n-ctx ctx))
-     (str/join
-      (eduction
-       (take (- (:n-ctx ctx) n-past))
-       (decode-token-to-char ctx)
-       (generate-tokens ctx prompt opts))))))
-
+  [ctx prompt opts]
+  (let [n-ctx (:n-ctx ctx)
+        seq-id 0
+        prompt-tokens (tokenize ctx prompt true)
+        n-prompt-tokens (count prompt-tokens)
+        _ (log/debug "cleared kv cache")
+        n-past (volatile! 0)
+        _ (batched-decode ctx seq-id prompt-tokens n-past)]
+    (str/join
+     (eduction
+      (take (- n-ctx n-prompt-tokens))
+      (decode-token-to-char ctx)
+      (generate-tokens ctx seq-id opts n-past)))))
 
 ;; Scratch
 (comment
@@ -401,11 +400,11 @@
   (require '[clojure.java.io :as io])
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def ctx (create-context llama7b-path {:n-ctx 512 :n-gpu-layers 35}))
+  (def ctx (create-context llama7b-path {:n-ctx 128 :n-gpu-layers 35}))
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
-  (def sampler (grammar/init-llama-sampler ctx ctx->candidates grammar-str {}))
+  (def sampler (grammar/init-llama-sampler ctx grammar-str {}))
 
   (generate-string ctx "Hi there!" {:samplef sampler})
 

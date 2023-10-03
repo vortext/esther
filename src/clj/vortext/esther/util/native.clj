@@ -6,6 +6,7 @@
    [babashka.fs :as fs]
    [clojure.java.io :as io])
   (:import
+   java.nio.ByteBuffer
    com.sun.jna.Memory
    com.sun.jna.Pointer
    com.sun.jna.ptr.IntByReference
@@ -36,6 +37,31 @@
         ibr (doto (IntByReference.)
               (.setPointer mem))]
     ibr))
+
+
+(def ptr->int-array #(.getIntArray % 0 (/ (.size %) Integer/BYTES)))
+
+(defn int-array->int-array-by-reference
+  [arr]
+  (let [arrlen (alength arr)
+        num-bytes (* arrlen Integer/BYTES)
+        mem (Memory. num-bytes)]
+    (dotimes [i arrlen]
+      (.setInt mem (* i Integer/BYTES) (aget arr i)))
+    (let [ibr (doto (IntByReference.)
+                (.setPointer mem))]
+      ibr)))
+
+
+(defn boolean-array->byte-array-by-reference
+  [bool-arr]
+  (let [arrlen (alength bool-arr)
+        mem (Memory. arrlen)]
+    (dotimes [i arrlen]
+      (.setByte mem i (if (aget bool-arr i) 1 0)))
+    (let [ibr (doto (com.sun.jna.ptr.ByteByReference.)
+                (.setPointer mem))]
+      ibr)))
 
 
 ;; API generation

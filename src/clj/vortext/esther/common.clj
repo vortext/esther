@@ -1,6 +1,7 @@
 (ns vortext.esther.common
   (:require
    [clojure.string :as str]
+   [clojure.tools.logging :as log]
    [clojure.walk :as walk]))
 
 
