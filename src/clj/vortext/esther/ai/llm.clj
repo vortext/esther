@@ -4,7 +4,7 @@
    [clojure.string :as str]
    [clojure.java.io :as io]
    [vortext.esther.util.json :as json]
-   [vortext.esther.ai.llama-jna :as llama]
+   [vortext.esther.ai.llama-jna :refer [generate-string create-context]]
    [vortext.esther.jna.grammar :refer [init-llama-sampler]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
@@ -60,8 +60,7 @@
         submission ((:handlebars/render-template renderer)
                     "templates/prompt" template-vars)
         _ (log/debug "submission::" submission)
-        generated (llama/generate-string
-                   ctx submission {:samplef sampler})
+        generated (generate-string ctx submission {:samplef sampler})
         _ (log/debug "generated::" generated)]
     (assoc obj :llm/response
            (-> generated
@@ -71,7 +70,7 @@
 
 (defmethod ig/init-key :ai.llm/instance
   [_ {:keys [:llm/params :template/renderer] :as opts}]
-  (let [ctx (llama/create-context
+  (let [ctx (create-context
              (str (fs/canonicalize (:model-path params))) params)
         gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
         sampler (init-llama-sampler ctx gbnf params)
