@@ -9,6 +9,9 @@
    ;; Edges
    [kit.edge.server.undertow]
    [kit.edge.utils.nrepl]
+   ;; JNA
+   [vortext.esther.jna.llama]
+   [vortext.esther.jna.grammar]
    ;; AI
    [vortext.esther.ai.llm]
 

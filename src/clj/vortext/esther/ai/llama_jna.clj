@@ -40,9 +40,15 @@
    com.sun.jna.Memory
    com.sun.jna.Pointer
    com.sun.jna.ptr.FloatByReference
-   com.sun.jna.Structure))
+   com.sun.jna.Structure)
+  (:gen-class))
 
 (llama/import-structs!)
+
+(def ^:dynamic
+  *num-threads*
+  "Number of threads used when generating tokens."
+  (.. Runtime getRuntime availableProcessors))
 
 (defonce cleaner (delay (Cleaner/create)))
 
@@ -112,7 +118,9 @@
    (create-context model-path nil))
   ([model-path params]
    @llm-init
-   (let [^llama_context_params llama-context-params (map->llama-context-params params)
+   (let [threads {:n-threads-batch *num-threads*
+                  :n-threads *num-threads*}
+         ^llama_context_params llama-context-params (map->llama-context-params (merge threads params))
          ^llama_model_params llama-model-params (map->llama-model-params params)
 
          model (llama/llama_load_model_from_file model-path llama-model-params)
@@ -182,6 +190,7 @@
           [actual-size resized-buffer]))
       [n-tokens buffer])))
 
+
 (defn decode-token-to-char
   [ctx]
   (fn [rf]
@@ -194,14 +203,14 @@
         ([result] (rf result))
         ([result token]
          (let [[len result-buf] (llama-token-to-str ctx token)]
-           (.put input-buffer (.array result-buf) 0 len)  ;; Pay attention to how the input is fed to the buffer
-           (.flip input-buffer)  ;; Preparing buffer for read
+           (.put input-buffer (.array result-buf) 0 len) ;; Pay attention to how the input is fed to the buffer
+           (.flip input-buffer) ;; Preparing buffer for read
            (let [decoder-result (.decode decoder input-buffer output-buffer false)]
              (cond
                (.isUnderflow decoder-result)
                (do
-                 (.compact input-buffer)  ;; Preparing buffer for write
-                 (.flip output-buffer)  ;; Preparing buffer for read
+                 (.compact input-buffer) ;; Preparing buffer for write
+                 (.flip output-buffer)   ;; Preparing buffer for read
                  (let [result (reduce rf result output-buffer)]
                    (.clear output-buffer)
                    result))
@@ -211,6 +220,7 @@
                (throw (ex-info "Decoder Error" {:decoder decoder}))
                :else
                (throw (Exception. "Unexpected decoder state."))))))))))
+
 
 
 (defn get-logits
@@ -290,12 +300,30 @@
           (when (< next-offset n-tokens) (recur next-offset))))))
   ctx)
 
+(def ^:dynamic
+  *num-threads*
+  "Number of threads used when generating tokens."
+  (.. Runtime getRuntime availableProcessors))
 
 (defn generate-tokens
   [ctx seq-id {:keys [samplef seed]} n-past]
   (let [eos (llama/llama_token_eos ctx)
         reset? (volatile! true)]
     (reify
+      clojure.lang.IReduceInit
+      (reduce [_ rf init]
+        (when seed
+          (llama/llama_set_rng_seed ctx seed))
+        (loop [acc init
+               ret nil]
+          (let [next-token (samplef (ctx->candidates ctx seq-id) @reset?)]
+            (if (= eos next-token)
+              acc
+              (let [acc (rf acc next-token)]
+                (if (reduced? acc)
+                  @acc
+                  (recur acc (batched-decode ctx seq-id [next-token] n-past))))))))
+
       clojure.lang.Seqable
       (seq [_]
         (when seed
@@ -307,6 +335,7 @@
                (cons next-token
                      (lazy-seq (next (batched-decode ctx seq-id [next-token] n-past)))))))
          ctx)))))
+
 
 
 (defn generate-string
@@ -324,6 +353,7 @@
        (take (- n-ctx (count prompt-tokens)))
        (decode-token-to-char ctx)
        (generate-tokens ctx seq-id opts n-past))))))
+
 
 ;; Scratch
 (comment

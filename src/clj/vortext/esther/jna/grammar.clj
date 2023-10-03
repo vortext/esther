@@ -1,4 +1,5 @@
 (ns vortext.esther.jna.grammar
+  (:gen-class)
   (:refer-clojure :exclude [remove printf]) ;; [WARNING]
   (:require
    [com.phronemophobic.clong.gen.jna :as gen]
