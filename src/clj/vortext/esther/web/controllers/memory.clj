@@ -49,7 +49,7 @@
                 (query-fn tx :associate-keyword
                           {:gid gid
                            :fingerprint fingerprint})))
-            (get-in response [:event/content :keywords] []))))
+            (into #{} (get-in response [:event/content :keywords] #{})))))
     obj))
 
 
