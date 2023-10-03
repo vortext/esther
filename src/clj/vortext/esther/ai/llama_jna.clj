@@ -171,7 +171,7 @@
 
 (defn llama-token-to-str
   [ctx token]
-  (let [buffer-size 8
+  (let [buffer-size (* 4 Character/BYTES)
         buffer (ByteBuffer/allocate buffer-size)
         n-tokens (llama/llama_token_to_piece (->model ctx) token (.array buffer) buffer-size)]
     (if (< n-tokens 0)
@@ -281,12 +281,10 @@
     (let [n-tokens (count tokens)
           n-eval (min (:n-batch ctx) n-tokens)
           eval-tokens (subvec tokens offset (+ offset n-eval))
-          batch (create-batch seq-id eval-tokens @n-past) ; Create a batch
-          ]
-
+          batch (create-batch seq-id eval-tokens @n-past)]
       (llama/llama_kv_cache_tokens_rm ctx @n-past -1)
       (if-let [_ (neg? (llama/llama_decode ctx batch))]
-        (log/warn "failed to decode n-tokens" n-tokens " n-past " @n-past)
+        (throw (Exception. (str "failed to decode n-tokens" n-tokens " n-past " @n-past)))
         (let [next-offset (+ offset n-eval)]
           (vreset! n-past (+ @n-past n-eval))
           (when (< next-offset n-tokens) (recur next-offset))))))
@@ -313,18 +311,19 @@
 
 (defn generate-string
   "Returns a string with all tokens generated from prompt up until end of sentence or max context size."
-  [ctx prompt opts]
-  (let [n-ctx (:n-ctx ctx)
-        seq-id 0
-        _ (llama/llama_kv_cache_seq_rm ctx seq-id 0 (:n-ctx ctx))
-        prompt-tokens (tokenize ctx prompt true)
-        n-past (volatile! 0)
-        _ (batched-decode ctx seq-id prompt-tokens n-past)]
-    (str/join
-     (eduction
-      (take (- n-ctx (count prompt-tokens)))
-      (decode-token-to-char ctx)
-      (generate-tokens ctx seq-id opts n-past)))))
+  ([ctx prompt opts]
+   (generate-string ctx prompt opts 0))
+  ([ctx prompt opts seq-id]
+   (let [n-ctx (:n-ctx ctx)
+         _ (llama/llama_kv_cache_seq_rm ctx seq-id 0 (:n-ctx ctx))
+         prompt-tokens (tokenize ctx prompt true)
+         n-past (volatile! 0)
+         _ (batched-decode ctx seq-id prompt-tokens n-past)]
+     (str/join
+      (eduction
+       (take (- n-ctx (count prompt-tokens)))
+       (decode-token-to-char ctx)
+       (generate-tokens ctx seq-id opts n-past))))))
 
 ;; Scratch
 (comment
