@@ -22,14 +22,11 @@
    [clojure.string :as str]
    [vortext.esther.jna.llama :as llama]
    [vortext.esther.jna.grammar :as grammar]
-   [clojure.tools.logging :as log]
-   [clj-commons.format.binary :refer [format-binary]]
    [vortext.esther.util.native
     :refer [->bool
             ->float-array-by-reference
             ->int-array-by-reference
             int-array->int-array-by-reference
-            boolean-array->byte-array-by-reference
             ptr->int-array]])
   (:import
    java.lang.ref.Cleaner
@@ -39,7 +36,6 @@
    com.sun.jna.Memory
    com.sun.jna.Pointer
    com.sun.jna.ptr.FloatByReference
-   com.sun.jna.ptr.IntByReference
    com.sun.jna.Structure)
   (:gen-class))
 
@@ -49,21 +45,6 @@
   *num-threads*
   "Number of threads used when generating tokens."
   (.. Runtime getRuntime availableProcessors))
-
-(defn dump-memory
-  [mem]
-  (log/debug
-   (str "\n" (format-binary (.getByteBuffer mem 0 (.size mem))))))
-
-
-(defn write-to-buffer!
-  [^Pointer buffer-ptr write-pos size elem]
-  ;; Calculate the position to write in the buffer, starting from the end.
-  (let [write-index (mod (- size (inc write-pos)) size)]
-    ;; Write the element to the calculated write position.
-    (.setInt buffer-ptr (* write-index Integer/BYTES) (int elem)))
-  ;; Increment the write position and wrap it around if it reaches the buffer size.
-  (mod (inc write-pos) size))
 
 
 (defonce cleaner (delay (Cleaner/create)))
@@ -239,9 +220,6 @@
                 (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
-
-
-
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
   [ctx]
@@ -282,7 +260,6 @@
         num-tokens (llama/llama_tokenize
                     (->model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
-    (log/debug "tokenize::tokenized" num-tokens)
     (int-array (take num-tokens (ptr->int-array token-buf*)))))
 
 
@@ -314,7 +291,6 @@
   (let [eos (llama/llama_token_eos ctx)
         reset? (volatile! true)
         eval (partial batched-decode ctx seq-id n-past)]
-    (log/debug n-past)
     (reify
       clojure.lang.IReduceInit
       (reduce [_ rf init]
