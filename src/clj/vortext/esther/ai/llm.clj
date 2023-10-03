@@ -74,7 +74,7 @@
   (let [ctx (llama/create-context
              (str (fs/canonicalize (:model-path params))) params)
         gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
-        sampler (init-llama-sampler ctx llama/ctx->candidates gbnf params)
+        sampler (init-llama-sampler ctx gbnf params)
         template-vars (:template/vars opts)]
 
     ((:handlebars/register-helper renderer)

@@ -278,23 +278,20 @@
 
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
-  [ctx]
-  (let [n-vocab (llama/llama_n_vocab (->model ctx))]
-    (-> ^FloatByReference (llama/llama_get_logits ctx)
-        .getPointer
-        (.getFloatArray 0 n-vocab))))
+  [ctx seq-id]
+  (-> ^FloatByReference (llama/llama_get_logits_ith ctx seq-id)
+      .getPointer))
 
 
 (defn ctx->candidates
-  [ctx]
+  [ctx seq-id]
   (let [n-vocab (llama/llama_n_vocab (->model ctx))
         buf-size (* token-data-size n-vocab)
         ^Memory candidates-buf (doto (Memory. buf-size) (.clear))
-        logits (get-logits ctx)]
-    (doseq [i (range n-vocab)]
-      (let [base-addr (* i token-data-size)
-            id i
-            logit (aget logits id)]
+        logits (get-logits ctx seq-id)]
+    (doseq [id (range n-vocab)]
+      (let [base-addr (* id token-data-size)
+            logit (.getFloat logits (* id Float/BYTES))]
         (.setInt candidates-buf base-addr id)
         (.setFloat candidates-buf (+ base-addr 4) logit)
         (.setFloat candidates-buf (+ base-addr 8) 0)))
@@ -370,7 +367,7 @@
         (when seed
           (llama/llama_set_rng_seed ctx seed))
         ((fn next [ctx]
-           (let [next-token (samplef (ctx->candidates ctx)  @reset?)]
+           (let [next-token (samplef (ctx->candidates ctx seq-id) @reset?)]
              (when (not= eos next-token)
                (vreset! reset? false)
                (cons next-token
@@ -400,7 +397,7 @@
   (require '[clojure.java.io :as io])
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def ctx (create-context llama7b-path {:n-ctx 128 :n-gpu-layers 35}))
+  (def ctx (create-context llama7b-path {:n-ctx 4096 :n-gpu-layers 35}))
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
