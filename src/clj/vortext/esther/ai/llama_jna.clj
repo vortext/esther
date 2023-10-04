@@ -41,17 +41,12 @@
 
 (llama/import-structs!)
 
-(def ^:dynamic
-  *num-threads*
-  "Number of threads used when generating tokens."
-  (.. Runtime getRuntime availableProcessors))
-
 
 (defonce cleaner (delay (Cleaner/create)))
 
 (def ^:private token-data-size (.size (llama_token_data.)))
 
-(def ->model (fn [ctx] (llama/llama_get_model ctx)))
+
 
 (defonce ^:private llm-init
   (delay
@@ -115,9 +110,7 @@
    (create-context model-path nil))
   ([model-path params]
    @llm-init
-   (let [threads {:n-threads-batch *num-threads*
-                  :n-threads *num-threads*}
-         ^llama_context_params llama-context-params (map->llama-context-params (merge threads params))
+   (let [^llama_context_params llama-context-params (map->llama-context-params params)
          ^llama_model_params llama-model-params (map->llama-model-params params)
 
          model (llama/llama_load_model_from_file model-path llama-model-params)
@@ -151,7 +144,7 @@
          delete-batch (fn []
                         (let [[old new] (swap-vals! model-ptr (constantly nil))]
                           (when old
-                            (llama/llama_batch_free old))))
+                            (llama/llama_batch_free ^llama_batch old))))
 
 
          n-batch (.readField llama-context-params "n_batch")
@@ -190,11 +183,11 @@
   [ctx token]
   (let [buffer-size (* 4 Character/BYTES)
         buffer (ByteBuffer/allocate buffer-size)
-        n-tokens (llama/llama_token_to_piece (->model ctx) token (.array buffer) buffer-size)]
+        n-tokens (llama/llama_token_to_piece (:model ctx) token (.array buffer) buffer-size)]
     (if (< n-tokens 0)
       (let [actual-size (Math/abs (int n-tokens))
             resized-buffer (ByteBuffer/allocate actual-size)]
-        (let [check (llama/llama_token_to_piece (->model ctx) token (.array resized-buffer) actual-size)]
+        (let [check (llama/llama_token_to_piece (:model ctx) token (.array resized-buffer) actual-size)]
           (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
           [actual-size resized-buffer]))
       [n-tokens buffer])))
@@ -213,7 +206,7 @@
          ([result] (rf result))
          ([result token]
           (let [[len result-buf] (llama-token-to-str ctx token)]
-            (.put input-buffer (.array result-buf) 0 len) ;; Pay attention to how the input is fed to the buffer
+            (.put input-buffer (.array result-buf) 0 len)
             (.flip input-buffer) ;; Preparing buffer for read
             (let [decoder-result (.decode decoder input-buffer output-buffer false)]
               (cond
@@ -232,18 +225,20 @@
                 (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
-(defn get-logits
-  [ctx]
-  (-> ^FloatByReference (llama/llama_get_logits_ith ctx 0)
-      .getPointer))
+(defn get-logits-ith
+  ([ctx]
+   (get-logits-ith ctx 0))
+  ([ctx idx]
+   (-> ^FloatByReference (llama/llama_get_logits_ith ctx idx)
+       .getPointer)))
 
 
 (defn ctx->candidates
   [ctx]
-  (let [n-vocab (llama/llama_n_vocab (->model ctx))
+  (let [n-vocab (llama/llama_n_vocab (:model ctx))
         buf-size (* token-data-size n-vocab)
         ^Memory candidates-buf (doto (Memory. buf-size) (.clear))
-        logits (get-logits ctx)]
+        logits (get-logits-ith ctx)]
     (doseq [id (range n-vocab)]
       (let [base-addr (* id token-data-size)
             logit  (.getFloat logits (* id Float/BYTES))]
@@ -259,6 +254,15 @@
                         (.writeField "sorted" (byte 0)))]
       candidates*)))
 
+(defn init-grammar-sampler
+  [ctx grammar-str params]
+  (let [params (grammar/map->llama-sampler-params params)
+        grammar* (atom nil)]
+    (fn [candidates reset?]
+      (when reset?
+        (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
+      (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))
+
 
 (defn tokenize
   [ctx s add-bos?]
@@ -267,7 +271,7 @@
         max-tokens (+ add-bos (alength (.getBytes s "utf-8")))
         token-buf* (.getPointer (->int-array-by-reference max-tokens))
         num-tokens (llama/llama_tokenize
-                    (->model ctx) s
+                    (:model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
     (into [] (take num-tokens (ptr->int-array token-buf*)))))
 
@@ -369,7 +373,8 @@
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
-  (def sampler (grammar/init-llama-sampler ctx grammar-str {:mirostat 2}))
+  (def sampler
+    (init-grammar-sampler ctx grammar-str {:mirostat 2}))
 
   (generate-string ctx "Hi there!" {:samplef sampler})
 

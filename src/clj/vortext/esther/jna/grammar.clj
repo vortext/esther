@@ -55,19 +55,3 @@
      params)
    (llama_sampler_default_params)
    m))
-
-
-(defn init-llama-sampler
-  [ctx grammar-str params]
-  (let [^llama_sampler_params params (map->llama-sampler-params params)
-        grammar* (volatile! nil)]
-    (fn [candidates reset?]
-      (when reset?
-        (vreset! grammar* (llama_cached_parse_grammar grammar-str)))
-      (let [next-token (llama_grammar_sample_token
-                        ctx
-                        @grammar*
-                        params
-                        candidates
-                        (->bool reset?))]
-        next-token))))

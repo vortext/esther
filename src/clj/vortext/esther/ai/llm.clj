@@ -1,11 +1,9 @@
 (ns vortext.esther.ai.llm
   (:require
    [babashka.fs :as fs]
-   [clojure.string :as str]
    [clojure.java.io :as io]
    [vortext.esther.util.json :as json]
-   [vortext.esther.ai.llama-jna :refer [generate-string create-context]]
-   [vortext.esther.jna.grammar :refer [init-llama-sampler]]
+   [vortext.esther.ai.llama-jna :refer [generate-string create-context init-grammar-sampler]]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [malli.core :as m]
@@ -73,7 +71,7 @@
   (let [ctx (create-context
              (str (fs/canonicalize (:model-path params))) params)
         gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
-        sampler (init-llama-sampler ctx gbnf params)
+        sampler (init-grammar-sampler ctx gbnf params)
         template-vars (:template/vars opts)]
 
     ((:handlebars/register-helper renderer)
