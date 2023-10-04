@@ -148,8 +148,17 @@
                           (when old
                             (llama/llama_free_model (Pointer. old)))))
 
+         delete-batch (fn []
+                        (let [[old new] (swap-vals! model-ptr (constantly nil))]
+                          (when old
+                            (llama/llama_batch_free old))))
+
+
          n-batch (.readField llama-context-params "n_batch")
          n-ctx (.readField llama-context-params "n_ctx")
+
+         batch (llama/llama_batch_init n-batch 0)
+         batch-ref (atom batch)
 
          ;; make context autocloseable and implement
          ;; some map lookup interfaces
@@ -162,13 +171,16 @@
                        :n-batch n-batch
                        :n-ctx n-ctx
                        :model @model-ref
+                       :batch @batch-ref
                        ;; else
                        nil))
                    (close []
                      (delete-context)
-                     (delete-model)))]
+                     (delete-model)
+                     (delete-batch)))]
 
      ;; cleanup
+     (.register ^Cleaner @cleaner batch delete-batch)
      (.register ^Cleaner @cleaner context delete-context)
      (.register ^Cleaner @cleaner model delete-model)
      context)))
@@ -221,12 +233,9 @@
 
 
 (defn get-logits
-  "Returns a copy of the current context's logits as a float array."
   [ctx]
-  (let [n-vocab (llama/llama_n_vocab (->model ctx))]
-    (-> ^FloatByReference (llama/llama_get_logits ctx)
-        .getPointer
-        (.getFloatArray 0 n-vocab))))
+  (-> ^FloatByReference (llama/llama_get_logits_ith ctx 0)
+      .getPointer))
 
 
 (defn ctx->candidates
@@ -237,7 +246,7 @@
         logits (get-logits ctx)]
     (doseq [id (range n-vocab)]
       (let [base-addr (* id token-data-size)
-            logit (aget logits id)]
+            logit  (.getFloat logits (* id Float/BYTES))]
         (.setInt candidates-buf base-addr id)
         (.setFloat candidates-buf (+ base-addr 4) logit)
         (.setFloat candidates-buf (+ base-addr 8) 0)))
@@ -260,12 +269,21 @@
         num-tokens (llama/llama_tokenize
                     (->model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
-    (int-array (take num-tokens (ptr->int-array token-buf*)))))
+    (into [] (take num-tokens (ptr->int-array token-buf*)))))
 
 
 (defn create-batch
-  [seq-id tokens* n-past n-eval]
-  (llama/llama_batch_get_one tokens* n-eval n-past seq-id))
+  [ctx seq-id tokens n-past n-tokens]
+  (doto (:batch ctx)
+    (.writeField "n_tokens" (int n-tokens))
+    (.writeField "token" (-> tokens int-array int-array->int-array-by-reference))
+    (.writeField "embd" nil)
+    (.writeField "pos" nil)
+    (.writeField "seq_id" nil)
+    (.writeField "logits" nil)
+    (.writeField "all_pos_0" (int n-past))
+    (.writeField "all_pos_1" (int 1))
+    (.writeField "all_seq_id" (int seq-id))))
 
 
 (defn batched-decode
@@ -273,12 +291,11 @@
   (assert (< @n-past (:n-ctx ctx))
           "Context size exceeded")
   (let [n-past @n-past
-        n-tokens (count tokens)
-        tokens* (.getPointer (int-array->int-array-by-reference tokens))]
+        n-tokens (count tokens)]
     (loop [offset 0]
       (let [n-eval (min (:n-batch ctx) n-tokens)
-            to-eval* (.share tokens* (* Integer/BYTES offset) (* Integer/BYTES n-eval))
-            batch (create-batch seq-id to-eval* n-past n-eval)]
+            to-eval (subvec tokens offset (+ offset n-eval))
+            batch (create-batch ctx seq-id to-eval n-past n-eval)]
         (if-let [_ (neg? (llama/llama_decode ctx batch))]
           (throw (Exception. (str "failed to decode n-tokens" n-tokens " n-past " n-past)))
           (let [next-offset (+ offset n-eval)]
@@ -306,7 +323,7 @@
               (let [acc (rf acc next-token)]
                 (if (reduced? acc)
                   @acc
-                  (recur acc (eval (int-array [next-token])))))))))
+                  (recur acc (eval [next-token]))))))))
 
       clojure.lang.Seqable
       (seq [_]
@@ -318,7 +335,7 @@
              (when (not= eos next-token)
                (vreset! reset? false)
                (cons next-token
-                     (lazy-seq (next (eval (int-array [next-token]))))))))
+                     (lazy-seq (next (eval [next-token])))))))
          ctx)))))
 
 
