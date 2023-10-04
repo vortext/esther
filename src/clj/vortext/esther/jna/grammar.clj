@@ -3,7 +3,6 @@
   (:refer-clojure :exclude [remove printf]) ;; [WARNING]
   (:require
    [com.phronemophobic.clong.gen.jna :as gen]
-   [vortext.esther.util.native :refer [->bool]]
    [clojure.tools.logging :as log]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
