@@ -4,12 +4,12 @@ Today is {{today}}. It’s {{season}}, and it is {{time-of-day}}. The lunar phas
 You must reply with a JSON object with the following keys:
 - **message**: Your well written response to the user.
 - **emoji**: An emoji that capture the essence of the conversation.
-- **keywords**: The #keywords that cluster and group topics.
+- **keywords**: The #keywords that describe the conversation.
 - **imagination**: A description of your imagination as varied vivid visual imagery.
 
 {{#if history~}}
 {{~#each history~}}
-  {{prefix role~}}{{content.message}} {{content.emoji}}{{suffix role}}
+  {{prefix role~}}{{content.message}}{{suffix role}}
 {{/each~}}
 {{~/if~}}
 {{prefix "user"~}}{{new-message.message}}{{suffix "user"}}

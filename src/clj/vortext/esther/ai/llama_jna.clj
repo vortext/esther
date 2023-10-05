@@ -307,9 +307,11 @@
                     (count s) token-buf* max-tokens add-bos)]
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
 
+
 ;;;;;;;;;;;;;;;;;;;
 ;; Decode & batches
 ;;;;;;;;;;;;;;;;;;;
+(defn- by-reference [o v] (doto o (.setPointer (seq->memory v))))
 
 (defn create-batch
   [^Memory batch-buf* num-batch-tokens n-past seq-id]
@@ -320,11 +322,11 @@
     (doto batch
       (.writeField "n_tokens" (int num-batch-tokens))
       (.writeField "token" (doto (IntByReference.) (.setPointer batch-buf*)))
-      (.writeField "pos" (doto (IntByReference.) (.setPointer (seq->memory pos))))
-      (.writeField "seq_id" (doto (IntByReference.) (.setPointer (seq->memory seq-ids))))
-      (.writeField "logits" (doto (ByteByReference.) (.setPointer (seq->memory logits))))
+      (.writeField "pos" (by-reference (IntByReference.) pos))
+      (.writeField "seq_id" (by-reference (IntByReference.) seq-ids))
+      (.writeField "logits" (by-reference (ByteByReference.) logits))
       (.writeField "embd" nil))
-    ;; I'm gonna assume JNA is going to garbage collect these, if not we leak memory.
+    ;; I'm gonna assume the JVM is going to garbage collect these, if not we leak memory.
     batch))
 
 
@@ -337,13 +339,7 @@
 
 
 (defn decode
-  "Adds `s` to the current context and updates the context's logits (see `get-logits`).
-
-  `s`: either be a string or an integer token.
-  `n-past`: number of previous tokens to include when updating logits.
-  `num-threads`: number of threads to use when updating the logits.
-                 If not provided, or `nil`, defaults to `*num-threads*`.
-  "
+  "Adds `s` to the current context and updates the context's logits (see `get-logits`)."
   [ctx s n-past* seq-id]
   (let [[total-tokens ^Memory tokens]
         (cond
@@ -354,7 +350,7 @@
           [1 [s]])
         ^Memory token-buf* (seq->memory tokens)]
     (assert (< @n-past* (:n-ctx ctx)) "Context size exceeded")
-
+    (assert (< total-tokens (:n-ctx ctx)) "Input tokens exceeded context size")
     (let [batch-size (:n-batch ctx)]
       (loop [offset (long 0)
              n-past @n-past*]
@@ -381,7 +377,8 @@
          eos (llama/llama_token_eos ctx)
          n-past (volatile! 0)
          reset? (volatile! true)]
-     (llama/llama_kv_cache_tokens_rm ctx -1 -1) ;; Clear all kv_cache_tokens
+     ;; Clear all kv_cache_tokens in seq
+     (llama/llama_kv_cache_seq_rm ctx seq-id -1 -1)
      (reify
        clojure.lang.Seqable
        (seq [_]
@@ -429,9 +426,12 @@
   (require '[babashka.fs :as fs])
   (require '[clojure.java.io :as io])
 
-  (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def opts {:n-gpu-layers 35 :n-threads *num-threads* :n-threads-batch *num-threads* :n-ctx 0})
-  (def ctx (create-context llama7b-path opts))
+  ;; (def model-path "/media/array/Models/guff/Mistral-7B-Instruct-v0.1-q6_K.guff")
+  (def model-path "/media/array/Models/guff/Synthia-7B-v1.3-q5_K_M.guff")
+
+  (def opts {:n-gpu-layers 25 :n-threads *num-threads* :n-threads-batch *num-threads* :n-ctx 0})
+
+  (def ctx (create-context model-path opts))
 
   (def prompt "You are Hibotron8000. All you do is say 'hi'. What do you say?")
   (def tokens (second (tokenize ctx prompt true)))
@@ -445,8 +445,9 @@
   (generate-string ctx prompt {:samplef default-sampler})
   (generate-string ctx prompt {:samplef grammar-sampler})
 
-  ;; Test a large file (TODO context swapping)
-  (def txt (slurp (fs/file (fs/expand-home "~/Desktop/test.txt"))))
+
+  ;; Alice's Adventures in Wonderland (Lewis Carroll)
+  (def txt (slurp "https://www.gutenberg.org/cache/epub/11/pg11.txt"))
 
   (generate-string ctx txt)
 
