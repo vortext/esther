@@ -42,7 +42,6 @@
 
 (llama/import-structs!)
 
-
 (def ^:dynamic
   *num-threads*
   "Number of threads used when generating tokens."
@@ -186,7 +185,7 @@
 (defn llama-token-to-str
   [ctx token]
   (let [buffer-size (* 8 Character/BYTES)
-        buffer (ByteBuffer/allocate buffer-size)
+        ^ByteBuffer buffer (ByteBuffer/allocate buffer-size)
         n-tokens (llama/llama_token_to_piece (:model ctx) token (.array buffer) buffer-size)]
     (if (< n-tokens 0)
       (let [actual-size (Math/abs (int n-tokens))
@@ -200,7 +199,7 @@
 (defn decode-token-to-char
   ([ctx]
    (decode-token-to-char ctx (Charset/forName "UTF-8")))
-  ([ctx charset]
+  ([ctx ^Charset charset]
    (fn [rf]
      (let [decoder (.newDecoder charset)
            input-buffer (ByteBuffer/allocate 256)
@@ -209,7 +208,7 @@
          ([] (rf))
          ([result] (rf result))
          ([result token]
-          (let [[len result-buf] (llama-token-to-str ctx token)]
+          (let [[len ^ByteBuffer result-buf] (llama-token-to-str ctx token)]
             (.put input-buffer (.array result-buf) 0 len)
             (.flip input-buffer) ;; Preparing buffer for read
             (let [decoder-result (.decode decoder input-buffer output-buffer false)]
@@ -238,7 +237,6 @@
         (.getFloatArray 0 n-vocab))))
 
 
-
 (defn ^:private ctx->candidates
   [ctx candidates-buf*]
   (let [n-vocab (llama/llama_n_vocab (llama/llama_get_model ctx))
@@ -253,7 +251,7 @@
         logits (get-logits ctx)]
     (doseq [id (range n-vocab)]
       (let [base-addr (* id token-data-size)
-            logit (aget logits id)]
+            logit (aget ^floats logits (int id))]
         (.setInt candidates-buf base-addr id)
         (.setFloat candidates-buf (+ base-addr 4) logit)
         (.setFloat candidates-buf (+ base-addr 8) 0)))
@@ -307,12 +305,13 @@
            (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
          (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
 
+
 (defn tokenize
   [ctx s add-bos?]
   (let [add-bos (->bool add-bos?)
         s (if add-bos? (str " " s) s)
-        max-tokens (+ add-bos (alength (.getBytes s "utf-8")))
-        token-buf* (.getPointer (->int-array-by-reference max-tokens))
+        max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
+        token-buf* (Memory. (* max-tokens Integer/BYTES))
         num-tokens (llama/llama_tokenize
                     (:model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
@@ -320,11 +319,11 @@
 
 
 (defn write-to-batch!
-  [batch batch-buf* num-batch-tokens n-past seq-id]
+  [^llama_batch batch ^Memory batch-buf* num-batch-tokens n-past seq-id]
   (let [pos (map #(+ n-past %) (range num-batch-tokens))
         seq-ids (repeat num-batch-tokens seq-id)
-        pos* (.getPointer (.readField batch "pos"))
-        seq-id* (.getPointer (.readField batch "seq_id")) ]
+        ^Pointer pos* (.getPointer ^IntByReference (.readField batch "pos"))
+        ^Pointer seq-id* (.getPointer ^IntByReference (.readField batch "seq_id")) ]
     (doto batch
       (.writeField "n_tokens" (int num-batch-tokens))
       (.writeField "token" (doto (IntByReference.) (.setPointer batch-buf*)))
@@ -356,18 +355,18 @@
 
           (integer? s)
           [1 [s]])
-        token-buf* (-> tokens int-array int-array->memory)]
+        ^Memory token-buf* (-> tokens int-array int-array->memory)]
     (assert (< @n-past* (:n-ctx ctx)) "Context size exceeded")
 
     (let [batch-size (:n-batch ctx)]
-      (loop [offset 0
+      (loop [offset (long 0)
              n-past @n-past*]
         (let [batch-buf (.share token-buf* (* offset Integer/BYTES))
               num-batch-tokens (min batch-size (- total-tokens offset))]
           (llama-eval ctx batch-buf num-batch-tokens n-past seq-id)
           (let [next-offset (+ offset num-batch-tokens)]
             (when (< next-offset total-tokens)
-              (recur next-offset
+              (recur (long next-offset)
                      (+ n-past num-batch-tokens)))))))
 
     (vreset! n-past* (+ @n-past* total-tokens))
