@@ -36,6 +36,7 @@
    com.sun.jna.Pointer
    com.sun.jna.ptr.FloatByReference
    com.sun.jna.ptr.IntByReference
+   com.sun.jna.ptr.ByteByReference
    com.sun.jna.Structure)
   (:gen-class))
 
@@ -143,18 +144,9 @@
                           (when old
                             (llama/llama_free_model (Pointer. old)))))
 
-         delete-batch (fn []
-                        (let [[old _new] (swap-vals! model-ptr (constantly nil))]
-                          (when old
-                            (llama/llama_batch_free ^llama_batch old))))
-
-
          n-batch (.readField llama-context-params "n_batch")
          n-ctx (llama/llama_n_ctx context)
          n-vocab (llama/llama_n_vocab model)
-
-         batch (llama/llama_batch_init n-batch 0)
-         batch-ref (atom batch)
 
          ;; make context autocloseable and implement
          ;; some map lookup interfaces
@@ -164,26 +156,23 @@
                      [(Pointer/nativeValue context)]
                    (valAt [k]
                      (case k
-                       :n-batch n-batch
                        :n-ctx n-ctx
+                       :n-batch n-batch
                        :n-vocab n-vocab
                        :model @model-ref
-                       :batch @batch-ref
                        ;; else
                        nil))
                    (close []
                      (delete-context)
-                     (delete-model)
-                     (delete-batch)))]
+                     (delete-model)))]
 
      ;; cleanup
-     (.register ^Cleaner @cleaner batch delete-batch)
      (.register ^Cleaner @cleaner context delete-context)
      (.register ^Cleaner @cleaner model delete-model)
      context)))
 
 
-(defn llama-token-to-str
+(defn ^:private llama-token-to-str
   [ctx token]
   (let [buffer-size (* 8 Character/BYTES)
         ^ByteBuffer buffer (ByteBuffer/allocate buffer-size)
@@ -262,7 +251,6 @@
             (.writeField "sorted" (byte 0)))]
       candidates*)))
 
-
 ;;;;;;;;;;;;;;
 ;;; Samplers
 ;;;;;;;;;;;;;;
@@ -293,7 +281,6 @@
 
 
 (defn init-grammar-sampler
-  "Given a context, returns a sampling function that uses the llama.cpp mirostat_v2 implementation."
   ([ctx grammar-str] (init-grammar-sampler ctx grammar-str {}))
   ([ctx grammar-str params]
    (let [params (grammar/map->llama-sampler-params params)
@@ -305,7 +292,10 @@
            (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
          (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
 
+;;;;;;;;;;;;;;
 ;; Tokenize
+;;;;;;;;;;;;;;
+
 (defn tokenize
   [ctx s add-bos?]
   (let [add-bos (->bool add-bos?)
@@ -317,28 +307,34 @@
                     (count s) token-buf* max-tokens add-bos)]
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
 
-
+;;;;;;;;;;;;;;;;;;;
 ;; Decode & batches
-(defn write-to-batch!
-  [^llama_batch batch ^Memory batch-buf* num-batch-tokens n-past seq-id]
-  (let [pos (map #(+ n-past %) (range num-batch-tokens))
-        seq-ids (repeat num-batch-tokens seq-id)
-        ^Pointer pos* (.getPointer ^IntByReference (.readField batch "pos"))
-        ^Pointer seq-id* (.getPointer ^IntByReference (.readField batch "seq_id")) ]
+;;;;;;;;;;;;;;;;;;;
+
+(defn create-batch
+  [^Memory batch-buf* num-batch-tokens n-past seq-id]
+  (let [batch (doto (Structure/newInstance llama_batch) (.read))
+        pos (int-array (map #(+ n-past %) (range num-batch-tokens)))
+        seq-ids (int-array (repeat num-batch-tokens seq-id))
+        logits (byte-array (conj (vec (repeat (dec num-batch-tokens) 0)) 1))]
     (doto batch
       (.writeField "n_tokens" (int num-batch-tokens))
       (.writeField "token" (doto (IntByReference.) (.setPointer batch-buf*)))
-      (.writeField "logits" nil)
+      (.writeField "pos" (doto (IntByReference.) (.setPointer (seq->memory pos))))
+      (.writeField "seq_id" (doto (IntByReference.) (.setPointer (seq->memory seq-ids))))
+      (.writeField "logits" (doto (ByteByReference.) (.setPointer (seq->memory logits))))
       (.writeField "embd" nil))
-    (doseq [i (range num-batch-tokens)]
-      (.setInt pos* (* Integer/BYTES i) (nth pos i))
-      (.setInt seq-id* (* Integer/BYTES i) (nth seq-ids i)))
+    ;; I'm gonna assume JNA is going to garbage collect these, if not we leak memory.
     batch))
 
+
 (defn llama-eval
-  [ctx batch-buf* num-batch-tokens n-past seq-id]
+  [ctx batch seq-id n-past]
   (llama/llama_kv_cache_seq_rm ctx seq-id n-past -1)
-  (llama/llama_decode ctx (write-to-batch! (:batch ctx) batch-buf* num-batch-tokens n-past seq-id)))
+  (if-let [res (llama/llama_decode ctx batch)]
+    (assert (zero? res) (format "Failed to decode batch: %s"  res))
+    batch))
+
 
 (defn decode
   "Adds `s` to the current context and updates the context's logits (see `get-logits`).
@@ -348,7 +344,7 @@
   `num-threads`: number of threads to use when updating the logits.
                  If not provided, or `nil`, defaults to `*num-threads*`.
   "
-  [ctx seq-id s n-past*]
+  [ctx s n-past* seq-id]
   (let [[total-tokens ^Memory tokens]
         (cond
           (string? s)
@@ -356,24 +352,26 @@
 
           (integer? s)
           [1 [s]])
-        ^Memory token-buf* (seq->memory tokens Integer/BYTES)]
+        ^Memory token-buf* (seq->memory tokens)]
     (assert (< @n-past* (:n-ctx ctx)) "Context size exceeded")
 
     (let [batch-size (:n-batch ctx)]
       (loop [offset (long 0)
              n-past @n-past*]
-        (let [batch-buf (.share token-buf* (* offset Integer/BYTES))
-              num-batch-tokens (min batch-size (- total-tokens offset))]
-          (llama-eval ctx batch-buf num-batch-tokens n-past seq-id)
-          (let [next-offset (+ offset num-batch-tokens)]
-            (when (< next-offset total-tokens)
-              (recur (long next-offset)
-                     (+ n-past num-batch-tokens)))))))
-
+        (let [batch-buf* (.share token-buf* (* offset Integer/BYTES))
+              num-batch-tokens (min batch-size (- total-tokens offset))
+              batch (create-batch batch-buf* num-batch-tokens n-past seq-id)
+              next-offset (+ offset num-batch-tokens)]
+          (llama-eval ctx batch n-past seq-id)
+          (when (< next-offset total-tokens)
+            (recur (long next-offset) (+ n-past num-batch-tokens))))))
     (vreset! n-past* (+ @n-past* total-tokens))
     ctx))
 
-;; Generate tokens
+;;;;;;;;;;;;;;;;;;;
+;; Generation API
+;;;;;;;;;;;;;;;;;;;
+
 (defn generate-tokens
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
   ([ctx prompt]
@@ -394,14 +392,14 @@
               (vreset! reset? false)
               (when (not= eos next-token)
                 (cons next-token
-                      (lazy-seq (next (decode ctx seq-id next-token n-past)))))))
-          (decode ctx seq-id prompt n-past)))
+                      (lazy-seq (next (decode ctx next-token n-past seq-id)))))))
+          (decode ctx prompt n-past seq-id)))
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
            (llama/llama_set_rng_seed ctx seed))
          (loop [acc init
-                ret (decode ctx seq-id prompt n-past)]
+                ret (decode ctx prompt n-past seq-id)]
            (let [next-token (samplef (get-logits ctx) @reset?)]
              (vreset! reset? false)
              (if (= eos next-token)
@@ -409,7 +407,7 @@
                (let [acc (rf acc next-token)]
                  (if (reduced? acc)
                    @acc
-                   (recur acc (decode ctx seq-id next-token n-past))))))))))))
+                   (recur acc (decode ctx next-token n-past seq-id))))))))))))
 
 
 
@@ -432,8 +430,9 @@
   (require '[clojure.java.io :as io])
 
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
-  (def opts {:n-gpu-layers 35 :n-threads *num-threads* :n-ctx 0 :n-threads-batch *num-threads*})
+  (def opts {:n-gpu-layers 35 :n-threads *num-threads* :n-threads-batch *num-threads* :n-ctx 0})
   (def ctx (create-context llama7b-path opts))
+
   (def prompt "You are Hibotron8000. All you do is say 'hi'. What do you say?")
   (def tokens (second (tokenize ctx prompt true)))
 
@@ -449,4 +448,6 @@
   ;; Test a large file (TODO context swapping)
   (def txt (slurp (fs/file (fs/expand-home "~/Desktop/test.txt"))))
 
-  (generate-string ctx txt))
+  (generate-string ctx txt)
+
+  )

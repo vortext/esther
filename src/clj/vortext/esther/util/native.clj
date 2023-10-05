@@ -4,6 +4,7 @@
    [clojure.string :as str]
    [babashka.process :refer [shell]]
    [babashka.fs :as fs]
+   [clojure.tools.logging :as log]
    [clojure.java.io :as io])
   (:import
    java.nio.ByteBuffer
@@ -38,14 +39,26 @@
               (.setPointer mem))]
     ibr))
 
-
 (defn seq->memory
-  [arr size]
+  [arr]
   (let [arrlen (count arr)
+        type (class (first arr))
+        type-name (.getName type)
+        type-info
+        {"java.lang.Integer"   [Integer/BYTES #(.setInt %1 %2 %3)]
+         "java.lang.Byte"      [Byte/BYTES #(.setByte %1 %2 %3)]
+         "java.lang.Float"     [Float/BYTES #(.setFloat %1 %2 %3)]
+         "java.lang.Long"      [Long/BYTES #(.setLong %1 %2 %3)]
+         "java.lang.Double"    [Double/BYTES #(.setLong %1 %2 %3)]
+         "java.lang.Short"     [Short/BYTES #(.setLong %1 %2 %3)]
+         "java.lang.Character" [Character/BYTES #(.setChar %1 %2 %3)]}
+        [size set-fn] (get type-info type-name)
         num-bytes (* arrlen size)
         mem (doto (Memory. num-bytes) (.clear))]
-    (dotimes [i arrlen]
-      (.setInt mem (* i size) (nth arr i)))
+    (when (nil? size)
+      (throw (IllegalArgumentException. "Unsupported type")))
+    (doseq [[i val] (map-indexed vector arr)]
+      (set-fn mem (* i size) val))
     mem))
 
 
