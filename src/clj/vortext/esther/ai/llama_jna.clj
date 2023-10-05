@@ -55,6 +55,30 @@
   (delay
     (llama/llama_backend_init 0)))
 
+(defn eos
+  "Returns the llama end of sentence token.
+
+  Calling `eos` without a context is deprecated as not all models use the same eos token."
+  ;; only for backwards compatibility
+  [ctx]
+  (llama/llama_token_eos ctx))
+
+(defn bos
+  "Returns the llama beginning of sentence token.
+
+  Calling `bos` without a context is deprecated as not all models use the same bos token."
+  ;; only for backwards compatibility
+  [ctx]
+  (llama/llama_token_bos ctx))
+
+(defn nl
+  "Returns the llama newline token.
+
+  Calling `nl` without a context is deprecated as not all models use the same nl token."
+  ;; only for backwards compatibility
+  [ctx]
+  (llama/llama_token_nl ctx))
+
 (defn ^:private map->llama-context-params [m]
   (reduce-kv
    (fn [^llama_context_params params k v]
@@ -311,11 +335,10 @@
 ;;;;;;;;;;;;;;;;;;;
 ;; Decode & batches
 ;;;;;;;;;;;;;;;;;;;
-(defn- by-reference [o v] (doto o (.setPointer (seq->memory v))))
-
 (defn create-batch
   [^Memory batch-buf* num-batch-tokens n-past seq-id]
   (let [batch (doto (Structure/newInstance llama_batch) (.read))
+        by-reference (fn [o v] (doto o (.setPointer (seq->memory v))))
         pos (int-array (map #(+ n-past %) (range num-batch-tokens)))
         seq-ids (int-array (repeat num-batch-tokens seq-id))
         logits (byte-array (conj (vec (repeat (dec num-batch-tokens) 0)) 1))]
@@ -326,7 +349,7 @@
       (.writeField "seq_id" (by-reference (IntByReference.) seq-ids))
       (.writeField "logits" (by-reference (ByteByReference.) logits))
       (.writeField "embd" nil))
-    ;; I'm gonna assume the JVM is going to garbage collect these, if not we leak memory.
+    ;; I'm gonna assume the JVM is going to garbage collect these eventually, if not it leaks memory.
     batch))
 
 
@@ -374,7 +397,7 @@
    (generate-tokens ctx 0 prompt nil))
   ([ctx seq-id prompt {:keys [samplef seed] :as opts}]
    (let [samplef (or samplef (init-mirostat-v2-sampler ctx))
-         eos (llama/llama_token_eos ctx)
+         eos (eos ctx)
          n-past (volatile! 0)
          reset? (volatile! true)]
      ;; Clear all kv_cache_tokens in seq
@@ -450,5 +473,25 @@
   (def txt (slurp "https://www.gutenberg.org/cache/epub/11/pg11.txt"))
 
   (generate-string ctx txt)
+
+  ;; For running ctx
+  (require '[integrant.repl.state :as state])
+  (def ctx (get-in state/system [:ai.llm/instance :llm/ctx]))
+
+
+
+  (require '[instaparse.core :as insta])
+
+  (def grammar (str (fs/canonicalize (io/resource "grammars/chat.instaparse"))))
+
+
+  (def parser (insta/parser grammar :auto-whitespace :standard))
+  (def resp (jsonista.core/write-value-as-string
+             {:message "hi there"
+              :emoji "🙂"
+              :keywords ["#Hibotron800"]
+              :imagination "The Abyss"}))
+  (insta/parse parser resp)
+
 
   )
