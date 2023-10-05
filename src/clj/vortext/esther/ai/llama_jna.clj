@@ -229,15 +229,7 @@
                 (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
-(defn get-logits-ith
-  ([ctx]
-   (get-logits-ith ctx 0))
-  ([ctx idx]
-   (-> ^FloatByReference (llama/llama_get_logits_ith ctx idx)
-       .getPointer)))
-
-
-(defn ^:private get-logits
+(defn  get-logits
   "Returns a copy of the current context's logits as a float array."
   [ctx]
   (let [n-vocab (llama/llama_n_vocab (:model ctx))]
@@ -247,7 +239,8 @@
 
 
 
-(defn ^:private ctx->candidates [ctx candidates-buf*]
+(defn ^:private ctx->candidates
+  [ctx candidates-buf*]
   (let [n-vocab (llama/llama_n_vocab (llama/llama_get_model ctx))
         buf-size (* token-data-size n-vocab)
         candidates-buf @candidates-buf*
@@ -257,13 +250,10 @@
                                     buf-size))
                          candidates-buf
                          (vreset! candidates-buf* (Memory. buf-size)))
-
         logits (get-logits ctx)]
-    (doseq [i (range n-vocab)]
-      (let [base-addr (* i token-data-size)
-            id i
-            logit (aget logits id)
-            p 0]
+    (doseq [id (range n-vocab)]
+      (let [base-addr (* id token-data-size)
+            logit (aget logits id)]
         (.setInt candidates-buf base-addr id)
         (.setFloat candidates-buf (+ base-addr 4) logit)
         (.setFloat candidates-buf (+ base-addr 8) 0)))
@@ -384,23 +374,6 @@
     ctx))
 
 
-(defn llama-update
-  "Adds `s` to the current context and updates the context's logits (see `get-logits`).
-
-  `s`: either be a string or an integer token.
-  `n-past`: number of previous tokens to include when updating logits.
-  `num-threads`: number of threads to use when updating the logits.
-                 If not provided, or `nil`, defaults to `*num-threads*`.
-  "
-  ([ctx seq-id s n-past]
-   (decode ctx seq-id s n-past)))
-
-(defn decode-prompt
-  ([ctx seq-id prompt n-past]
-   (let [ctx (decode ctx seq-id prompt n-past)]
-     ctx)))
-
-
 (defn generate-tokens
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
   ([ctx prompt]
@@ -421,14 +394,14 @@
               (vreset! reset? false)
               (when (not= eos next-token)
                 (cons next-token
-                      (lazy-seq (next (llama-update ctx seq-id next-token n-past)))))))
-          (decode-prompt ctx seq-id prompt n-past)))
+                      (lazy-seq (next (decode ctx seq-id next-token n-past)))))))
+          (decode ctx seq-id prompt n-past)))
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
            (llama/llama_set_rng_seed ctx seed))
          (loop [acc init
-                ret (decode-prompt ctx seq-id prompt n-past)]
+                ret (decode ctx seq-id prompt n-past)]
            (let [next-token (samplef (get-logits ctx) @reset?)]
              (vreset! reset? false)
              (if (= eos next-token)
@@ -436,7 +409,7 @@
                (let [acc (rf acc next-token)]
                  (if (reduced? acc)
                    @acc
-                   (recur acc (llama-update ctx seq-id next-token n-past))))))))))))
+                   (recur acc (decode ctx seq-id next-token n-past))))))))))))
 
 
 
