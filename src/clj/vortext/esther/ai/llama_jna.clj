@@ -240,8 +240,7 @@
 
 (defn ^:private malloc-candidates-buf
   [ctx]
-  (doto (Memory. (* token-data-size (:n-vocab ctx)))
-    (.clear)))
+  (doto (Memory. (* token-data-size (:n-vocab ctx))) (.clear)))
 
 
 (defn ^:private ctx->candidates
@@ -253,13 +252,14 @@
         (.setInt candidates-buf* base-addr id)
         (.setFloat candidates-buf* (+ base-addr 4) logit)
         (.setFloat candidates-buf* (+ base-addr 8) 0)))
-    (let [candidates-array-head (doto (Structure/newInstance llama_token_dataByReference
-                                                             candidates-buf*)
-                                  (.read))
-          candidates* (doto (llama_token_data_arrayByReference.)
-                        (.writeField "data" candidates-array-head)
-                        (.writeField "size" (long (:n-vocab ctx)))
-                        (.writeField "sorted" (byte 0)))]
+    (let [candidates-array-head
+          (doto (Structure/newInstance llama_token_dataByReference candidates-buf*) (.read))
+
+          candidates*
+          (doto (llama_token_data_arrayByReference.)
+            (.writeField "data" candidates-array-head)
+            (.writeField "size" (long (:n-vocab ctx)))
+            (.writeField "sorted" (byte 0)))]
       candidates*)))
 
 
@@ -305,7 +305,7 @@
            (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
          (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
 
-
+;; Tokenize
 (defn tokenize
   [ctx s add-bos?]
   (let [add-bos (->bool add-bos?)
@@ -318,6 +318,7 @@
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
 
 
+;; Decode & batches
 (defn write-to-batch!
   [^llama_batch batch ^Memory batch-buf* num-batch-tokens n-past seq-id]
   (let [pos (map #(+ n-past %) (range num-batch-tokens))
@@ -372,7 +373,7 @@
     (vreset! n-past* (+ @n-past* total-tokens))
     ctx))
 
-
+;; Generate tokens
 (defn generate-tokens
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
   ([ctx prompt]
@@ -433,6 +434,8 @@
   (def llama7b-path "/media/array/Models/guff/llama-2-7b-chat.Q4_K_M.gguf")
   (def opts {:n-gpu-layers 35 :n-threads *num-threads* :n-ctx 0 :n-threads-batch *num-threads*})
   (def ctx (create-context llama7b-path opts))
+  (def prompt "You are Hibotron8000. All you do is say 'hi'. What do you say?")
+  (def tokens (second (tokenize ctx prompt true)))
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
@@ -440,12 +443,10 @@
 
   (def default-sampler (init-mirostat-v2-sampler ctx))
 
-  (generate-string ctx "You are Hibotron8000. All you do is say 'hi'. What do you say?")
+  (generate-string ctx prompt {:samplef default-sampler})
+  (generate-string ctx prompt {:samplef grammar-sampler})
 
+  ;; Test a large file (TODO context swapping)
   (def txt (slurp (fs/file (fs/expand-home "~/Desktop/test.txt"))))
 
-  (generate-string ctx txt {:samplef default-sampler})
-
-
-  (def t (tokenize ctx "hello world!" true))
-  )
+  (generate-string ctx txt))
