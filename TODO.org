@@ -121,7 +121,7 @@ _ more user information in session (vault)
 - [ ] Logo + favicon
 - [X] Loading indicator login
 - [ ] Accessibility and ARIA
-- [ ] Disable text input while in modal confirm
+- [X] Disable text input while in modal confirm
 ** TODO test infrastructure and tests => generate training / test data for fine tuning
 ** TODO better intro flow
 ** TODO /help command
