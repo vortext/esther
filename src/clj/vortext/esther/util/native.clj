@@ -39,22 +39,15 @@
     ibr))
 
 
-(def ptr->int-array #(.getIntArray % 0 (/ (.size %) Integer/BYTES)))
-
-(defn int-array->memory
-  [arr]
-  (let [arrlen (alength arr)
-        num-bytes (* arrlen Integer/BYTES)
-        mem (Memory. num-bytes)]
+(defn seq->memory
+  [arr size]
+  (let [arrlen (count arr)
+        num-bytes (* arrlen size)
+        mem (doto (Memory. num-bytes) (.clear))]
     (dotimes [i arrlen]
-      (.setInt mem (* i Integer/BYTES) (aget arr i)))
+      (.setInt mem (* i size) (nth arr i)))
     mem))
 
-(defn int-array->int-array-by-reference
-  [arr]
-  (let [ibr (doto (IntByReference.)
-              (.setPointer (int-array->memory arr)))]
-    ibr))
 
 ;; API generation
 (defn ^:private write-edn [w obj]

@@ -25,9 +25,8 @@
    [vortext.esther.jna.grammar :as grammar]
    [vortext.esther.util.native
     :refer [->bool
-            int-array->memory
-            ->float-array-by-reference
-            ->int-array-by-reference]])
+            seq->memory
+            ->float-array-by-reference]])
   (:import
    java.lang.ref.Cleaner
    java.nio.charset.Charset
@@ -228,13 +227,13 @@
                 (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
-(defn  get-logits
+(defn get-logits
   "Returns a copy of the current context's logits as a float array."
   [ctx]
   (let [n-vocab (llama/llama_n_vocab (:model ctx))]
-    (-> ^FloatByReference (llama/llama_get_logits ctx)
-        .getPointer
-        (.getFloatArray 0 n-vocab))))
+    ^floats (-> ^FloatByReference (llama/llama_get_logits ctx)
+                .getPointer
+                (.getFloatArray 0 n-vocab))))
 
 
 (defn ^:private ctx->candidates
@@ -247,7 +246,9 @@
                                 (>= (.size ^Memory candidates-buf)
                                     buf-size))
                          candidates-buf
-                         (vreset! candidates-buf* (Memory. buf-size)))
+                         (vreset! candidates-buf*
+                                  (doto (Memory. buf-size)
+                                    (.clear))))
         logits (get-logits ctx)]
     (doseq [id (range n-vocab)]
       (let [base-addr (* id token-data-size)
@@ -311,7 +312,7 @@
   (let [add-bos (->bool add-bos?)
         s (if add-bos? (str " " s) s)
         max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
-        token-buf* (Memory. (* max-tokens Integer/BYTES))
+        token-buf* (doto (Memory. (* max-tokens Integer/BYTES)) (.clear))
         num-tokens (llama/llama_tokenize
                     (:model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
@@ -355,7 +356,7 @@
 
           (integer? s)
           [1 [s]])
-        ^Memory token-buf* (-> tokens int-array int-array->memory)]
+        ^Memory token-buf* (seq->memory tokens Integer/BYTES)]
     (assert (< @n-past* (:n-ctx ctx)) "Context size exceeded")
 
     (let [batch-size (:n-batch ctx)]
