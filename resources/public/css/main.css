@@ -24,6 +24,11 @@
   padding: 0; /* Reset margin and padding */
 }
 
+.debug {
+  outline: 1px solid red !important;
+  color: red !important;
+}
+
 html {
   background: var(--background-color);
   color: var(--font-color);

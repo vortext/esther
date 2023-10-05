@@ -71,7 +71,8 @@
       (-> (ui (do ((scopes scope) opts user)
                   [:span "Wiped memories: " (name scope)]))
           (assoc :headers {"HX-Redirect" "/"}))
-      (ui [:span "Let us continue."]))))
+      (-> (ui [:span "Let us continue."])
+          (update :headers merge {"HX-Trigger" "enableUserInput"})))))
 
 
 (defn archive-form
@@ -96,4 +97,5 @@
       (-> (ui (do (memory/archive-todays-memories opts user)
                   [:span "Archived conversation."]))
           (assoc :headers {"HX-Redirect" "/"}))
-      (ui [:span "Let us continue."]))))
+      (-> (ui [:span "Let us continue."])
+          (update :headers merge {"HX-Trigger" "enableUserInput"})))))

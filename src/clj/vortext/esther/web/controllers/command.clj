@@ -61,17 +61,23 @@
 
 (defn logout
   [_opts _user _args _obj]
-  (->event :htmx (login-ui/logout-chat)))
+  (with-meta
+    (->event :htmx (login-ui/logout-chat))
+    {:headers {"HX-Trigger" "disableUserInput"}}))
 
 
 (defn wipe
   [opts user args _obj]
-  (->event :htmx (memory-ui/wipe-form opts user args)))
+  (with-meta
+    (->event :htmx (memory-ui/wipe-form opts user args))
+    {:headers {"HX-Trigger" "disableUserInput"}}))
 
 
 (defn archive
   [opts user _args _obj]
-  (->event :htmx (memory-ui/archive-form opts user)))
+  (with-meta
+    (->event :htmx (memory-ui/archive-form opts user))
+    {:headers {"HX-Trigger" "disableUserInput"}}))
 
 
 (defn command!

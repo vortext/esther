@@ -31,7 +31,7 @@
   (let [reply (if (str/starts-with? (common/request-msg obj) "/")
                 (command! opts user obj)
                 (chat! opts user obj))]
-    (append-event obj reply)))
+    (with-meta (append-event obj reply) (meta reply))))
 
 
 (defn as-obj

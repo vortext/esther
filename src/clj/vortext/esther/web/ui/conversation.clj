@@ -56,7 +56,9 @@
 
 (defn message
   [opts request]
-  (ui (memory-container (converse/answer! opts request))))
+  (let [response (converse/answer! opts request)]
+    (-> (ui (memory-container response))
+        (merge (meta response)))))
 
 
 (defn msg-input

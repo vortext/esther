@@ -129,6 +129,10 @@ body {
   opacity: 0.5;
 }
 
+.disabled-user-input {
+  visibility: hidden;
+}
+
 /* Loading animation */
 .response-loading {
   margin-top: 2em;

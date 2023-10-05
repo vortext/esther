@@ -217,8 +217,22 @@ function today(date = new Date()) {
 
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("today").innerHTML = today();
-
   setClientContext();
+
+  const userInput = document.getElementById("user-input");
+
+  // Add listeners
+  document.body.addEventListener("disableUserInput", function(evt){
+    userInput.disabled = true;
+    userInput.classList.add("user-input-disabled");
+  });
+
+  document.body.addEventListener("enableUserInput", function(evt){
+    userInput.disabled = false;
+    userInput.classList.remove("user-input-disabled");
+    userInput.focus();
+
+  });
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -234,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("bottom").scrollIntoView({behavior: 'smooth'});
   },0);
 });
+
 
 function refreshAtMidnight() {
   var now = new Date();
