@@ -151,6 +151,7 @@
 
          n-batch (.readField llama-context-params "n_batch")
          n-ctx (llama/llama_n_ctx context)
+         n-vocab (llama/llama_n_vocab model)
 
          batch (llama/llama_batch_init n-batch 0)
          batch-ref (atom batch)
@@ -165,6 +166,7 @@
                      (case k
                        :n-batch n-batch
                        :n-ctx n-ctx
+                       :n-vocab n-vocab
                        :model @model-ref
                        :batch @batch-ref
                        ;; else
@@ -236,32 +238,27 @@
                 (.getFloatArray 0 n-vocab))))
 
 
+(defn ^:private malloc-candidates-buf
+  [ctx]
+  (doto (Memory. (* token-data-size (:n-vocab ctx)))
+    (.clear)))
+
+
 (defn ^:private ctx->candidates
-  [ctx candidates-buf*]
-  (let [n-vocab (llama/llama_n_vocab (llama/llama_get_model ctx))
-        buf-size (* token-data-size n-vocab)
-        candidates-buf @candidates-buf*
-        ^Memory
-        candidates-buf (if (and candidates-buf
-                                (>= (.size ^Memory candidates-buf)
-                                    buf-size))
-                         candidates-buf
-                         (vreset! candidates-buf*
-                                  (doto (Memory. buf-size)
-                                    (.clear))))
-        logits (get-logits ctx)]
-    (doseq [id (range n-vocab)]
+  [ctx ^Memory candidates-buf*]
+  (let [logits (get-logits ctx)]
+    (doseq [id (range (:n-vocab ctx))]
       (let [base-addr (* id token-data-size)
             logit (aget ^floats logits (int id))]
-        (.setInt candidates-buf base-addr id)
-        (.setFloat candidates-buf (+ base-addr 4) logit)
-        (.setFloat candidates-buf (+ base-addr 8) 0)))
+        (.setInt candidates-buf* base-addr id)
+        (.setFloat candidates-buf* (+ base-addr 4) logit)
+        (.setFloat candidates-buf* (+ base-addr 8) 0)))
     (let [candidates-array-head (doto (Structure/newInstance llama_token_dataByReference
-                                                             candidates-buf)
+                                                             candidates-buf*)
                                   (.read))
           candidates* (doto (llama_token_data_arrayByReference.)
                         (.writeField "data" candidates-array-head)
-                        (.writeField "size" (long n-vocab))
+                        (.writeField "size" (long (:n-vocab ctx)))
                         (.writeField "sorted" (byte 0)))]
       candidates*)))
 
@@ -285,13 +282,14 @@
          eta (float 0.1)]
      (init-mirostat-v2-sampler ctx tau eta)))
   ([ctx tau eta]
-   (fn [logits reset?]
-     (sample-mirostat-v2
-      ctx
-      (volatile! nil)
-      (volatile! (* 2 tau))
-      tau
-      eta))))
+   (let [candidates-buf* (malloc-candidates-buf ctx)]
+     (fn [logits reset?]
+       (sample-mirostat-v2
+        ctx
+        candidates-buf*
+        (volatile! (* 2 tau))
+        tau
+        eta)))))
 
 
 (defn init-grammar-sampler
@@ -299,9 +297,10 @@
   ([ctx grammar-str] (init-grammar-sampler ctx grammar-str {}))
   ([ctx grammar-str params]
    (let [params (grammar/map->llama-sampler-params params)
-         grammar* (atom nil)]
+         grammar* (atom nil)
+         candidates-buf* (malloc-candidates-buf ctx)]
      (fn [logits reset?]
-       (let [candidates (ctx->candidates ctx (volatile! nil))]
+       (let [candidates (ctx->candidates ctx candidates-buf*)]
          (when reset?
            (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
          (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
@@ -383,7 +382,7 @@
          eos (llama/llama_token_eos ctx)
          n-past (volatile! 0)
          reset? (volatile! true)]
-     (llama/llama_kv_cache_tokens_rm ctx -1 -1)
+     (llama/llama_kv_cache_tokens_rm ctx -1 -1) ;; Clear all kv_cache_tokens
      (reify
        clojure.lang.Seqable
        (seq [_]
@@ -437,14 +436,15 @@
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
-  (def sampler (init-grammar-sampler ctx grammar-str {:mirostat 2}))
-  (def sampler (init-mirostat-v2-sampler ctx))
+  (def grammar-sampler (init-grammar-sampler ctx grammar-str {:mirostat 2}))
 
-  (generate-string ctx "You are Hibotron8000. All you do is say 'hi'. What do you say?" {:samplef sampler})
+  (def default-sampler (init-mirostat-v2-sampler ctx))
+
+  (generate-string ctx "You are Hibotron8000. All you do is say 'hi'. What do you say?")
 
   (def txt (slurp (fs/file (fs/expand-home "~/Desktop/test.txt"))))
 
-  (generate-string ctx txt {:samplef sampler})
+  (generate-string ctx txt {:samplef default-sampler})
 
 
   (def t (tokenize ctx "hello world!" true))
