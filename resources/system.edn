@@ -36,7 +36,7 @@
  :util.handlebars/instance {}
 
  :ai.llm/instance
- {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/pygmalion-2-13b-q5_K_M.guff"]
+ {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/Synthia-7B-v1.3-q5_K_M.guff"]
                :n-ctx 0 ;; 0 => from model
                :n-gpu-layers 26
                :prompt-template  "templates/prompt"
@@ -45,11 +45,11 @@
                :mirostat-tau 5.0
                :mirostat-eta 0.1}
   :template/renderer #ig/ref :util.handlebars/instance
-  :template/vars {:system {:prefix "<|system|> "
+  :template/vars {:system {:prefix "SYSTEM: "
                            :suffix ""}
-                  :user {:prefix "<|user|> "
+                  :user {:prefix "USER: "
                          :suffix ""}
-                  :model {:prefix "<|model|> "
+                  :model {:prefix "ESTHER: "
                           :suffix ""}}}
 
  :reitit.routes/api
