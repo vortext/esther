@@ -1,0 +1,13 @@
+response = <"{"> quote <"message">  quote <":"> message <",">
+            quote <"emoji">         quote <":"> emoji <",">
+            quote <"keywords">      quote <":"> keywords <",">
+            quote <"imagination">   quote <":"> imagination
+          <"}">
+
+<quote> = <"\"">
+message =  quote #'[^"]*' quote
+imagination =  quote #'[^"]*' quote
+
+keyword = quote #'\#[a-zA-Z0-9-]+' quote
+keywords = <'['> (keyword (<','> keyword)*) <']'>
+emoji = quote #"[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]" quote
