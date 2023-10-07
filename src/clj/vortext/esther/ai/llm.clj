@@ -3,7 +3,7 @@
    [babashka.fs :as fs]
    [clojure.java.io :as io]
    [vortext.esther.util.json :as json]
-   [vortext.esther.ai.llama-jna :refer [generate-string create-context init-grammar-sampler]]
+   [vortext.esther.ai.llama-jna :as llama]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [malli.core :as m]
@@ -51,14 +51,19 @@
 (defn complete-submission
   [ctx renderer sampler obj]
   (let [{:keys [:memory/events :user/memories]} obj
+        untoken #(llama/untokenize ctx [%])
+        special-tokens {:bos (untoken (llama/bos ctx))
+                        :eos (untoken (llama/eos ctx))
+                        :nl (untoken (llama/nl ctx))}
         template-vars (merge
                        (context-map obj)
-                       {:history memories,
+                       special-tokens
+                       {:history memories
                         :new-message (:event/content (first events))})
         submission ((:handlebars/render-template renderer)
                     "templates/prompt" template-vars)
         _ (log/debug "submission::" submission)
-        generated (generate-string ctx submission {:samplef sampler})
+        generated (llama/generate-string ctx submission {:samplef sampler})
         _ (log/debug "generated::" generated)]
     (assoc obj :llm/response
            (-> generated
@@ -68,10 +73,10 @@
 
 (defmethod ig/init-key :ai.llm/instance
   [_ {:keys [:llm/params :template/renderer] :as opts}]
-  (let [ctx (create-context
+  (let [ctx (llama/create-context
              (str (fs/canonicalize (:model-path params))) params)
         gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
-        sampler (init-grammar-sampler ctx gbnf params)
+        sampler (llama/init-grammar-sampler ctx gbnf params)
         template-vars (:template/vars opts)]
 
     ((:handlebars/register-helper renderer)

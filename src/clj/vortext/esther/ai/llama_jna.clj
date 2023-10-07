@@ -647,8 +647,8 @@
   (require '[babashka.fs :as fs])
   (require '[clojure.java.io :as io])
 
-  (def model-path "/media/array/Models/guff/llama-2-7b-chat.Q5_K_M.guff")
-  ;;(def model-path "/media/array/Models/guff/Synthia-7B-v1.3-q5_K_M.guff")
+  #_(def model-path "/media/array/Models/guff/llama-2-7b-chat.Q5_K_M.guff")
+  (def model-path "/media/array/Models/guff/")
 
   (def opts {:n-gpu-layers 25 :n-threads *num-threads* :n-threads-batch *num-threads* :n-ctx 0})
 
@@ -659,7 +659,7 @@
     (let [prefix "User:" suffix "\n Assistant:"
           prompts ["Finish the sentence 'all your base are..."
                    "A one line summary of Alfred North Whitehead process philosophy"
-                   "How deep does the rabbithole go?"
+                   "How deep does the rabbit hole go?"
                    "A line from the lyrics of a Spice Girls song'"
                    "You are Hibotron8000. All you do is say 'hi'"]
           prompt (rand-nth prompts)]
