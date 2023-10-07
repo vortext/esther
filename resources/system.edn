@@ -41,6 +41,10 @@
                :n-gpu-layers 26
                :prompt-template  "templates/prompt"
                :grammar-file "grammars/chat.gbnf"
+               ;; https://github.com/ggerganov/llama.cpp/pull/3401
+               :rope-freq-base 0
+               :rope-freq-scale 0
+               ;; Mirostat
                :mirostat 2
                :mirostat-tau 5.0
                :mirostat-eta 0.1}

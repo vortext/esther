@@ -26,10 +26,13 @@
    [vortext.esther.util.native
     :refer [->bool
             seq->memory
-            ->float-array-by-reference]])
+            ->int-array-by-reference
+            ->float-array-by-reference]]
+   [instaparse.core :as insta])
   (:import
    java.lang.ref.Cleaner
    java.nio.charset.Charset
+   java.nio.charset.CodingErrorAction
    java.nio.ByteBuffer
    java.nio.CharBuffer
    com.sun.jna.Memory
@@ -56,28 +59,26 @@
     (llama/llama_backend_init 0)))
 
 (defn eos
-  "Returns the llama end of sentence token.
-
-  Calling `eos` without a context is deprecated as not all models use the same eos token."
+  "Returns the llama end of sentence token."
   ;; only for backwards compatibility
   [ctx]
   (llama/llama_token_eos ctx))
 
 (defn bos
-  "Returns the llama beginning of sentence token.
-
-  Calling `bos` without a context is deprecated as not all models use the same bos token."
+  "Returns the llama beginning of sentence token."
   ;; only for backwards compatibility
   [ctx]
   (llama/llama_token_bos ctx))
 
 (defn nl
-  "Returns the llama newline token.
-
-  Calling `nl` without a context is deprecated as not all models use the same nl token."
-  ;; only for backwards compatibility
+  "Returns the llama next line token."
   [ctx]
   (llama/llama_token_nl ctx))
+
+(defn eot
+  "Returns the llama end of turn token."
+  [ctx]
+  (llama/llama_token_eot ctx))
 
 (defn ^:private map->llama-context-params [m]
   (reduce-kv
@@ -196,6 +197,43 @@
      context)))
 
 
+(def
+  ^:private
+  ^com.sun.jna.Function
+  llama-token-to-piece
+  (.getFunction ^com.sun.jna.NativeLibrary llama/libllama
+                "llama_token_to_piece"))
+
+(defn ^:private decode-token-to-buf
+  ([ctx]
+   (fn [rf]
+     (let [buf-length (int 255)
+           buf (Memory. buf-length)
+           model (:model ctx)
+           skip-whitespace* (volatile! true)]
+       (fn
+         ([] (rf))
+         ([result] (rf result))
+         ([result token]
+          (let [nbytes (.invoke llama-token-to-piece
+                                Integer/TYPE
+                                (to-array [model token buf buf-length]))]
+            (if (pos? nbytes)
+              (let [bb
+                    (if @skip-whitespace*
+                      (do
+                        (vreset! skip-whitespace* false)
+                        (if (= 32 (.getByte buf 0))
+                          (let [len (dec nbytes)]
+                            (when (pos? len)
+                              (.getByteBuffer buf 1 (dec nbytes))))
+                          (.getByteBuffer buf 0 nbytes)))
+                      (.getByteBuffer buf 0 nbytes))]
+                (when bb
+                  (rf result bb)))
+              result))))))))
+
+
 (defn ^:private llama-token-to-str
   [ctx token]
   (let [buffer-size (* 8 Character/BYTES)
@@ -210,115 +248,150 @@
       [n-tokens buffer])))
 
 
-(defn decode-token-to-char
+(defn ^:private preserving-reduced
+  [rf]
+  #(let [ret (rf %1 %2)]
+     (if (reduced? ret)
+       (reduced ret)
+       ret)))
+
+(defn ^:private decode-token-to-char
+  "Returns a transducer that expects a stream of llama tokens
+  and outputs a stream of decoded chars.
+
+  The transducer will buffer intermediate results until enough
+  bytes to decode a character are available."
   ([ctx]
-   (decode-token-to-char ctx (Charset/forName "UTF-8")))
+   (decode-token-to-char ctx nil))
+  ([ctx opts]
+   (let [^Charset charset
+         (cond
+           (nil? opts) (Charset/forName "UTF-8")
+           (map? opts) (or (:charset opts)
+                           (Charset/forName "UTF-8"))
+           ;; for backwards compatibility
+           :else opts)
+         flush? (:flush? opts)]
+     (comp
+      (decode-token-to-buf ctx)
+      (fn [rf]
+        (let [model (:model ctx)
+
+              decoder (doto (.newDecoder charset)
+                        (.onMalformedInput CodingErrorAction/REPLACE)
+                        (.onUnmappableCharacter CodingErrorAction/REPLACE))
+
+              input-buffer (ByteBuffer/allocate 256)
+              output-buffer (CharBuffer/allocate 256)
+
+              buf-length (int 255)
+              buf (Memory. buf-length)
+              skip-whitespace* (volatile! true)
+
+              rrf (preserving-reduced rf)]
+          (fn
+            ([] (rf))
+            ([result]
+             (if flush?
+               (do
+                 (.flip input-buffer)
+                 (let [result
+                       (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
+                             decoder-result1 (.decode decoder input-buffer output-buffer true)
+                             ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
+                             decoder-result2 (.flush decoder output-buffer)]
+                         (if (and (.isUnderflow decoder-result1)
+                                  (.isUnderflow decoder-result2))
+                           (do
+                             (.flip output-buffer)
+                             (let [result (reduce rrf result output-buffer)]
+                               (.clear output-buffer)
+                               result))
+                           ;; else
+                           (throw (Exception. "Unexpected decoder state."))))]
+                   (rf result)))
+               ;; else no flush
+               (rf result)))
+            ([result ^java.nio.ByteBuffer bb]
+             (.put input-buffer bb)
+             (.flip input-buffer)
+
+             ;; Invoke the decode method zero or more times, as long as
+             ;; additional input may be available, passing false for the
+             ;; endOfInput argument and filling the input buffer and flushing
+             ;; the output buffer between invocations;
+             (let [decoder-result (.decode decoder input-buffer output-buffer false)]
+               (cond
+                 (.isUnderflow decoder-result)
+                 (do
+                   (.compact input-buffer)
+                   (.flip output-buffer)
+                   (let [result (reduce rrf result output-buffer)]
+                     (.clear output-buffer)
+                     result))
+
+                 (.isOverflow decoder-result)
+                 (throw (ex-info "Decoder buffer too small" {}))
+
+                 (.isError decoder-result)
+                 (throw (ex-info "Decoder Error" {:decoder decoder}))
+
+                 :else
+                 (throw (Exception. "Unexpected decoder state."))))))))))))
+
+
+
+(defn ^:private char->str
+  "Transducer that expects a stream of chars. If a surrogate pair is detected,
+  wait until the full pair is available before emitting."
+  []
+  (fn [rf]
+    (let [v (volatile! nil)]
+      (fn
+        ([] (rf))
+        ([result]
+         (let [result (if-let [c @v]
+                        (unreduced (rf result c))
+                        result)]
+           (rf result)))
+        ([result c]
+         (if-let [c1 @v]
+           (do
+             (vreset! v nil)
+             (rf result (str c1 c)))
+           (if (Character/isHighSurrogate c)
+             (do
+               (vreset! v c)
+               result)
+             (rf result (str c)))))))))
+
+
+(defn ^:private decode-token-to-str
+  "Returns a transducer that expects a stream of llama tokens
+  and outputs a stream of strings.
+
+  The transducer will buffer intermediate results until enough
+  bytes to decode a character are available. Also combines
+  surrogate pairs of characters."
+  ([ctx]
+   (decode-token-to-str ctx (Charset/forName "UTF-8")))
   ([ctx ^Charset charset]
-   (fn [rf]
-     (let [decoder (.newDecoder charset)
-           input-buffer (ByteBuffer/allocate 256)
-           output-buffer (CharBuffer/allocate 256)]
-       (fn
-         ([] (rf))
-         ([result] (rf result))
-         ([result token]
-          (let [[len ^ByteBuffer result-buf] (llama-token-to-str ctx token)]
-            (.put input-buffer (.array result-buf) 0 len)
-            (.flip input-buffer) ;; Preparing buffer for read
-            (let [decoder-result (.decode decoder input-buffer output-buffer false)]
-              (cond
-                (.isUnderflow decoder-result)
-                (do
-                  (.compact input-buffer) ;; Preparing buffer for write
-                  (.flip output-buffer)   ;; Preparing buffer for read
-                  (let [result (reduce rf result output-buffer)]
-                    (.clear output-buffer)
-                    result))
-                (.isOverflow decoder-result)
-                (throw (ex-info "Decoder buffer too small" {}))
-                (.isError decoder-result)
-                (throw (ex-info "Decoder Error" {:decoder decoder}))
-                :else
-                (throw (Exception. "Unexpected decoder state.")))))))))))
+   (comp
+    (decode-token-to-char ctx charset)
+    (char->str))))
 
-
-(defn get-logits
-  "Returns a copy of the current context's logits as a float array."
-  [ctx]
-  (let [n-vocab (llama/llama_n_vocab (:model ctx))]
-    ^floats (-> ^FloatByReference (llama/llama_get_logits ctx)
-                .getPointer
-                (.getFloatArray 0 n-vocab))))
-
-
-(defn ^:private malloc-candidates-buf
-  [ctx]
-  (doto (Memory. (* token-data-size (:n-vocab ctx))) (.clear)))
-
-
-(defn ^:private ctx->candidates
-  [ctx ^Memory candidates-buf*]
-  (let [logits (get-logits ctx)]
-    (doseq [id (range (:n-vocab ctx))]
-      (let [base-addr (* id token-data-size)
-            logit (aget ^floats logits (int id))]
-        (.setInt candidates-buf* base-addr id)
-        (.setFloat candidates-buf* (+ base-addr 4) logit)
-        (.setFloat candidates-buf* (+ base-addr 8) 0)))
-    (let [candidates-array-head
-          (doto (Structure/newInstance llama_token_dataByReference candidates-buf*) (.read))
-
-          candidates*
-          (doto (llama_token_data_arrayByReference.)
-            (.writeField "data" candidates-array-head)
-            (.writeField "size" (long (:n-vocab ctx)))
-            (.writeField "sorted" (byte 0)))]
-      candidates*)))
-
-;;;;;;;;;;;;;;
-;;; Samplers
-;;;;;;;;;;;;;;
-(defn sample-mirostat-v2
-  [ctx candidates-buf* mu* tau eta]
-  (let [mu (FloatByReference. @mu*)
-        candidates (ctx->candidates ctx candidates-buf*)
-        next-token (llama/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
-    (vreset! mu* (.getValue mu))
-    next-token))
-
-
-(defn init-mirostat-v2-sampler
-  "Given a context, returns a sampling function that uses the llama.cpp mirostat_v2 implementation."
-  ([ctx]
-   (let [tau (float 5.0)
-         eta (float 0.1)]
-     (init-mirostat-v2-sampler ctx tau eta)))
-  ([ctx tau eta]
-   (let [candidates-buf* (malloc-candidates-buf ctx)]
-     (fn [logits reset?]
-       (sample-mirostat-v2
-        ctx
-        candidates-buf*
-        (volatile! (* 2 tau))
-        tau
-        eta)))))
-
-
-(defn init-grammar-sampler
-  ([ctx grammar-str] (init-grammar-sampler ctx grammar-str {}))
-  ([ctx grammar-str params]
-   (let [params (grammar/map->llama-sampler-params params)
-         grammar* (atom nil)
-         candidates-buf* (malloc-candidates-buf ctx)]
-     (fn [logits reset?]
-       (let [candidates (ctx->candidates ctx candidates-buf*)]
-         (when reset?
-           (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
-         (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
 
 ;;;;;;;;;;;;;;
 ;; Tokenize
 ;;;;;;;;;;;;;;
+(defn untokenize
+  "Given a sequence of tokens, return the string representation."
+  [ctx tokens]
+  (str/join
+   (eduction
+    (decode-token-to-str ctx)
+    tokens)))
+
 
 (defn tokenize
   [ctx s add-bos?]
@@ -330,6 +403,130 @@
                     (:model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
+
+;;;;;;;;;;;;;;
+;;; Samplers
+;;;;;;;;;;;;;;
+(defn get-logits
+  "Returns a copy of the current context's logits as a float array."
+  [ctx]
+  (let [n-vocab (llama/llama_n_vocab (:model ctx))]
+    ^floats (-> ^FloatByReference (llama/llama_get_logits ctx)
+                .getPointer
+                (.getFloatArray 0 n-vocab))))
+
+
+(defn ^:private logits->candidates
+  [logits n ^Memory candidates-buf*]
+  (doseq [id (range n)]
+    (let [base-addr (* id token-data-size)
+          logit (aget ^floats logits (int id))]
+      (.setInt candidates-buf* base-addr id)
+      (.setFloat candidates-buf* (+ base-addr 4) logit)
+      (.setFloat candidates-buf* (+ base-addr 8) 0)))
+  (let [candidates-array-head
+        (doto (Structure/newInstance llama_token_dataByReference candidates-buf*) (.read))
+
+        candidates*
+        (doto (llama_token_data_arrayByReference.)
+          (.writeField "data" candidates-array-head)
+          (.writeField "size" (long n))
+          (.writeField "sorted" (byte 0)))]
+    candidates*))
+
+
+
+(defn sample-mirostat-v2
+  [ctx logits candidates-buf* mu* tau eta temp]
+  (let [mu (FloatByReference. @mu*)
+        candidates (logits->candidates logits (:n-vocab ctx) candidates-buf*)
+        _ (llama/llama_sample_temp ctx candidates temp)
+        next-token (llama/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
+    (vreset! mu* (.getValue mu))
+    next-token))
+
+
+(defn init-mirostat-v2-sampler
+  "Given a context, returns a sampling function that uses the llama.cpp mirostat_v2 implementation."
+  ([ctx]
+   (let [tau (float 5.0)
+         eta (float 0.1)
+         temp (float 0.8)]
+     (init-mirostat-v2-sampler ctx tau eta temp)))
+  ([ctx tau eta temp]
+   (let [candidates-buf* (doto (Memory. (* token-data-size (:n-vocab ctx))) (.clear))]
+     (fn [logits reset?]
+       (sample-mirostat-v2
+        ctx
+        logits
+        candidates-buf*
+        (volatile! (* 2 tau))
+        tau
+        eta
+        temp)))))
+
+
+
+(defn init-grammar-sampler
+  ([ctx grammar-str] (init-grammar-sampler ctx grammar-str {}))
+  ([ctx grammar-str params]
+   (let [params (grammar/map->llama-sampler-params params)
+         grammar* (atom nil)
+         n-vocab (:n-vocab ctx)
+         candidates-buf* (doto (Memory. (* token-data-size n-vocab)) (.clear))]
+     (fn [logits reset?]
+       (let [candidates (logits->candidates logits n-vocab candidates-buf*)]
+         (when reset?
+           (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
+         (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
+
+
+(defn ring-buffer-write!
+  [^Pointer buffer-ptr write-pos size elem]
+  ;; Calculate the position to write in the buffer, starting from the end.
+  (let [write-index (mod (- size (inc write-pos)) size)]
+    ;; Write the element to the calculated write position.
+    (.setInt buffer-ptr (* write-index Integer/BYTES) (int elem)))
+  ;; Increment the write position and wrap it around if it reaches the buffer size.
+  (mod (inc write-pos) size))
+
+
+(defn count-non-zero-elements
+[^Pointer ptr ^Integer size]
+(loop [i (dec size)  ; start from the end of the array
+       count 0]      ; initialize the count as 0
+  ;; Check if the index is less than 0, if true, return the count
+  (if (< i 0)
+    count
+    ;; Get the integer at the memory position i
+    (let [element (.getInt ptr (* i Integer/BYTES))]
+      ;; If the element is zero, recur with decremented i and same count,
+      ;; otherwise, recur with decremented i and incremented count.
+      (if (zero? element)
+        (recur (dec i) count))))))
+
+
+(defn apply-penalties
+  "Applies penalties based on the given context, candidates, and last-tokens pointer."
+  [ctx candidates last-tokens-ptr {:keys [repeat-last-n
+                                          repeat-penalty
+                                          alpha-frequency
+                                          alpha-presence]}]
+  (let [n-last-tokens (count-non-zero-elements last-tokens-ptr repeat-last-n)]
+    (when n-last-tokens
+      (llama/llama_sample_repetition_penalty
+       ctx candidates last-tokens-ptr n-last-tokens repeat-penalty)
+      (llama/llama_sample_frequency_and_presence_penalties
+       ctx candidates last-tokens-ptr n-last-tokens alpha-frequency alpha-presence))))
+
+(defn candidates->seq
+  [candidates n-vocab]
+  (let [data (.readField candidates "data")]
+    (sort-by
+     :logit >
+     (map (fn [e] {:id (.readField e "id")
+                   :logit (.readField e "logit")
+                   :p (.readField e "p")}) (.toArray data n-vocab)))))
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -355,7 +552,7 @@
 
 (defn llama-eval
   [ctx batch seq-id n-past]
-  (llama/llama_kv_cache_seq_rm ctx seq-id n-past -1)
+  #_(llama/llama_kv_cache_seq_rm ctx seq-id n-past -1)
   (if-let [res (llama/llama_decode ctx batch)]
     (assert (zero? res) (format "Failed to decode batch: %s"  res))
     batch))
@@ -402,6 +599,7 @@
          reset? (volatile! true)]
      ;; Clear all kv_cache_tokens in seq
      (llama/llama_kv_cache_seq_rm ctx seq-id -1 -1)
+     #_(llama/llama_kv_cache_tokens_rm ctx -1 -1)
      (reify
        clojure.lang.Seqable
        (seq [_]
@@ -419,7 +617,7 @@
          (when seed
            (llama/llama_set_rng_seed ctx seed))
          (loop [acc init
-                ret (decode ctx prompt n-past seq-id)]
+                _ (decode ctx prompt n-past seq-id)]
            (let [next-token (samplef (get-logits ctx) @reset?)]
              (vreset! reset? false)
              (if (= eos next-token)
@@ -449,15 +647,25 @@
   (require '[babashka.fs :as fs])
   (require '[clojure.java.io :as io])
 
-  ;; (def model-path "/media/array/Models/guff/Mistral-7B-Instruct-v0.1-q6_K.guff")
-  (def model-path "/media/array/Models/guff/Synthia-7B-v1.3-q5_K_M.guff")
+  (def model-path "/media/array/Models/guff/llama-2-7b-chat.Q5_K_M.guff")
+  ;;(def model-path "/media/array/Models/guff/Synthia-7B-v1.3-q5_K_M.guff")
 
   (def opts {:n-gpu-layers 25 :n-threads *num-threads* :n-threads-batch *num-threads* :n-ctx 0})
 
   (def ctx (create-context model-path opts))
 
-  (def prompt "You are Hibotron8000. All you do is say 'hi'. What do you say?")
-  (def tokens (second (tokenize ctx prompt true)))
+  (defn prompt
+    []
+    (let [prefix "User:" suffix "\n Assistant:"
+          prompts ["Finish the sentence 'all your base are..."
+                   "A one line summary of Alfred North Whitehead process philosophy"
+                   "How deep does the rabbithole go?"
+                   "A line from the lyrics of a Spice Girls song'"
+                   "You are Hibotron8000. All you do is say 'hi'"]
+          prompt (rand-nth prompts)]
+      (log/debug "prompt::" prompt)
+      (str prefix prompt suffix "\n")))
+
 
   (def grammar-str (slurp (str (fs/canonicalize (io/resource "grammars/chat.gbnf")))))
 
@@ -465,14 +673,20 @@
 
   (def default-sampler (init-mirostat-v2-sampler ctx))
 
-  (generate-string ctx prompt {:samplef default-sampler})
-  (generate-string ctx prompt {:samplef grammar-sampler})
 
+  (generate-string ctx (prompt) {:samplef grammar-sampler})
+
+  (generate-string ctx (prompt))
 
   ;; Alice's Adventures in Wonderland (Lewis Carroll)
   (def txt (slurp "https://www.gutenberg.org/cache/epub/11/pg11.txt"))
 
   (generate-string ctx txt)
+
+
+
+  (require '[instaparse.core :as insta])
+  (generate-string ctx (prompt) {:samplef (init-simple-sampler ctx (io/resource "grammars/chat.bnf"))})
 
   ;; For running ctx
   (require '[integrant.repl.state :as state])
@@ -480,12 +694,6 @@
 
 
 
-  (require '[instaparse.core :as insta])
-
-  (def grammar (str (fs/canonicalize (io/resource "grammars/chat.instaparse"))))
-
-
-  (def parser (insta/parser grammar :auto-whitespace :standard))
   (def resp (jsonista.core/write-value-as-string
              {:message "hi there"
               :emoji "🙂"
