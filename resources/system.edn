@@ -36,9 +36,9 @@
  :util.handlebars/instance {}
 
  :ai.llm/instance
- {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/Mistral-7B-Instruct-v0.1-q5_K_M.guff"]
+ {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mistral-7b-openorca.Q5_K_M.gguf"]
                :n-ctx 0 ;; 0 => from model
-               :n-gpu-layers 26
+               :n-gpu-layers 25
                :prompt-template  "templates/prompt"
                :grammar-file "grammars/chat.gbnf"
                ;; https://github.com/ggerganov/llama.cpp/pull/3401
@@ -49,12 +49,12 @@
                :mirostat-tau 5.0
                :mirostat-eta 0.1}
   :template/renderer #ig/ref :util.handlebars/instance
-  :template/vars {:system {:prefix "<<SYS>>"
-                           :suffix "<</SYS>>"}
-                  :user {:prefix "[INST] "
-                         :suffix "[/INST]"}
-                  :model {:prefix ""
-                          :suffix ""}}}
+  :template/vars {:system {:prefix "<|im_start|>system\n"
+                           :suffix "<|im_end|>\n"}
+                  :user {:prefix "<|im_start|>user\n"
+                         :suffix "<|im_end|>\n"}
+                  :model {:prefix "<|im_start|>assistant\n"
+                          :suffix "<|im_end|>\n"}}}
 
  :reitit.routes/api
  {:base-path "/api"

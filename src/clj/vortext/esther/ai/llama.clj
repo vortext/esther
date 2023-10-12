@@ -22,6 +22,7 @@
   (:require
    [clojure.string :as str]
    [clojure.java.io :as io]
+   [babashka.fs :as fs]
    [com.phronemophobic.clong.gen.jna :as gen]
    [clojure.tools.logging :as log]
    [vortext.esther.jna.grammar :as grammar]
@@ -46,17 +47,17 @@
    com.sun.jna.Structure)
   (:gen-class))
 
-(def library-options
+(defonce library-options
   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})
 
-(def shared-lib
+(defonce shared-lib
   (str (fs/canonicalize "native/llama.cpp/build/libllama.so")))
 
-(def ^:no-doc libllama
+(defonce ^:no-doc libllama
   (com.sun.jna.NativeLibrary/getInstance
    shared-lib library-options))
 
-(def api
+(defonce api
   (with-open [rdr (io/reader (io/resource "api/llama.edn"))
               rdr (java.io.PushbackReader. rdr)]
     (edn/read rdr)))
@@ -66,7 +67,6 @@
 (let [struct-prefix (gen/ns-struct-prefix *ns*)]
   (defmacro import-structs! []
     `(gen/import-structs! api ~struct-prefix)))
-
 
 (import-structs!)
 
@@ -81,29 +81,29 @@
 
 (defonce ^:private llm-init
   (delay
-    (llama/llama_backend_init 0)))
+    (llama_backend_init 0)))
 
 (defn eos
   "Returns the llama end of sentence token."
   ;; only for backwards compatibility
   [ctx]
-  (llama/llama_token_eos ctx))
+  (llama_token_eos ctx))
 
 (defn bos
   "Returns the llama beginning of sentence token."
   ;; only for backwards compatibility
   [ctx]
-  (llama/llama_token_bos ctx))
+  (llama_token_bos ctx))
 
 (defn nl
   "Returns the llama next line token."
   [ctx]
-  (llama/llama_token_nl ctx))
+  (llama_token_nl ctx))
 
 (defn eot
   "Returns the llama end of turn token."
   [ctx]
-  (llama/llama_token_eot ctx))
+  (llama_token_eot ctx))
 
 (defn ^:private map->llama-context-params [m]
   (reduce-kv
@@ -126,7 +126,7 @@
        nil)
      ;; return params
      params)
-   (llama/llama_context_default_params)
+   (llama_context_default_params)
    m))
 
 (defn ^:private map->llama-model-params [m]
@@ -145,7 +145,7 @@
        nil)
      ;; return params
      params)
-   (llama/llama_model_default_params)
+   (llama_model_default_params)
    m))
 
 (defn create-context
@@ -166,12 +166,12 @@
    (let [^llama_context_params llama-context-params (map->llama-context-params params)
          ^llama_model_params llama-model-params (map->llama-model-params params)
 
-         model (llama/llama_load_model_from_file model-path llama-model-params)
+         model (llama_load_model_from_file model-path llama-model-params)
          _ (when (nil? model)
              (throw (ex-info "Error creating model"
                              {:params params
                               :model-path model-path})))
-         context (llama/llama_new_context_with_model model llama-context-params)
+         context (llama_new_context_with_model model llama-context-params)
 
          ctx-ptr (atom (Pointer/nativeValue context))
          model-ptr (atom (Pointer/nativeValue model))
@@ -182,7 +182,7 @@
          delete-context (fn []
                           (let [[old _new] (swap-vals! ctx-ptr (constantly nil))]
                             (when old
-                              (llama/llama_free (Pointer. old))
+                              (llama_free (Pointer. old))
                               ;; make sure model doesn't lose
                               ;; all references and get garbage
                               ;; collected until context is freed.
@@ -192,11 +192,11 @@
          delete-model (fn []
                         (let [[old _new] (swap-vals! model-ptr (constantly nil))]
                           (when old
-                            (llama/llama_free_model (Pointer. old)))))
+                            (llama_free_model (Pointer. old)))))
 
          n-batch (.readField llama-context-params "n_batch")
-         n-ctx (llama/llama_n_ctx context)
-         n-vocab (llama/llama_n_vocab model)
+         n-ctx (llama_n_ctx context)
+         n-vocab (llama_n_vocab model)
 
          ;; make context autocloseable and implement
          ;; some map lookup interfaces
@@ -226,7 +226,7 @@
   ^:private
   ^com.sun.jna.Function
   llama-token-to-piece
-  (.getFunction ^com.sun.jna.NativeLibrary llama/libllama
+  (.getFunction ^com.sun.jna.NativeLibrary libllama
                 "llama_token_to_piece"))
 
 (defn ^:private decode-token-to-buf
@@ -263,11 +263,11 @@
   [ctx token]
   (let [buffer-size (* 8 Character/BYTES)
         ^ByteBuffer buffer (ByteBuffer/allocate buffer-size)
-        n-tokens (llama/llama_token_to_piece (:model ctx) token (.array buffer) buffer-size)]
+        n-tokens (llama_token_to_piece (:model ctx) token (.array buffer) buffer-size)]
     (if (< n-tokens 0)
       (let [actual-size (Math/abs (int n-tokens))
             resized-buffer (ByteBuffer/allocate actual-size)]
-        (let [check (llama/llama_token_to_piece (:model ctx) token (.array resized-buffer) actual-size)]
+        (let [check (llama_token_to_piece (:model ctx) token (.array resized-buffer) actual-size)]
           (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
           [actual-size resized-buffer]))
       [n-tokens buffer])))
@@ -424,7 +424,7 @@
         s (if add-bos? (str " " s) s)
         max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
         token-buf* (doto (Memory. (* max-tokens Integer/BYTES)) (.clear))
-        num-tokens (llama/llama_tokenize
+        num-tokens (llama_tokenize
                     (:model ctx) s
                     (count s) token-buf* max-tokens add-bos)]
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
@@ -435,8 +435,8 @@
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
   [ctx]
-  (let [n-vocab (llama/llama_n_vocab (:model ctx))]
-    ^floats (-> ^FloatByReference (llama/llama_get_logits ctx)
+  (let [n-vocab (llama_n_vocab (:model ctx))]
+    ^floats (-> ^FloatByReference (llama_get_logits ctx)
                 .getPointer
                 (.getFloatArray 0 n-vocab))))
 
@@ -465,8 +465,8 @@
   [ctx logits candidates-buf* mu* tau eta temp]
   (let [mu (FloatByReference. @mu*)
         candidates (logits->candidates logits (:n-vocab ctx) candidates-buf*)
-        _ (llama/llama_sample_temp ctx candidates temp)
-        next-token (llama/llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
+        _ (llama_sample_temp ctx candidates temp)
+        next-token (llama_sample_token_mirostat_v2 ctx candidates tau eta mu)]
     (vreset! mu* (.getValue mu))
     next-token))
 
@@ -539,9 +539,9 @@
                                           alpha-presence]}]
   (let [n-last-tokens (count-non-zero-elements last-tokens-ptr repeat-last-n)]
     (when n-last-tokens
-      (llama/llama_sample_repetition_penalty
+      (llama_sample_repetition_penalty
        ctx candidates last-tokens-ptr n-last-tokens repeat-penalty)
-      (llama/llama_sample_frequency_and_presence_penalties
+      (llama_sample_frequency_and_presence_penalties
        ctx candidates last-tokens-ptr n-last-tokens alpha-frequency alpha-presence))))
 
 (defn candidates->seq
@@ -577,8 +577,8 @@
 
 (defn- decode-
   [ctx ^llama_batch batch]
-  #_(llama/llama_kv_cache_seq_rm ctx seq-id n-past -1)
-  (if-let [res (llama/llama_decode ctx batch)]
+  #_(llama_kv_cache_seq_rm ctx seq-id n-past -1)
+  (if-let [res (llama_decode ctx batch)]
     (assert (zero? res) (format "Failed to decode batch: %s"  res))
     ^llama_batch batch))
 
@@ -623,13 +623,13 @@
          n-past (volatile! 0)
          reset? (volatile! true)]
      ;; Clear all kv_cache_tokens in seq
-     (llama/llama_kv_cache_seq_rm ctx seq-id -1 -1)
-     #_(llama/llama_kv_cache_tokens_rm ctx -1 -1)
+     (llama_kv_cache_seq_rm ctx seq-id -1 -1)
+     #_(llama_kv_cache_tokens_rm ctx -1 -1)
      (reify
        clojure.lang.Seqable
        (seq [_]
          (when seed
-           (llama/llama_set_rng_seed ctx seed))
+           (llama_set_rng_seed ctx seed))
          ((fn next [ctx]
             (let [next-token (samplef (get-logits ctx) @reset?)]
               (vreset! reset? false)
@@ -640,7 +640,7 @@
        clojure.lang.IReduceInit
        (reduce [_ rf init]
          (when seed
-           (llama/llama_set_rng_seed ctx seed))
+           (llama_set_rng_seed ctx seed))
          (loop [acc init
                 _ (decode ctx prompt n-past seq-id)]
            (let [next-token (samplef (get-logits ctx) @reset?)]

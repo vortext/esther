@@ -3,7 +3,7 @@
    [babashka.fs :as fs]
    [clojure.java.io :as io]
    [vortext.esther.util.json :as json]
-   [vortext.esther.ai.llama-jna :as llama]
+   [vortext.esther.ai.llama :as llama]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
    [malli.core :as m]
