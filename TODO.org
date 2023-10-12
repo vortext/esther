@@ -87,8 +87,10 @@ _ more user information in session (vault)
 - [X] get rid of shell impl (generate better "prompt" to complete)
 - [X] Try https://huggingface.co/PygmalionAI/mythalion-13b (not better?)
 ** DONE move handlebars in system, better Helper in llm.clj
+** TODO use client context `now` for memory sql dates
 ** TODO play with models
-** TODO Try websockets
+** TODO Implement websockets
+** TODO llama.cpp parallel mode
 ** TODO embeddings
 - onnx bert?
 - bert.cpp / jna?
