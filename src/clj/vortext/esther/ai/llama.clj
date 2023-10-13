@@ -451,7 +451,6 @@
         (let [batch-buf* (.share token-buf* (* offset Integer/BYTES))
               num-batch-tokens (min batch-size (- total-tokens offset))
               ^llama_batch batch (create-batch batch-buf* num-batch-tokens n-past seq-id)
-              _ (log/debug (class batch))
               next-offset (+ offset num-batch-tokens)]
           (if-let [res (llama_decode ctx batch)]
             (assert (zero? res) (format "Failed to decode batch: %s"  res)))
