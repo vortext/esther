@@ -13,7 +13,7 @@
    ;; AI
    [vortext.esther.ai.llm]
    [vortext.esther.ai.llama]
-   [vortext.esther.jna.grammar]
+   [vortext.esther.ai.grammar]
 
    ;; Util
    [vortext.esther.util.handlebars]

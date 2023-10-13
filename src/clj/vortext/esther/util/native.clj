@@ -7,12 +7,9 @@
    [clojure.tools.logging :as log]
    [clojure.java.io :as io])
   (:import
-   java.nio.ByteBuffer
    com.sun.jna.Memory
-   com.sun.jna.Pointer
    com.sun.jna.ptr.IntByReference
-   com.sun.jna.ptr.FloatByReference
-   com.sun.jna.Structure))
+   com.sun.jna.ptr.FloatByReference))
 
 (defn ->bool [b]
   (if b

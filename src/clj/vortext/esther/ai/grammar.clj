@@ -1,4 +1,4 @@
-(ns vortext.esther.jna.grammar
+(ns vortext.esther.ai.grammar
   (:gen-class)
   (:refer-clojure :exclude [remove printf]) ;; [WARNING]
   (:require
@@ -6,9 +6,7 @@
    [clojure.tools.logging :as log]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
-   [babashka.fs :as fs])
-  (:import
-   com.sun.jna.Pointer))
+   [babashka.fs :as fs]))
 
 (def library-options
   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})

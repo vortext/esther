@@ -25,13 +25,10 @@
    [babashka.fs :as fs]
    [com.phronemophobic.clong.gen.jna :as gen]
    [clojure.tools.logging :as log]
-   [vortext.esther.jna.grammar :as grammar]
+   [vortext.esther.ai.grammar :as grammar]
    [clojure.edn :as edn]
    [vortext.esther.util.native
-    :refer [->bool
-            seq->memory
-            ->int-array-by-reference
-            ->float-array-by-reference]]
+    :refer [->bool seq->memory ->float-array-by-reference]]
    [instaparse.core :as insta])
   (:import
    java.lang.ref.Cleaner
@@ -222,42 +219,6 @@
      context)))
 
 
-(def
-  ^:private
-  ^com.sun.jna.Function
-  llama-token-to-piece
-  (.getFunction ^com.sun.jna.NativeLibrary libllama
-                "llama_token_to_piece"))
-
-(defn ^:private decode-token-to-buf
-  ([ctx]
-   (fn [rf]
-     (let [buf-length (int 255)
-           buf (Memory. buf-length)
-           model (:model ctx)
-           skip-whitespace* (volatile! true)]
-       (fn
-         ([] (rf))
-         ([result] (rf result))
-         ([result token]
-          (let [nbytes (.invoke llama-token-to-piece
-                                Integer/TYPE
-                                (to-array [model token buf buf-length]))]
-            (if (pos? nbytes)
-              (let [bb
-                    (if @skip-whitespace*
-                      (do
-                        (vreset! skip-whitespace* false)
-                        (if (= 32 (.getByte buf 0))
-                          (let [len (dec nbytes)]
-                            (when (pos? len)
-                              (.getByteBuffer buf 1 (dec nbytes))))
-                          (.getByteBuffer buf 0 nbytes)))
-                      (.getByteBuffer buf 0 nbytes))]
-                (when bb
-                  (rf result bb)))
-              result))))))))
-
 
 (defn ^:private llama-token-to-str
   [ctx token]
@@ -270,99 +231,125 @@
         (let [check (llama_token_to_piece (:model ctx) token (.array resized-buffer) actual-size)]
           (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
           [actual-size resized-buffer]))
-      [n-tokens buffer])))
+      [n-tokens buffer]))))
+
+
+(defn decode-token-to-char
+([ctx]
+ (decode-token-to-char ctx (Charset/forName "UTF-8")))
+([ctx ^Charset charset]
+ (fn [rf]
+   (let [decoder (.newDecoder charset)
+         input-buffer (ByteBuffer/allocate 256)
+         output-buffer (CharBuffer/allocate 256)]
+     (fn
+       ([] (rf))
+       ([result] (rf result))
+       ([result token]
+        (let [[len ^ByteBuffer result-buf] (llama-token-to-str ctx token)]
+          (.put input-buffer (.array result-buf) 0 len)
+          (.flip input-buffer) ;; Preparing buffer for read
+          (let [decoder-result (.decode decoder input-buffer output-buffer false)]
+            (cond
+              (.isUnderflow decoder-result)
+              (do
+                (.compact input-buffer) ;; Preparing buffer for write
+                (.flip output-buffer)   ;; Preparing buffer for read
+                (let [result (reduce rf result output-buffer)]
+                  (.clear output-buffer)
+                  result))
+              (.isOverflow decoder-result)
+              (throw (ex-info "Decoder buffer too small" {}))
+              (.isError decoder-result)
+              (throw (ex-info "Decoder Error" {:decoder decoder}))
+              :else
+              (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
 (defn ^:private preserving-reduced
-  [rf]
-  #(let [ret (rf %1 %2)]
-     (if (reduced? ret)
-       (reduced ret)
-       ret)))
+[rf]
+#(let [ret (rf %1 %2)]
+   (if (reduced? ret)
+     (reduced ret)
+     ret)))
 
 (defn ^:private decode-token-to-char
-  "Returns a transducer that expects a stream of llama tokens
+"Returns a transducer that expects a stream of llama tokens
   and outputs a stream of decoded chars.
 
   The transducer will buffer intermediate results until enough
   bytes to decode a character are available."
-  ([ctx]
-   (decode-token-to-char ctx nil))
-  ([ctx opts]
-   (let [^Charset charset
-         (cond
-           (nil? opts) (Charset/forName "UTF-8")
-           (map? opts) (or (:charset opts)
-                           (Charset/forName "UTF-8"))
-           ;; for backwards compatibility
-           :else opts)
-         flush? (:flush? opts)]
-     (comp
-      (decode-token-to-buf ctx)
-      (fn [rf]
-        (let [model (:model ctx)
+([ctx]
+ (decode-token-to-char ctx nil))
+([ctx opts]
+ (let [^Charset charset
+       (cond
+         (nil? opts) (Charset/forName "UTF-8")
+         (map? opts) (or (:charset opts)
+                         (Charset/forName "UTF-8"))
+         ;; for backwards compatibility
+         :else opts)
+       flush? (:flush? opts)]
+   (fn [rf]
+     (let [decoder (doto (.newDecoder charset)
+                     (.onMalformedInput CodingErrorAction/REPLACE)
+                     (.onUnmappableCharacter CodingErrorAction/REPLACE))
 
-              decoder (doto (.newDecoder charset)
-                        (.onMalformedInput CodingErrorAction/REPLACE)
-                        (.onUnmappableCharacter CodingErrorAction/REPLACE))
+           input-buffer (ByteBuffer/allocate 256)
+           output-buffer (CharBuffer/allocate 256)
 
-              input-buffer (ByteBuffer/allocate 256)
-              output-buffer (CharBuffer/allocate 256)
+           skip-whitespace* (volatile! true)
 
-              buf-length (int 255)
-              buf (Memory. buf-length)
-              skip-whitespace* (volatile! true)
+           rrf (preserving-reduced rf)]
+       (fn
+         ([] (rf))
+         ([result]
+          (if flush?
+            (do
+              (.flip input-buffer)
+              (let [result
+                    (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
+                          decoder-result1 (.decode decoder input-buffer output-buffer true)
+                          ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
+                          decoder-result2 (.flush decoder output-buffer)]
+                      (if (and (.isUnderflow decoder-result1)
+                               (.isUnderflow decoder-result2))
+                        (do
+                          (.flip output-buffer)
+                          (let [result (reduce rrf result output-buffer)]
+                            (.clear output-buffer)
+                            result))
+                        ;; else
+                        (throw (Exception. "Unexpected decoder state."))))]
+                (rf result)))
+            ;; else no flush
+            (rf result)))
+         ([result ^java.nio.ByteBuffer bb]
+          (.put input-buffer bb)
+          (.flip input-buffer)
 
-              rrf (preserving-reduced rf)]
-          (fn
-            ([] (rf))
-            ([result]
-             (if flush?
-               (do
-                 (.flip input-buffer)
-                 (let [result
-                       (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
-                             decoder-result1 (.decode decoder input-buffer output-buffer true)
-                             ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
-                             decoder-result2 (.flush decoder output-buffer)]
-                         (if (and (.isUnderflow decoder-result1)
-                                  (.isUnderflow decoder-result2))
-                           (do
-                             (.flip output-buffer)
-                             (let [result (reduce rrf result output-buffer)]
-                               (.clear output-buffer)
-                               result))
-                           ;; else
-                           (throw (Exception. "Unexpected decoder state."))))]
-                   (rf result)))
-               ;; else no flush
-               (rf result)))
-            ([result ^java.nio.ByteBuffer bb]
-             (.put input-buffer bb)
-             (.flip input-buffer)
+          ;; Invoke the decode method zero or more times, as long as
+          ;; additional input may be available, passing false for the
+          ;; endOfInput argument and filling the input buffer and flushing
+          ;; the output buffer between invocations;
+          (let [decoder-result (.decode decoder input-buffer output-buffer false)]
+            (cond
+              (.isUnderflow decoder-result)
+              (do
+                (.compact input-buffer)
+                (.flip output-buffer)
+                (let [result (reduce rrf result output-buffer)]
+                  (.clear output-buffer)
+                  result))
 
-             ;; Invoke the decode method zero or more times, as long as
-             ;; additional input may be available, passing false for the
-             ;; endOfInput argument and filling the input buffer and flushing
-             ;; the output buffer between invocations;
-             (let [decoder-result (.decode decoder input-buffer output-buffer false)]
-               (cond
-                 (.isUnderflow decoder-result)
-                 (do
-                   (.compact input-buffer)
-                   (.flip output-buffer)
-                   (let [result (reduce rrf result output-buffer)]
-                     (.clear output-buffer)
-                     result))
+              (.isOverflow decoder-result)
+              (throw (ex-info "Decoder buffer too small" {}))
 
-                 (.isOverflow decoder-result)
-                 (throw (ex-info "Decoder buffer too small" {}))
+              (.isError decoder-result)
+              (throw (ex-info "Decoder Error" {:decoder decoder}))
 
-                 (.isError decoder-result)
-                 (throw (ex-info "Decoder Error" {:decoder decoder}))
-
-                 :else
-                 (throw (Exception. "Unexpected decoder state."))))))))))))
+              :else
+              (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
 
@@ -434,11 +421,11 @@
 ;;;;;;;;;;;;;;
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
-  [ctx]
-  (let [n-vocab (llama_n_vocab (:model ctx))]
-    ^floats (-> ^FloatByReference (llama_get_logits ctx)
-                .getPointer
-                (.getFloatArray 0 n-vocab))))
+  ([ctx] (get-logits ctx 0))
+  ([ctx i]
+   ^floats (-> ^FloatByReference (llama_get_logits_ith ctx i)
+               .getPointer
+               (.getFloatArray 0 (:n-vocab ctx)))))
 
 
 (defn ^:private logits->candidates
@@ -505,44 +492,6 @@
            (reset! grammar* (grammar/llama_cached_parse_grammar grammar-str)))
          (grammar/llama_grammar_sample_token ctx @grammar* params candidates (->bool reset?)))))))
 
-
-(defn ring-buffer-write!
-  [^Pointer buffer-ptr write-pos size elem]
-  ;; Calculate the position to write in the buffer, starting from the end.
-  (let [write-index (mod (- size (inc write-pos)) size)]
-    ;; Write the element to the calculated write position.
-    (.setInt buffer-ptr (* write-index Integer/BYTES) (int elem)))
-  ;; Increment the write position and wrap it around if it reaches the buffer size.
-  (mod (inc write-pos) size))
-
-
-(defn count-non-zero-elements
-[^Pointer ptr ^Integer size]
-(loop [i (dec size)  ; start from the end of the array
-       count 0]      ; initialize the count as 0
-  ;; Check if the index is less than 0, if true, return the count
-  (if (< i 0)
-    count
-    ;; Get the integer at the memory position i
-    (let [element (.getInt ptr (* i Integer/BYTES))]
-      ;; If the element is zero, recur with decremented i and same count,
-      ;; otherwise, recur with decremented i and incremented count.
-      (if (zero? element)
-        (recur (dec i) count))))))
-
-
-(defn apply-penalties
-  "Applies penalties based on the given context, candidates, and last-tokens pointer."
-  [ctx candidates last-tokens-ptr {:keys [repeat-last-n
-                                          repeat-penalty
-                                          alpha-frequency
-                                          alpha-presence]}]
-  (let [n-last-tokens (count-non-zero-elements last-tokens-ptr repeat-last-n)]
-    (when n-last-tokens
-      (llama_sample_repetition_penalty
-       ctx candidates last-tokens-ptr n-last-tokens repeat-penalty)
-      (llama_sample_frequency_and_presence_penalties
-       ctx candidates last-tokens-ptr n-last-tokens alpha-frequency alpha-presence))))
 
 (defn candidates->seq
   [candidates n-vocab]
@@ -669,11 +618,7 @@
 
 ;; Scratch
 (comment
-  (require '[babashka.fs :as fs])
-  (require '[clojure.java.io :as io])
-
-  #_(def model-path "/media/array/Models/guff/llama-2-7b-chat.Q5_K_M.guff")
-  (def model-path "/media/array/Models/guff/")
+  (def model-path "/media/array/Models/guff/llama-2-7b-chat.Q5_K_M.guff")
 
   (def opts {:n-gpu-layers 25 :n-threads *num-threads* :n-threads-batch *num-threads* :n-ctx 0})
 
@@ -696,35 +641,12 @@
 
   (def grammar-sampler (init-grammar-sampler ctx grammar-str {:mirostat 2}))
 
-  (def default-sampler (init-mirostat-v2-sampler ctx))
-
-
   (generate-string ctx (prompt) {:samplef grammar-sampler})
 
   (generate-string ctx (prompt))
 
   ;; Alice's Adventures in Wonderland (Lewis Carroll)
   (def txt (slurp "https://www.gutenberg.org/cache/epub/11/pg11.txt"))
-
-  (generate-string ctx txt)
-
-
-
-  (require '[instaparse.core :as insta])
-  (generate-string ctx (prompt) {:samplef (init-simple-sampler ctx (io/resource "grammars/chat.bnf"))})
-
-  ;; For running ctx
-  (require '[integrant.repl.state :as state])
-  (def ctx (get-in state/system [:ai.llm/instance :llm/ctx]))
-
-
-
-  (def resp (jsonista.core/write-value-as-string
-             {:message "hi there"
-              :emoji "🙂"
-              :keywords ["#Hibotron800"]
-              :imagination "The Abyss"}))
-  (insta/parse parser resp)
-
+  (generate-string ctx txt) ;; Todo context overflow
 
   )
