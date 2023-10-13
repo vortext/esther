@@ -28,8 +28,7 @@
    [vortext.esther.ai.grammar :as grammar]
    [clojure.edn :as edn]
    [vortext.esther.util.native
-    :refer [->bool seq->memory ->float-array-by-reference]]
-   [instaparse.core :as insta])
+    :refer [->bool seq->memory ->float-array-by-reference]])
   (:import
    java.lang.ref.Cleaner
    java.nio.charset.Charset
@@ -61,11 +60,7 @@
 
 (gen/def-api libllama api)
 
-(let [struct-prefix (gen/ns-struct-prefix *ns*)]
-  (defmacro import-structs! []
-    `(gen/import-structs! api ~struct-prefix)))
-
-(import-structs!)
+(gen/import-structs! api)
 
 (def ^:dynamic
   *num-threads*
@@ -231,126 +226,39 @@
         (let [check (llama_token_to_piece (:model ctx) token (.array resized-buffer) actual-size)]
           (assert (= check (- n-tokens)) "Mismatch in expected size from llama_token_to_piece")
           [actual-size resized-buffer]))
-      [n-tokens buffer]))))
+      [n-tokens buffer])))
 
 
 (defn decode-token-to-char
-([ctx]
- (decode-token-to-char ctx (Charset/forName "UTF-8")))
-([ctx ^Charset charset]
- (fn [rf]
-   (let [decoder (.newDecoder charset)
-         input-buffer (ByteBuffer/allocate 256)
-         output-buffer (CharBuffer/allocate 256)]
-     (fn
-       ([] (rf))
-       ([result] (rf result))
-       ([result token]
-        (let [[len ^ByteBuffer result-buf] (llama-token-to-str ctx token)]
-          (.put input-buffer (.array result-buf) 0 len)
-          (.flip input-buffer) ;; Preparing buffer for read
-          (let [decoder-result (.decode decoder input-buffer output-buffer false)]
-            (cond
-              (.isUnderflow decoder-result)
-              (do
-                (.compact input-buffer) ;; Preparing buffer for write
-                (.flip output-buffer)   ;; Preparing buffer for read
-                (let [result (reduce rf result output-buffer)]
-                  (.clear output-buffer)
-                  result))
-              (.isOverflow decoder-result)
-              (throw (ex-info "Decoder buffer too small" {}))
-              (.isError decoder-result)
-              (throw (ex-info "Decoder Error" {:decoder decoder}))
-              :else
-              (throw (Exception. "Unexpected decoder state.")))))))))))
-
-
-(defn ^:private preserving-reduced
-[rf]
-#(let [ret (rf %1 %2)]
-   (if (reduced? ret)
-     (reduced ret)
-     ret)))
-
-(defn ^:private decode-token-to-char
-"Returns a transducer that expects a stream of llama tokens
-  and outputs a stream of decoded chars.
-
-  The transducer will buffer intermediate results until enough
-  bytes to decode a character are available."
-([ctx]
- (decode-token-to-char ctx nil))
-([ctx opts]
- (let [^Charset charset
-       (cond
-         (nil? opts) (Charset/forName "UTF-8")
-         (map? opts) (or (:charset opts)
-                         (Charset/forName "UTF-8"))
-         ;; for backwards compatibility
-         :else opts)
-       flush? (:flush? opts)]
+  ([ctx]
+   (decode-token-to-char ctx (Charset/forName "UTF-8")))
+  ([ctx ^Charset charset]
    (fn [rf]
-     (let [decoder (doto (.newDecoder charset)
-                     (.onMalformedInput CodingErrorAction/REPLACE)
-                     (.onUnmappableCharacter CodingErrorAction/REPLACE))
-
+     (let [decoder (.newDecoder charset)
            input-buffer (ByteBuffer/allocate 256)
-           output-buffer (CharBuffer/allocate 256)
-
-           skip-whitespace* (volatile! true)
-
-           rrf (preserving-reduced rf)]
+           output-buffer (CharBuffer/allocate 256)]
        (fn
          ([] (rf))
-         ([result]
-          (if flush?
-            (do
-              (.flip input-buffer)
-              (let [result
-                    (let [ ;; Invoke the decode method one final time, passing true for the endOfInput argument; and then
-                          decoder-result1 (.decode decoder input-buffer output-buffer true)
-                          ;; Invoke the flush method so that the decoder can flush any internal state to the output buffer.
-                          decoder-result2 (.flush decoder output-buffer)]
-                      (if (and (.isUnderflow decoder-result1)
-                               (.isUnderflow decoder-result2))
-                        (do
-                          (.flip output-buffer)
-                          (let [result (reduce rrf result output-buffer)]
-                            (.clear output-buffer)
-                            result))
-                        ;; else
-                        (throw (Exception. "Unexpected decoder state."))))]
-                (rf result)))
-            ;; else no flush
-            (rf result)))
-         ([result ^java.nio.ByteBuffer bb]
-          (.put input-buffer bb)
-          (.flip input-buffer)
-
-          ;; Invoke the decode method zero or more times, as long as
-          ;; additional input may be available, passing false for the
-          ;; endOfInput argument and filling the input buffer and flushing
-          ;; the output buffer between invocations;
-          (let [decoder-result (.decode decoder input-buffer output-buffer false)]
-            (cond
-              (.isUnderflow decoder-result)
-              (do
-                (.compact input-buffer)
-                (.flip output-buffer)
-                (let [result (reduce rrf result output-buffer)]
-                  (.clear output-buffer)
-                  result))
-
-              (.isOverflow decoder-result)
-              (throw (ex-info "Decoder buffer too small" {}))
-
-              (.isError decoder-result)
-              (throw (ex-info "Decoder Error" {:decoder decoder}))
-
-              :else
-              (throw (Exception. "Unexpected decoder state.")))))))))))
-
+         ([result] (rf result))
+         ([result token]
+          (let [[len ^ByteBuffer result-buf] (llama-token-to-str ctx token)]
+            (.put input-buffer (.array result-buf) 0 len)
+            (.flip input-buffer) ;; Preparing buffer for read
+            (let [decoder-result (.decode decoder input-buffer output-buffer false)]
+              (cond
+                (.isUnderflow decoder-result)
+                (do
+                  (.compact input-buffer) ;; Preparing buffer for write
+                  (.flip output-buffer)   ;; Preparing buffer for read
+                  (let [result (reduce rf result output-buffer)]
+                    (.clear output-buffer)
+                    result))
+                (.isOverflow decoder-result)
+                (throw (ex-info "Decoder buffer too small" {}))
+                (.isError decoder-result)
+                (throw (ex-info "Decoder Error" {:decoder decoder}))
+                :else
+                (throw (Exception. "Unexpected decoder state.")))))))))))
 
 
 (defn ^:private char->str
@@ -507,7 +415,7 @@
 ;; Decode & batches
 ;;;;;;;;;;;;;;;;;;;
 (defn create-batch
-  [^Memory batch-buf* num-batch-tokens n-past seq-id]
+  [^Memory token-buf* num-batch-tokens n-past seq-id]
   (let [batch (doto (Structure/newInstance llama_batch) (.read))
         by-reference (fn [o v] (doto o (.setPointer (seq->memory v))))
         pos (int-array (map #(+ n-past %) (range num-batch-tokens)))
@@ -515,20 +423,12 @@
         logits (byte-array (conj (vec (repeat (dec num-batch-tokens) 0)) 1))]
     (doto batch
       (.writeField "n_tokens" (int num-batch-tokens))
-      (.writeField "token" (doto (IntByReference.) (.setPointer batch-buf*)))
+      (.writeField "token" (doto (IntByReference.) (.setPointer token-buf*)))
       (.writeField "pos" (by-reference (IntByReference.) pos))
       (.writeField "seq_id" (by-reference (IntByReference.) seq-ids))
       (.writeField "logits" (by-reference (ByteByReference.) logits))
       (.writeField "embd" nil))
     ;; I'm gonna assume the JVM is going to garbage collect these eventually, if not it leaks memory.
-    ^llama_batch batch))
-
-
-(defn- decode-
-  [ctx ^llama_batch batch]
-  #_(llama_kv_cache_seq_rm ctx seq-id n-past -1)
-  (if-let [res (llama_decode ctx batch)]
-    (assert (zero? res) (format "Failed to decode batch: %s"  res))
     ^llama_batch batch))
 
 
@@ -550,9 +450,11 @@
              n-past @n-past*]
         (let [batch-buf* (.share token-buf* (* offset Integer/BYTES))
               num-batch-tokens (min batch-size (- total-tokens offset))
-              batch (create-batch batch-buf* num-batch-tokens n-past seq-id)
+              ^llama_batch batch (create-batch batch-buf* num-batch-tokens n-past seq-id)
+              _ (log/debug (class batch))
               next-offset (+ offset num-batch-tokens)]
-          (decode- ctx batch)
+          (if-let [res (llama_decode ctx batch)]
+            (assert (zero? res) (format "Failed to decode batch: %s"  res)))
           (when (< next-offset total-tokens)
             (recur (long next-offset) (+ n-past num-batch-tokens))))))
     (vreset! n-past* (+ @n-past* total-tokens))
