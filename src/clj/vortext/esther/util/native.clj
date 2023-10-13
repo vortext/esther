@@ -50,10 +50,9 @@
          "java.lang.Short"     [Short/BYTES #(.setLong %1 %2 %3)]
          "java.lang.Character" [Character/BYTES #(.setChar %1 %2 %3)]}
         [size set-fn] (get type-info type-name)
-        num-bytes (* arrlen size)
-        mem (doto (Memory. num-bytes) (.clear))]
-    (when (nil? size)
-      (throw (IllegalArgumentException. "Unsupported type")))
+        _ (when-not size (throw (IllegalArgumentException.
+                                 (format "Unsupported type: %s" type-name))))
+        mem (doto (Memory. (* arrlen size)) (.clear))]
     (doseq [[i val] (map-indexed vector arr)]
       (set-fn mem (* i size) val))
     mem))
