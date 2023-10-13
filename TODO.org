@@ -1,97 +1,10 @@
 * Progress
-** DONE hook up OpenAI
-** DONE store results
-- sqllite storing memories
-** DONE use results, better context (locale, time, memories)
-** DONE markdown, KaTeX and such
-** DONE /inspect command
-** DONE /status command
-** DONE styling according to style vibes
-** DONE user flow (just use sqllite)
-** DONE vibes for login page
-** DONE logout functionality (/logout)
-** DONE refactor memory and login/auth controllers
-** DONE geoip for time of day?
-** DONE maybe bouncing ball energy for loading?
-** DONE introduce as book fiction literary work imaginary scene
-** DONE keyword frecency query
-** DONE multi user?
-_ encrypt contents
-_ encrypt keywords
-_ add vault to user
-_ uid in vault
-_ more user information in session (vault)
-** DONE use data, iv as columns instead of the json for memory and memory_keywords
-** DONE better input UI? (textfield, resize, like Signal?)
-** DONE local version of fonts
-** DONE just slurp the secrets.edn file and get rid of the rest (secrets.clj)
-** DONE refactor memory to only have contents
-** DONE error handling
-** DONE better integrate keywords in narrative
-** DONE check multi-line markdown
-** DONE input checking and validation (also converse.clj)
-** DONE Remember and show for a day, clear page every day (aligns with the prominent date)
-** DONE /clear command (clear all memory for uid)
-** DONE url handling (it renders)
-** DONE check logging levels (disable debug outside dev)
-** DONE llma locally
-** DONE llama tweaks
-- json grammar :D
-- performance tweaks (gpu layers, cores)
-** DONE keep for llama.cpp
-- calculate token-length (and set)
-- up the context
-** DONE try openorca-platypus2-13b
-- Requires different prompt template format see https://huggingface.co/Open-Orca/OpenOrcaxOpenChat-Preview2-13B
-** DONE get rid of sid
-** DONE experiment with multi-turn
-** DONE weather API integration
-** DONE fix mutli-line input scroll to bottom of page (css?)
-** DONE time of day etc context in prompt
-** DONE history on first request
-** DONE deprecate openai
-** DONE harmonize markdown handling using graalvm
-** DONE get rid of pty_bridy.py
-** DONE switch to guff
-- probably needs lots of updating
-** DONE Try https://huggingface.co/Gryphe/MythoMax-L2-13b
-- MythoMax-L2-13B-GGML-Q6_K with llamacpp, and Mirostat set to Mirostat 2, Tau 5, Eta 0.1
-- https://www.reddit.com/r/LocalLLaMA/comments/167088h/why_are_the_answers_getting_dumber_as_the/
-- different prompt format
-** DONE use proper locale for times?
-** DONE better handling of location data
-** DONE move all the local context stuff to server side (e.g. moon phase etc) -> create proper context.clj controller
-** DONE use 🌒 emojis in prompt again (they're cute)
-** DONE figure out a more sane TZ to heuristic lat long
-** DONE proper timezone for human-today on initial render (see also https://ipgeolocation.io/timezone-api.html)
-** DONE set guards around weather in prompt-template
-** DONE use a single map from the whole req-rep thread with namespaced keywords.
-** DONE minify on the fly with hash check (maybe wontfix because javascript is hell)
-** DONE harmonize emoji handling using graalvm? (did it a better way client side)
-** DONE keyword_memory_lookup table and logic
-** DONE refactor user management to be slightly saner
-** DONE disable colors in logging when prod
-- can be done with jvm ring-middleware
-- could be sped up with clong or llvm for practice?
-- but really belongs in nginx or wherever
-** DONE better error handling subprocesses
-** DONE switch to libsodium for security
-** DONE simple sentiment analysis for energy
-** DONE #keywords (hash tags instead of namespaced concepts?)
-** DONE weird bug where login shows in memory (enforce redirect). Not fixed ...
-- Steps to reproduce: clear cookies, send message.
-** DONE use llama.clj instead of shell
-- [X] make it work again with master llama.cpp
-- [X] implement mirostat params
-- [X] implement grammar
-- [X] get rid of shell impl (generate better "prompt" to complete)
-- [X] Try https://huggingface.co/PygmalionAI/mythalion-13b (not better?)
-** DONE move handlebars in system, better Helper in llm.clj
 ** TODO use client context `now` for memory sql dates
+** TODO documentation
 ** TODO play with models
-** TODO Implement websockets
+** TODO Implement websockets for chat
 ** TODO llama.cpp parallel mode
-** TODO embeddings
+** TODO embeddings for RAG
 - onnx bert?
 - bert.cpp / jna?
 - wait for llama.cpp to fix it?
@@ -111,6 +24,8 @@ _ more user information in session (vault)
 ** TODO a way to serialize "personality"
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** TODO export / download data functionality (for me and GDPR!)
+** TODO /forget <last|random> <n> command
+** TODO /context command
 ** TODO figure out a sane way to do multi user scalably
 - check if there's a distributed deploy strategy that supports mirostat 🙃
 - https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
@@ -148,5 +63,4 @@ _ more user information in session (vault)
 - store description and image in memory contents
 - use image describe as context for converse
 - stablediffusion locally?
-
 ** TODO integrate https://github.com/spencermountain/compromise for NER or for the lulz?
