@@ -2,7 +2,6 @@
   (:require
    [babashka.fs :as fs]
    [babashka.process :refer [shell]]
-   [clj-commons.digest :as digest]
    [clojure.java.io :as io]
    [clojure.string :as str]
    [jsonista.core :as json]
@@ -45,7 +44,7 @@
 (defn bundle
   [out-dir resources prefix suffix]
   (let [paths (map ->canonical-path resources)
-        hash (digest/md5 (apply str (map crc32/compute-file-crc32 paths)))
+        hash (crc32/checksum (apply str (map crc32/compute-file-crc32 paths)))
         filename (str prefix hash suffix)
         outfile (str (fs/path out-dir filename))]
     (if (fs/exists? outfile) outfile (minify paths outfile))))
