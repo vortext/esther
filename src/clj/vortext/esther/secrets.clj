@@ -1,5 +1,5 @@
 (ns vortext.esther.secrets
-  "Utilities to for encrypting stuff.
+  "Utilities for encrypting and decrypting secrets.
    https://doc.libsodium.org/
    https://github.com/lvh/caesium"
   (:require
