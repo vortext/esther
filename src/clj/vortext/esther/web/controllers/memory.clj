@@ -143,10 +143,17 @@
         {:keys [uid]} (:vault user)]
     (query-fn :forget-last-n-memory {:uid uid :n n})))
 
+(defn allowed-to-forget?
+  [scope]
+  (or (number? scope)
+      (#{"" "all" "today"} scope)))
 
 (defn forget!
   [opts user scope]
   (cond
+    (number? scope) (forget-last-n! opts user scope)
+    (= scope "") (forget-last-n! opts user 1)
     (= scope "all") (forget-all! opts user)
     (= scope "today") (forget-today! opts user)
-    (number? scope) (forget-last-n! opts user scope)))
+    :else
+    (throw (UnsupportedOperationException. (format "Not allowed to forget %s" scope)))))

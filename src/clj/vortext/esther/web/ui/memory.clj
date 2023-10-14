@@ -38,40 +38,36 @@
      (map #(select-keys % ks) formatted-responses))))
 
 
-(defn forget-scope
-  [scope]
-  (if (str/blank? scope) nil
-      (or (parse-number scope)
-          (str/trim scope))))
-
 
 (defn forget-form
   [_opts _user scope]
-  (if-let [scope (forget-scope scope)]
+  (if (memory/allowed-to-forget? scope)
     (with-meta
       [:form.confirmation
        {:hx-post "/user/forget"
         :hx-swap "outerHTML"}
        [:div.nudge-bottom
         [:strong
-         (format "Are you sure you want to forget %s %s?"
-                 scope
-                 (i/pluralize-noun (if (number? scope) scope 2) "memory"))]]
+         (if (str/blank? scope)
+           "Are you sure you want to forget the last memory?"
+           (format "Are you sure you want to forget %s %s?"
+                   scope
+                   (i/pluralize-noun (if (number? scope) scope 2) "memory")))]]
        [:button.button.button-primary
         {:name "action" :value "forget"} "Forget"]
        [:button.button.button-info
         {:name "action" :value "cancel"} "Cancel"]
        [:input {:type :hidden :name "scope" :value scope}]]
       {:headers {"HX-Trigger" "disableUserInput"}})
-    ;; Not allowed
-    [:span "Allowed options for forgetting are: all, today, or a number n for the last n memories."]))
-
+    (markdown/parse
+     "Allowed options for forgetting are: `all`, `today`, or a number `n` for the `last n` memories.")))
 
 (defn forget
   [opts {:keys [params] :as request}]
   (let [action (keyword (:action params))
         user (get-in request [:session :user])
-        scope (forget-scope (:scope params))]
+        scope (:scope params)
+        scope (or (parse-number scope) scope)]
     (if (= action :forget)
       (-> (ui (do (memory/forget! opts user scope)
                   [:span (format "Forgot %s memories" scope)]))

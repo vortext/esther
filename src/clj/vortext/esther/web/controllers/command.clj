@@ -68,7 +68,10 @@
 
 (defn forget
   [opts user args _obj]
-  (->event :htmx (memory-ui/forget-form opts user args)))
+  (let [ui (memory-ui/forget-form opts user args)]
+    (with-meta
+      (->event :htmx ui)
+      (meta ui))))
 
 
 (defn archive
