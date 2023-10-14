@@ -1,14 +1,14 @@
-* Progress
+* Really TODO
 ** TODO use client context `now` for memory sql dates
-** TODO documentation
-** TODO play with models
+** TODO documentation (docstring & readmes)
+** TODO do not use JSON for Esther responses (no need really with gbnf constraints)
+- It confuses the llm as it pushes the logits towards json garbage, rather than natural language
 ** TODO Implement websockets for chat
-** TODO llama.cpp parallel mode
-** TODO embeddings for RAG
+** TODO llama.cpp parallel decode
+** TODO embeddings for RAG (memory retrieval for context)
 - onnx bert?
 - bert.cpp / jna?
 - wait for llama.cpp to fix it?
-** TODO embeddings for memory retrieval and context
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)
 - For prompt: frecency keywords => memories by keyword => most_similar => summarize top-k => context: {kw: summary}
@@ -20,7 +20,7 @@
 - get it to work persistence, how to deal with scoping to user?!
 - get it to work with embeddings and real data (find or generate some dataset)
 - summarize using simple lexrank?
-- how to generate the proper amount of context? (summarization???)
+- how to generate the proper amount of context? (summarizing???)
 ** TODO a way to serialize "personality"
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** TODO export / download data functionality (for me and GDPR!)
@@ -39,11 +39,11 @@
 - [X] Loading indicator login
 - [ ] Accessibility and ARIA
 - [X] Disable text input while in modal confirm
-** TODO test infrastructure and tests => generate training / test data for fine tuning
+** TODO test infrastructure and tests => generate training / test data for fine-tuning
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
-** TODO calendar page (for memories)?
+** TODO calendar page (for memories)
 ** TODO #keyword search
 ** TODO semantic search memories
 ** TODO share a page (static gen)
@@ -56,11 +56,11 @@
 ** TODO image upload (img-to-text?)
 ** TODO offline desktop app?
 ** TODO /imagine command (no solutions for this ATM)
-- maybe stablediffusion v0.9 (new version)
-- hook up image generation (StableDiffusionAPI is too crappy)
+- StableDiffusion locally?
+- maybe StableDiffusion v0.9 (new version)
 - integrate image describe into memory
 - https://github.com/deep-floyd/IF maybe?
 - store description and image in memory contents
 - use image describe as context for converse
-- stablediffusion locally?
 ** TODO integrate https://github.com/spencermountain/compromise for NER or for the lulz?
+** TODO Simularca for data generation / simulations
