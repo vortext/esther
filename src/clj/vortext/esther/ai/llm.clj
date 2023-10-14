@@ -1,15 +1,15 @@
 (ns vortext.esther.ai.llm
   (:require
-   [babashka.fs :as fs]
-   [clojure.java.io :as io]
-   [vortext.esther.util.json :as json]
-   [vortext.esther.ai.llama :as llama]
-   [clojure.tools.logging :as log]
-   [integrant.core :as ig]
-   [malli.core :as m]
-   [malli.error :as me]
-   [vortext.esther.common :as common]
-   [vortext.esther.util.emoji :as emoji]))
+    [babashka.fs :as fs]
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
+    [integrant.core :as ig]
+    [malli.core :as m]
+    [malli.error :as me]
+    [vortext.esther.ai.llama :as llama]
+    [vortext.esther.common :as common]
+    [vortext.esther.util.emoji :as emoji]
+    [vortext.esther.util.json :as json]))
 
 
 (def response-schema
@@ -33,19 +33,20 @@
 
 (def validate-response (partial validate response-schema))
 
+
 (defn context-map
   [obj]
   (common/remove-namespaces
-   (select-keys
-    obj
-    (filter #(#{"context" "personality"} (namespace %)) (keys obj)))))
+    (select-keys
+      obj
+      (filter #(#{"context" "personality"} (namespace %)) (keys obj)))))
 
 
 (defn extract-json-parse
   [output]
   (->
-   (json/read-json-value (common/escape-newlines output))
-   (update :message common/unescape-newlines)))
+    (json/read-json-value (common/escape-newlines output))
+    (update :message common/unescape-newlines)))
 
 
 (defn complete-submission
@@ -56,10 +57,10 @@
                         :eos (untoken (llama/eos ctx))
                         :nl (untoken (llama/nl ctx))}
         template-vars (merge
-                       (context-map obj)
-                       special-tokens
-                       {:history memories
-                        :new-message (:event/content (first events))})
+                        (context-map obj)
+                        special-tokens
+                        {:history memories
+                         :new-message (:event/content (first events))})
         submission ((:handlebars/render-template renderer)
                     "templates/prompt" template-vars)
         _ (log/debug "submission::" submission)
@@ -74,7 +75,7 @@
 (defmethod ig/init-key :ai.llm/instance
   [_ {:keys [:llm/params :template/renderer] :as opts}]
   (let [ctx (llama/create-context
-             (str (fs/canonicalize (:model-path params))) params)
+              (str (fs/canonicalize (:model-path params))) params)
         gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
         sampler (llama/init-grammar-sampler ctx gbnf params)
         template-vars (:template/vars opts)]

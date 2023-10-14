@@ -1,13 +1,13 @@
 (ns vortext.esther.web.ui.conversation
   (:require
-   [clojure.string :as str]
-   [clojure.tools.logging :as log]
-   [vortext.esther.util.markdown :as markdown]
-   [vortext.esther.web.controllers.converse :as converse]
-   [vortext.esther.web.controllers.memory :as memory]
-   [clj-commons.humanize :as h]
-   [vortext.esther.web.htmx :refer [page ui] :as htmx]
-   [vortext.esther.web.ui.common :as common]))
+    [clj-commons.humanize :as h]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [vortext.esther.util.markdown :as markdown]
+    [vortext.esther.web.controllers.converse :as converse]
+    [vortext.esther.web.controllers.memory :as memory]
+    [vortext.esther.web.htmx :refer [page ui] :as htmx]
+    [vortext.esther.web.ui.common :as common]))
 
 
 (def loading
@@ -88,8 +88,8 @@
      :maxlength converse/message-maxlength
      :autofocus "true"
      :placeholder (h/truncate
-                   placeholder
-                   (get config "maxPlaceholderLength"))
+                    placeholder
+                    (get config "maxPlaceholderLength"))
      :rows 3
      :oninput "resizeTextarea(event)"
      :onkeydown "handleTextareaInput(event);"}]])
@@ -114,15 +114,15 @@
   [opts request]
   (let [config {"maxPlaceholderLength" 300}]
     (page
-     (common/head
-      {:config config
-       :styles ["public/css/conversation.css"]
-       :scripts ["public/js/vendor/emoji.js"
-                 "public/js/vendor/marked.js"
-                 "public/js/vendor/sentiment.js"
-                 "public/js/conversation.js"]})
-     [:main#container
-      [:h1#title "Esther"]
-      [:h2#today]
-      (conversation opts config request)
-      [:div#bottom]])))
+      (common/head
+        {:config config
+         :styles ["public/css/conversation.css"]
+         :scripts ["public/js/vendor/emoji.js"
+                   "public/js/vendor/marked.js"
+                   "public/js/vendor/sentiment.js"
+                   "public/js/conversation.js"]})
+      [:main#container
+       [:h1#title "Esther"]
+       [:h2#today]
+       (conversation opts config request)
+       [:div#bottom]])))

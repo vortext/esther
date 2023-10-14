@@ -1,12 +1,14 @@
 (ns vortext.esther.util.time
   (:require
-   [babashka.fs :as fs]
-   [clj-commons.humanize :as h]
-   [clojure.java.io :as io]
-   [clojure.tools.logging :as log]
-   [java-time.api :as jt]
-   [vortext.esther.util.polyglot :as polyglot])
-  (:import (java.time.format TextStyle)))
+    [babashka.fs :as fs]
+    [clj-commons.humanize :as h]
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
+    [java-time.api :as jt]
+    [vortext.esther.util.polyglot :as polyglot])
+  (:import
+    (java.time.format
+      TextStyle)))
 
 
 (def default-locale (java.util.Locale/getDefault))
@@ -38,7 +40,7 @@
 
 (defn human-today
   ([] (human-today
-       (->local-date (jt/instant) default-zone-id) default-locale))
+        (->local-date (jt/instant) default-zone-id) default-locale))
   ([present locale]
    (let [day (jt/day-of-week present)
          day-month (.getDayOfMonth (jt/month-day present))
@@ -80,12 +82,14 @@
         :else "summer"))))
 
 
-
 (def human-time-ago h/datetime)
 
-(defn as-moment [ts]
+
+(defn as-moment
+  [ts]
   (human-time-ago
-   (->local-date-time ts)))
+    (->local-date-time ts)))
+
 
 (def time-of-day
   (let [script "public/js/vendor/suncalc.js"
@@ -105,7 +109,6 @@
         (case type
           :emoji ((:lunarPhaseEmoji api) iso8601)
           :string ((:lunarPhase api) iso8601))))))
-
 
 
 ;; Scratch

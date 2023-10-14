@@ -1,16 +1,16 @@
 (ns vortext.esther.web.controllers.health
   (:require
-   [clojure.tools.logging :as log]
-   [ring.util.http-response :as http-response])
+    [clojure.tools.logging :as log]
+    [ring.util.http-response :as http-response])
   (:import
-   (java.util
-    Date)))
+    (java.util
+      Date)))
 
 
 (defn healthcheck!
   [_opts _req]
   (http-response/ok
-   {:time     (str (Date. (System/currentTimeMillis)))
-    :up-since (str (Date. (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean))))
-    :app      {:status  "up"
-               :message ""}}))
+    {:time     (str (Date. (System/currentTimeMillis)))
+     :up-since (str (Date. (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean))))
+     :app      {:status  "up"
+                :message ""}}))

@@ -1,14 +1,17 @@
 (ns vortext.esther.web.controllers.memory
   (:require
-   [clojure.tools.logging :as log]
-   [buddy.core.codecs :as codecs]
-   [buddy.core.hash :as hash]
-   [next.jdbc :as jdbc]
-   [vortext.esther.secrets :as secrets])
-  (:import (java.util UUID)))
+    [buddy.core.codecs :as codecs]
+    [buddy.core.hash :as hash]
+    [clojure.tools.logging :as log]
+    [next.jdbc :as jdbc]
+    [vortext.esther.secrets :as secrets])
+  (:import
+    (java.util
+      UUID)))
 
 
 (def gid #(str (UUID/randomUUID)))
+
 
 (defn see-keyword
   [query-fn tx user kw]
@@ -23,10 +26,10 @@
 (defn memorable
   [{:keys [context/present] :as obj}]
   (->
-   (select-keys
-    obj
-    (filter #(= (namespace %) "memory") (keys obj)))
-   (assoc :memory/ts (str present))))
+    (select-keys
+      obj
+      (filter #(= (namespace %) "memory") (keys obj)))
+    (assoc :memory/ts (str present))))
 
 
 (defn remember!
@@ -42,14 +45,14 @@
                 :iv iv
                 :conversation (boolean (:event/conversation? response))}]
     (jdbc/with-transaction [tx connection]
-      (query-fn tx :push-memory memory)
-      (doall
-       (map (fn [kw]
-              (let [fingerprint (see-keyword query-fn tx user kw)]
-                (query-fn tx :associate-keyword
-                          {:gid gid
-                           :fingerprint fingerprint})))
-            (into #{} (get-in response [:event/content :keywords] #{})))))
+                           (query-fn tx :push-memory memory)
+                           (doall
+                             (map (fn [kw]
+                                    (let [fingerprint (see-keyword query-fn tx user kw)]
+                                      (query-fn tx :associate-keyword
+                                                {:gid gid
+                                                 :fingerprint fingerprint})))
+                                  (into #{} (get-in response [:event/content :keywords] #{})))))
     obj))
 
 
@@ -67,8 +70,9 @@
    (let [{:keys [query-fn]} (:db opts)
          uid (get-in user [:vault :uid])]
      (construct-memories
-      user
-      (query-fn :last-n-conversation-memories {:uid uid :n n})))))
+       user
+       (query-fn :last-n-conversation-memories {:uid uid :n n})))))
+
 
 (defn last-imagination
   [opts user]
@@ -82,8 +86,8 @@
   (let [{:keys [query-fn]} (:db opts)
         uid (get-in user [:vault :uid])]
     (construct-memories
-     user
-     (query-fn :todays-non-archived-memories {:uid uid}))))
+      user
+      (query-fn :todays-non-archived-memories {:uid uid}))))
 
 
 (defn archive-todays-memories

@@ -1,13 +1,13 @@
 (ns vortext.esther.util.json
   (:require
-   [clojure.java.io :as io]
-   [cognitect.transit :as transit]
-   [jsonista.core :as json]))
+    [clojure.java.io :as io]
+    [cognitect.transit :as transit]
+    [jsonista.core :as json]))
 
 
 (def pretty-object-mapper
   (json/object-mapper
-   {:pretty true}))
+    {:pretty true}))
 
 
 (defn pretty-json

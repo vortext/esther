@@ -1,11 +1,11 @@
 (ns vortext.esther.web.ui.common
   (:require
-   [babashka.fs :as fs]
-   [babashka.process :refer [shell]]
-   [clojure.java.io :as io]
-   [clojure.string :as str]
-   [jsonista.core :as json]
-   [vortext.esther.util.crc32 :as crc32]))
+    [babashka.fs :as fs]
+    [babashka.process :refer [shell]]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [jsonista.core :as json]
+    [vortext.esther.util.crc32 :as crc32]))
 
 
 (defn client-config
@@ -59,8 +59,8 @@
         bundle-asset
         (fn [& args]
           (str (fs/path
-                "/resources" out
-                (fs/file-name (apply (partial bundle out-dir) args)))))
+                 "/resources" out
+                 (fs/file-name (apply (partial bundle out-dir) args)))))
         js-asset (bundle-asset all-scripts "main_" ".js")
         css-asset (bundle-asset all-styles "styles_" ".css")]
     [:head

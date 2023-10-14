@@ -1,17 +1,19 @@
 (ns vortext.esther.web.controllers.converse
   (:require
-   [clojure.string :as str]
-   [clojure.tools.logging :as log]
-   [malli.core :as m]
-   [vortext.esther.common :as common]
-   [vortext.esther.errors :refer [wrapped-error]]
-   [vortext.esther.util.json :as json]
-   [vortext.esther.web.controllers.chat :refer [chat!]]
-   [vortext.esther.web.controllers.command :refer [command!]]
-   [vortext.esther.web.controllers.context :as context]
-   [vortext.esther.web.controllers.memory :as memory]))
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [malli.core :as m]
+    [vortext.esther.common :as common]
+    [vortext.esther.errors :refer [wrapped-error]]
+    [vortext.esther.util.json :as json]
+    [vortext.esther.web.controllers.chat :refer [chat!]]
+    [vortext.esther.web.controllers.command :refer [command!]]
+    [vortext.esther.web.controllers.context :as context]
+    [vortext.esther.web.controllers.memory :as memory]))
+
 
 (def message-maxlength 1024)
+
 
 (def request-schema
   [:map
@@ -41,10 +43,10 @@
         {:keys [client-context content]} params
         client-context (json/read-json-value client-context)]
     (merge
-     {:memory/gid (memory/gid)
-      :memory/events [{:event/content {:message (str/trim content)}
-                       :event/role :user}]}
-     (context/from-client-context client-context))))
+      {:memory/gid (memory/gid)
+       :memory/events [{:event/content {:message (str/trim content)}
+                        :event/role :user}]}
+      (context/from-client-context client-context))))
 
 
 (defn answer!
@@ -55,10 +57,10 @@
     (try
       (if-not (m/validate request-schema request)
         (append-event
-         obj
-         (wrapped-error
-          :unrecognized-input
-          (str "Unrecognized input: "  request)))
+          obj
+          (wrapped-error
+            :unrecognized-input
+            (str "Unrecognized input: "  request)))
         (let [{:keys [:memory/events] :as obj} (respond! opts user obj)
               [_ response] events]
           (if (= (-> response :event/content :ui/type) :htmx)
@@ -68,7 +70,8 @@
             (memory/remember! opts user obj))))
       (catch Exception e
         (append-event
-         obj
-         (wrapped-error :internal-server-error e))))))
+          obj
+          (wrapped-error :internal-server-error e))))))
+
 
 ;; Scratch

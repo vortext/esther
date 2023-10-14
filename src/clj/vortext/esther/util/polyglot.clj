@@ -2,16 +2,16 @@
 (ns vortext.esther.util.polyglot
   (:refer-clojure :exclude [import load-file load-string eval eval])
   (:require
-   [clojure.java.io :as io]
-   [clojure.tools.logging :as log])
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log])
   (:import
-   (org.graalvm.polyglot
-    Context
-    Source
-    Value)
-   (org.graalvm.polyglot.proxy
-    ProxyArray
-    ProxyObject)))
+    (org.graalvm.polyglot
+      Context
+      Source
+      Value)
+    (org.graalvm.polyglot.proxy
+      ProxyArray
+      ProxyObject)))
 
 
 (defn deserialize-number

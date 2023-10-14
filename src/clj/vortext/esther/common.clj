@@ -1,13 +1,14 @@
 (ns vortext.esther.common
   (:require
-   [clojure.string :as str]
-   [babashka.fs :as fs]
-   [clojure.java.io :as io]
-   [clojure.tools.logging :as log]
-   [clojure.walk :as walk]))
+    [babashka.fs :as fs]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [clojure.walk :as walk]))
 
 
-(defn read-resource [resource-path]
+(defn read-resource
+  [resource-path]
   (-> resource-path
       io/resource
       fs/canonicalize
@@ -34,15 +35,18 @@
             (keyword (name k))
             k))]
     (walk/postwalk
-     (fn [x]
-       (if (map? x)
-         (into {} (map (fn [[k v]] [(remove-namespace k) v]) x))
-         x))
-     m)))
+      (fn [x]
+        (if (map? x)
+          (into {} (map (fn [[k v]] [(remove-namespace k) v]) x))
+          x))
+      m)))
 
 
-(defn unescape-newlines [s]
+(defn unescape-newlines
+  [s]
   (str/replace s "\\n" "\n"))
 
-(defn escape-newlines [s]
+
+(defn escape-newlines
+  [s]
   (str/replace s "\n" "\\\\n"))

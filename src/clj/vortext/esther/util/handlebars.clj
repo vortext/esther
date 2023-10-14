@@ -1,29 +1,36 @@
 (ns vortext.esther.util.handlebars
   (:require
-   [vortext.esther.util.json :as json]
-   [clojure.tools.logging :as log]
-   [integrant.core :as ig]
-   [clojure.walk :refer [stringify-keys]])
-  (:import [com.github.jknack.handlebars
-            Handlebars$SafeString EscapingStrategy
-            Handlebars Template Helper Options]))
+    [clojure.tools.logging :as log]
+    [clojure.walk :refer [stringify-keys]]
+    [integrant.core :as ig]
+    [vortext.esther.util.json :as json])
+  (:import
+    (com.github.jknack.handlebars
+      EscapingStrategy
+      Handlebars
+      Handlebars$SafeString
+      Helper
+      Options
+      Template)))
 
 
 (defn create-instance
   []
   (doto (Handlebars.)
-    (.with EscapingStrategy/NOOP) ;; ⚠
+    (.with EscapingStrategy/NOOP) ; ⚠
     (.registerHelper
-     "eq"
-     (proxy [Helper] []
-       (apply [context ^Options options]
-         (= (name context) (name (first (.params options)))))))
+      "eq"
+      (proxy [Helper] []
+        (apply
+          [context ^Options options]
+          (= (name context) (name (first (.params options)))))))
 
     (.registerHelper
-     "json"
-     (proxy [Helper] []
-       (apply [context ^Options options]
-         (json/write-value-as-string context))))))
+      "json"
+      (proxy [Helper] []
+        (apply
+          [context ^Options options]
+          (json/write-value-as-string context))))))
 
 
 (defn apply-template
@@ -40,18 +47,19 @@
 (defn render-template
   [^Handlebars handlebars ^String location obj]
   (->
-   (.compile handlebars location)
-   (apply-template (stringify-keys obj))))
+    (.compile handlebars location)
+    (apply-template (stringify-keys obj))))
 
 
 (defn register-helper
   [handlebars name f]
   (.registerHelper
-   handlebars
-   name
-   (proxy [Helper] []
-     (apply [context ^Options options]
-       (f context options)))))
+    handlebars
+    name
+    (proxy [Helper] []
+      (apply
+        [context ^Options options]
+        (f context options)))))
 
 
 (defmethod ig/init-key :util.handlebars/instance

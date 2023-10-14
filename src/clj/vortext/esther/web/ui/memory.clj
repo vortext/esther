@@ -34,7 +34,7 @@
                    (update :keywords update-kw)))
              responses)]
     (markdown/table
-     (map #(select-keys % ks) formatted-responses))))
+      (map #(select-keys % ks) formatted-responses))))
 
 
 (defn wipe-form

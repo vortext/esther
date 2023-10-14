@@ -1,7 +1,8 @@
 (ns vortext.esther.web.controllers.chat
   (:require
-   [clojure.tools.logging :as log]
-   [vortext.esther.web.controllers.memory :as memory]))
+    [clojure.tools.logging :as log]
+    [vortext.esther.web.controllers.memory :as memory]))
+
 
 (defn ->memory-context
   [{:keys [:memory/events]}]

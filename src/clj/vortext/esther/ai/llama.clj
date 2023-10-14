@@ -18,62 +18,76 @@
 ;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns vortext.esther.ai.llama
-  (:refer-clojure :exclude [remove printf]) ;; [WARNING]
+  (:refer-clojure :exclude [remove printf])
+  (:gen-class)
+  ; [WARNING]
   (:require
-   [clojure.string :as str]
-   [clojure.java.io :as io]
-   [babashka.fs :as fs]
-   [com.phronemophobic.clong.gen.jna :as gen]
-   [clojure.tools.logging :as log]
-   [vortext.esther.ai.grammar :as grammar]
-   [clojure.edn :as edn]
-   [vortext.esther.util.native
-    :refer [->bool seq->memory ->float-array-by-reference]])
+    [babashka.fs :as fs]
+    [clojure.edn :as edn]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [com.phronemophobic.clong.gen.jna :as gen]
+    [vortext.esther.ai.grammar :as grammar]
+    [vortext.esther.util.native
+     :refer [->bool seq->memory ->float-array-by-reference]])
   (:import
-   java.lang.ref.Cleaner
-   java.nio.charset.Charset
-   java.nio.charset.CodingErrorAction
-   java.nio.ByteBuffer
-   java.nio.CharBuffer
-   com.sun.jna.Memory
-   com.sun.jna.Pointer
-   com.sun.jna.ptr.FloatByReference
-   com.sun.jna.ptr.IntByReference
-   com.sun.jna.ptr.ByteByReference
-   com.sun.jna.Structure)
-  (:gen-class))
+    (com.sun.jna
+      Memory
+      Pointer
+      Structure)
+    (com.sun.jna.ptr
+      ByteByReference
+      FloatByReference
+      IntByReference)
+    java.lang.ref.Cleaner
+    (java.nio
+      ByteBuffer
+      CharBuffer)
+    (java.nio.charset
+      Charset
+      CodingErrorAction)))
+
 
 (defonce library-options
   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})
 
+
 (defonce shared-lib
   (str (fs/canonicalize "native/llama.cpp/build/libllama.so")))
 
+
 (defonce ^:no-doc libllama
   (com.sun.jna.NativeLibrary/getInstance
-   shared-lib library-options))
+    shared-lib library-options))
+
 
 (defonce api
   (with-open [rdr (io/reader (io/resource "api/llama.edn"))
               rdr (java.io.PushbackReader. rdr)]
     (edn/read rdr)))
 
+
 (gen/def-api libllama api)
 
 (gen/import-structs! api)
+
 
 (def ^:dynamic
   *num-threads*
   "Number of threads used when generating tokens."
   (.. Runtime getRuntime availableProcessors))
 
+
 (defonce cleaner (delay (Cleaner/create)))
 
 (def ^:private token-data-size (.size (llama_token_data.)))
 
+
 (defonce ^:private llm-init
   (delay
     (llama_backend_init 0)))
+
 
 (defn eos
   "Returns the llama end of sentence token."
@@ -81,64 +95,72 @@
   [ctx]
   (llama_token_eos ctx))
 
+
 (defn bos
   "Returns the llama beginning of sentence token."
   ;; only for backwards compatibility
   [ctx]
   (llama_token_bos ctx))
 
+
 (defn nl
   "Returns the llama next line token."
   [ctx]
   (llama_token_nl ctx))
+
 
 (defn eot
   "Returns the llama end of turn token."
   [ctx]
   (llama_token_eot ctx))
 
-(defn ^:private map->llama-context-params [m]
+
+(defn ^:private map->llama-context-params
+  [m]
   (reduce-kv
-   (fn [^llama_context_params params k v]
-     (case k
-       :seed (.writeField params "seed" (int v))
-       :n-ctx (.writeField params "n_ctx" (int v))
-       :n-batch (.writeField params "n_batch" (int v))
-       :n-threads (.writeField params "n_threads" (int v))
-       :n-threads-batch (.writeField params "n_threads_batch" (int v))
+    (fn [^llama_context_params params k v]
+      (case k
+        :seed (.writeField params "seed" (int v))
+        :n-ctx (.writeField params "n_ctx" (int v))
+        :n-batch (.writeField params "n_batch" (int v))
+        :n-threads (.writeField params "n_threads" (int v))
+        :n-threads-batch (.writeField params "n_threads_batch" (int v))
 
-       :rope-freq-base (.writeField params "rope_freq_base" (float v))
-       :rope-freq-scale (.writeField params "rope_freq_scale" (float v))
+        :rope-freq-base (.writeField params "rope_freq_base" (float v))
+        :rope-freq-scale (.writeField params "rope_freq_scale" (float v))
 
-       :mul_mat_q (.writeField params "mul_mat_q" (->bool v))
-       :f16-kv (.writeField params "f16_kv" (->bool v))
-       :logits-all (.writeField params "logits_all" (->bool v))
-       :embedding (.writeField params "embedding" (->bool v))
-       ;;default
-       nil)
-     ;; return params
-     params)
-   (llama_context_default_params)
-   m))
+        :mul_mat_q (.writeField params "mul_mat_q" (->bool v))
+        :f16-kv (.writeField params "f16_kv" (->bool v))
+        :logits-all (.writeField params "logits_all" (->bool v))
+        :embedding (.writeField params "embedding" (->bool v))
+        ;; default
+        nil)
+      ;; return params
+      params)
+    (llama_context_default_params)
+    m))
 
-(defn ^:private map->llama-model-params [m]
+
+(defn ^:private map->llama-model-params
+  [m]
   (reduce-kv
-   (fn [^llama_model_params params k v]
-     (case k
-       :n-gpu-layers (.writeField params "n_gpu_layers" (int v))
-       :main-gpu (.writeField params "main_gpu" (int v))
-       :tensor-split (.writeField params "tensor_split" (->float-array-by-reference  v))
-       ;; :progress-callback (.writeField params "progress_callback" v)
-       ;; :progress-callback-user-data (.writeField params "progress_callback_user_data" v)
-       :vocab-only (.writeField params "vocab_only" (->bool v))
-       :use-mmap (.writeField params "use_mmap" (->bool v))
-       :use-mlock (.writeField params "use_mlock" (->bool v))
-       ;;default
-       nil)
-     ;; return params
-     params)
-   (llama_model_default_params)
-   m))
+    (fn [^llama_model_params params k v]
+      (case k
+        :n-gpu-layers (.writeField params "n_gpu_layers" (int v))
+        :main-gpu (.writeField params "main_gpu" (int v))
+        :tensor-split (.writeField params "tensor_split" (->float-array-by-reference  v))
+        ;; :progress-callback (.writeField params "progress_callback" v)
+        ;; :progress-callback-user-data (.writeField params "progress_callback_user_data" v)
+        :vocab-only (.writeField params "vocab_only" (->bool v))
+        :use-mmap (.writeField params "use_mmap" (->bool v))
+        :use-mlock (.writeField params "use_mlock" (->bool v))
+        ;; default
+        nil)
+      ;; return params
+      params)
+    (llama_model_default_params)
+    m))
+
 
 (defn create-context
   "Create and return an opaque llama context.
@@ -195,8 +217,9 @@
          context (proxy [Pointer
                          clojure.lang.ILookup
                          java.lang.AutoCloseable]
-                     [(Pointer/nativeValue context)]
-                   (valAt [k]
+                        [(Pointer/nativeValue context)]
+                   (valAt
+                     [k]
                      (case k
                        :n-ctx n-ctx
                        :n-batch n-batch
@@ -204,7 +227,9 @@
                        :model @model-ref
                        ;; else
                        nil))
-                   (close []
+
+                   (close
+                     []
                      (delete-context)
                      (delete-model)))]
 
@@ -212,7 +237,6 @@
      (.register ^Cleaner @cleaner context delete-context)
      (.register ^Cleaner @cleaner model delete-model)
      context)))
-
 
 
 (defn ^:private llama-token-to-str
@@ -243,13 +267,13 @@
          ([result token]
           (let [[len ^ByteBuffer result-buf] (llama-token-to-str ctx token)]
             (.put input-buffer (.array result-buf) 0 len)
-            (.flip input-buffer) ;; Preparing buffer for read
+            (.flip input-buffer) ; Preparing buffer for read
             (let [decoder-result (.decode decoder input-buffer output-buffer false)]
               (cond
                 (.isUnderflow decoder-result)
                 (do
-                  (.compact input-buffer) ;; Preparing buffer for write
-                  (.flip output-buffer)   ;; Preparing buffer for read
+                  (.compact input-buffer) ; Preparing buffer for write
+                  (.flip output-buffer)   ; Preparing buffer for read
                   (let [result (reduce rf result output-buffer)]
                     (.clear output-buffer)
                     result))
@@ -297,20 +321,20 @@
    (decode-token-to-str ctx (Charset/forName "UTF-8")))
   ([ctx ^Charset charset]
    (comp
-    (decode-token-to-char ctx charset)
-    (char->str))))
+     (decode-token-to-char ctx charset)
+     (char->str))))
 
 
-;;;;;;;;;;;;;;
+;;
 ;; Tokenize
-;;;;;;;;;;;;;;
+;;
 (defn untokenize
   "Given a sequence of tokens, return the string representation."
   [ctx tokens]
   (str/join
-   (eduction
-    (decode-token-to-str ctx)
-    tokens)))
+    (eduction
+      (decode-token-to-str ctx)
+      tokens)))
 
 
 (defn tokenize
@@ -320,13 +344,14 @@
         max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
         token-buf* (doto (Memory. (* max-tokens Integer/BYTES)) (.clear))
         num-tokens (llama_tokenize
-                    (:model ctx) s
-                    (count s) token-buf* max-tokens add-bos)]
+                     (:model ctx) s
+                     (count s) token-buf* max-tokens add-bos)]
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
 
-;;;;;;;;;;;;;;
-;;; Samplers
-;;;;;;;;;;;;;;
+
+;;
+;; Samplers
+;;
 (defn get-logits
   "Returns a copy of the current context's logits as a float array."
   ([ctx] (get-logits ctx 0))
@@ -355,7 +380,6 @@
     candidates*))
 
 
-
 (defn sample-mirostat-v2
   [ctx logits candidates-buf* mu* tau eta temp]
   (let [mu (FloatByReference. @mu*)
@@ -377,14 +401,13 @@
    (let [candidates-buf* (doto (Memory. (* token-data-size (:n-vocab ctx))) (.clear))]
      (fn [logits reset?]
        (sample-mirostat-v2
-        ctx
-        logits
-        candidates-buf*
-        (volatile! (* 2 tau))
-        tau
-        eta
-        temp)))))
-
+         ctx
+         logits
+         candidates-buf*
+         (volatile! (* 2 tau))
+         tau
+         eta
+         temp)))))
 
 
 (defn init-grammar-sampler
@@ -405,15 +428,16 @@
   [candidates n-vocab]
   (let [data (.readField candidates "data")]
     (sort-by
-     :logit >
-     (map (fn [e] {:id (.readField e "id")
-                   :logit (.readField e "logit")
-                   :p (.readField e "p")}) (.toArray data n-vocab)))))
+      :logit >
+      (map (fn [e]
+             {:id (.readField e "id")
+              :logit (.readField e "logit")
+              :p (.readField e "p")}) (.toArray data n-vocab)))))
 
 
-;;;;;;;;;;;;;;;;;;;
+;;
 ;; Decode & batches
-;;;;;;;;;;;;;;;;;;;
+;;
 (defn create-batch
   [^Memory token-buf* num-batch-tokens n-past seq-id]
   (let [batch (doto (Structure/newInstance llama_batch) (.read))
@@ -459,9 +483,10 @@
     (vreset! n-past* (+ @n-past* total-tokens))
     ctx))
 
-;;;;;;;;;;;;;;;;;;;
+
+;;
 ;; Generation API
-;;;;;;;;;;;;;;;;;;;
+;;
 
 (defn generate-tokens
   "Returns a seqable/reducible sequence of tokens from ctx with prompt."
@@ -477,18 +502,24 @@
      #_(llama_kv_cache_tokens_rm ctx -1 -1)
      (reify
        clojure.lang.Seqable
-       (seq [_]
+       (seq
+         [_]
          (when seed
            (llama_set_rng_seed ctx seed))
-         ((fn next [ctx]
+         ((fn next
+            [ctx]
             (let [next-token (samplef (get-logits ctx) @reset?)]
               (vreset! reset? false)
               (when (not= eos next-token)
                 (cons next-token
                       (lazy-seq (next (decode ctx next-token n-past seq-id)))))))
           (decode ctx prompt n-past seq-id)))
+
+
        clojure.lang.IReduceInit
-       (reduce [_ rf init]
+
+       (reduce
+         [_ rf init]
          (when seed
            (llama_set_rng_seed ctx seed))
          (loop [acc init
@@ -503,7 +534,6 @@
                    (recur acc (decode ctx next-token n-past seq-id))))))))))))
 
 
-
 (defn generate-string
   "Returns a string with all tokens generated from prompt up until end of sentence or max context size."
   ([ctx prompt]
@@ -511,10 +541,10 @@
   ([ctx prompt opts]
    (let [[prompt-token-count _] (tokenize ctx prompt true)]
      (str/join
-      (eduction
-       (take (- (:n-ctx ctx) prompt-token-count))
-       (decode-token-to-char ctx)
-       (generate-tokens ctx 0 prompt opts))))))
+       (eduction
+         (take (- (:n-ctx ctx) prompt-token-count))
+         (decode-token-to-char ctx)
+         (generate-tokens ctx 0 prompt opts))))))
 
 
 ;; Scratch

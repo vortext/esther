@@ -1,11 +1,15 @@
 (ns vortext.esther.web.controllers.users
   (:require
-   [clojure.tools.logging :as log]
-   [integrant.core :as ig]
-   [vortext.esther.secrets :as secrets])
-  (:import (java.util UUID)))
+    [clojure.tools.logging :as log]
+    [integrant.core :as ig]
+    [vortext.esther.secrets :as secrets])
+  (:import
+    (java.util
+      UUID)))
+
 
 (def uid #(str (UUID/randomUUID)))
+
 
 (defn build-vault
   [password]
@@ -19,11 +23,11 @@
   (let [query-fn (:query-fn db)
         {:keys [data iv]} (build-vault password)]
     (query-fn
-     :create-user
-     {:username username
-      :password_hash (secrets/password-hash password)
-      :data data
-      :iv iv})))
+      :create-user
+      {:username username
+       :password_hash (secrets/password-hash password)
+       :data data
+       :iv iv})))
 
 
 (defn find-by-username
@@ -38,8 +42,8 @@
     (when (and username password (secrets/check (:password_hash user) password))
       (let [encrypted-vault (select-keys user [:data :iv])
             vault (secrets/decrypt-from-sql
-                   encrypted-vault
-                   (secrets/derive-key-base64-str password))]
+                    encrypted-vault
+                    (secrets/derive-key-base64-str password))]
         (-> user
             (dissoc :data :iv)
             (assoc :vault vault))))))

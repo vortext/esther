@@ -1,9 +1,9 @@
 (ns vortext.esther.web.controllers.context
   (:require
-   [clojure.tools.logging :as log]
-   [clojure.java.io :as io]
-   [vortext.esther.util.json :as json]
-   [vortext.esther.util.time :as time]))
+    [clojure.java.io :as io]
+    [clojure.tools.logging :as log]
+    [vortext.esther.util.json :as json]
+    [vortext.esther.util.time :as time]))
 
 
 (defonce timezones

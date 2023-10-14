@@ -1,30 +1,26 @@
 (ns vortext.esther.core
   (:gen-class)
   (:require
-   [clojure.tools.logging :as log]
-
-   [integrant.core :as ig]
-   [kit.edge.db.sql.conman]
-   [kit.edge.db.sql.migratus]
-   ;; Edges
-   [kit.edge.server.undertow]
-   [kit.edge.utils.nrepl]
-
-   ;; AI
-   [vortext.esther.ai.llm]
-   [vortext.esther.ai.llama]
-   [vortext.esther.ai.grammar]
-
-   ;; Util
-   [vortext.esther.util.handlebars]
-
-   [vortext.esther.config :as config]
-   [vortext.esther.env :refer [defaults]]
-   [vortext.esther.errors :as errors]
-   [vortext.esther.web.handler]
-   ;; Routes
-   [vortext.esther.web.routes.api]
-   [vortext.esther.web.routes.ui]))
+    [clojure.tools.logging :as log]
+    [integrant.core :as ig]
+    [kit.edge.db.sql.conman]
+    [kit.edge.db.sql.migratus]
+    ;; Edges
+    [kit.edge.server.undertow]
+    [kit.edge.utils.nrepl]
+    [vortext.esther.ai.grammar]
+    [vortext.esther.ai.llama]
+    ;; AI
+    [vortext.esther.ai.llm]
+    [vortext.esther.config :as config]
+    [vortext.esther.env :refer [defaults]]
+    [vortext.esther.errors :as errors]
+    ;; Util
+    [vortext.esther.util.handlebars]
+    [vortext.esther.web.handler]
+    ;; Routes
+    [vortext.esther.web.routes.api]
+    [vortext.esther.web.routes.ui]))
 
 
 ;; log uncaught exceptions in threads

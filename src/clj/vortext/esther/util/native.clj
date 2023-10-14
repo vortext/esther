@@ -1,22 +1,27 @@
 (ns vortext.esther.util.native
   (:require
-   [clojure.edn :as edn]
-   [clojure.string :as str]
-   [babashka.process :refer [shell]]
-   [babashka.fs :as fs]
-   [clojure.tools.logging :as log]
-   [clojure.java.io :as io])
+    [babashka.fs :as fs]
+    [babashka.process :refer [shell]]
+    [clojure.edn :as edn]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log])
   (:import
-   com.sun.jna.Memory
-   com.sun.jna.ptr.IntByReference
-   com.sun.jna.ptr.FloatByReference))
+    com.sun.jna.Memory
+    (com.sun.jna.ptr
+      FloatByReference
+      IntByReference)))
 
-(defn ->bool [b]
+
+(defn ->bool
+  [b]
   (if b
     (byte 1)
     (byte 0)))
 
-(defn ->float-array-by-reference [v]
+
+(defn ->float-array-by-reference
+  [v]
   (let [arr (float-array v)
         arrlen (alength arr)
         num-bytes (* arrlen 4)
@@ -26,7 +31,9 @@
               (.setPointer mem))]
     fbr))
 
-(defn ->int-array-by-reference [v]
+
+(defn ->int-array-by-reference
+  [v]
   (let [arr (int-array v)
         arrlen (alength arr)
         num-bytes (* arrlen 4)
@@ -35,6 +42,7 @@
         ibr (doto (IntByReference.)
               (.setPointer mem))]
     ibr))
+
 
 (defn seq->memory
   [arr]
@@ -51,7 +59,7 @@
          "java.lang.Character" [Character/BYTES #(.setChar %1 %2 %3)]}
         [size set-fn] (get type-info type-name)
         _ (when-not size (throw (IllegalArgumentException.
-                                 (format "Unsupported type: %s" type-name))))
+                                  (format "Unsupported type: %s" type-name))))
         mem (doto (Memory. (* arrlen size)) (.clear))]
     (doseq [[i val] (map-indexed vector arr)]
       (set-fn mem (* i size) val))
@@ -59,7 +67,8 @@
 
 
 ;; API generation
-(defn ^:private write-edn [w obj]
+(defn ^:private write-edn
+  [w obj]
   (binding [*print-length* nil
             *print-level* nil
             *print-dup* false
@@ -91,21 +100,25 @@
      "-internal-externc-isystem" "/include"
      "-internal-externc-isystem" "/usr/include"])
 
-(defn remove-quotes [strings]
+
+(defn remove-quotes
+  [strings]
   (map #(clojure.string/replace % "\"" "") strings))
+
 
 (defn get-clang-args
   []
   (let [tmp-h (fs/delete-on-exit
-               (fs/create-temp-file {:suffix ".h"}))
+                (fs/create-temp-file {:suffix ".h"}))
         cmd (str/join " " ["clang" "-###" (str tmp-h)])
         result (-> (shell {:err :string} cmd) deref :err)
         result (str/split (last (str/split result #"\n")) #" ")]
     (remove-quotes
-     (flatten (filter
-               (fn [[k _v]] (or (str/includes? k "resource-dir")
-                                (str/includes? k "isystem")))
-               (partition 2 (rest result)))))))
+      (flatten (filter
+                 (fn [[k _v]]
+                   (or (str/includes? k "resource-dir")
+                       (str/includes? k "isystem")))
+                 (partition 2 (rest result)))))))
 
 
 (defn dump-api
@@ -117,7 +130,6 @@
                  ((requiring-resolve 'com.phronemophobic.clong.clang/easy-api)
                   (str header-path)
                   (get-clang-args))))))
-
 
 
 (comment

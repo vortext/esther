@@ -1,10 +1,13 @@
 (ns vortext.esther.util.crc32
   (:require
-   [buddy.core.codecs :as codecs]
-   [clojure.java.io :as io])
+    [buddy.core.codecs :as codecs]
+    [clojure.java.io :as io])
   (:import
-   [java.util.zip CRC32]
-   [java.nio.file Files Paths]))
+    (java.nio.file
+      Files
+      Paths)
+    (java.util.zip
+      CRC32)))
 
 
 (defn compute-crc32
@@ -34,4 +37,4 @@
 (defn crc32->base64-str
   [crc32]
   (codecs/bytes->b64-str
-   (codecs/long->bytes crc32) true)) ; true = websafe
+    (codecs/long->bytes crc32) true)) ; true = websafe

@@ -45,7 +45,7 @@
 (defn on-error
   [req _]
   (log/warn "access-rules on-error session:" (:session req))
-  {:status 200 ;; HTMX does not recognize it if you send 301 ...
+  {:status 200 ; HTMX does not recognize it if you send 301 ...
    :headers {"location" "/login"
              "HX-Redirect" "/login"
              "HX-Refresh" "true"}
