@@ -3,9 +3,6 @@
    [clojure.tools.logging :as log]
    [vortext.esther.web.controllers.memory :as memory]))
 
-
-
-
 (defn ->memory-context
   [{:keys [:memory/events]}]
   (let [format-event (fn [{:keys [:event/content :event/role]}]
@@ -16,10 +13,12 @@
 
 (defn ->user-context
   [opts user obj]
-  (let [keywords (memory/frecency-keywords opts user :week 10)
+  (let [n-keywords 10
+        n-memories 10
+        keywords (memory/frecency-keywords opts user :week n-keywords)
         keywords (into #{} (map :value keywords))
-        ;; TODO calculate tokens so we don't overflow the context ...
-        memories (reverse (memory/recent-conversation opts user 10))]
+        ;; TODO calculate n-memories based on context size
+        memories (reverse (memory/recent-conversation opts user n-memories))]
     (merge obj {:user/keywords keywords
                 :user/memories (mapcat ->memory-context memories)})))
 

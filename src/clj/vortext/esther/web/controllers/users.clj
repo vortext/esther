@@ -50,5 +50,5 @@
   (let [username "test"
         password "test"]
     (when-not (find-by-username opts username)
-      (log/warn "creating user " username "with password" password)
+      (log/warn "creating user" username "with password" password)
       (insert! opts username password))))
