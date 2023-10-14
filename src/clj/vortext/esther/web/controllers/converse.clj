@@ -18,7 +18,7 @@
    [:message
     [:and
      [:string {:min 1, :max message-maxlength}]
-     [:fn {:error/message "message should be at most 1024 chars"}
+     [:fn {:error/message (format "message should be at most %s chars" message-maxlength)}
       (fn [s] (<= (count s) message-maxlength))]]]])
 
 
