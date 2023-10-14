@@ -11,14 +11,15 @@
    [vortext.esther.web.controllers.context :as context]
    [vortext.esther.web.controllers.memory :as memory]))
 
+(def message-maxlength 1024)
 
 (def request-schema
   [:map
    [:message
     [:and
-     [:string {:min 1, :max 1024}]
+     [:string {:min 1, :max message-maxlength}]
      [:fn {:error/message "message should be at most 1024 chars"}
-      (fn [s] (<= (count s) 1024))]]]])
+      (fn [s] (<= (count s) message-maxlength))]]]])
 
 
 (defn append-event
@@ -61,7 +62,7 @@
         (let [{:keys [:memory/events] :as obj} (respond! opts user obj)
               [_ response] events]
           (if (= (-> response :event/content :ui/type) :htmx)
-            ;; Just return without remembering if not conversation?
+            ;; Just return without remembering if a UI element
             obj
             ;; Otherwise remember
             (memory/remember! opts user obj))))

@@ -167,7 +167,7 @@ function removeTextAreaListeners(textarea) {
   window.clientConfig.eventListeners[textarea] = {};
 }
 
-function beforeConverseRequest() {
+function beforeConverseRequest(e) {
   const textarea = document.getElementById('user-input');
   const inputContent = document.getElementById("input-content");
   const userValue = document.getElementById("user-value");
@@ -189,7 +189,7 @@ function focusWithoutScrolling(element) {
   window.scrollTo(x, y);
 }
 
-function afterConverseRequest() {
+function afterConverseRequest(e) {
   const textarea = document.getElementById('user-input');
   const messagesContainer = document.getElementById('conversation');
   const bottomElement = document.getElementById('bottom');

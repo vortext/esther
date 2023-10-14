@@ -71,8 +71,8 @@
     :hx-indicator ".loading-state"
     :hx-target "#history"
     :hx-trigger "submit"
-    "hx-on::before-request" "beforeConverseRequest();"
-    "hx-on::after-request" "afterConverseRequest();"}
+    "hx-on::before-request" "beforeConverseRequest(event);"
+    "hx-on::after-request" "afterConverseRequest(event);"}
    [:input#client-context
     {:type "hidden"
      :name "client-context"
@@ -85,7 +85,7 @@
     {:autocomplete "off"
      :minlength 1
      :name "_content"
-     :maxlength 1024
+     :maxlength converse/message-maxlength
      :autofocus "true"
      :placeholder (h/truncate
                    placeholder
