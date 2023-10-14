@@ -72,14 +72,14 @@ from memory_keyword
 where uid = :uid
 order by frecency desc limit :n;
 
--- :name wipe-all-memory :! :1
--- :doc wipes all memories for a uid
+-- :name forget-all-memory :! :1
+-- :doc Forget all memories for a uid
 delete from memory where uid = :uid;
 
--- :name wipe-todays-memory :! :1
--- :doc wipes todays memories for a uid
+-- :name forget-todays-memory :! :1
+-- :doc Forget todays memories for a uid
 delete from memory where uid = :uid and created_date = date('now');
 
--- :name wipe-all-memory-keywords :! :1
--- :doc wipes all memory keywords for a uid
+-- :name forget-all-memory-keywords :! :1
+-- :doc Forget all memory keywords for a uid
 delete from memory_keyword where uid = :uid;

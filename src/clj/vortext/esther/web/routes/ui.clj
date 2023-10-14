@@ -38,8 +38,8 @@
       :post (partial conversation/message opts)}]
     ["/archive"
      {:post (partial memory/archive opts)}]
-    ["/wipe"
-     {:post (partial memory/wipe opts)}]]])
+    ["/forget"
+     {:post (partial memory/forget opts)}]]])
 
 
 (defn on-error

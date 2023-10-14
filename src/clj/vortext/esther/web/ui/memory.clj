@@ -37,7 +37,7 @@
       (map #(select-keys % ks) formatted-responses))))
 
 
-(defn wipe-form
+(defn forget-form
   [_opts _user scope]
   (let [scope (if (and (string? scope)
                        (not (str/blank? scope)))
@@ -47,29 +47,29 @@
     (if (not (allowed scope))
       [:span "The only allowed options are " (h/oxford (map name allowed)) "."]
       [:form.confirmation
-       {:hx-post "/user/wipe"
+       {:hx-post "/user/forget"
         :hx-swap "outerHTML"}
        [:div
         {:style "padding-bottom: 1em"}
-        [:strong (str "Are you sure you want to wipe " (name scope) " memory?")]]
+        [:strong (str "Are you sure you want to forget " (name scope) " memory?")]]
        [:button.button.button-primary
-        {:name "action" :value "wipe"} "Wipe memory"]
+        {:name "action" :value "forget"} "Forget memory"]
        [:button.button.button-info
         {:name "action" :value "cancel"} "Cancel"]
        [:input {:type :hidden :name "scope" :value scope}]])))
 
 
-(defn wipe
+(defn forget
   [opts {:keys [params] :as request}]
   (let [action (keyword (:action params))
         user (get-in request [:session :user])
         {:keys [uid]} (:vault user)
         scope (keyword (:scope params))
-        scopes {:today memory/wipe-today!
-                :all memory/wipe-all!}]
-    (if (= action :wipe)
+        scopes {:today memory/forget-today!
+                :all memory/forget-all!}]
+    (if (= action :forget)
       (-> (ui (do ((scopes scope) opts user)
-                  [:span "Wiped memories: " (name scope)]))
+                  [:span "Forgot memories: " (name scope)]))
           (assoc :headers {"HX-Redirect" "/"}))
       (-> (ui [:span "Let us continue."])
           (update :headers merge {"HX-Trigger" "enableUserInput"})))))

@@ -1,13 +1,11 @@
 (ns vortext.esther.web.controllers.memory
   (:require
-    [buddy.core.codecs :as codecs]
-    [buddy.core.hash :as hash]
-    [clojure.tools.logging :as log]
-    [next.jdbc :as jdbc]
-    [vortext.esther.secrets :as secrets])
-  (:import
-    (java.util
-      UUID)))
+   [buddy.core.codecs :as codecs]
+   [buddy.core.hash :as hash]
+   [clojure.tools.logging :as log]
+   [next.jdbc :as jdbc]
+   [vortext.esther.secrets :as secrets])
+  (:import (java.util UUID)))
 
 
 (def gid #(str (UUID/randomUUID)))
@@ -125,15 +123,15 @@
      (map decrypt (query-fn :frecency-keywords query-params)))))
 
 
-(defn wipe-all!
+(defn forget-all!
   [opts user]
   (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
-    (query-fn :wipe-all-memory {:uid uid})))
+    (query-fn :forget-all-memory {:uid uid})))
 
 
-(defn wipe-today!
+(defn forget-today!
   [opts user]
   (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
-    (query-fn :wipe-todays-memory {:uid uid})))
+    (query-fn :forget-todays-memory {:uid uid})))

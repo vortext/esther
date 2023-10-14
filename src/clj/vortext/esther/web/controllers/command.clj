@@ -66,10 +66,10 @@
     {:headers {"HX-Trigger" "disableUserInput"}}))
 
 
-(defn wipe
+(defn forget
   [opts user args _obj]
   (with-meta
-    (->event :htmx (memory-ui/wipe-form opts user args))
+    (->event :htmx (memory-ui/forget-form opts user args))
     {:headers {"HX-Trigger" "disableUserInput"}}))
 
 
@@ -86,14 +86,14 @@
         commands {:inspect inspect
                   :keywords keywords
                   :status status
-                  :wipe wipe
+                  :forget forget
                   :imagine imagine
                   :archive archive
                   :logout logout}
         [cmd args] (common/split-first-word
-                     (apply str (rest msg)))]
+                    (apply str (rest msg)))]
     (if-let [impl (get commands (keyword cmd))]
       (impl opts user args obj)
       (wrapped-error
-        :invalid-command
-        (Exception. (str "Invalid command: " msg))))))
+       :invalid-command
+       (Exception. (str "Invalid command: " msg))))))
