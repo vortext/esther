@@ -68,9 +68,7 @@
 
 (defn forget
   [opts user args _obj]
-  (with-meta
-    (->event :htmx (memory-ui/forget-form opts user args))
-    {:headers {"HX-Trigger" "disableUserInput"}}))
+  (->event :htmx (memory-ui/forget-form opts user args)))
 
 
 (defn archive

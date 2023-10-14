@@ -1,6 +1,5 @@
 (ns vortext.esther.web.ui.memory
   (:require
-   [clj-commons.humanize :as h]
    [clj-commons.humanize.inflect :as i]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
@@ -41,26 +40,31 @@
 
 (defn forget-scope
   [scope]
-  (or (parse-number scope)
-      (str/trim scope)))
+  (if (str/blank? scope) nil
+      (or (parse-number scope)
+          (str/trim scope))))
 
 
 (defn forget-form
   [_opts _user scope]
-  (let [scope (forget-scope scope)]
-    [:form.confirmation
-     {:hx-post "/user/forget"
-      :hx-swap "outerHTML"}
-     [:div.nudge-bottom
-      [:strong
-       (format "Are you sure you want to forget %s %s?"
-               scope
-               (i/pluralize-noun (if (number? scope) scope 2) "memory"))]]
-     [:button.button.button-primary
-      {:name "action" :value "forget"} "Forget"]
-     [:button.button.button-info
-      {:name "action" :value "cancel"} "Cancel"]
-     [:input {:type :hidden :name "scope" :value scope}]]))
+  (if-let [scope (forget-scope scope)]
+    (with-meta
+      [:form.confirmation
+       {:hx-post "/user/forget"
+        :hx-swap "outerHTML"}
+       [:div.nudge-bottom
+        [:strong
+         (format "Are you sure you want to forget %s %s?"
+                 scope
+                 (i/pluralize-noun (if (number? scope) scope 2) "memory"))]]
+       [:button.button.button-primary
+        {:name "action" :value "forget"} "Forget"]
+       [:button.button.button-info
+        {:name "action" :value "cancel"} "Cancel"]
+       [:input {:type :hidden :name "scope" :value scope}]]
+      {:headers {"HX-Trigger" "disableUserInput"}})
+    ;; Not allowed
+    [:span "Allowed options for forgetting are: all, today, or a number n for the last n memories."]))
 
 
 (defn forget
