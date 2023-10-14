@@ -32,33 +32,27 @@
 (gen/def-api library api)
 
 
-(let [struct-prefix (gen/ns-struct-prefix *ns*)]
-  (defmacro import-structs!
-    []
-    `(gen/import-structs! api ~struct-prefix)))
-
-
-(import-structs!)
+(gen/import-structs! api (gen/ns-struct-prefix *ns*))
 
 
 (defn map->llama-sampler-params
   [m]
   (reduce-kv
-    (fn [^llama_sampler_params params k v]
-      (case k
-        :temp (.writeField params "temp" (float v))
-        :repeat-penalty (.writeField params "repeat_penalty" (float v))
-        :repeat-last-n (.writeField params "repeat_last_n" (int v))
-        :frequency-penalty (.writeField params "frequency_penalty" (float v))
-        :presence-penalty (.writeField params "presence_penalty" (float v))
+   (fn [^llama_sampler_params params k v]
+     (case k
+       :temp (.writeField params "temp" (float v))
+       :repeat-penalty (.writeField params "repeat_penalty" (float v))
+       :repeat-last-n (.writeField params "repeat_last_n" (int v))
+       :frequency-penalty (.writeField params "frequency_penalty" (float v))
+       :presence-penalty (.writeField params "presence_penalty" (float v))
 
-        :mirostat (.writeField params "mirostat" (int v))
-        :mirostat-tau (.writeField params "mirostat_tau" (float v))
-        :mirostat-eta (.writeField params "mirostat_eta" (float v))
+       :mirostat (.writeField params "mirostat" (int v))
+       :mirostat-tau (.writeField params "mirostat_tau" (float v))
+       :mirostat-eta (.writeField params "mirostat_eta" (float v))
 
-        ;; default
-        nil)
-      ;; return params
-      params)
-    (llama_sampler_default_params)
-    m))
+       ;; default
+       nil)
+     ;; return params
+     params)
+   (llama_sampler_default_params)
+   m))

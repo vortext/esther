@@ -1,11 +1,13 @@
 (ns vortext.esther.web.ui.memory
   (:require
-    [clj-commons.humanize :as h]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [vortext.esther.util.markdown :as markdown]
-    [vortext.esther.web.controllers.memory :as memory]
-    [vortext.esther.web.htmx :refer [ui] :as htmx]))
+   [clj-commons.humanize :as h]
+   [clj-commons.humanize.inflect :as i]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [vortext.esther.common :refer [parse-number]]
+   [vortext.esther.util.markdown :as markdown]
+   [vortext.esther.web.controllers.memory :as memory]
+   [vortext.esther.web.htmx :refer [ui] :as htmx]))
 
 
 (defn md-keywords-table
@@ -34,43 +36,43 @@
                    (update :keywords update-kw)))
              responses)]
     (markdown/table
-      (map #(select-keys % ks) formatted-responses))))
+     (map #(select-keys % ks) formatted-responses))))
+
+
+(defn forget-scope
+  [scope]
+  (or (parse-number scope)
+      (str/trim scope)))
 
 
 (defn forget-form
   [_opts _user scope]
-  (let [scope (if (and (string? scope)
-                       (not (str/blank? scope)))
-                (keyword (str/trim scope))
-                :session)
-        allowed #{:today :all}]
-    (if (not (allowed scope))
-      [:span "The only allowed options are " (h/oxford (map name allowed)) "."]
-      [:form.confirmation
-       {:hx-post "/user/forget"
-        :hx-swap "outerHTML"}
-       [:div
-        {:style "padding-bottom: 1em"}
-        [:strong (str "Are you sure you want to forget " (name scope) " memory?")]]
-       [:button.button.button-primary
-        {:name "action" :value "forget"} "Forget memory"]
-       [:button.button.button-info
-        {:name "action" :value "cancel"} "Cancel"]
-       [:input {:type :hidden :name "scope" :value scope}]])))
+  (let [scope (forget-scope scope)]
+    [:form.confirmation
+     {:hx-post "/user/forget"
+      :hx-swap "outerHTML"}
+     [:div.nudge-bottom
+      [:strong
+       (format "Are you sure you want to forget %s %s?"
+               scope
+               (i/pluralize-noun (if (number? scope) scope 2) "memory"))]]
+     [:button.button.button-primary
+      {:name "action" :value "forget"} "Forget"]
+     [:button.button.button-info
+      {:name "action" :value "cancel"} "Cancel"]
+     [:input {:type :hidden :name "scope" :value scope}]]))
 
 
 (defn forget
   [opts {:keys [params] :as request}]
   (let [action (keyword (:action params))
         user (get-in request [:session :user])
-        {:keys [uid]} (:vault user)
-        scope (keyword (:scope params))
-        scopes {:today memory/forget-today!
-                :all memory/forget-all!}]
+        scope (forget-scope (:scope params))]
     (if (= action :forget)
-      (-> (ui (do ((scopes scope) opts user)
-                  [:span "Forgot memories: " (name scope)]))
+      (-> (ui (do (memory/forget! opts user scope)
+                  [:span (format "Forgot %s memories" scope)]))
           (assoc :headers {"HX-Redirect" "/"}))
+      ;; Cancel
       (-> (ui [:span "Let us continue."])
           (update :headers merge {"HX-Trigger" "enableUserInput"})))))
 
@@ -80,11 +82,10 @@
   [:form.confirmation
    {:hx-post "/user/archive"
     :hx-swap "outerHTML"}
-   [:div
-    {:style "padding-bottom: 1em"}
+   [:div.nudge-bottom
     [:strong (str "Are you sure you want to archive this conversation?")]]
    [:button.button.button-primary
-    {:name "action" :value "archive"} "Archive conversation"]
+    {:name "action" :value "archive"} "Archive"]
    [:button.button.button-info
     {:name "action" :value "cancel"} "Cancel"]])
 
@@ -97,5 +98,6 @@
       (-> (ui (do (memory/archive-todays-memories opts user)
                   [:span "Archived conversation."]))
           (assoc :headers {"HX-Redirect" "/"}))
+      ;; Cancel
       (-> (ui [:span "Let us continue."])
           (update :headers merge {"HX-Trigger" "enableUserInput"})))))

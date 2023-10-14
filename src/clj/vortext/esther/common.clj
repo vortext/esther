@@ -1,19 +1,8 @@
 (ns vortext.esther.common
   (:require
-    [babashka.fs :as fs]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [clojure.walk :as walk]))
-
-
-(defn read-resource
-  [resource-path]
-  (-> resource-path
-      io/resource
-      fs/canonicalize
-      str
-      slurp))
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [clojure.walk :as walk]))
 
 
 (defn split-first-word
@@ -50,3 +39,10 @@
 (defn escape-newlines
   [s]
   (str/replace s "\n" "\\\\n"))
+
+
+(defn parse-number
+  [s]
+  (if (number? s) s
+      (try (Long/parseLong s)
+           (catch Exception _  nil))))

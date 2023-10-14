@@ -80,6 +80,17 @@ delete from memory where uid = :uid;
 -- :doc Forget todays memories for a uid
 delete from memory where uid = :uid and created_date = date('now');
 
+-- :name forget-last-n-memory :! :1
+-- :doc Forgets the last n memories for uid (order by created, latest first)
+delete from memory
+where uid = :uid and gid in (
+    select gid
+    from memory
+    where uid = :uid
+    order by created desc
+    limit :n
+);
+
 -- :name forget-all-memory-keywords :! :1
 -- :doc Forget all memory keywords for a uid
 delete from memory_keyword where uid = :uid;

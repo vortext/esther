@@ -43,14 +43,14 @@
                 :iv iv
                 :conversation (boolean (:event/conversation? response))}]
     (jdbc/with-transaction [tx connection]
-                           (query-fn tx :push-memory memory)
-                           (doall
-                             (map (fn [kw]
-                                    (let [fingerprint (see-keyword query-fn tx user kw)]
-                                      (query-fn tx :associate-keyword
-                                                {:gid gid
-                                                 :fingerprint fingerprint})))
-                                  (into #{} (get-in response [:event/content :keywords] #{})))))
+      (query-fn tx :push-memory memory)
+      (doall
+       (map (fn [kw]
+              (let [fingerprint (see-keyword query-fn tx user kw)]
+                (query-fn tx :associate-keyword
+                          {:gid gid
+                           :fingerprint fingerprint})))
+            (into #{} (get-in response [:event/content :keywords] #{})))))
     obj))
 
 
@@ -135,3 +135,18 @@
   (let [{:keys [query-fn]} (:db opts)
         {:keys [uid]} (:vault user)]
     (query-fn :forget-todays-memory {:uid uid})))
+
+
+(defn forget-last-n!
+  [opts user n]
+  (let [{:keys [query-fn]} (:db opts)
+        {:keys [uid]} (:vault user)]
+    (query-fn :forget-last-n-memory {:uid uid :n n})))
+
+
+(defn forget!
+  [opts user scope]
+  (cond
+    (= scope "all") (forget-all! opts user)
+    (= scope "today") (forget-today! opts user)
+    (number? scope) (forget-last-n! opts user scope)))
