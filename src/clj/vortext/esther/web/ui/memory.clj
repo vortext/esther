@@ -41,26 +41,27 @@
 
 (defn forget-form
   [_opts _user scope]
-  (if (memory/allowed-to-forget? scope)
-    (with-meta
-      [:form.confirmation
-       {:hx-post "/user/forget"
-        :hx-swap "outerHTML"}
-       [:div.nudge-bottom
-        [:strong
-         (if (str/blank? scope)
-           "Are you sure you want to forget the last memory?"
-           (format "Are you sure you want to forget %s %s?"
-                   scope
-                   (i/pluralize-noun (if (number? scope) scope 2) "memory")))]]
-       [:button.button.button-primary
-        {:name "action" :value "forget"} "Forget"]
-       [:button.button.button-info
-        {:name "action" :value "cancel"} "Cancel"]
-       [:input {:type :hidden :name "scope" :value scope}]]
-      {:headers {"HX-Trigger" "disableUserInput"}})
-    (markdown/parse
-     "Allowed options for forgetting are: `all`, `today`, or a number `n` for the `last n` memories.")))
+  (let [scope (or (parse-number scope) scope)]
+    (if (memory/allowed-to-forget? scope)
+      (with-meta
+        [:form.confirmation
+         {:hx-post "/user/forget"
+          :hx-swap "outerHTML"}
+         [:div.nudge-bottom
+          [:strong
+           (if (= scope "")
+             "Are you sure you want to forget the last memory?"
+             (format "Are you sure you want to forget %s %s?"
+                     scope
+                     (i/pluralize-noun (if (number? scope) scope 2) "memory")))]]
+         [:button.button.button-primary
+          {:name "action" :value "forget"} "Forget"]
+         [:button.button.button-info
+          {:name "action" :value "cancel"} "Cancel"]
+         [:input {:type :hidden :name "scope" :value scope}]]
+        {:headers {"HX-Trigger" "disableUserInput"}})
+      (markdown/parse
+       "Allowed options for forgetting are: `all`, `today`, or a number `n` for the `last n` memories."))))
 
 (defn forget
   [opts {:keys [params] :as request}]
