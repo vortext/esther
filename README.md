@@ -74,18 +74,20 @@ At its core Esther is a fairly simple [Clojure](https://clojure.org/) [Kit](http
 However, that doesn't seem to do it justice. Esther is a work-in-progress application and many features are not finished yet.
 As such it's probably better to outline some ideas, goals, and directions.
 
-At first I wanted it to be an LLM running on an e-ink display like the Remarkable2, however it turns out I don't own an e-ink display and programming them seems tedious unless you hot glue an iPhone to the back so that is no longer a design goal.
-However the minimal monochrome UI I've grown quite fond of. The vibes were mostly inspired by "but what if Her was a movie about a tablet rather than an AirPod". Voice, although possible, is not yet a goal. Solving consciousness is but I'll save my philosophy for never.
-The name is basically because I really liked the video game (alternatively: walking simulator) "Dear Esther".
+At first I wanted it to be an LLM running on an e-ink display like the [Remarkable2](https://remarkable.com/store/remarkable-2), however it turns out I don't own an e-ink display and programming them seems very tedious unless you hot glue an iPhone to the back... so that is no longer a design goal.
+The minimal monochrome UI inspired by that idea, however, I've grown quite fond of.
+The vibes were mostly inspired by "but what if Her was a movie about a tablet rather than an AirPod". Voice, although possible, is not yet a goal. Solving consciousness is but I'll save my philosophy for never.
+The name is basically because I really like the video game (alternatively: walking simulator) "Dear Esther".
 Also I like the name in a "if I meet someone with that name I will think their name is pretty" kind of way.
+It also works in Dutch and English, and since I'm Dutch that is convenient.
 
 Anyway, eventually I set out to do the following:
 
 ### Ideas
-- Esther is a diary: allow user to jot down their daily thoughts as if in conversation.
-- Esther is a companion: by locally storing "memories"  the applications allows for more personalization than typical.
+- Esther is a diary: allow users to jot down their daily thoughts as if in conversation.
+- Esther is a companion: by locally storing "memories"  the applications should allow for more personalization than typical.
 - Esther by design embodies certain qualities and personality traits, as seen in the [prompt](./resources/templates/prompt.hbs) file.
-- The application needs to work completely offline, no data will be send remotely ever.
+- The application needs to work completely offline, no data should be send remotely ever.
 - All user data is opaque to the database owner: nobody except the person with the password should be able to see the content of their diary.
 - Allow the user to "inspect" the innards of the application.
 - Embody elements of "[calm](https://dribbble.com/tags/calm)" UI design (however, see: [vibes](./doc/vibes/v2))
@@ -103,13 +105,27 @@ Initially I wanted to include an "imagine" command that would produce images bas
 There are some more general "app" ideas like creating a JavaFX desktop app front-end as well, but first things first.
 
 ## Screenshots
-[[https://github.com/vortext/esther/blob/main/doc/img/login.png?raw=true)]]
+![Login screen](https://github.com/vortext/esther/blob/main/doc/img/login.png?raw=true)
+The login screen.
 
-[[https://github.com/vortext/esther/blob/main/doc/img/inspect.png?raw=true)]]
+![Inspect the AI](https://github.com/vortext/esther/blob/main/doc/img/inspect.png?raw=true)
+A simple chat message followed by the `/inspect` command. Currently available commands are:
 
-[[https://github.com/vortext/esther/blob/main/doc/img/whitehead.png?raw=true)]]
+- `\inspect`: Show the last 5 memories.
+- `\keywords`: Show the stored frecency keywords.
+- `\imagine`: Show the last 3 imaginations.
+- `\forget`: Forgets either `all`, `today`, or past `n` (integer) memories.
+- `\archive`: Clears the page for today without forgetting.
+- `\logout`: Logout.
 
-[[https://github.com/vortext/esther/blob/main/doc/img/logout.png?raw=true)]]
+![A conversation about Whitehead](https://github.com/vortext/esther/blob/main/doc/img/whitehead.png?raw=true)
+
+See the [journal directory](./journal) for multi-turn conversations by me with Esther during the development process. It's mostly screenshots.
+
+![logout](https://github.com/vortext/esther/blob/main/doc/img/forget.png?raw=true)
+
+Example of a UI element that needs confirmation.
+
 
 ## Design ideas
 There are two ways one can approach the code-base. The first one is from the perspective of a *web-developer*.
@@ -150,6 +166,10 @@ One weird thing to note when doing structured responses with LLMs like this: ord
 
 On the TODO list is implementing better prompt generation via Approximate Nearest Neighbor based RAG (likely using [hnswlib](https://github.com/nmslib/hnswlib) or similar via JNA).
 But, in order to properly test that I also need to write tests and data generation pipelines. There are no tests, and hence I've been postponing that by playing with the models or implementing silly other things.
+
+# UI quirks
+The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral kind of way) but I'll probably end up writing some sort of calendar UI.
+Also funny: the speed of bouncy loading animation is based on sentiment analysis, it's subtle but it's there.
 
 ## Technical stuff
 Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers.

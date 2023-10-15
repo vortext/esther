@@ -1,4 +1,4 @@
-[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner-monochrome90.png?raw=true)]]
+![banner](https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner-monochrome90.png?raw=true)
 
 # Vibes
 abstract circle and circle drawing vector, in the style of industrial futurism, textured splashes, nathan wirth, kinetic installations, destroyed gadgets sculptures, victor pasmore, rectangular fields --ar 128:71
@@ -20,10 +20,11 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
    --ar 128:71
 
 # Colors
-[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)]]
+![Colors](https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)
 
 ## Desaturated
-[[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors-desaturated90.png?raw=true)]]
+![Desaturated](https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors-desaturated90.png?raw=true)
+
 
 ```css
 #E4E4E2
