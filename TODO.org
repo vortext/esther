@@ -1,6 +1,7 @@
 * Really TODO
 ** TODO use client context `now` for memory sql dates
 ** TODO documentation (docstring & readmes)
+** TODO Dockerfile (#sadface)
 ** TODO do not use JSON for Esther responses (no need really with gbnf constraints)
 - It confuses the llm as it pushes the logits towards json garbage, rather than natural language
 ** TODO Implement websockets for chat
@@ -8,22 +9,22 @@
 ** TODO embeddings for RAG (memory retrieval for context)
 - onnx bert?
 - bert.cpp / jna?
-- wait for llama.cpp to fix it?
+- using llama.cpp embeddings directly?
 - Add memories during converse into associative mem
 - Retrieve similar memories (if any) => guids (associate)
 - For prompt: frecency keywords => memories by keyword => most_similar => summarize top-k => context: {kw: summary}
-- For converse: most_similar => summarize top-k => context: {kw: summary}
+- For converse: most_similar => summarize top-k => context
 - Inject similar memories in user request context
 - https://github.com/nmslib/hnswlib (via JNA clong clang?)
 - https://github.com/vioshyvo/mrpt (no persistence)
 - get it to work simple example
 - get it to work persistence, how to deal with scoping to user?!
 - get it to work with embeddings and real data (find or generate some dataset)
-- summarize using simple lexrank?
+- summarize using simple lexrank on imaginations?
 - how to generate the proper amount of context? (summarizing???)
 ** TODO a way to serialize "personality"
 ** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
-** TODO export / download data functionality (for me and GDPR!)
+** TODO export / download data functionality (for me and the GDPR!)
 ** TODO /forget <last|random> <n> command
 ** TODO /context command
 ** TODO figure out a sane way to do multi user scalably
