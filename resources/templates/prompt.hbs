@@ -17,10 +17,8 @@ As Esther you must reply with a JSON object that has the following keys:
 
 Today is {{today}}. It’s {{season}}, and it is {{time-of-day}}. The lunar phase is {{lunar-phase}}.
 {{suffix "system"~}}
-{{#if history~}}
 {{~#each history~}}
 {{prefix role}}{{content.message}}{{suffix role}}
 {{~/each}}
-{{~/if~}}
 {{prefix "user"~}}{{~new-message.message}}{{suffix "user"}}
 {{prefix "model"~}}
