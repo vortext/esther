@@ -1,3 +1,5 @@
+![banner](https://github.com/vortext/esther/blob/main/doc/img/banner.jpg?raw=true)
+
 > Welcome to the Code of Esther 🌸
 >
 > Hey there, wonderful human! 🌟
@@ -70,14 +72,14 @@ ChatGPT said. It also said:
 So here we are.
 
 ## Introduction
-At its core Esther is a fairly simple [Clojure](https://clojure.org/) [Kit](https://kit-clj.github.io/) web-application with an [htmx](https://htmx.org/) "front-end" for Large Language Models via [llama.cpp](https://github.com/ggerganov/llama.cpp) (see [llama.clj](https://github.com/phronmophobic/llama.clj)).
-However, that doesn't seem to do it justice. Esther is a work-in-progress application and many features are not finished yet.
+At its core Esther is a fairly simple [Clojure](https://clojure.org/) [Kit](https://kit-clj.github.io/) web-application with an [htmx](https://htmx.org/) front-end for Large Language Models via [llama.cpp](https://github.com/ggerganov/llama.cpp) (see [llama.clj](https://github.com/phronmophobic/llama.clj)).
+However, that doesn't seem to do it justice. Esther is a work-in-progress application and many planned features are not finished yet.
 As such it's probably better to outline some ideas, goals, and directions.
 
 At first I wanted it to be an LLM running on an e-ink display like the [Remarkable2](https://remarkable.com/store/remarkable-2), however it turns out I don't own an e-ink display and programming them seems very tedious unless you hot glue an iPhone to the back... so that is no longer a design goal.
 The minimal monochrome UI inspired by that idea, however, I've grown quite fond of.
-The vibes were mostly inspired by "but what if Her was a movie about a tablet rather than an AirPod". Voice, although possible, is not yet a goal. Solving consciousness is but I'll save my philosophy for never.
-The name is basically because I really like the video game (alternatively: walking simulator) "Dear Esther".
+The vibes were mostly inspired by "but what if [Her](https://en.wikipedia.org/wiki/Her_(film)) was a movie about a tablet rather than an AirPod". Voice, although possible, is not yet a goal. Solving consciousness is but I'll save my philosophy for never.
+The name is basically because I really like the video game (alternatively: walking simulator) [Dear Esther](https://en.wikipedia.org/wiki/Dear_Esther).
 Also I like the name in a "if I meet someone with that name I will think their name is pretty" kind of way.
 It also works in Dutch and English, and since I'm Dutch that is convenient.
 
@@ -111,12 +113,12 @@ The login screen.
 ![Inspect the AI](https://github.com/vortext/esther/blob/main/doc/img/inspect.png?raw=true)
 A simple chat message followed by the `/inspect` command. Currently available commands are:
 
-- `\inspect`: Show the last 5 memories.
-- `\keywords`: Show the stored frecency keywords.
-- `\imagine`: Show the last 3 imaginations.
-- `\forget`: Forgets either `all`, `today`, or past `n` (integer) memories.
-- `\archive`: Clears the page for today without forgetting.
-- `\logout`: Logout.
+- `/inspect`: Show the last 5 memories.
+- `/keywords`: Show the stored frecency keywords.
+- `/imagine`: Show the last 3 imaginations.
+- `/forget`: Forgets either `all`, `today`, or past `n` (integer) memories.
+- `/archive`: Clears the page for today without forgetting.
+- `/logout`: Logout.
 
 ![A conversation about Whitehead](https://github.com/vortext/esther/blob/main/doc/img/whitehead.png?raw=true)
 
@@ -133,14 +135,19 @@ In that case the HTTP methods are defined in the [ui.clj](./src/clj/vortext/esth
 In essence the chatty bits are handled by the [converse.clj](./src/clj/vortext/esther/web/controllers/converse.clj) controller which then dispatches to either `command!` (i.e. `/logout`) or `chat!`.
 Chat then dispatches to [llm.clj](./src/clj/vortext/esther/ai/llm.clj) and then to [llama.clj](./src/clj/vortext/esther/ai/llama.clj).
 Along the way state is accumulated in the stupidly named "obj" map that contains the namespaced keys needed to construct the final response.
+
 Persistence is handled by [sqlite](https://www.sqlite.org/index.html) with the [queries](./resources/sql/queries.sql) and [migrations](./resources/migrations) defined in their respective files, with the relevant controller being [memory.clj](./src/clj/vortext/esther/web/controllers/memory.clj).
+
 For authentication and encryption the application relies on [libsodium](https://doc.libsodium.org/) (via [caesium](https://github.com/lvh/caesium)) and should be on-par with industry standards for security.
+
 One interesting tidbit is that currently there is no way to implement "forgot password".
 The user password authenticates *and* decrypts a vault that contains the `uid` and `secret` for decrypting memories in the database.
 This ensures that the database is garbled for anyone except who has the password for a particular user, but don't forget the password.
 When running in dev mode the system will create a `test` user with the password `test`. Sign-up page is still TODO.
 I typically just do it from the REPL, this being Clojure and all.
+
 For more details about the framework I recommend the [Kit documentation](https://kit-clj.github.io/docs/guestbook.html), or checkout the [deps.edn](./deps.edn) and [system.edn](./resources/system.edn) files for pointers.
+
 Note that the application will ask for a location using the browser API: but this is only done to figure out things like season, time of day, moon phase and some other [context](./src/clj/vortext/esther/web/controllers/context.clj).
 If you decline the default is London. That might or might not be preferable.
 
@@ -149,7 +156,7 @@ In that case there are perhaps three interesting design choices:
 
 1. The LLM runs locally via llama.cpp.
 2. [GBNF grammar](./resources/grammars/chat.gbnf) constraints ensure a valid JSON response that follows a chain-of-thought.
-3. Create holistic design playground for new ideas.
+3. Try to create a holistic design playground for new ideas.
 
 It goes a little bit far to write an [intro to LLMs](https://ig.ft.com/generative-ai/)... but long story short you can run these locally on modest hardware.
 There are several implementations that support allow this but Esther uses the excellent [llama.cpp](https://github.com/ggerganov/llama.cpp) library.
@@ -203,6 +210,7 @@ cmake -DBUILD_SHARED_LIBS=ON  -DLLAMA_CUBLAS=ON  ..
 cmake --build . --config Release
 ```
 For a CUDA enabled build (which requires the CUDA build chain to function properly).
+
 TODO: Dockerfile that works.
 
 #### Model
