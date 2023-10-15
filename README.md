@@ -81,7 +81,7 @@ The minimal monochrome UI inspired by that idea, however, I've grown quite fond 
 The vibes were mostly inspired by "but what if [Her](https://en.wikipedia.org/wiki/Her_(film)) was a movie about a tablet rather than an AirPod". Voice, although possible, is not yet a goal. Solving consciousness is but I'll save my philosophy for never.
 The name is basically because I really like the video game (alternatively: walking simulator) [Dear Esther](https://en.wikipedia.org/wiki/Dear_Esther).
 Also I like the name in a "if I meet someone with that name I will think their name is pretty" kind of way.
-It also works in Dutch and English, and since I'm Dutch that is convenient.
+It also works in Dutch and English, and since I'm Dutch that is convenient. I am also seriously obsessed by the HBO TV-series WestWorld "but we're not there yet".
 
 Anyway, eventually I set out to do the following:
 
@@ -95,7 +95,7 @@ Anyway, eventually I set out to do the following:
 - Embody elements of "[calm](https://dribbble.com/tags/calm)" UI design (however, see: [vibes](./doc/vibes/v2))
 
 ## Goals
-- Build software that lasts. I no longer care about whatever framework or hip thing, so in this code base are only things I like and understand. I'd like to imagine that I can unzip a file decades in the future and still run it.
+- Build software that lasts. I no longer care about whatever framework or hip thing, so in this codebase are only the things I like and understand. I'd like to imagine that I can unzip a file decades in the future and still run it.
 Carry it with me on a thumb drive.
 - Try to be kind.
 - Move slow and try not to break things.
@@ -103,7 +103,7 @@ Carry it with me on a thumb drive.
 ## Directions
 For now I am working on [Retrieval Augmented Generation](https://towardsdatascience.com/retrieval-augmented-generation-intuitively-and-exhaustively-explain-6a39d6fe6fc9) (RAG).
 After that probably the calendar and (semantic) search UI for past "days".
-Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open source solutions exist yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
+Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exist yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
 There are some more general "app" ideas like creating a JavaFX desktop app front-end as well, but first things first.
 
 ## Screenshots
@@ -141,10 +141,10 @@ Persistence is handled by [sqlite](https://www.sqlite.org/index.html) with the [
 For authentication and encryption the application relies on [libsodium](https://doc.libsodium.org/) (via [caesium](https://github.com/lvh/caesium)) and should be on-par with industry standards for security.
 
 One interesting tidbit is that currently there is no way to implement "forgot password".
-The user password authenticates *and* decrypts a vault that contains the `uid` and `secret` for decrypting memories in the database.
+The user password authenticates *and* decrypts a vault that contains the `uid` and `secret` needed for decrypting memories in the database.
 This ensures that the database is garbled for anyone except who has the password for a particular user, but don't forget the password.
 When running in dev mode the system will create a `test` user with the password `test`. Sign-up page is still TODO.
-I typically just do it from the REPL, this being Clojure and all.
+I typically just do it from the REPL, this being Clojure after all.
 
 For more details about the framework I recommend the [Kit documentation](https://kit-clj.github.io/docs/guestbook.html), or checkout the [deps.edn](./deps.edn) and [system.edn](./resources/system.edn) files for pointers.
 
@@ -158,9 +158,9 @@ In that case there are perhaps three interesting design choices:
 2. [GBNF grammar](./resources/grammars/chat.gbnf) constraints ensure a valid JSON response that follows a chain-of-thought.
 3. Try to create a holistic design playground for new ideas.
 
-It goes a little bit far to write an [intro to LLMs](https://ig.ft.com/generative-ai/)... but long story short you can run these locally on modest hardware.
-There are several implementations that support allow this but Esther uses the excellent [llama.cpp](https://github.com/ggerganov/llama.cpp) library.
-One way of thinking about LLM is "given a wall of text, predict some new tokens" and this is certainly true. The chat bits of ChatGPT are mostly a facade around that basic idea.
+It goes a little bit too far to write an [intro to LLMs](https://ig.ft.com/generative-ai/)... but long story short you can run these locally on modest hardware. Then you can ask the LLM to explain it to you, from your own machine.
+There are several implementations that allow this but Esther uses the excellent [llama.cpp](https://github.com/ggerganov/llama.cpp) library.
+One way of thinking about what an LLM does is "given a wall of text, predict some new tokens" ... and that would be true. The chat bits of ChatGPT and-the-likes are mostly a facade around that basic idea.
 Esther is simply a different facade ... but done right it really is a magic trick (see [journal](./journal) entries for very personal interactions I had during the development process).
 One of the things that makes Esther subtly different is the fact that it (or her, I guess, weird) must output the following fields
 
@@ -169,17 +169,17 @@ One of the things that makes Esther subtly different is the fact that it (or her
 - **Keywords** The #keywords are automatic summarization with will later be used to enable search and facilitate Retrieval Augmented Generation.
 - **Imagination** What Esther currently "imagines", this serves to embed a inner state ... and one day maybe we can make images from them (seems like a cool idea).
 
-One weird thing to note when doing structured responses with LLMs like this: order matters. Again, it's just a wall of text.
+One weird thing to note when doing structured responses with LLMs like this: order matters. Since it's just a completion of a wall of text.
 
-On the TODO list is implementing better prompt generation via Approximate Nearest Neighbor based RAG (likely using [hnswlib](https://github.com/nmslib/hnswlib) or similar via JNA).
-But, in order to properly test that I also need to write tests and data generation pipelines. There are no tests, and hence I've been postponing that by playing with the models or implementing silly other things.
+On the TODO list is implementing better prompt generation via Approximate Nearest Neighbor based RAG (likely using [hnswlib](https://github.com/nmslib/hnswlib) or [mrpt](https://github.com/vioshyvo/mrpt) via JNA).
+But in order to properly test and design that I also need to write tests and data generation pipelines. There are no tests, and hence I've been postponing that by playing with the models or implementing silly other things.
 
 # UI quirks
-The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral kind of way) but I'll probably end up writing some sort of calendar UI.
-Also funny: the speed of bouncy loading animation is based on sentiment analysis, it's subtle but it's there.
+The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral and life is fleetingly forgotten kind of way) but I'll probably end up writing some sort of calendar UI.
+Also funny: the speed of the bouncy loading animation is based on sentiment analysis, it's subtle but it's there.
 
 ## Technical stuff
-Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers.
+Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers. The main reason is because the minification code uses a binary version of [minify](https://github.com/tdewolff/minify) which is silly but all the other JavaScript based tools I honestly find dreadful. I could compile it to LLVM maybe?
 
 ### GraalVM
 Esther runs Clojure on GraalVM because it uses JavaScript polyglot in order to use some libraries I was to lazy to find or write a JVM alternative for.
@@ -197,7 +197,7 @@ gu install js
 ```
 
 ### Native dependencies
-`libsodium` needs to be installed for the security related features. sqlite also needs to be installed.
+`libsodium` needs to be installed for the security related features. [sqlite](https://www.sqlite.org/index.html) also needs to be installed.
 
 `llama.cpp` needs to be compiled. Best method is to navigate to the native/llama.cpp folder which contains a friendly fork of the upstream and follow the instructions.
 E.g
@@ -213,7 +213,7 @@ For a CUDA enabled build (which requires the CUDA build chain to function proper
 
 TODO: Dockerfile that works.
 
-#### Model
+### Model
 Right now the model of personal choice is `mistral-7b-openorca.Q5_K_M.gguf` which can be downloaded from [HuggingFace](https://huggingface.co/).
 This runs fine on my Nvidia RTX 2080 Super with most of the layers offloaded.
 
