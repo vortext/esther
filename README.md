@@ -179,7 +179,7 @@ The page refreshes at midnight when it's a new day. Every day is a new page. At 
 Also funny: the speed of the bouncy loading animation is based on sentiment analysis, it's subtle but it's there.
 
 ## Technical stuff
-Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers. The main reason is because the minification code uses a binary version of [minify](https://github.com/tdewolff/minify) which is silly but all the other JavaScript based tools I honestly find dreadful. I could compile it to LLVM maybe?
+Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers. The main reason it only works on Linux is because the minification code for the front-end assets uses a binary version of [minify](https://github.com/tdewolff/minify). This is silly but all the other JavaScript based tools I honestly find dreadful. I could compile it to LLVM maybe?
 
 ### GraalVM
 Esther runs Clojure on GraalVM because it uses JavaScript polyglot in order to use some libraries I was to lazy to find or write a JVM alternative for.
