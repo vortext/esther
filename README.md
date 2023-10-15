@@ -103,8 +103,8 @@ Carry it with me on a thumb drive.
 ## Directions
 For now I am working on [Retrieval Augmented Generation](https://towardsdatascience.com/retrieval-augmented-generation-intuitively-and-exhaustively-explain-6a39d6fe6fc9) (RAG).
 After that probably the calendar and (semantic) search UI for past "days".
-Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exist yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
-There are some more general "app" ideas like creating a JavaFX desktop app front-end as well, but first things first.
+Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exists yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
+There are some more general "app" ideas like creating a [JavaFX-based](https://github.com/cljfx/cljfx) desktop app front-end as well, but first things first.
 
 ## Screenshots
 ![Login screen](https://github.com/vortext/esther/blob/main/doc/img/login.png?raw=true)
