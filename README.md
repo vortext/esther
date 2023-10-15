@@ -247,7 +247,7 @@ Combining the Clojure REPL with `browser-sync start --proxy http://localhost:300
 You can try `clj -P -Sthreads 1` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason.
 
 ## TODO
-See [TODO.org](https://raw.githubusercontent.com/vortext/esther/main/TODO.org)
+See [TODO.org](https://github.com/vortext/esther/blob/main/TODO.org?raw=true)
 
 ## References
 
