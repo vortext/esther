@@ -1,7 +1,8 @@
 [[https://github.com/vortext/esther/blob/main/doc/vibes/v2/banner-monochrome90.png?raw=true)]]
-* Vibes
+
+# Vibes
 abstract circle and circle drawing vector, in the style of industrial futurism, textured splashes, nathan wirth, kinetic installations, destroyed gadgets sculptures, victor pasmore, rectangular fields --ar 128:71
-/describe
+
 1. abstract black and white illustration created with various spheres
    and dots, in the style of esteban vicente, nostalgic tone, future
    tech, david mould, organic forms, muted tones, mechanical designs,
@@ -18,40 +19,46 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
    black and brown, redshift, innovating techniques, analytical art
    --ar 128:71
 
-* Colors
+# Colors
 [[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors.png?raw=true)]]
 
-** Desaturated
+## Desaturated
 [[https://github.com/vortext/esther/blob/main/doc/vibes/v2/colors-desaturated90.png?raw=true)]]
-#+BEGIN_SRC css
+
+```css
 #E4E4E2
 #2D2D2C
 #6D6866
 #84807E
-#+END_SRC
+```
+
 ** Dominant
-#+BEGIN_SRC css
+```css
 #EEEEEC
 #DFDEDC
 #B1B0AE
 #242323
 #6F6E6C
-#+END_SRC
-** Accent colors
-#+BEGIN_SRC css
+```
+
+## Accent colors
+```css
 #B52D10
 #EC8050
-#+END_SRC
-** saturated dominant 5
-#+BEGIN_SRC css
+```
+
+## saturated dominant 5
+```css
 #F3EDE0
 #E6DDCC
 #BAAF9C
 #26231E
 #776C5D
-#+END_SRC
-** more saturated colors
+```
+
+## more saturated colors
 #+BEGIN_SRC css
+```css
 #EDE7D8
 #302C26
 #A39783
@@ -60,4 +67,4 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 #997B5C
 #AFA39C
 #9FA49F
-#+END_SRC
+```
