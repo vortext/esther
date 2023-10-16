@@ -103,7 +103,7 @@ Carry it with me on a thumb drive.
 ## Directions
 For now I am working on [Retrieval Augmented Generation](https://towardsdatascience.com/retrieval-augmented-generation-intuitively-and-exhaustively-explain-6a39d6fe6fc9) (RAG).
 After that probably the calendar and (semantic) search UI for past "days".
-Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exists yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
+Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exist yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
 There are some more general "app" ideas like creating a [JavaFX-based](https://github.com/cljfx/cljfx) desktop app front-end as well, but first things first.
 
 ## Screenshots
@@ -167,23 +167,23 @@ One of the things that makes Esther subtly different is the fact that it (or her
 - **Message:** What the user will see as the written response.
 - **Emoji:** An emoji reflecting the conversation. This simple token works as hieroglyph and is intended to compress meaning.
 - **Keywords** The #keywords are automatic summarization with will later be used to enable search and facilitate Retrieval Augmented Generation.
-- **Imagination** What Esther currently "imagines", this serves to embed a inner state ... and one day maybe we can make images from them (seems like a cool idea).
+- **Imagination** What Esther currently "imagines", this serves to embed an inner metal state for use within the context ... and one day maybe we can make images from them (seems like a cool idea).
 
 One weird thing to note when doing structured responses with LLMs like this: order matters. Since it's just a completion of a wall of text.
 
 On the TODO list is implementing better prompt generation via Approximate Nearest Neighbor based RAG (likely using [hnswlib](https://github.com/nmslib/hnswlib) or [mrpt](https://github.com/vioshyvo/mrpt) via JNA).
-But in order to properly test and design that I also need to write tests and data generation pipelines. There are no tests, and hence I've been postponing that by playing with the models or implementing silly other things.
+But in order to properly test and design that I also need to write tests and data generation pipelines. There are no tests, and hence I've been postponing that by playing with new models or implementing silly other things.
 
 # UI quirks
-The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral and life is fleetingly forgotten kind of way) but I'll probably end up writing some sort of calendar UI.
-Also funny: the speed of the bouncy loading animation is based on sentiment analysis, it's subtle but it's there.
+The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral and life is fleetingly forgotten kind of way) but I'll probably end up writing some sort of calendar-based navigation UI.
+Also funny: the speed of the bouncy loading animation is based on sentiment analysis, it's subtle but it's there. Slower is "more sad", faster is "more happy" but it really is just a gimmick.
 
 ## Technical stuff
 Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers. The main reason it only works on Linux is because the minification code for the front-end assets uses a binary version of [minify](https://github.com/tdewolff/minify).
 This is all a bit silly but the JavaScript based tools I honestly all find dreadful.
 
 ### GraalVM
-Esther runs Clojure on GraalVM because it uses JavaScript polyglot in order to use some libraries I was to lazy to find or write a JVM alternative for.
+Esther uses Clojure with GraalVM polyglot features because it uses JavaScript polyglot for some libraries I was to lazy to find (or write) an alternative for.
 It can also do LLVM code, but it doesn't do LLVM code right now.
 To get GraalVM you can download it from https://www.graalvm.org/downloads/ and extract it somewhere.
 The GraaVM binaries need to be on the `$PATH` and must take precedent over the other JVM's.
@@ -194,13 +194,12 @@ export JAVA_HOME=/your/path/here/graalvm-jdk-21+35.1
 export PATH=$JAVA_HOME/bin/:$PATH
 ```
 
-Alternatively, one can use [sdkman.io](https://sdkman.io/) by using `sdk install java 21-graal`.
+Alternatively, one can use [sdkman.io](https://sdkman.io/) by using `sdk install java 21-graal`. It may or may not work on different JDK's, I haven't tried. It might work.
 
 ### Native dependencies
 `libsodium` needs to be installed for the security related features. [sqlite](https://www.sqlite.org/index.html) also needs to be installed.
 
-`llama.cpp` needs to be compiled. Best method is to navigate to the native/llama.cpp folder which contains a friendly fork of the upstream and follow the instructions.
-E.g
+`llama.cpp` needs to be compiled. Best method is to navigate to the native/llama.cpp folder which contains a friendly fork of the upstream and follow the instructions. For example:
 
 ```shell
 cd native/llama.cpp
@@ -211,11 +210,11 @@ cmake --build . --config Release
 ```
 For a CUDA enabled build (which requires the CUDA build chain to function properly).
 
-TODO: Dockerfile that works.
+TODO: a Dockerfile that works.
 
 ### Model
 Right now the model of personal choice is `mistral-7b-openorca.Q5_K_M.gguf` which can be downloaded from [HuggingFace](https://huggingface.co/).
-This runs fine on my Nvidia RTX 2080 Super with most of the layers offloaded.
+This model runs fine on my Nvidia RTX 2080 Super with most of the layers offloaded with CuBLAS.
 
 - [Mistral 7B OpenOrca](https://huggingface.co/Open-Orca/Mistral-7B-OpenOrca)
 - [GUFF quantized models](https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF)
@@ -242,9 +241,9 @@ To reload changes:
 (reset)
 ```
 
-Combining the Clojure REPL with `browser-sync start --proxy http://localhost:3000 --files="**/*"` started from the resource folder makes front-end development a breeze.
+Combining the Clojure REPL with `browser-sync start --proxy http://localhost:3000 --files="**/*"` started from the resource folder makes front-end development a breeze, since it's basically all just static files.
 
-You can try `clj -P -Sthreads 1 -M:dev:cider` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason.
+You can try `clj -P -Sthreads 1 -M:dev:cider` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason (llvm is only needed in the dev profile as a dependency for generating  API files for [coffi](https://github.com/IGJoshua/coffi) with [clong](https://github.com/phronmophobic/clong)).
 
 ## TODO
 See [TODO.org](https://github.com/vortext/esther/blob/main/TODO.org?raw=true)
