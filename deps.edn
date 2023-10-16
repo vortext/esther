@@ -26,7 +26,6 @@
            org.graalvm.js/js {:mvn/version "23.0.1"}
            org.graalvm.js/js-scriptengine {:mvn/version "23.0.1"}
 
-
            ;; Database
            org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
 

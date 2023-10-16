@@ -18,35 +18,24 @@
 ;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns vortext.esther.ai.llama
-  (:refer-clojure :exclude [remove printf])
+  (:refer-clojure :exclude [remove printf])  ; [WARNING]
   (:gen-class)
-  ; [WARNING]
   (:require
-    [babashka.fs :as fs]
-    [clojure.edn :as edn]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [com.phronemophobic.clong.gen.jna :as gen]
-    [vortext.esther.ai.grammar :as grammar]
-    [vortext.esther.util.native
-     :refer [->bool seq->memory ->float-array-by-reference]])
+   [babashka.fs :as fs]
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [com.phronemophobic.clong.gen.jna :as gen]
+   [vortext.esther.ai.grammar :as grammar]
+   [vortext.esther.util.jna
+    :refer [->bool seq->memory ->float-array-by-reference]])
   (:import
-    (com.sun.jna
-      Memory
-      Pointer
-      Structure)
-    (com.sun.jna.ptr
-      ByteByReference
-      FloatByReference
-      IntByReference)
-    java.lang.ref.Cleaner
-    (java.nio
-      ByteBuffer
-      CharBuffer)
-    (java.nio.charset
-      Charset
-      CodingErrorAction)))
+   java.lang.ref.Cleaner
+   (com.sun.jna Memory Pointer Structure)
+   (com.sun.jna.ptr ByteByReference FloatByReference IntByReference)
+   (java.nio ByteBuffer CharBuffer)
+   (java.nio.charset Charset CodingErrorAction)))
 
 
 (defonce library-options
