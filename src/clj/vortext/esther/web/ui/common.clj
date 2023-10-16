@@ -1,11 +1,12 @@
 (ns vortext.esther.web.ui.common
   (:require
-    [babashka.fs :as fs]
-    [babashka.process :refer [shell]]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [jsonista.core :as json]
-    [vortext.esther.util.crc32 :as crc32]))
+   [babashka.fs :as fs]
+   [babashka.process :refer [shell]]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [jsonista.core :as json]
+   [clojure.tools.logging :as log]
+   [vortext.esther.util.crc32 :as crc32]))
 
 
 (defn client-config
@@ -27,16 +28,21 @@
 
 (defn ->canonical-path
   [resource]
-  (str (fs/canonicalize (io/resource resource))))
+  (let [res (io/resource resource)]
+    (str (fs/copy res (fs/create-temp-file) {:replace-existing true}))))
 
+(defn minify-bin
+  []
+  (let [res (io/resource "scripts/minify/linux_amd64/minify")
+        f (fs/copy res (fs/create-temp-file) {:replace-existing true})]
+    (.setExecutable (fs/file f) true)
+    (str f)))
 
-(def minify-bin
-  (fs/canonicalize (io/resource "scripts/minify/linux_amd64/minify")))
-
+(log/debug minify-bin)
 
 (defn minify
   [paths outfile]
-  (let [cmd [(str minify-bin) "-b" "-o" outfile " " (str/join " " paths)]]
+  (let [cmd [(minify-bin) "-b" "-o" outfile " " (str/join " " paths)]]
     (-> (shell {:out :string} (str/join " " cmd))
         deref :out) outfile))
 

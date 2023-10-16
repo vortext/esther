@@ -189,7 +189,7 @@ To get GraalVM you can download it from https://www.graalvm.org/downloads/ and e
 The GraaVM binaries need to be on the `$PATH` and must take precedent over the other JVM's.
 
 ```shell
-# Put in .bashrc or .zshrc, etc
+# The can be placed somehwere in .bashrc or .zshrc, etc
 export JAVA_HOME=/your/path/here/graalvm-jdk-21+35.1
 export PATH=$JAVA_HOME/bin/:$PATH
 ```

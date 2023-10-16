@@ -12,13 +12,15 @@
    [vortext.esther.util.json :as json]))
 
 
+(def max-response-length 2048)
+
 (def response-schema
   [:map
    [:message
-    [:string {:min 1, :max 2048}]]
+    [:string {:min 1, :max max-response-length}]]
    [:emoji [:fn {:error/message "should contain a valid emoji"}
             (fn [s] (emoji/unicode-emoji? s))]]
-   [:imagination [:string {:min 1, :max 2048}]]])
+   [:imagination [:string {:min 1, :max max-response-length}]]])
 
 
 (defn validate
@@ -57,10 +59,10 @@
                         :eos (untoken (llama/eos ctx))
                         :nl (untoken (llama/nl ctx))}
         template-vars (merge
-                        (context-map obj)
-                        special-tokens
-                        {:history memories
-                         :new-message (:event/content (first events))})
+                       (context-map obj)
+                       special-tokens
+                       {:history memories
+                        :new-message (:event/content (first events))})
         submission ((:handlebars/render-template renderer)
                     "templates/prompt" template-vars)
         _ (log/debug "submission::" submission)
@@ -77,7 +79,7 @@
   ;; Generate the API with the struct classes
   (let [ctx (llama/create-context
              (str (fs/canonicalize (:model-path params))) params)
-        gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
+        gbnf (slurp (io/resource (:grammar-file params)))
         sampler (llama/init-grammar-sampler ctx gbnf params)
         template-vars (:template/vars opts)]
 
