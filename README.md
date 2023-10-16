@@ -190,12 +190,11 @@ The GraaVM binaries need to be on the `$PATH` and must take precedent over the o
 
 ```shell
 # Put in .bashrc or .zshrc, etc
-export JAVA_HOME=~/Sync/etc/graalvm-jdk-20.0.2+9.1
+export JAVA_HOME=/your/path/here/graalvm-jdk-21+35.1
 export PATH=$JAVA_HOME/bin/:$PATH
-
-# Then also
-gu install js
 ```
+
+Alternatively, one can use [sdkman.io](https://sdkman.io/) by using `sdk install java 21-graal`.
 
 ### Native dependencies
 `libsodium` needs to be installed for the security related features. [sqlite](https://www.sqlite.org/index.html) also needs to be installed.
@@ -245,7 +244,7 @@ To reload changes:
 
 Combining the Clojure REPL with `browser-sync start --proxy http://localhost:3000 --files="**/*"` started from the resource folder makes front-end development a breeze.
 
-You can try `clj -P -Sthreads 1` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason.
+You can try `clj -P -Sthreads 1 -M:dev:cider` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason.
 
 ## TODO
 See [TODO.org](https://github.com/vortext/esther/blob/main/TODO.org?raw=true)

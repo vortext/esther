@@ -19,6 +19,14 @@
            hiccup/hiccup {:mvn/version "1.0.5"}
            com.github.jknack/handlebars {:mvn/version "4.3.1"}
 
+           ;; GraalVM polyglot
+           ;; See https://medium.com/graalvm/truffle-unchained-13887b77b62c
+           ;;org.graalvm.polyglot/polyglot {:mvn/version "23.1.0"}
+           org.graalvm.truffle/truffle-api {:mvn/version "23.0.1"}
+           org.graalvm.js/js {:mvn/version "23.0.1"}
+           org.graalvm.js/js-scriptengine {:mvn/version "23.0.1"}
+
+
            ;; Database
            org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
 
@@ -70,9 +78,8 @@
                                 ring/ring-mock                  {:mvn/version "0.4.0"}
                                 io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
                                 org.clojure/tools.namespace     {:mvn/version "1.2.0"}
-                                ;; For generating native APIs
+                                ;; For generating native coffi FFI APIs
                                 org.bytedeco/llvm-platform      {:mvn/version "16.0.4-1.5.9"}}
-                  :jvm-opts ["-Djna.library.path=/home/joelkuiper/Projects/esther/native/llama.cpp/build/"]
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}

@@ -86,6 +86,7 @@
 (defn context-builder
   [lang]
   (doto (Context/newBuilder (into-array String [lang]))
+    (.option "engine.WarnInterpreterOnly", "false")
     #_(.option "js.timer-resolution" "1")
     #_(.option "js.java-package-globals" "false")
     #_(.out System/out)
