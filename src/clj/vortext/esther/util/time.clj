@@ -93,7 +93,7 @@
 
 (def time-of-day
   (let [script "public/js/vendor/suncalc.js"
-        script (str (fs/canonicalize (io/resource script)))
+        script (io/resource script)
         api (polyglot/js-api script "SunCalc" [:getTimeOfDay])]
     (fn [local-date-time lat lng]
       ((:getTimeOfDay api) (->iso8601 local-date-time) lat lng))))
@@ -101,7 +101,7 @@
 
 (def lunar-phase
   (let [script "public/js/vendor/lunarphase.js"
-        script (str (fs/canonicalize (io/resource script)))
+        script (io/resource script)
         fs [:lunarPhaseEmoji :lunarPhase]
         api (polyglot/js-api script "lunarPhase" fs)]
     (fn [local-date-time type]

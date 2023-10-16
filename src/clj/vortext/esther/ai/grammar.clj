@@ -1,39 +1,30 @@
 (ns vortext.esther.ai.grammar
-  (:refer-clojure :exclude [remove printf])
-  (:gen-class)
-  ; [WARNING]
+  (:refer-clojure :exclude [remove printf]) ;; [WARNING]
   (:require
-    [babashka.fs :as fs]
-    [clojure.edn :as edn]
-    [clojure.java.io :as io]
-    [clojure.tools.logging :as log]
-    [com.phronemophobic.clong.gen.jna :as gen]))
-
-
-(def library-options
-  {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})
-
-
-(def shared-lib
-  (str (fs/canonicalize "native/llama.cpp/build/examples/grammar/libgrammar.so")))
+   [babashka.fs :as fs]
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [com.phronemophobic.clong.gen.jna :as gen]))
 
 
 (def ^:no-doc library
   (com.sun.jna.NativeLibrary/getInstance
-    shared-lib library-options))
+   (str (fs/canonicalize "native/llama.cpp/build/examples/grammar/libgrammar.so"))
+   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"}))
 
 
-(def api
-  (with-open [rdr (io/reader (io/resource "api/grammar.edn"))
-              rdr (java.io.PushbackReader. rdr)]
-    (edn/read rdr)))
-
+(def api (with-open [rdr (io/reader (io/resource "api/grammar.edn"))
+                     rdr (java.io.PushbackReader. rdr)]
+           (edn/read rdr)))
 
 (gen/def-api library api)
 
+(let [struct-prefix (gen/ns-struct-prefix *ns*)]
+  (defmacro import-structs! []
+    `(gen/import-structs! api ~struct-prefix)))
 
-(gen/import-structs! api (gen/ns-struct-prefix *ns*))
-
+(import-structs!)
 
 (defn map->llama-sampler-params
   [m]

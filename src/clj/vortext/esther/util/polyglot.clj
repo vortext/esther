@@ -79,8 +79,8 @@
 
 
 (defn source
-  [lang path]
-  (.build (Source/newBuilder lang (io/file path))))
+  [lang arg]
+  (.build (Source/newBuilder lang arg)))
 
 
 (defn context-builder

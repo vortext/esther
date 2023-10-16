@@ -18,8 +18,7 @@
 ;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (ns vortext.esther.ai.llama
-  (:refer-clojure :exclude [remove printf])  ; [WARNING]
-  (:gen-class)
+  (:refer-clojure :exclude [remove printf])  ;; [WARNING]
   (:require
    [babashka.fs :as fs]
    [clojure.edn :as edn]
@@ -38,29 +37,22 @@
    (java.nio.charset Charset CodingErrorAction)))
 
 
-(defonce library-options
-  {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"})
-
-
-(defonce shared-lib
-  (str (fs/canonicalize "native/llama.cpp/build/libllama.so")))
-
-
-(defonce ^:no-doc libllama
+(def ^:no-doc libllama
   (com.sun.jna.NativeLibrary/getInstance
-    shared-lib library-options))
+   "llama"
+   {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"}))
 
-
-(defonce api
-  (with-open [rdr (io/reader (io/resource "api/llama.edn"))
-              rdr (java.io.PushbackReader. rdr)]
-    (edn/read rdr)))
-
+(def api (with-open [rdr (io/reader (io/resource "api/llama.edn"))
+                     rdr (java.io.PushbackReader. rdr)]
+           (edn/read rdr)))
 
 (gen/def-api libllama api)
 
-(gen/import-structs! api)
+(let [struct-prefix (gen/ns-struct-prefix *ns*)]
+  (defmacro import-structs! []
+    `(gen/import-structs! api ~struct-prefix)))
 
+(import-structs!)
 
 (def ^:dynamic
   *num-threads*
@@ -107,48 +99,48 @@
 (defn ^:private map->llama-context-params
   [m]
   (reduce-kv
-    (fn [^llama_context_params params k v]
-      (case k
-        :seed (.writeField params "seed" (int v))
-        :n-ctx (.writeField params "n_ctx" (int v))
-        :n-batch (.writeField params "n_batch" (int v))
-        :n-threads (.writeField params "n_threads" (int v))
-        :n-threads-batch (.writeField params "n_threads_batch" (int v))
+   (fn [^llama_context_params params k v]
+     (case k
+       :seed (.writeField params "seed" (int v))
+       :n-ctx (.writeField params "n_ctx" (int v))
+       :n-batch (.writeField params "n_batch" (int v))
+       :n-threads (.writeField params "n_threads" (int v))
+       :n-threads-batch (.writeField params "n_threads_batch" (int v))
 
-        :rope-freq-base (.writeField params "rope_freq_base" (float v))
-        :rope-freq-scale (.writeField params "rope_freq_scale" (float v))
+       :rope-freq-base (.writeField params "rope_freq_base" (float v))
+       :rope-freq-scale (.writeField params "rope_freq_scale" (float v))
 
-        :mul_mat_q (.writeField params "mul_mat_q" (->bool v))
-        :f16-kv (.writeField params "f16_kv" (->bool v))
-        :logits-all (.writeField params "logits_all" (->bool v))
-        :embedding (.writeField params "embedding" (->bool v))
-        ;; default
-        nil)
-      ;; return params
-      params)
-    (llama_context_default_params)
-    m))
+       :mul_mat_q (.writeField params "mul_mat_q" (->bool v))
+       :f16-kv (.writeField params "f16_kv" (->bool v))
+       :logits-all (.writeField params "logits_all" (->bool v))
+       :embedding (.writeField params "embedding" (->bool v))
+       ;; default
+       nil)
+     ;; return params
+     params)
+   (llama_context_default_params)
+   m))
 
 
 (defn ^:private map->llama-model-params
   [m]
   (reduce-kv
-    (fn [^llama_model_params params k v]
-      (case k
-        :n-gpu-layers (.writeField params "n_gpu_layers" (int v))
-        :main-gpu (.writeField params "main_gpu" (int v))
-        :tensor-split (.writeField params "tensor_split" (->float-array-by-reference  v))
-        ;; :progress-callback (.writeField params "progress_callback" v)
-        ;; :progress-callback-user-data (.writeField params "progress_callback_user_data" v)
-        :vocab-only (.writeField params "vocab_only" (->bool v))
-        :use-mmap (.writeField params "use_mmap" (->bool v))
-        :use-mlock (.writeField params "use_mlock" (->bool v))
-        ;; default
-        nil)
-      ;; return params
-      params)
-    (llama_model_default_params)
-    m))
+   (fn [^llama_model_params params k v]
+     (case k
+       :n-gpu-layers (.writeField params "n_gpu_layers" (int v))
+       :main-gpu (.writeField params "main_gpu" (int v))
+       :tensor-split (.writeField params "tensor_split" (->float-array-by-reference  v))
+       ;; :progress-callback (.writeField params "progress_callback" v)
+       ;; :progress-callback-user-data (.writeField params "progress_callback_user_data" v)
+       :vocab-only (.writeField params "vocab_only" (->bool v))
+       :use-mmap (.writeField params "use_mmap" (->bool v))
+       :use-mlock (.writeField params "use_mlock" (->bool v))
+       ;; default
+       nil)
+     ;; return params
+     params)
+   (llama_model_default_params)
+   m))
 
 
 (defn create-context
@@ -166,10 +158,15 @@
    (create-context model-path nil))
   ([model-path params]
    @llm-init
-   (let [^llama_context_params llama-context-params (map->llama-context-params params)
-         ^llama_model_params llama-model-params (map->llama-model-params params)
+   (let [^llama_context_params
+         llama-context-params (map->llama-context-params params)
 
-         model (llama_load_model_from_file model-path llama-model-params)
+         ^llama_model_params
+         llama-model-params (map->llama-model-params params)
+
+         model
+         (llama_load_model_from_file model-path llama-model-params)
+
          _ (when (nil? model)
              (throw (ex-info "Error creating model"
                              {:params params
@@ -206,7 +203,7 @@
          context (proxy [Pointer
                          clojure.lang.ILookup
                          java.lang.AutoCloseable]
-                        [(Pointer/nativeValue context)]
+                     [(Pointer/nativeValue context)]
                    (valAt
                      [k]
                      (case k
@@ -490,9 +487,10 @@
      (llama_kv_cache_seq_rm ctx seq-id -1 -1)
      #_(llama_kv_cache_tokens_rm ctx -1 -1)
      (reify
+
        clojure.lang.Seqable
        (seq
-         [_]
+           [_]
          (when seed
            (llama_set_rng_seed ctx seed))
          ((fn next
@@ -504,11 +502,9 @@
                       (lazy-seq (next (decode ctx next-token n-past seq-id)))))))
           (decode ctx prompt n-past seq-id)))
 
-
        clojure.lang.IReduceInit
-
        (reduce
-         [_ rf init]
+           [_ rf init]
          (when seed
            (llama_set_rng_seed ctx seed))
          (loop [acc init

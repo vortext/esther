@@ -1,15 +1,15 @@
 (ns vortext.esther.ai.llm
   (:require
-    [babashka.fs :as fs]
-    [clojure.java.io :as io]
-    [clojure.tools.logging :as log]
-    [integrant.core :as ig]
-    [malli.core :as m]
-    [malli.error :as me]
-    [vortext.esther.ai.llama :as llama]
-    [vortext.esther.common :as common]
-    [vortext.esther.util.emoji :as emoji]
-    [vortext.esther.util.json :as json]))
+   [babashka.fs :as fs]
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [malli.core :as m]
+   [malli.error :as me]
+   [vortext.esther.ai.llama :as llama]
+   [vortext.esther.common :as common]
+   [vortext.esther.util.emoji :as emoji]
+   [vortext.esther.util.json :as json]))
 
 
 (def response-schema
@@ -74,8 +74,9 @@
 
 (defmethod ig/init-key :ai.llm/instance
   [_ {:keys [:llm/params :template/renderer] :as opts}]
+  ;; Generate the API with the struct classes
   (let [ctx (llama/create-context
-              (str (fs/canonicalize (:model-path params))) params)
+             (str (fs/canonicalize (:model-path params))) params)
         gbnf (slurp (str (fs/canonicalize (io/resource (:grammar-file params)))))
         sampler (llama/init-grammar-sampler ctx gbnf params)
         template-vars (:template/vars opts)]

@@ -19,7 +19,7 @@
 
 (def parse
   (let [script "public/js/vendor/marked.js"
-        script (str (fs/canonicalize (io/resource script)))
+        script (io/resource script)
         marked (polyglot/js-api script "marked" [:parse])]
     (fn [& args]
       (apply (:parse marked) args))))
