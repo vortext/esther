@@ -76,8 +76,8 @@ At its core Esther is a fairly simple [Clojure](https://clojure.org/) [Kit](http
 However, that doesn't seem to do it justice. Esther is a work-in-progress application and many planned features are not finished yet.
 As such it's probably better to outline some ideas, goals, and directions.
 
-At first I wanted it to be an LLM running on an e-ink display like the [Remarkable2](https://remarkable.com/store/remarkable-2), however it turns out I don't own an e-ink display and programming them seems very tedious unless you hot glue an iPhone to the back... so that is no longer a design goal.
-The minimal monochrome UI inspired by that idea, however, I've grown quite fond of.
+At first I wanted it to be an LLM running on an e-ink display like the [Remarkable2](https://remarkable.com/store/remarkable-2), however it turns out I don't actually own an e-ink display and programming them seems very tedious unless you hot glue an iPhone to the back and then it seems even more tedious... so that is no longer a design goal.
+The minimal monochromatic UI inspired by that idea, however, is something I've grown quite fond of.
 The vibes were mostly inspired by "but what if [Her](https://en.wikipedia.org/wiki/Her_(film)) was a movie about a tablet rather than an AirPod". Voice, although possible, is not yet a goal. Solving consciousness is but I'll save my philosophy for never.
 The name is basically because I really like the video game (alternatively: walking simulator) [Dear Esther](https://en.wikipedia.org/wiki/Dear_Esther).
 Also I like the name in a "if I meet someone with that name I will think their name is pretty" kind of way.
@@ -98,12 +98,12 @@ Anyway, eventually I set out to do the following:
 - Build software that lasts. I no longer care about whatever framework or hip thing, so in this codebase are only the things I like and understand. I'd like to imagine that I can unzip a file decades in the future and still run it.
 Carry it with me on a thumb drive.
 - Try to be kind.
-- Move slow and try not to break things.
+- Move slow and try not to break things (I will break things).
 
 ## Directions
 For now I am working on [Retrieval Augmented Generation](https://towardsdatascience.com/retrieval-augmented-generation-intuitively-and-exhaustively-explain-6a39d6fe6fc9) (RAG).
 After that probably the calendar and (semantic) search UI for past "days".
-Initially I wanted to include an "imagine" command that would produce images based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exist yet that satisfies my constraints; maybe later. Waiting is sometimes an excellent strategy.
+Initially I wanted to include an "imagine" command that would produce images (like MidJourney or other text-to-img) based on the "visio-spatial sketchpad" of the AI, however no fully open-source solutions exist yet that satisfy my constraints; maybe later. Waiting is sometimes an excellent strategy.
 There are some more general "app" ideas like creating a [JavaFX-based](https://github.com/cljfx/cljfx) desktop app front-end as well, but first things first.
 
 ## Screenshots
@@ -127,7 +127,6 @@ See the [journal directory](./journal) for multi-turn conversations by me with E
 ![logout](https://github.com/vortext/esther/blob/main/doc/img/forget.png?raw=true)
 
 Example of a UI element that needs confirmation.
-
 
 ## Design ideas
 There are two ways one can approach the code-base. The first one is from the perspective of a *web-developer*.
@@ -162,12 +161,12 @@ It goes a little bit too far to write an [intro to LLMs](https://ig.ft.com/gener
 There are several implementations that allow this but Esther uses the excellent [llama.cpp](https://github.com/ggerganov/llama.cpp) library.
 One way of thinking about what an LLM does is "given a wall of text, predict some new tokens" ... and that would be true. The chat bits of ChatGPT and-the-likes are mostly a facade around that basic idea.
 Esther is simply a different facade ... but done right it really is a magic trick (see [journal](./journal) entries for very personal interactions I had during the development process).
-One of the things that makes Esther subtly different is the fact that it (or her, I guess, weird) must output the following fields
+One of the things that makes Esther subtly different is the fact that it (or her, I guess, weird) must output the following fields:
 
 - **Message:** What the user will see as the written response.
 - **Emoji:** An emoji reflecting the conversation. This simple token works as hieroglyph and is intended to compress meaning.
 - **Keywords** The #keywords are automatic summarization with will later be used to enable search and facilitate Retrieval Augmented Generation.
-- **Imagination** What Esther currently "imagines", this serves to embed an inner metal state for use within the context ... and one day maybe we can make images from them (seems like a cool idea).
+- **Imagination** What Esther currently "imagines", this serves to embed an inner mental state for use within the context ... and one day maybe we can make images from them (seems like a cool idea).
 
 One weird thing to note when doing structured responses with LLMs like this: order matters. Since it's just a completion of a wall of text.
 
@@ -175,7 +174,7 @@ On the TODO list is implementing better prompt generation via Approximate Neares
 But in order to properly test and design that I also need to write tests and data generation pipelines. There are no tests, and hence I've been postponing that by playing with new models or implementing silly other things.
 
 # UI quirks
-The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral and life is fleetingly forgotten kind of way) but I'll probably end up writing some sort of calendar-based navigation UI.
+The page refreshes at midnight when it's a new day. Every day is a new page. At first I really liked the idea of having the past days to be inaccessible (in a sort of everything is ephemeral and life is fleetingly forgotten kind of way) but I'll probably end up writing some sort of calendar-based navigation UI with semantic search capabilities.
 Also funny: the speed of the bouncy loading animation is based on sentiment analysis, it's subtle but it's there. Slower is "more sad", faster is "more happy" but it really is just a gimmick.
 
 ## Technical stuff
@@ -204,7 +203,7 @@ TODO: a Dockerfile that works.
 
 ### Model
 Right now the model of personal choice is `mistral-7b-openorca.Q5_K_M.gguf` which can be downloaded from [HuggingFace](https://huggingface.co/).
-This model runs fine on my Nvidia RTX 2080 Super with most of the layers offloaded with CuBLAS.
+This model runs fine on my Nvidia RTX 2080 Super (8GB of vRAM) with most of the layers offloaded with CuBLAS.
 
 - [Mistral 7B OpenOrca](https://huggingface.co/Open-Orca/Mistral-7B-OpenOrca)
 - [GUFF quantized models](https://huggingface.co/TheBloke/Mistral-7B-OpenOrca-GGUF)
@@ -233,7 +232,7 @@ To reload changes:
 
 Combining the Clojure REPL with `browser-sync start --proxy http://localhost:3000 --files="**/*"` started from the resource folder makes front-end development a breeze, since it's basically all just static files.
 
-You can try `clj -P -Sthreads 1 -M:dev:cider` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason (llvm is only needed in the dev profile as a dependency for generating  API files for [coffi](https://github.com/IGJoshua/coffi) with [clong](https://github.com/phronmophobic/clong)).
+You can try `clj -P -Sthreads 1 -M:dev:cider` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason (llvm is only needed in the dev profile as a dependency for generating  API files for [coffi](https://github.com/IGJoshua/coffi) with [clong](https://github.com/phronmophobic/clong) but for some bizarre reason it fails to download on my machine unless running in a single thread, once it's downloaded to `.m2` there's no need for that flag).
 
 ## TODO
 See [TODO.org](https://github.com/vortext/esther/blob/main/TODO.org?raw=true)
