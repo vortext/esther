@@ -1,13 +1,14 @@
 (ns vortext.esther.web.ui.conversation
   (:require
-    [clj-commons.humanize :as h]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [vortext.esther.util.markdown :as markdown]
-    [vortext.esther.web.controllers.converse :as converse]
-    [vortext.esther.web.controllers.memory :as memory]
-    [vortext.esther.web.htmx :refer [page ui] :as htmx]
-    [vortext.esther.web.ui.common :as common]))
+   [clj-commons.humanize :as h]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [clojure.java.io :as io]
+   [vortext.esther.util.markdown :as markdown]
+   [vortext.esther.web.controllers.converse :as converse]
+   [vortext.esther.web.controllers.memory :as memory]
+   [vortext.esther.web.htmx :refer [page ui] :as htmx]
+   [vortext.esther.web.ui.common :as common]))
 
 
 (def loading
@@ -109,17 +110,13 @@
      [:span#placeholder {:style "display:none"} placeholder]
      (msg-input config placeholder)]))
 
-(def includes
-  {:styles ["css/conversation.css"]
-   :scripts ["js/vendor/emoji.js"
-             "js/vendor/marked.js"
-             "js/vendor/sentiment.js"
-             "js/conversation.js"]})
+(def assets
+  (read-string (slurp (io/resource "public/assets/conversation.edn"))))
 
 (defn render
   [opts request]
   (let [config {"maxPlaceholderLength" 300}]
-    (page (common/head (assoc includes :config config))
+    (page (common/head (assoc assets :config config))
           [:main#container
            [:h1#title "Esther"]
            [:h2#today]

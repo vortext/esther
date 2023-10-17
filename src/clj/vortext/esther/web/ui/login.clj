@@ -1,9 +1,10 @@
 (ns vortext.esther.web.ui.login
   (:require
-    [clojure.tools.logging :as log]
-    [vortext.esther.web.htmx :refer [page ui] :as htmx]
-    [vortext.esther.web.middleware.auth :refer [authenticate authenticated?]]
-    [vortext.esther.web.ui.common :as common]))
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [vortext.esther.web.htmx :refer [page ui] :as htmx]
+   [vortext.esther.web.middleware.auth :refer [authenticate authenticated?]]
+   [vortext.esther.web.ui.common :as common]))
 
 
 (defn logout-chat
@@ -13,9 +14,8 @@
     {:name "logout" :value -1} "Click to logout"]])
 
 
-(def includes
-  {:styles  ["css/login.css"]
-   :scripts ["js/login.js"]})
+(def assets
+  (read-string (slurp (io/resource "public/assets/login.edn"))))
 
 (defn render
   [{:keys [default-path]} request]
@@ -25,7 +25,7 @@
        :headers {"Location" default-path}}
       (page
        (common/head
-        (assoc includes :config config))
+        (assoc assets :config config))
        [:body
         [:div.container
          [:div.login-box

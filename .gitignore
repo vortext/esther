@@ -24,7 +24,3 @@ pom.xml.asc
 .sync-conflict*
 esther_dev.db
 cache/*.bin
-resources/public/assets/*
-!resources/public/assets/.gitkeep
-
-

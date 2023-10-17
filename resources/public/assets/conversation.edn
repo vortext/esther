@@ -1,0 +1,10 @@
+{:css {:files ["css/fonts.css"
+               "css/main.css"
+               "css/conversation.css"]
+       :bundle "assets/conversation.min.css"}
+ :js {:files ["js/vendor/htmx.js"
+              "js/vendor/emoji.js"
+              "js/vendor/marked.js"
+              "js/vendor/sentiment.js"
+              "js/conversation.js"]
+      :bundle "assets/conversation.min.js"}}

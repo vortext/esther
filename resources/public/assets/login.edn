@@ -1,0 +1,6 @@
+{:css  {:files ["css/fonts.css"
+                "css/main.css"
+                "css/login.css"]
+        :bundle "assets/login.min.css"}
+ :js {:files ["js/vendor/htmx.js" "js/login.js"]
+      :bundle "assets/login.min.js"}}

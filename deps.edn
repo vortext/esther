@@ -1,5 +1,4 @@
-{:paths   ["src/clj"
-           "resources"]
+{:paths   ["src/clj" "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
 
            ;; Util
@@ -63,9 +62,9 @@
            io.github.kit-clj/kit-nrepl {:mvn/version "1.0.1"}
            io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.5"}
            io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.2"}}
- :aliases {:build {:deps {io.github.clojure/tools.build
-                          {:git/sha "e3e3532"
-                           :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}}
+ :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
+                          babashka/fs {:mvn/version "0.4.19"}
+                          babashka/process {:mvn/version "0.5.21"}}
                    :ns-default build}
            :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.0.27"}
                                 criterium/criterium             {:mvn/version "0.4.6"}
@@ -80,9 +79,7 @@
                                 ;; For generating native coffi FFI APIs
                                 org.bytedeco/llvm-platform      {:mvn/version "16.0.4-1.5.9"}}
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]
-                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]
-
-                  }
+                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}
            :cider {:extra-deps {nrepl/nrepl       {:mvn/version "0.9.0"}
