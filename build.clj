@@ -17,11 +17,26 @@
   (b/delete {:path target-dir}))
 
 (defn prep [_]
-  (println "Preparing...")
+  (println "Writing Pom...")
+  (b/write-pom {:class-dir class-dir
+                :lib lib
+                :version version
+                :basis basis
+                :src-dirs ["src/clj"]})
+
+  (println "Copying to target-dir...")
   (b/copy-dir {:src-dirs ["src/clj" "resources" "env/prod/resources" "env/prod/clj"]
                :target-dir class-dir}))
 
 (defn uber [_]
+  (println "Compiling Clojure...")
+  (b/compile-clj {:basis basis
+                  :src-dirs ["src/clj/vortext/esther/web"
+                             "src/clj/vortext/esther/util"
+                             ;; Do not add AI folder as clong does
+                             ;; funky import-structs! dynamic class building
+                             "env/prod/resources" "env/prod/clj"]
+                  :class-dir class-dir})
   (println "Making uberjar...")
   (b/uber {:class-dir class-dir
            :uber-file uber-file
