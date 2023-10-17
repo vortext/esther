@@ -109,20 +109,19 @@
      [:span#placeholder {:style "display:none"} placeholder]
      (msg-input config placeholder)]))
 
+(def includes
+  {:styles ["css/conversation.css"]
+   :scripts ["js/vendor/emoji.js"
+             "js/vendor/marked.js"
+             "js/vendor/sentiment.js"
+             "js/conversation.js"]})
 
 (defn render
   [opts request]
   (let [config {"maxPlaceholderLength" 300}]
-    (page
-      (common/head
-        {:config config
-         :styles ["css/conversation.css"]
-         :scripts ["js/vendor/emoji.js"
-                   "js/vendor/marked.js"
-                   "js/vendor/sentiment.js"
-                   "js/conversation.js"]})
-      [:main#container
-       [:h1#title "Esther"]
-       [:h2#today]
-       (conversation opts config request)
-       [:div#bottom]])))
+    (page (common/head (assoc includes :config config))
+          [:main#container
+           [:h1#title "Esther"]
+           [:h2#today]
+           (conversation opts config request)
+           [:div#bottom]])))

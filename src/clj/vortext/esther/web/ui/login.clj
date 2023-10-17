@@ -13,35 +13,38 @@
     {:name "logout" :value -1} "Click to logout"]])
 
 
+(def includes
+  {:styles  ["css/login.css"]
+   :scripts ["js/login.js"]})
+
 (defn render
   [{:keys [default-path]} request]
-  (if (authenticated? request)
-    {:status 303
-     :headers {"Location" default-path}}
-    (page
-      (common/head
-        {:config  {:redirect default-path}
-         :styles  ["public/css/login.css"]
-         :scripts ["public/js/login.js"]})
-      [:body
-       [:div.container
-        [:div.login-box
-         [:h1 "Esther"]
-         [:div#error-message.error]
-         [:form#login-form
-          {:hx-post "/login"
-           :hx-target "#error-message"}
-          [:div.form-group
-           [:label "Username"
-            [:input {:type "text" :name "username" :class "form-input"}]]]
-          [:div.form-group
-           [:label "Password"
-            [:input {:type "password" :name "password" :class "form-input"}]]]
-          [:button#submit.button.button-primary.action
-           {:onclick "handleClick(this)"}
-           [:span.sign-in-text "Sign In"]
-           [:img.htmx-indicator
-            {:src "/resources/public/img/3-dots-fade.svg"}]]]]]])))
+  (let [config {:redirect default-path}]
+    (if (authenticated? request)
+      {:status 303
+       :headers {"Location" default-path}}
+      (page
+       (common/head
+        (assoc includes :config config))
+       [:body
+        [:div.container
+         [:div.login-box
+          [:h1 "Esther"]
+          [:div#error-message.error]
+          [:form#login-form
+           {:hx-post "/login"
+            :hx-target "#error-message"}
+           [:div.form-group
+            [:label "Username"
+             [:input {:type "text" :name "username" :class "form-input"}]]]
+           [:div.form-group
+            [:label "Password"
+             [:input {:type "password" :name "password" :class "form-input"}]]]
+           [:button#submit.button.button-primary.action
+            {:onclick "handleClick(this)"}
+            [:span.sign-in-text "Sign In"]
+            [:img.htmx-indicator
+             {:src "/resources/public/img/3-dots-fade.svg"}]]]]]]))))
 
 
 (defn handler
