@@ -5,7 +5,8 @@
 ** TODO do not use JSON for Esther responses (no need really with gbnf constraints)
 - It confuses the llm as it pushes the logits towards json garbage, rather than natural language
 ** TODO Implement websockets for chat
-** TODO llama.cpp parallel decode
+** TODO llama.cpp parallel decode?
+** TODO test infrastructure and tests => generate training / test data for fine-tuning
 ** TODO embeddings for RAG (memory retrieval for context)
 - onnx bert?
 - bert.cpp / jna?
@@ -22,15 +23,10 @@
 - get it to work with embeddings and real data (find or generate some dataset)
 - summarize using simple lexrank on imaginations?
 - how to generate the proper amount of context? (summarizing???)
-** TODO a way to serialize "personality"
-** TODO daily scheduled tasks: sleep, dream, clean (integrate quartz)
 ** TODO export / download data functionality (for me and the GDPR!)
-** TODO /forget <last|random> <n> command
+** TODO when login code crashes for some reason the app should give UI feedback
+** TODO redirect page on auth-fail (to deal with the HTMX not doing 301 stuff)
 ** TODO /context command
-** TODO figure out a sane way to do multi user scalably
-- check if there's a distributed deploy strategy that supports mirostat 🙃
-- https://github.com/InternLM/lmdeploy (needs bigger GPU to quantize)
-- https://github.com/vllm-project/vllm (doesn't support quantization at all)
 ** TODO UI/UX things
 - [X] Discoverability of input bar --- Maybe show imagination?
 - [X] Nicer / intelligent placeholder?
@@ -40,7 +36,6 @@
 - [X] Loading indicator login
 - [ ] Accessibility and ARIA
 - [X] Disable text input while in modal confirm
-** TODO test infrastructure and tests => generate training / test data for fine-tuning
 ** TODO better intro flow
 ** TODO /help command
 ** TODO sign-up page
