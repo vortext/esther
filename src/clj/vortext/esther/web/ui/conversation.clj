@@ -116,11 +116,11 @@
     (page
       (common/head
         {:config config
-         :styles ["public/css/conversation.css"]
-         :scripts ["public/js/vendor/emoji.js"
-                   "public/js/vendor/marked.js"
-                   "public/js/vendor/sentiment.js"
-                   "public/js/conversation.js"]})
+         :styles ["css/conversation.css"]
+         :scripts ["js/vendor/emoji.js"
+                   "js/vendor/marked.js"
+                   "js/vendor/sentiment.js"
+                   "js/conversation.js"]})
       [:main#container
        [:h1#title "Esther"]
        [:h2#today]

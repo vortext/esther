@@ -179,22 +179,12 @@ The page refreshes at midnight when it's a new day. Every day is a new page. At 
 Also funny: the speed of the bouncy loading animation is based on sentiment analysis, it's subtle but it's there. Slower is "more sad", faster is "more happy" but it really is just a gimmick.
 
 ## Technical stuff
-Currently Esther is only confirmed working on Debian based Linux (I use Xubuntu). In the future Docker builds will become available as well as stand-alone installers. The main reason it only works on Linux is because the minification code for the front-end assets uses a binary version of [minify](https://github.com/tdewolff/minify).
-This is all a bit silly but the JavaScript based tools I honestly all find dreadful.
-
-### GraalVM
-Esther uses Clojure with GraalVM polyglot features because it uses JavaScript polyglot for some libraries I was to lazy to find (or write) an alternative for.
+### JVM
+Esther uses Clojure on a JVM with GraalVM polyglot features (because it uses JavaScript polyglot for some libraries I was to lazy to find (or write) an alternative for).
 It can also do LLVM code, but it doesn't do LLVM code right now.
-To get GraalVM you can download it from https://www.graalvm.org/downloads/ and extract it somewhere.
-The GraaVM binaries need to be on the `$PATH` and must take precedent over the other JVM's.
+One can use [sdkman.io](https://sdkman.io/) to install a JVM using `sdk install java 21-graal` or similar.
+It is confirmed working on openjdk 21 2023-09-19 (`sdk install java 21-open`) and GraalVM (`sdk install java 21-graal`).
 
-```shell
-# The can be placed somehwere in .bashrc or .zshrc, etc
-export JAVA_HOME=/your/path/here/graalvm-jdk-21+35.1
-export PATH=$JAVA_HOME/bin/:$PATH
-```
-
-Alternatively, one can use [sdkman.io](https://sdkman.io/) by using `sdk install java 21-graal`. It may or may not work on different JDK's, I haven't tried. It might work.
 
 ### Native dependencies
 `libsodium` needs to be installed for the security related features. [sqlite](https://www.sqlite.org/index.html) also needs to be installed.
