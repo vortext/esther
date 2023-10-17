@@ -230,7 +230,7 @@ To reload changes:
 (reset)
 ```
 
-Combining the Clojure REPL with `browser-sync start --proxy http://localhost:3000 --files="**/*"` started from the resource folder makes front-end development a breeze, since it's basically all just static files.
+Combining the Clojure REPL with https://browsersync.io/ using `browser-sync start --proxy http://localhost:3000 --files="**/*"` started from the resource folder makes front-end development a breeze, since it's basically all just static files.
 
 You can try `clj -P -Sthreads 1 -M:dev:cider` if `Could not acquire write lock for 'artifact:org.bytedeco:llvm:16.0.4-1.5.9'` happens for some reason (llvm is only needed in the dev profile as a dependency for generating  API files for [coffi](https://github.com/IGJoshua/coffi) with [clong](https://github.com/phronmophobic/clong) but for some bizarre reason it fails to download on my machine unless running in a single thread, once it's downloaded to `.m2` there's no need for that flag).
 
