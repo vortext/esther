@@ -49,9 +49,13 @@
 
 (defn handler
   [{:keys [default-path] :as opts} request]
-  (if-let [user (authenticate opts request)]
-    {:status 200
-     :session {:identity (get-in user [:vault :uid])
-               :user user}
-     :headers {"HX-Redirect" default-path}}
-    (ui [:span.login-failed "Invalid credentials"])))
+  (try
+    (if-let [user (authenticate opts request)]
+      {:status 200
+       :session {:identity (get-in user [:vault :uid])
+                 :user user}
+       :headers {"HX-Redirect" default-path}}
+      (ui [:span.login-failed "Invalid credentials."]))
+    (catch Exception e
+      (do (log/warn e)
+          (ui [:span.login-failed "System error."])))))
