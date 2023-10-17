@@ -25,7 +25,6 @@
 - how to generate the proper amount of context? (summarizing???)
 ** TODO export / download data functionality (for me and the GDPR!)
 ** TODO when login code crashes for some reason the app should give UI feedback
-** TODO redirect page on auth-fail (to deal with the HTMX not doing 301 stuff)
 ** TODO /context command
 ** TODO UI/UX things
 - [X] Discoverability of input bar --- Maybe show imagination?

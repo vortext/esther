@@ -1,18 +1,20 @@
 (ns vortext.esther.web.routes.ui
   (:require
-    [buddy.auth.accessrules :refer [wrap-access-rules]]
-    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-    [clojure.tools.logging :as log]
-    [integrant.core :as ig]
-    [reitit.ring.middleware.muuntaja :as muuntaja]
-    [reitit.ring.middleware.parameters :as parameters]
-    [ring.util.response :as response]
-    [vortext.esther.web.middleware.auth :as auth]
-    [vortext.esther.web.middleware.exception :as exception]
-    [vortext.esther.web.middleware.formats :as formats]
-    [vortext.esther.web.ui.conversation :as conversation]
-    [vortext.esther.web.ui.login :as login]
-    [vortext.esther.web.ui.memory :as memory]))
+   [buddy.auth.accessrules :refer [wrap-access-rules]]
+   [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [hiccup.core :as h]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.ring.middleware.parameters :as parameters]
+   [ring.util.response :as response]
+   [ring.util.http-response :as http-response]
+   [vortext.esther.web.middleware.auth :as auth]
+   [vortext.esther.web.middleware.exception :as exception]
+   [vortext.esther.web.middleware.formats :as formats]
+   [vortext.esther.web.ui.conversation :as conversation]
+   [vortext.esther.web.ui.login :as login]
+   [vortext.esther.web.ui.memory :as memory]))
 
 
 ;; Routes
@@ -45,11 +47,14 @@
 (defn on-error
   [req _]
   (log/warn "access-rules on-error session:" (:session req))
-  {:status 200 ; HTMX does not recognize it if you send 301 ...
-   :headers {"location" "/login"
-             "HX-Redirect" "/login"
-             "HX-Refresh" "true"}
-   :body "Redirecting to login"})
+  (-> {:status 200 ;; HTMX does not recognize it if you send 301 ...
+       :content-type "text/html"
+       :headers {"HX-Redirect" "/login"
+                 "HX-Refresh" "true"}
+       :body (h/html
+              [:div [:a {:href "/login"} "Click to login"]
+               [:script (str "window.location = '/login'")]])}
+      (http-response/content-type "text/html")))
 
 
 (defn any-access
