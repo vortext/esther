@@ -3,48 +3,45 @@
    https://doc.libsodium.org/
    https://github.com/lvh/caesium"
   (:require
-    [babashka.fs :as fs]
-    [buddy.core.codecs :as codecs]
-    [caesium.crypto.pwhash :as pwhash]
-    [caesium.crypto.secretbox :as sb]
-    [caesium.randombytes :as rb]
-    [caesium.util :as u]
-    [clojure.edn :as edn]
-    [msgpack.clojure-extensions]
-    [msgpack.core :as msg]))
+   [babashka.fs :as fs]
+   [buddy.core.codecs :as codecs]
+   [caesium.crypto.pwhash :as pwhash]
+   [caesium.crypto.secretbox :as sb]
+   [caesium.randombytes :as rb]
+   [msgpack.clojure-extensions]
+   [msgpack.core :as msg]))
 
+(def random-base64 #(-> (rb/randombytes %) codecs/bytes->b64-str))
 
-(defonce secrets
-  (edn/read-string
-    (slurp (str (fs/expand-home "~/.secrets.edn")))))
-
-
-;; helper function for creating salts from integers. may be useful for deterministic
-;; key derivation, incrementing subkeys from 0.
-(def int->salt (partial u/n->bytes pwhash/saltbytes))
+(def salt
+  (let [salt-file (str (fs/canonicalize "./.salt"))]
+    (if (fs/exists? salt-file)
+      (slurp salt-file)
+      (let [new-salt (random-base64 12)]
+        (spit salt-file new-salt)
+        new-salt))))
 
 
 (defn password-hash
   [password]
   (pwhash/pwhash-str
-    password
-    pwhash/opslimit-sensitive
-    pwhash/memlimit-sensitive))
+   password
+   pwhash/opslimit-sensitive
+   pwhash/memlimit-sensitive))
 
 
 (defn derive-key
   [weak-text-key]
   (pwhash/pwhash
-    sb/keybytes
-    weak-text-key
-    (codecs/b64->bytes (:salt secrets))
-    pwhash/opslimit-sensitive
-    pwhash/memlimit-sensitive
-    pwhash/alg-default))
+   sb/keybytes
+   weak-text-key
+   (codecs/b64->bytes salt)
+   pwhash/opslimit-sensitive
+   pwhash/memlimit-sensitive
+   pwhash/alg-default))
 
 
 (def derive-key-base64-str #(-> % derive-key codecs/bytes->b64-str))
-(def random-base64 #(-> (rb/randombytes %) codecs/bytes->b64-str))
 
 (def check pwhash/pwhash-str-verify)
 
