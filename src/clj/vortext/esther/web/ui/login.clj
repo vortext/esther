@@ -56,6 +56,5 @@
                  :user user}
        :headers {"HX-Redirect" default-path}}
       (ui [:span.login-failed "Invalid credentials."]))
-    (catch Exception e
-      (do (log/warn e)
-          (ui [:span.login-failed "System error."])))))
+    (catch Exception _
+      (ui [:span.login-failed "System error."]))))
