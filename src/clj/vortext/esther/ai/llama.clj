@@ -39,7 +39,7 @@
 
 (def ^:no-doc libllama
   (com.sun.jna.NativeLibrary/getInstance
-   "llama"
+   (str (fs/canonicalize "native/llama.cpp/build/libllama.so"))
    {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"}))
 
 (def api (with-open [rdr (io/reader (io/resource "api/llama.edn"))

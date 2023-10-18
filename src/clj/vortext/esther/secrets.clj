@@ -3,6 +3,7 @@
    https://doc.libsodium.org/
    https://github.com/lvh/caesium"
   (:require
+   [clojure.tools.logging :as log]
    [babashka.fs :as fs]
    [buddy.core.codecs :as codecs]
    [caesium.crypto.pwhash :as pwhash]
@@ -18,6 +19,8 @@
     (if (fs/exists? salt-file)
       (slurp salt-file)
       (let [new-salt (random-base64 12)]
+        (log/warn "Generating " salt-file "with salt" new-salt
+                  ". Keep the salt safe, lose it and nobody can login!")
         (spit salt-file new-salt)
         new-salt))))
 

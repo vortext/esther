@@ -1,11 +1,18 @@
 * Really TODO
-** TODO use client context `now` for memory sql dates
-** TODO documentation (docstring & readmes)
+** TODO sign-up page
 ** TODO Dockerfile (#sadface)
+** TODO use client context `now` for memory sql dates
+** TODO Implement websockets for chat
+** TODO documentation (docstring & readmes)
+** TODO better intro flow
+** TODO /help command
+** TODO /context command
+** TODO export / download data functionality (for me and the GDPR!)
+** TODO calendar page (for memories)
+** TODO #keyword search
+** TODO semantic search memories
 ** TODO do not use JSON for Esther responses (no need really with gbnf constraints)
 - It confuses the llm as it pushes the logits towards json garbage, rather than natural language
-** TODO Implement websockets for chat
-** TODO llama.cpp parallel decode?
 ** TODO test infrastructure and tests => generate training / test data for fine-tuning
 ** TODO embeddings for RAG (memory retrieval for context)
 - onnx bert?
@@ -23,8 +30,6 @@
 - get it to work with embeddings and real data (find or generate some dataset)
 - summarize using simple lexrank on imaginations?
 - how to generate the proper amount of context? (summarizing???)
-** TODO export / download data functionality (for me and the GDPR!)
-** TODO /context command
 ** TODO UI/UX things
 - [X] Discoverability of input bar --- Maybe show imagination?
 - [X] Nicer / intelligent placeholder?
@@ -34,12 +39,7 @@
 - [X] Loading indicator login
 - [ ] Accessibility and ARIA
 - [X] Disable text input while in modal confirm
-** TODO better intro flow
-** TODO /help command
-** TODO sign-up page
-** TODO calendar page (for memories)
-** TODO #keyword search
-** TODO semantic search memories
+** TODO llama.cpp parallel decode?
 ** TODO share a page (static gen)
 ** TODO security and hosting
 ** TODO deploy and build shizzle (Github actions?)

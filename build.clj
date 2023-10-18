@@ -48,7 +48,19 @@
   (println (str "Cleaning " target-dir))
   (b/delete {:path target-dir})
   (println "Cleaning minified assets")
-  (doall (map fs/delete (fs/glob (fs/path public-path "assets") "*.min.*"))))
+  (doall (map fs/delete (fs/glob (fs/path public-path "assets") "*.min.*")))
+  (println "Cleaning llama.cpp build")
+  (fs/delete-tree "native/llama.cpp/build"))
+
+
+(defn compile-llamacpp-cublas
+  "Build llama.cpp for CUDA (CuBLAS)"
+  [_]
+  (let [build-dir (str (fs/canonicalize "native/llama.cpp/build"))
+        cd (str "sh -c 'cd " build-dir " && ")] ;; add ' as suffix later
+    (fs/create-dirs build-dir)
+    (shell (str cd "cmake -DBUILD_SHARED_LIBS=ON  -DLLAMA_CUBLAS=ON  ..'"))
+    (shell (str cd "cmake --build . --config Release'"))))
 
 
 (defn prep [_]
