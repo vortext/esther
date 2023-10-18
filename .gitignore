@@ -2,7 +2,8 @@ pom.xml
 pom.xml.asc
 *.jar
 *.class
-/lib/
+/lib/*
+!/lib/.gitkeep
 /classes/
 /target/
 /checkouts/

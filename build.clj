@@ -13,6 +13,7 @@
 (def uber-file (format "%s/%s-standalone.jar" target-dir (name lib)))
 (def basis (b/create-basis {:project "deps.edn"}))
 (def public-path "./resources/public/")
+(def lib-dir "./lib/")
 
 (defn- minify-
   [paths outfile]
@@ -52,16 +53,31 @@
   (println "Cleaning llama.cpp build")
   (fs/delete-tree "native/llama.cpp/build"))
 
-
-(defn compile-llamacpp-cublas
-  "Build llama.cpp for CUDA (CuBLAS)"
+(defn copy-llama-targets
   [_]
+  (let [build-dir (fs/canonicalize "native/llama.cpp/build")]
+    (println (str "Copying llama shared libraries to " lib-dir))
+    (fs/copy (fs/path build-dir "libllama.so") lib-dir
+             {:replace-existing true})
+    (fs/copy (fs/path build-dir "examples/grammar/libgrammar.so") lib-dir
+             {:replace-existing true})))
+
+(defn compile-llama
+  "Compile native with CUDA (CuBLAS)"
+  [flags]
   (let [build-dir (str (fs/canonicalize "native/llama.cpp/build"))
         cd (str "sh -c 'cd " build-dir " && ")] ;; add ' as suffix later
     (fs/create-dirs build-dir)
-    (shell (str cd "cmake -DBUILD_SHARED_LIBS=ON  -DLLAMA_CUBLAS=ON  ..'"))
+    (shell (str cd "cmake -DBUILD_SHARED_LIBS=ON " flags "  ..'"))
     (shell (str cd "cmake --build . --config Release'"))))
 
+(defn compile-cublas
+  [_] ;; whatever magic needed to make CUDA work
+  (compile-llama "-DLLAMA_CUBLAS=ON"))
+
+(defn compile-clblast
+  [_] ;; sudo apt install libclblast-dev
+  (compile-llama "-DLLAMA_CLBLAST=ON"))
 
 (defn prep [_]
   (println "Writing Pom...")

@@ -10,7 +10,7 @@
 
 (def ^:no-doc library
   (com.sun.jna.NativeLibrary/getInstance
-   (str (fs/canonicalize "native/llama.cpp/build/examples/grammar/libgrammar.so"))
+   (str (fs/canonicalize "lib/libgrammar.so"))
    {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"}))
 
 
