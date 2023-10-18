@@ -326,12 +326,13 @@
 (defn tokenize
   [ctx s add-bos?]
   (let [add-bos (->bool add-bos?)
+        special (->bool true)
         s (if add-bos? (str " " s) s)
         max-tokens (+ add-bos (alength (.getBytes ^String s "utf-8")))
         token-buf* (doto (Memory. (* max-tokens Integer/BYTES)) (.clear))
         num-tokens (llama_tokenize
-                     (:model ctx) s
-                     (count s) token-buf* max-tokens add-bos)]
+                    (:model ctx) s
+                    (count s) token-buf* max-tokens add-bos special)]
     [num-tokens (vec (.getIntArray token-buf* 0 num-tokens))]))
 
 
