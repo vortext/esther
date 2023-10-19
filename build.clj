@@ -79,6 +79,13 @@
   [_] ;; sudo apt install libclblast-dev
   (compile-llama "-DLLAMA_CLBLAST=ON"))
 
+(defn build-llama
+  [{:keys [blas]}]
+  (case (str blas)
+    "cublas" (compile-cublas nil)
+    "clblast" (compile-clblast nil))
+  (copy-llama-targets nil))
+
 (defn prep [_]
   (println "Writing Pom...")
   (b/write-pom {:class-dir class-dir
@@ -106,5 +113,5 @@
            :main main-cls
            :basis basis}))
 
-(defn all [_]
+(defn server [_]
   (do (clean nil) (prep nil) (uber nil)))

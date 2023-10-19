@@ -36,7 +36,7 @@
  :util.handlebars/instance {}
 
  :ai.llm/instance
- {:llm/params {:model-path #or [#env GGML_MODEL_PATH "./models/guff/mistral-7b-openorca.Q5_K_M.gguf"]
+ {:llm/params {:model-path #or [#env GGUF_MODEL_PATH "./models/guff/mistral-7b-openorca.Q5_K_M.gguf"]
                :n-ctx 0 ;; 0 => from model
                :n-gpu-layers 25
                :prompt-template  "templates/prompt"

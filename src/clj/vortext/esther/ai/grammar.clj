@@ -8,9 +8,21 @@
    [com.phronemophobic.clong.gen.jna :as gen]))
 
 
+(defn load-library [lib-name]
+  (try
+    (clojure.lang.RT/loadLibrary lib-name)
+    (log/info (str "Successfully loaded library: " lib-name))
+    (catch UnsatisfiedLinkError e
+      (log/error (str "Failed to load library: " lib-name " - " (.getMessage e)))
+      (throw e))))
+
+;; Load libllama.so and libgrammar.so
+(load-library "llama")
+(load-library "grammar")
+
 (def ^:no-doc library
   (com.sun.jna.NativeLibrary/getInstance
-   (str (fs/canonicalize "lib/libgrammar.so"))
+   "grammar"
    {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"}))
 
 

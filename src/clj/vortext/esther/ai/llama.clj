@@ -37,16 +37,16 @@
    (java.nio.charset Charset CodingErrorAction)))
 
 
-(def ^:no-doc libllama
+(def ^:no-doc library
   (com.sun.jna.NativeLibrary/getInstance
-   (str (fs/canonicalize "lib/libllama.so"))
+   "llama"
    {com.sun.jna.Library/OPTION_STRING_ENCODING "UTF8"}))
 
 (def api (with-open [rdr (io/reader (io/resource "api/llama.edn"))
                      rdr (java.io.PushbackReader. rdr)]
            (edn/read rdr)))
 
-(gen/def-api libllama api)
+(gen/def-api library api)
 
 (let [struct-prefix (gen/ns-struct-prefix *ns*)]
   (defmacro import-structs! []
@@ -388,13 +388,13 @@
    (let [candidates-buf* (doto (Memory. (* token-data-size (:n-vocab ctx))) (.clear))]
      (fn [logits reset?]
        (sample-mirostat-v2
-         ctx
-         logits
-         candidates-buf*
-         (volatile! (* 2 tau))
-         tau
-         eta
-         temp)))))
+        ctx
+        logits
+        candidates-buf*
+        (volatile! (* 2 tau))
+        tau
+        eta
+        temp)))))
 
 
 (defn init-grammar-sampler

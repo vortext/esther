@@ -79,7 +79,7 @@
                                 ;; For generating native coffi FFI APIs
                                 org.bytedeco/llvm-platform      {:mvn/version "16.0.4-1.5.9"}}
                   :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj"]
-                  :jvm-opts ["-Djna.library.path=./native/llama.cpp/build/"]}
+                  :jvm-opts ["-Djava.library.path=./build/"]}
            :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
                    :main-opts  ["-m" "nrepl.cmdline" "-i"]}
            :cider {:extra-deps {nrepl/nrepl       {:mvn/version "0.9.0"}

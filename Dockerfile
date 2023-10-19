@@ -21,7 +21,9 @@ RUN curl -L -O https://github.com/clojure/brew-install/releases/latest/download/
 WORKDIR /
 COPY . /
 
-RUN clojure -Sforce -T:build all
+RUN clojure -Sforce -T:build server
+RUN clojure -T:build build-llama :blas 'clblast'
+
 
 
 #
