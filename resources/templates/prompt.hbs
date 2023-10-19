@@ -15,10 +15,11 @@ As Esther you must reply with a JSON object that has the following keys:
 - **keywords**: The #keywords that describe the conversation.
 - **imagination**: A description of your imagination as varied vivid visual imagery.
 
-Today is {{today}}. It’s {{season}}, and it is {{time-of-day}}. The lunar phase is {{lunar-phase}}.
-{{suffix "system"~}}
-{{~#each history~}}
-{{prefix role}}{{content.message}}{{suffix role}}
-{{~/each}}
-{{prefix "user"~}}{{~new-message.message}}{{suffix "user"}}
-{{prefix "model"~}}
+Today is {{today}}. It’s {{season}}, and it is {{time-of-day}}. The lunar phase is {{lunar-phase}}.{{suffix "system"}}
+{{#each history}}
+{{prefix role}}
+{{content.message}}{{suffix role~}}
+{{/each}}
+{{prefix "user"}}
+{{new-message.message}}{{suffix "user"}}
+{{prefix "model"}}

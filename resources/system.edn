@@ -49,12 +49,12 @@
                :mirostat-tau 5.0
                :mirostat-eta 0.1}
   :template/renderer #ig/ref :util.handlebars/instance
-  :template/vars {:system {:prefix "<|im_start|>system\n"
-                           :suffix "<|im_end|>\n"}
-                  :user {:prefix "<|im_start|>user\n"
-                         :suffix "<|im_end|>\n"}
-                  :model {:prefix "<|im_start|>assistant\n"
-                          :suffix "<|im_end|>\n"}}}
+  :template/vars {:system {:prefix "<|im_start|>system"
+                           :suffix "<|im_end|>"}
+                  :user {:prefix "<|im_start|>user"
+                         :suffix "<|im_end|>"}
+                  :model {:prefix "<|im_start|>assistant"
+                          :suffix "<|im_end|>"}}}
 
  :reitit.routes/api
  {:base-path "/api"
