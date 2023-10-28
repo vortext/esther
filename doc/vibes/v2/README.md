@@ -58,7 +58,6 @@ abstract circle and circle drawing vector, in the style of industrial futurism, 
 ```
 
 ## more saturated colors
-#+BEGIN_SRC css
 ```css
 #EDE7D8
 #302C26
